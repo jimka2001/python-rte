@@ -74,40 +74,45 @@ class SimpleTypeD(metaclass=ABCMeta):
 		#og_name in scala lazy: c1
 		def self_canonicalized(self, td):
 			if not hasattr(self_canonicalized, "holding"):
-				self_canonicalized.holding = self.canonicalized
+				self_canonicalized.holding = self.canonicalize()
 			return self_canonicalized.holding
 
 		#og_name in scala lazy: c2
 		def td_canonicalized(self, td):
 			if not hasattr(td_canonicalized, "holding"):
-				td_canonicalized.holding = td.canonicalized
+				td_canonicalized.holding = td.canonicalize()
 			return td_canonicalized.holding
 
 		#og_name in scala lazy: dc12
 		def canon_self_disjoint_td(self, td):
 			if not hasattr(canon_self_disjoint_td, "holding"):
-				canon_self_disjoint_td.holding = self.canonicalized
+				canon_self_disjoint_td.holding = self_canonicalized()._disjoint_down(td_canonicalized())
 			return canon_self_disjoint_td.holding
 
 		#og_name in scala lazy: dc21
 		def canon_td_disjoint_self(self, td):
 			if not hasattr(canon_td_disjoint_self, "holding"):
-				canon_td_disjoint_self.holding = self.canonicalized
+				canon_td_disjoint_self.holding = td_canonicalized()._disjoint_down(self_canonicalized())
 			return canon_td_disjoint_self.holding
 
 		#todo: check that "_.nonEmpty" is well translated as "inhabited not none and not empty"
-		if self == td and inhabited():
-			return inhabited().map(lambda x: unary_not(x))
-		elif this_disjoint_td:
-			return this_disjoint_td
+		if self == td and self.inhabited():
+			return self.inhabited().map(lambda x: unary_not(x))
+		
+		elif this_disjoint_td():
+			return this_disjoint_td()
+
 		elif td_disjoint_this():
-			return td_disjoint_this
-		elif self_canonicalized == td_canonicalized and self_canonicalized:
-			return self_canonicalized.inhabited().map(lambda x: unary_not(x))
-		elif canon_self_disjoint_td:
-			return canon_self_disjoint_td
+			return td_disjoint_this()
+		
+		elif self_canonicalized() == td_canonicalized() and self_canonicalized():
+			return self_canonicalized().inhabited().map(lambda x: unary_not(x))
+		
+		elif canon_self_disjoint_td():
+			return canon_self_disjoint_td()
+		
 		else:
-			canon_td_disjoint_self
+			canon_td_disjoint_self()
 
 	#for performance reasons, do not call directly, rather use the inhabited method as it stores the result
 	def _inhabited_down(self):
