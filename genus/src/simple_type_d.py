@@ -125,6 +125,7 @@ class SimpleTypeD(metaclass=ABCMeta):
 			return None
 
 	def subtypep(self, t):
+		#implement when SNot is implemented
 		raise NotImplementedError
 
 	@staticmethod
@@ -192,9 +193,11 @@ class SimpleTypeD(metaclass=ABCMeta):
 		return to_cnf.holding
 
 	def maybe_dnf(self, nf):
+		#implement when I find how to translate correctly nf.contains(Dnf)
 		raise NotImplementedError
 
 	def maybe_cnf(self, nf):
+		#implement when I find how to translate correctly nf.contains(Dnf)
 		raise NotImplementedError
 
 	def canonicalize_once(self, nf):
