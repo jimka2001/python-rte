@@ -21,7 +21,9 @@
 
 from abc import ABCMeta, abstractmethod
 
-class SimpleTypeD(metaclass=ABCMeta):
+from simple_type_d import SimpleTypeD 
+
+class SCombination(SimpleTypeD):
 	
 	#is create really needed ? it could be an __init__
 	@abstractmethod
