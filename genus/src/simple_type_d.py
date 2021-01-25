@@ -27,19 +27,24 @@ class SimpleTypeD(metaclass=ABCMeta):
 
 	#overloading operators
 	def __or__(self, t):
+		#implement when SOr is implemented
 		raise NotImplementedError
 
 	def __and__(self, t):
+		#implement when SAnd is implemented
 		raise NotImplementedError
 
 	#unfortunately, this one can't be overloaded
-	def unary_not(self, t):
+	def unary_not(self):
+		#implement when SNot is implemented
 		raise NotImplementedError
 
 	def __sub__(self, t):
+		#implement when SAnd and SNot are implemented
 		raise NotImplementedError
 
 	def __xor__(self, t):
+		#implement when SNot, SAnd and SOr are implemented
 		raise NotImplementedError
 
 	@abstractmethod
@@ -50,7 +55,59 @@ class SimpleTypeD(metaclass=ABCMeta):
 			@return a Boolean which is true is a is of this type"""
 
 	def disjoint(self, td):
-		raise NotImplementedError
+		"""okay, here I am doing some weird magic so I'll explain:
+		python does NOT have a lazy keyword, so I need to emulate it
+		I thus create utility functions within disjoint and within them,
+		I put static attributes. On the first call to those functions, 
+		the computations are performed and then cached in said
+		static attribute, so that on later calls they are output in O(1)"""
+		
+		#og_name in scala: d1
+		this_disjoint_td = self._disjoint_down(td)
+		
+		#og_name in scala lazy: d2
+		def td_disjoint_this(self, td):
+			if not hasattr(td_disjoint_this, "holding"):
+				td_disjoint_this.holding = td._disjoint_down(self)
+			return td_disjoint_this.holding
+
+		#og_name in scala lazy: c1
+		def self_canonicalized(self, td):
+			if not hasattr(self_canonicalized, "holding"):
+				self_canonicalized.holding = self.canonicalized
+			return self_canonicalized.holding
+
+		#og_name in scala lazy: c2
+		def td_canonicalized(self, td):
+			if not hasattr(td_canonicalized, "holding"):
+				td_canonicalized.holding = td.canonicalized
+			return td_canonicalized.holding
+
+		#og_name in scala lazy: dc12
+		def canon_self_disjoint_td(self, td):
+			if not hasattr(canon_self_disjoint_td, "holding"):
+				canon_self_disjoint_td.holding = self.canonicalized
+			return canon_self_disjoint_td.holding
+
+		#og_name in scala lazy: dc21
+		def canon_td_disjoint_self(self, td):
+			if not hasattr(canon_td_disjoint_self, "holding"):
+				canon_td_disjoint_self.holding = self.canonicalized
+			return canon_td_disjoint_self.holding
+
+		#todo: check that "_.nonEmpty" is well translated as "inhabited not none and not empty"
+		if self == td and inhabited():
+			return inhabited().map(lambda x: unary_not(x))
+		elif this_disjoint_td:
+			return this_disjoint_td
+		elif td_disjoint_this():
+			return td_disjoint_this
+		elif self_canonicalized == td_canonicalized and self_canonicalized:
+			return self_canonicalized.inhabited().map(lambda x: unary_not(x))
+		elif canon_self_disjoint_td:
+			return canon_self_disjoint_td
+		else:
+			canon_td_disjoint_self
 
 	#for performance reasons, do not call directly, rather use the inhabited method as it stores the result
 	def _inhabited_down(self):
@@ -62,10 +119,10 @@ class SimpleTypeD(metaclass=ABCMeta):
 		return inhabited.holding
 
 	def _disjoint_down(self, t):
-		if(inhabited()):
-			return None
-		else:
+		if(inhabited() == False):
 			return True
+		else:
+			return None
 
 	def subtypep(self, t):
 		raise NotImplementedError
