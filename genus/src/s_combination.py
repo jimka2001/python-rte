@@ -80,13 +80,22 @@ class SCombination(SimpleTypeD):
 			# SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
 			# SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
 			#TODO: implement when I understand the _* idiom
-			raise NotImplementedError
+			if self.unit in self.arglist:
+				return SCombination(list(filter(lambda x: x != self.unit)))
+			else:
+				return self
+
 		def l_5():
 			# (and A B A C) -> (and A B C)
 			# (or A B A C) -> (or A B C)
-			raise NotImplementedError
+			#list(set(x)) with x is a list ensures the elements are distinct
+			return SCombination(list(set(self.arglist)))
+		
 		def l_6():
+			# (and A (and B C) D) --> (and A B C D)
+			# (or A (or B C) D) --> (or A B C D)
 			pass
+		
 		simplifiers = []
 
 		
