@@ -25,6 +25,13 @@
 
 from abc import ABCMeta, abstractmethod
 
+#is it useful, though ? all classes are types by default in python
+class TerminalType(metaclass=ABCMeta):
+	"""This class is just here to emulate the TerminalType trait in Scala"""
+	def __init__(self):
+		raise TypeError("TerminalType should never be instanciated")
+		
+
 class SimpleTypeD(metaclass=ABCMeta):
 	"""SimpleTypeD is the abstract class that mothers all of the 
 	representations of type in Genus"""
