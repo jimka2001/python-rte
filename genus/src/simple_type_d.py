@@ -19,6 +19,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# TODO:
+# 	maybe rewrite the static variable using methods as properties ?
+
+
 from abc import ABCMeta, abstractmethod
 
 class SimpleTypeD(metaclass=ABCMeta):
@@ -95,20 +99,20 @@ class SimpleTypeD(metaclass=ABCMeta):
 				canon_td_disjoint_self.holding = td_canonicalized()._disjoint_down(self_canonicalized())
 			return canon_td_disjoint_self.holding
 
-		#todo: check that "_.nonEmpty" is well translated as "inhabited not none and not empty"
-		if self == td and self.inhabited():
+		#todo: check that "_.nonEmpty" is well translated as "inhabited not none"
+		if self == td and self.inhabited() is not None:
 			return self.inhabited().map(lambda x: unary_not(x))
 		
-		elif this_disjoint_td():
+		elif this_disjoint_td() and this_disjoint_td() is not None:
 			return this_disjoint_td()
 
-		elif td_disjoint_this():
+		elif td_disjoint_this() and td_disjoint_this is not None:
 			return td_disjoint_this()
 		
-		elif self_canonicalized() == td_canonicalized() and self_canonicalized():
+		elif self_canonicalized() == td_canonicalized() and self_canonicalized() is not None:
 			return self_canonicalized().inhabited().map(lambda x: unary_not(x))
 		
-		elif canon_self_disjoint_td():
+		elif canon_self_disjoint_td() is not None:
 			return canon_self_disjoint_td()
 		
 		else:
