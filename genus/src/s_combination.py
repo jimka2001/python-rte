@@ -94,8 +94,47 @@ class SCombination(SimpleTypeD):
 		def l_6():
 			# (and A (and B C) D) --> (and A B C D)
 			# (or A (or B C) D) --> (or A B C D)
-			pass
-		
+			if same_combination not in self.arglist:
+				return self
+			else:
+				def flat_map(f, xs):
+					ys = []
+					for x in xs:
+						ys.extend(f(x))
+					return ys
+				def flat_lambda(td):
+					if type(td) is SCombination and self.same_combination(td):
+					#TODO: honestly, this one is really scala idiomatic, I should ask Dr Newton
+						raise NotImplementedError
+			raise NotImplementedError 
 		simplifiers = []
 
-		
+		def l_7():
+			#TODO: move cmp_type_designators in Type
+			def cmp_type_designators(a, b):
+				if a == b:
+					return False
+				elif type(a) == b:
+					a.cmp_to_same_class_obj(b)
+				else:
+					str(type(a)) < str(type(b))
+
+			i2 = SCombination(map(lambda t: t.canonicalize(nf).sort(), self.arglist).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
+			if self == i2:
+				return self
+			else:
+				return i2
+
+		def l_8():
+			#implement when SNot is done
+			raise NotImplementedError
+
+	def cmp_to_same_class_obj(self, td):
+		if self == td:
+			return False
+		else:
+			if type(td) is SCombination:
+				#do it when Types is implemented
+				raise NotImplementedError
+			else:
+				return super.cmp_to_same_class_obj(td)
