@@ -22,15 +22,15 @@
 # TODO:
 # 	maybe rewrite the static variable using methods as properties ?
 
-
+from types import NormalForm
 from abc import ABCMeta, abstractmethod
 
 #is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
 	"""This class is just here to emulate the TerminalType trait in Scala"""
+	@abstractmethod
 	def __init__(self):
-		raise TypeError("TerminalType should never be instanciated")
-		
+		pass
 
 class SimpleTypeD(metaclass=ABCMeta):
 	"""SimpleTypeD is the abstract class that mothers all of the 
@@ -209,12 +209,16 @@ class SimpleTypeD(metaclass=ABCMeta):
 		return to_cnf.holding
 
 	def maybe_dnf(self, nf):
-		#implement when I find how to translate correctly nf.contains(Dnf)
-		raise NotImplementedError
+		if NormalForm.DNF in nf:
+			return to_dnf()
+		else:
+			return self
 
 	def maybe_cnf(self, nf):
-		#implement when I find how to translate correctly nf.contains(Dnf)
-		raise NotImplementedError
+		if NormalForm.CNF in nf:
+			return to_cnf
+		else:
+			return self
 
 	def canonicalize_once(self, nf):
 		return self
