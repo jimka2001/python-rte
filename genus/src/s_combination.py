@@ -84,7 +84,7 @@ class SCombination(SimpleTypeD):
 			# SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
 			#TODO: implement when I understand the _* idiom
 			if self.unit in self.arglist:
-				return create(list(filter(lambda x: x != self.unit)))
+				return self.create(list(filter(lambda x: x != self.unit)))
 			else:
 				return self
 
@@ -92,7 +92,7 @@ class SCombination(SimpleTypeD):
 			# (and A B A C) -> (and A B C)
 			# (or A B A C) -> (or A B C)
 			#list(set(x)) with x is a list ensures the elements are distinct
-			return create(list(set(self.arglist)))
+			return self.create(list(set(self.arglist)))
 		
 		def l_6():
 			# (and A (and B C) D) --> (and A B C D)
@@ -111,10 +111,10 @@ class SCombination(SimpleTypeD):
 						return td.arglist
 					else:
 						return [td]
-				return create(flat_map(flat_lambda, self.arglist)) 
+				return self.create(flat_map(flat_lambda, self.arglist)) 
 
 		def l_7():
-			i2 = create(map(lambda t: t.canonicalize(nf).sort(), self.arglist).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
+			i2 = self.create(map(lambda t: t.canonicalize(nf).sort(), self.arglist).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
 			if self == i2:
 				return self
 			else:
