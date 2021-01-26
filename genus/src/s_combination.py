@@ -25,10 +25,15 @@ from simple_type_d import SimpleTypeD
 
 class SCombination(SimpleTypeD):
 	
-	#is create really needed ? it could be an __init__
-	@abstractmethod
+	
 	def __init__(self, arglist):
+		self.arglist = arglist
 		pass
+
+	@abstractmethod
+	def create(self):
+		# TODO: replace the constructors by a create for the instances 
+		raise NotImplementedError
 
 	@property
 	@abstractmethod
@@ -102,23 +107,16 @@ class SCombination(SimpleTypeD):
 					for x in xs:
 						ys.extend(f(x))
 					return ys
+
 				def flat_lambda(td):
-					if type(td) is SCombination and self.same_combination(td):
-					#TODO: honestly, this one is really scala idiomatic, I should ask Dr Newton
-						raise NotImplementedError
-			raise NotImplementedError 
+					if isinstance(td, SCombination) and self.same_combination(td):
+						return td.arglist
+					else:
+						return [td]
+				return create(flat_map(flat_lambda, self.arglist)) 
 		simplifiers = []
 
 		def l_7():
-			#TODO: move cmp_type_designators in Type
-			def cmp_type_designators(a, b):
-				if a == b:
-					return False
-				elif type(a) == b:
-					a.cmp_to_same_class_obj(b)
-				else:
-					str(type(a)) < str(type(b))
-
 			i2 = SCombination(map(lambda t: t.canonicalize(nf).sort(), self.arglist).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
 			if self == i2:
 				return self
@@ -130,10 +128,11 @@ class SCombination(SimpleTypeD):
 			raise NotImplementedError
 
 	def cmp_to_same_class_obj(self, td):
+		#TODO: check this, this is is probably wrong
 		if self == td:
 			return False
 		else:
-			if type(td) is SCombination:
+			tdif isinstance(td, SCombination):
 				#do it when Types is implemented
 				raise NotImplementedError
 			else:
