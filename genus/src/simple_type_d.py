@@ -251,3 +251,11 @@ class SimpleTypeD(metaclass=ABCMeta):
 
 	def cmp_to_same_class_obj(self, t):
 		raise TypeError('cannot compare type designators', type(self), 'vs', type(t))
+
+def t_SimpleTypeD:
+	class ChildSTD(SimpleTypeD):
+		"""docstring for ChildSTD"""
+		def __init__(self, arg):
+			super(ChildSTD, self).__init__()
+			self.arg = arg
+			
