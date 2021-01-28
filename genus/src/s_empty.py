@@ -66,7 +66,7 @@ def t_SEmpty():
 	assert(a.subtypep(object))
 	assert(a.subtypep(type(a)))
 
-	#my understanding is that the empty type is unique so it can't be positively compared to any type
+	#my understanding is that the empty type is unique so it can't be positively compared to any object
 	assert(not a.cmp_to_same_class_obj(a))
 	assert(not a.cmp_to_same_class_obj(object))
 
