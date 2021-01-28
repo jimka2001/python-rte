@@ -43,3 +43,47 @@ class SEmpty(SimpleTypeD):
 
 	def cmp_to_same_class_obj(self, t):
 		return False
+
+#TODO: move the tests in their own files once this is packaged:
+def t_SEmpty():
+	a = SEmpty() #TODO: make this class uninstantiable and provide one single instance
+	
+	#str(a) has to be "Empty"
+	assert(str(a) == "Empty")
+
+	#a.typep(t) indicates whether t is a subtype of a, which is never the case
+	assert(not a.typep(object))
+	assert(not a.typep(a))
+
+	#obviously, a is not inhabited as it is by definition empty
+	assert(not a._inhabited_down)
+
+	#a is disjoint with anything as it is empty
+	assert(a._disjoint_down(object))
+
+	#on the contrary, a is always a subtype of any type 
+	#since types are sets and the empty set is a subset of all sets
+	assert(a.subtypep(object))
+	assert(a.subtypep(type(a)))
+
+	#my understanding is that the empty type is unique so it can't be positively compared to any type
+	assert(not a.cmp_to_same_class_obj(a))
+	assert(not a.cmp_to_same_class_obj(object))
+
+""" Scala code to print values used for testing:
+
+object t_SEmpty {
+  def main(args: Array[String]): Unit = {
+    println(SEmpty.toString() == "Empty")
+    println(!SEmpty.typep(Types.Integer))
+    println(SEmpty.inhabitedDown.contains(false))
+
+    //println(SEmpty.disjointDown(SAtomic(Types.Integer)).contains(true))
+    println(SEmpty.subtypep(SAtomic(Types.Integer)).contains(true))
+    println(SEmpty.subtypep((SEmpty)).contains(true))
+
+    println(!SEmpty.cmpToSameClassObj(SEmpty))
+    println(!SEmpty.cmpToSameClassObj(SAtomic(Types.Integer)))
+  }
+}
+"""
