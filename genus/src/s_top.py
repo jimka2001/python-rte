@@ -70,3 +70,21 @@ def t_STop():
 	#my understanding is that the top type is unique so it can't be positively compared to any object
 	assert(not a.cmp_to_same_class_obj(a))
 	assert(not a.cmp_to_same_class_obj(object))
+
+"""
+object t_STop {
+  def main(args: Array[String]): Unit = {
+    println(STop.toString() == "Top")
+    println(STop.typep(Types.Integer))
+    println(STop.inhabitedDown.contains(true))
+
+    //println(STop.disjointDown(SAtomic(Types.Integer)).contains(false))
+    //println(STop.disjointDown((SEmpty)).contains(true))
+    println(STop.subtypep(SAtomic(Types.Integer)).contains(false))
+    println(STop.subtypep((STop)).contains(true))
+
+    println(!STop.cmpToSameClassObj(STop))
+    println(!STop.cmpToSameClassObj(SAtomic(Types.Integer)))
+  }
+}
+"""
