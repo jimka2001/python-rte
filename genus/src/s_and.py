@@ -42,4 +42,30 @@ class SAnd(SimpleTypeD):
 	def unit:
 		#implement when STop is implemented
 		raise NotImplementedError
-	def 
+
+"""
+object t_SAnd {
+  def main(args: Array[String]): Unit = {
+
+    //test empty SAnd()
+    val a = new SAnd()
+    println(a.toString())
+
+    //test SAnd with primal types
+    val b = new SAnd(SAtomic(Types.Integer), SAtomic(Types.String), SAtomic(Types.Double))
+    println(b.toString())
+
+    //check Unit is valid
+    println(a.unit == b.unit && a.unit == STop)
+
+    //check Zero is valid
+    println(a.zero == b.zero && a.zero == SEmpty)
+
+    //check that create is working properly
+    val c = a.create(SAtomic(Types.Integer))
+    println(c.getClass() == a.getClass)
+    println(c.toString == SAnd(SAtomic(Types.Integer)).toString)
+
+  }
+}
+"""
