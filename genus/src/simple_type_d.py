@@ -22,7 +22,7 @@
 # TODO:
 # 	maybe rewrite the static variable using methods as properties ?
 
-from types import NormalForm
+from genus_types import NormalForm
 from abc import ABCMeta, abstractmethod
 
 #is it useful, though ? all classes are types by default in python
@@ -252,10 +252,41 @@ class SimpleTypeD(metaclass=ABCMeta):
 	def cmp_to_same_class_obj(self, t):
 		raise TypeError('cannot compare type designators', type(self), 'vs', type(t))
 
-def t_SimpleTypeD:
-	class ChildSTD(SimpleTypeD):
+def t_SimpleTypeD():
+
+	#ensuring SimpleTypeD is abstract
+	try:
+		foo = SimpleTypeD()
+		assert(False)
+	except:
+		pass
+
+	#ensuring typep is an abstract method
+	try:
+		class ChildSTDNoTypep(SimpleTypeD):
+			"""just for testing"""
+			def __init__(self):
+				super(ChildSTDNoTypep, self).__init__()	
+		foo = ChildSTDNoTypep()
+		del ChildSTDNoTypep
+		assert(False)
+	except:
+		pass
+
+	class ChildSTD(object):
 		"""docstring for ChildSTD"""
-		def __init__(self, arg):
+		def __init__(self):
 			super(ChildSTD, self).__init__()
-			self.arg = arg
 			
+		def typep(a):
+			pass
+
+	child = ChildSTD()
+	print(str(child))
+	print(child.__dict__)
+
+t_SimpleTypeD()
+
+
+		
+					
