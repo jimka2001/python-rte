@@ -22,6 +22,33 @@
 # TODO:
 #   maybe rewrite the static variable using methods as properties ?
 
+""" test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
+__or__  0
+__and__     0
+__unary_not__ 0
+__sub__     0
+__xor__     0
+typep       3
+disjoint    2
+_inhabited_down     3
+inhabited   3
+_disjoint_down  3
+subtypep
+fixed_point 1
+debug_find_simplifier   1
+find_simplifier     1
+_compute_dnf    3
+to_dnf  3
+_compute_cnf    3
+to_cnf  fully done
+maybe_dnf   2
+maybe_cnf   2
+canonicalize_once   1
+canonicalize    1
+supertypep  1
+cmp_to_same_class_obj   1
+"""
+
 from genus_types import NormalForm
 from abc import ABCMeta, abstractmethod
 
