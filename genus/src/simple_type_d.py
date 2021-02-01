@@ -46,7 +46,7 @@ maybe_cnf   2
 canonicalize_once   3
 canonicalize    3
 supertypep  1
-cmp_to_same_class_obj   1
+cmp_to_same_class_obj   3
 """
 
 from genus_types import NormalForm
@@ -282,11 +282,13 @@ class SimpleTypeD(metaclass=ABCMeta):
 def t_SimpleTypeD():
 
     #ensuring SimpleTypeD is abstract
+    pred = True
     try:
         foo = SimpleTypeD()
+        pred = False
         assert(False)
     except:
-        pass
+        assert(pred)
 
     #ensuring typep is an abstract method
     try:
@@ -296,9 +298,10 @@ def t_SimpleTypeD():
                 super(ChildSTDNoTypep, self).__init__() 
         foo = ChildSTDNoTypep()
         del ChildSTDNoTypep
+        pred = False
         assert(False)
     except:
-        pass
+        assert(pred)
 
     class ChildSTD(SimpleTypeD):
         """docstring for ChildSTD"""
@@ -338,6 +341,15 @@ def t_SimpleTypeD():
     assert(child == child.canonicalize() and child.canonicalized_hash == {None: child})
     #the second time is to make sure it isn't adding the same twice
     assert(child == child.canonicalize() and child.canonicalized_hash == {None: child})
+
+    #ensuring cmp_to_same_class_obj() throws an error
+    try:
+        child.cmp_to_same_class_obj(child)
+        pred = False
+        assert(False)
+    except:
+        assert(pred)
+
 t_SimpleTypeD()
 
 
