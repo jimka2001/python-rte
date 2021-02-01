@@ -77,51 +77,50 @@ class SimpleTypeD(metaclass=ABCMeta):
         this_disjoint_td = self._disjoint_down(td)
         
         #og_name in scala lazy: d2
-        def td_disjoint_this(self, td):
+        def td_disjoint_this():
             if not hasattr(td_disjoint_this, "holding"):
                 td_disjoint_this.holding = td._disjoint_down(self)
             return td_disjoint_this.holding
 
         #og_name in scala lazy: c1
-        def self_canonicalized(self, td):
+        def self_canonicalized():
             if not hasattr(self_canonicalized, "holding"):
                 self_canonicalized.holding = self.canonicalize()
             return self_canonicalized.holding
 
         #og_name in scala lazy: c2
-        def td_canonicalized(self, td):
+        def td_canonicalized():
             if not hasattr(td_canonicalized, "holding"):
                 td_canonicalized.holding = td.canonicalize()
             return td_canonicalized.holding
 
         #og_name in scala lazy: dc12
-        def canon_self_disjoint_td(self, td):
+        def canon_self_disjoint_td():
             if not hasattr(canon_self_disjoint_td, "holding"):
                 canon_self_disjoint_td.holding = self_canonicalized()._disjoint_down(td_canonicalized())
             return canon_self_disjoint_td.holding
 
         #og_name in scala lazy: dc21
-        def canon_td_disjoint_self(self, td):
+        def canon_td_disjoint_self():
             if not hasattr(canon_td_disjoint_self, "holding"):
                 canon_td_disjoint_self.holding = td_canonicalized()._disjoint_down(self_canonicalized())
             return canon_td_disjoint_self.holding
 
         #todo: check that "_.nonEmpty" is well translated as "inhabited not none"
         if self == td and self.inhabited() is not None:
-            return self.inhabited().map(lambda x: unary_not(x))
+            return map(lambda x: unary_not(x), self.inhabited())
         
-        elif this_disjoint_td() and this_disjoint_td() is not None:
+        elif this_disjoint_td and this_disjoint_td is not None:
             return this_disjoint_td()
 
         elif td_disjoint_this() and td_disjoint_this is not None:
             return td_disjoint_this()
         
-        elif self_canonicalized() == td_canonicalized() and self_canonicalized() is not None:
-            return self_canonicalized().inhabited().map(lambda x: unary_not(x))
+        elif self_canonicalized() == td_canonicalized() and self_canonicalized().inhabited() is not None:
+            return map(lambda x: unary_not(x), self_canonicalized().inhabited())
         
         elif canon_self_disjoint_td() is not None:
             return canon_self_disjoint_td()
-        
         else:
             canon_td_disjoint_self()
 
@@ -225,19 +224,20 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     canonicalized_hash = {}
 
-    def canonicalize(self, nf):
+    def canonicalize(self, nf = None):
         if not nf in self.canonicalized_hash:
             #we're in the case were the result isn't memoized,
             #so we compute it
             processor = lambda t: t.canonicalize_once(nf)
             good_enough = lambda a, b: type(a) == type(b) and a == b
             
-            res = fixed_point(self, processor, good_enough)
+            res = SimpleTypeD.fixed_point(self, processor, good_enough)
             
             self.canonicalized_hash |= {nf: res}
 
         #tell the perhaps new object it is already canonicalized (TODO: could I just put this in the if ?)
-        self.canonicalized_hash[nf].canonicalized_hash[nf] = canonicalized_hash[nf]
+        self.canonicalized_hash[nf].canonicalized_hash[nf] = self.canonicalized_hash[nf]
+        
         return self.canonicalized_hash[nf]
 
     def supertypep(self, t):
@@ -291,6 +291,7 @@ def t_SimpleTypeD():
     #anyway, this is how the scala code seems to behave
     assert(child._disjoint_down(child) is None)
 
+    assert(child.disjoint(child) is None)
 t_SimpleTypeD()
 
 
