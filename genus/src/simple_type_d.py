@@ -44,7 +44,7 @@ to_cnf  fully done
 maybe_dnf   2
 maybe_cnf   2
 canonicalize_once   3
-canonicalize    1
+canonicalize    3
 supertypep  1
 cmp_to_same_class_obj   1
 """
@@ -335,7 +335,9 @@ def t_SimpleTypeD():
     assert(SimpleTypeD.fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
     assert(child == child.canonicalize_once())
-
+    assert(child == child.canonicalize() and child.canonicalized_hash == {None: child})
+    #the second time is to make sure it isn't adding the same twice
+    assert(child == child.canonicalize() and child.canonicalized_hash == {None: child})
 t_SimpleTypeD()
 
 
