@@ -194,28 +194,28 @@ class SimpleTypeD(metaclass=ABCMeta):
         return self
 
     def to_dnf(self):
-        if not hasattr(to_dnf, "holding"):
-            to_dnf.holding = self._compute_dnf()
-        return to_dnf.holding
+        if not hasattr(self, "hold_todnf"):
+            self.hold_todnf = self._compute_dnf()
+        return self.hold_todnf
 
     #for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
     def _compute_cnf(self):
         return self
 
     def to_cnf(self):
-        if not hasattr(to_cnf, "holding"):
-            to_cnf.holding = self._compute_cnf()
-        return to_cnf.holding
+        if not hasattr(self, "hold_tocnf"):
+            self.hold_tocnf = self._compute_cnf()
+        return self.hold_tocnf
 
     def maybe_dnf(self, nf):
         if NormalForm.DNF in nf:
-            return to_dnf()
+            return self.to_dnf()
         else:
             return self
 
     def maybe_cnf(self, nf):
         if NormalForm.CNF in nf:
-            return to_cnf
+            return self.to_cnf()
         else:
             return self
 
@@ -289,9 +289,17 @@ def t_SimpleTypeD():
 
     #this one is weird. How come we can't detect that it is the same set?
     #anyway, this is how the scala code seems to behave
+    #as a reminder: True means yes, False means no, None means maybe
     assert(child._disjoint_down(child) is None)
-
     assert(child.disjoint(child) is None)
+
+    assert(child == child.to_dnf())
+    assert(child == child.to_cnf())
+
+    nf = [NormalForm.DNF, NormalForm.CNF]
+    assert(child == child.maybe_dnf(nf))
+    assert(child == child.maybe_cnf(nf))
+
 t_SimpleTypeD()
 
 
