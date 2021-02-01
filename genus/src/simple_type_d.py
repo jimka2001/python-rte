@@ -135,7 +135,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         return self.hold_inhabited
 
     def _disjoint_down(self, t):
-        if(inhabited() == False):
+        if(self.inhabited() == False):
             return True
         else:
             return None
@@ -287,6 +287,9 @@ def t_SimpleTypeD():
     #whether it is as this is the generic version
     assert(child.inhabited() is None)
 
+    #this one is weird. How come we can't detect that it is the same set?
+    #anyway, this is how the scala code seems to behave
+    assert(child._disjoint_down(child) is None)
 
 t_SimpleTypeD()
 
