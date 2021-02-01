@@ -43,7 +43,7 @@ _compute_cnf    3
 to_cnf  fully done
 maybe_dnf   2
 maybe_cnf   2
-canonicalize_once   1
+canonicalize_once   3
 canonicalize    1
 supertypep  1
 cmp_to_same_class_obj   1
@@ -246,7 +246,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return self
 
-    def canonicalize_once(self, nf):
+    def canonicalize_once(self, nf = None):
         return self
 
     canonicalized_hash = {}
@@ -333,6 +333,8 @@ def t_SimpleTypeD():
     evaluator = lambda x, y: x == y;
     assert(SimpleTypeD.fixed_point(5, increment, evaluator) == 5)
     assert(SimpleTypeD.fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
+
+    assert(child == child.canonicalize_once())
 
 t_SimpleTypeD()
 
