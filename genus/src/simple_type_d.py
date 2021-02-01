@@ -34,7 +34,7 @@ _inhabited_down     3
 inhabited   3
 _disjoint_down  3
 subtypep
-fixed_point 1
+fixed_point 3
 debug_find_simplifier   1
 find_simplifier     1
 _compute_dnf    3
@@ -326,6 +326,13 @@ def t_SimpleTypeD():
     nf = [NormalForm.DNF, NormalForm.CNF]
     assert(child == child.maybe_dnf(nf))
     assert(child == child.maybe_cnf(nf))
+
+    #fixed_point is just a way to incrementally apply a function on a value
+    #until another function deem the delta between two consecutive values to be negligible 
+    increment = lambda x: x;
+    evaluator = lambda x, y: x == y;
+    assert(SimpleTypeD.fixed_point(5, increment, evaluator) == 5)
+    assert(SimpleTypeD.fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
 t_SimpleTypeD()
 
