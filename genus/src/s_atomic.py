@@ -20,6 +20,8 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD, TerminalType
+from s_empty import SEmpty
+from s_top import STop
 
 class SAtomic(SimpleTypeD, TerminalType):
 	"""The atoms of our type system: a simple type built from a native python type."""
@@ -33,6 +35,15 @@ class SAtomic(SimpleTypeD, TerminalType):
 	def __init__(self, wrapped_class):
 		super(SAtomic, self).__init__()
 		self.wrapped_class = wrapped_class
+
+	@classmethod
+	def apply(cls, ct):
+		if ct == type(None):
+			return SEmpty.get_epsilon();
+		elif ct == type(object):
+			return STop.get_omega();
+		else:
+			return cls(ct);
 
 	def __str__(self):
 		return str(self.wrapped_class)
