@@ -26,7 +26,7 @@ class SEmpty(SimpleTypeD):
     __instance = None
 
     @staticmethod
-    def get_omega():
+    def get_epsilon():
         if SEmpty.__instance == None:
             SEmpty()
         return SEmpty.__instance
@@ -34,7 +34,7 @@ class SEmpty(SimpleTypeD):
     def __init__(self):
         super(SEmpty, self).__init__()
         if SEmpty.__instance != None:
-           raise Exception("Please use SEmpty.get_omega() as SEmpty is unique and can't be duplicated")
+           raise Exception("Please use SEmpty.get_epsilon() as SEmpty is unique and can't be duplicated")
         else:
            SEmpty.__instance = self
 
@@ -58,10 +58,10 @@ class SEmpty(SimpleTypeD):
 
 #TODO: move the tests in their own files once this is packaged:
 def t_SEmpty():
-    a = SEmpty.get_omega()
+    a = SEmpty.get_epsilon()
 
     #SEmpty has to be unique
-    assert(id(a) == id(SEmpty.get_omega()))
+    assert(id(a) == id(SEmpty.get_epsilon()))
     
     #SEmpty has to be unique part 2: ensure the constructor throws an error
     pred = True
