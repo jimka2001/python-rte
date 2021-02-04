@@ -38,16 +38,20 @@ class SNot(SimpleTypeD):
 	def _inhabited_down(self):
 		nothing = type(None)
 		any = object
-		if issubclass(self.s, STop):
+		if self.s == STop.get_omega():
 			return False
-		elif issubclass(self.s, SEmpty):
+		elif self.s == STop.get_epsilon():
 			return True
-		"""not sure I understand the SAtomic(*) comparison. It is probably related to the SAtomic object
-		TODO: implement SAtomic(nothing), SAtomic(any) and SAtomic(_) once I understood that"""
-		#TODO: implement when SMember is implemented
-		#TODO: implement when SEql is implemented
-		elif issubclass(self.s, SNot):
-			return self.s.inhabited()
+		elif self.s == SAtomic(type(None)):
+			return True
+		elif self.s == SAtomic(object):
+			return False
+		elif isinstance(self.s, SAtomic):
+			return True
+		#elif SMember
+		#elif SEql
+		elif isinstance(self.s, SNot):
+			return self.s.s.inhabited()
 		else:
 			return None
 
