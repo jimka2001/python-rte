@@ -23,6 +23,19 @@ from simple_type_d import SimpleTypeD, TerminalType
 from s_empty import SEmpty
 from s_top import STop
 
+"""
+[0-3] Advancement tracker
+__init__ 1
+__str__ 1
+typep 1
+inhabited_down 1 
+disjoint_down 0
+subtypep 0 
+canonicalize_once 1 
+cmp_to_same_class_obj 1
+apply 1
+"""
+
 class SAtomic(SimpleTypeD, TerminalType):
 	"""The atoms of our type system: a simple type built from a native python type."""
 	# reminder: the types are:
