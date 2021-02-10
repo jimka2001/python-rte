@@ -19,7 +19,22 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#TODO: make the whole thing a package
+"""
+[0-3] Advancement tracker
+__init__ 1
+__str__ 1
+create 0
+unit 0
+zero 0
+annihilator 0
+same_combination 0
+typep 0
+inhabited_down 0
+_disjoint_down 0
+subtypep 0
+canonicalize_once 0
+compute_dnf 0
+"""
 import simple_type_d
 
 class SAnd(SimpleTypeD):
