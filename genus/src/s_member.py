@@ -22,6 +22,20 @@
 from abc import ABCMeta, abstractmethod
 from simple_type_d import SimpleTypeD, TerminalType
 
+"""
+[0-3] Advancement tracker
+__init__ 1
+__str__ 1
+typep 1
+inhabited_down 1
+_disjoint_down 1
+subtypep 1
+canonicalize_once 0
+cmp_to_same_class_obj 0
+
+<???> case class SMember </???>
+"""
+
 class SMemberImpl(SimpleTypeD, TerminalType):
 	"""docstring for SMemberImpl"""
 	def __init__(self, arglist):
@@ -79,3 +93,4 @@ class SMemberImpl(SimpleTypeD, TerminalType):
 				def comp(a, b):
 					if not (a and b):
 						raise Exception("not expecting equal sequences $xs, $ys")
+
