@@ -19,6 +19,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+[0-3] Advancement tracker
+__init__ 1
+__str__ 1
+typep 1
+_inhabited_down 1
+_disjoint_down 1
+subtypep 1
+cmp_to_same_class_obj 1
+"""
 
 class SEql(SMemberImpl):
 	"""The equal type, a type that is equal to a given object.
