@@ -21,8 +21,20 @@
 
 from abc import ABCMeta, abstractmethod
 from types import NormalForm
-from simple_type_d import SimpleTypeD 
+from simple_type_d import SimpleTypeD
 
+"""
+[0-3] Advancement tracker
+
+__init__ 1
+create 1
+unit 1
+zero 1
+annihilator 1
+same_combination 1
+canonicalize_once 0
+cmp_to_same_class 0
+"""
 class SCombination(SimpleTypeD):
 	"""SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 	def __init__(self, arglist):
