@@ -20,7 +20,19 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD 
+"""
+[0-3] Advancement tracker
+get_epsilon 3
+__init__ 3
+__str__ 3
+typep 3
+_inhabited_down 3
+_disjoint_down 3
+subtypep 3
+cmp_to_same_class_obj 3
 
+TODO: move the tests on their own
+"""
 class SEmpty(SimpleTypeD):
     """The empty type, subtype of all types."""
     __instance = None
