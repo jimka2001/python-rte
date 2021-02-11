@@ -21,17 +21,54 @@
 """
 [0-3] Advancement tracker
 
-__init__ 0
-__str__ 0
-create 0
-unit 0
-zero 0
-annihilator 0
-same_combination 0
-typep 0
+__init__ 1
+__str__ 1
+create 1
+unit 1
+zero 1
+annihilator 1
+same_combination 1
+typep 1
 inhabited_down 0
 _disjoint_down 0
 subtypep 0
 canonicalize_once 0
 compute_cnf 0
 """
+
+import simple_type_d
+
+class SOr(SimpleTypeD):
+	"""docstring for SOr"""
+	def __init__(self, tds):
+		super(SOr, self).__init__()
+		self.tds = tds
+
+	def __str__(self):
+		s = "[Or "
+		for arg in self.arg_list:
+			s += str(arg)
+			s += ","
+		s += "]"
+		return s
+
+	def create(tds):
+		return SOr(tds)
+
+	unit = SEmpty.get_epsilon()
+	zero = STop.get_omega()
+
+	def annihilator(a, b):
+		return b.subtypep(a)
+
+	def same_combination(self, td):
+		return td in self.tds #this may be wrong
+
+	def typep(self, a):
+		for td in self.td:
+			if(td.typep(a)):
+				return True
+		return False
+
+	def inhabited_down(self):
+		raise NotImplementedError
