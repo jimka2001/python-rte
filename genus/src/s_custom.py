@@ -24,11 +24,11 @@
 __init__ 1
 typep 1
 __str__ 1
-_disjoint_down 0
-_inhabited_down 0
-subtypep 0
-cmp_to_same_class_obj 0
-apply 0
+_disjoint_down 1
+_inhabited_down 1
+subtypep 1
+cmp_to_same_class_obj 1
+apply 1
 """
 
 from simple_type_d import SimpleTypeD, TerminalType
@@ -45,9 +45,22 @@ class SCustom(SimpleTypeD):
     def __str__(self):
     	return self.printable + "?"
 
-    def _disjoint_down(t):
+    def _disjoint_down(self, t):
+    	return super().disjointDown(t)
+
+    def _inhabited_down(self):
+    	return super()._inhabited_down()
+
+    def subtypep(t):
     	return super().subtypep(t)
 
-    
+    def cmp_to_same_class_obj(self, t):
+    	return str(self) < str(t)
+
+    @staticmethod
+    def apply(f):
+    	return SCustom(f, str(f))
+
+
 
 
