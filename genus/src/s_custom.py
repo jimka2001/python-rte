@@ -45,5 +45,9 @@ class SCustom(SimpleTypeD):
     def __str__(self):
     	return self.printable + "?"
 
+    def _disjoint_down(t):
+    	return super().subtypep(t)
+
+    
 
 
