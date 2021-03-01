@@ -23,7 +23,7 @@
 [0-3] Advancement tracker
 __init__ 1
 typep 1
-__str__ 0
+__str__ 1
 _disjoint_down 0
 _inhabited_down 0
 subtypep 0
@@ -41,4 +41,9 @@ class SCustom(SimpleTypeD):
 
     def typep(self, a):
     	return self.f(a)
+
+    def __str__(self):
+    	return self.printable + "?"
+
+
 
