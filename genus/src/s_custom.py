@@ -21,8 +21,8 @@
 
 """
 [0-3] Advancement tracker
-__init__ 0
-typep 0
+__init__ 1
+typep 1
 __str__ 0
 _disjoint_down 0
 _inhabited_down 0
@@ -37,4 +37,8 @@ class SCustom(SimpleTypeD):
     """The super type, super type of all types."""
     def __init__(self, f, printable):
     	self.f = f
-    	self.printable = printable    	
+    	self.printable = printable
+
+    def typep(self, a):
+    	return self.f(a)
+
