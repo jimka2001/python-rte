@@ -30,3 +30,11 @@ subtypep 0
 cmp_to_same_class_obj 0
 apply 0
 """
+
+from simple_type_d import SimpleTypeD, TerminalType
+
+class SCustom(SimpleTypeD):
+    """The super type, super type of all types."""
+    def __init__(self, f, printable):
+    	self.f = f
+    	self.printable = printable    	
