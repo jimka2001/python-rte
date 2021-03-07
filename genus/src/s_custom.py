@@ -21,9 +21,9 @@
 
 """
 [0-3] Advancement tracker
-__init__ 1
-typep 1
-__str__ 1
+__init__ 3
+typep 3
+__str__ 3
 _disjoint_down 1
 _inhabited_down 1
 subtypep 1
@@ -61,6 +61,16 @@ class SCustom(SimpleTypeD):
     def apply(f):
     	return SCustom(f, str(f))
 
+def t_scustom():
+	l_odd = lambda x : x % 2 == 1
+	guinea_pig = SCustom(l_odd, "[odd numbers]")
+	assert(guinea_pig.f == l_odd)
+	assert(guinea_pig.printable == "[odd numbers]")
+	assert( str(guinea_pig) == "[odd numbers]?")
+	for x in range(-100,100):
+		if x % 2 == 1:
+			assert(guinea_pig.typep(x))
+		else:
+			assert(not guinea_pig.typep(x))
 
-
-
+t_scustom()
