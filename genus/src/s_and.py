@@ -23,19 +23,20 @@
 [0-3] Advancement tracker
 __init__ 1
 __str__ 1
-create 0
-unit 0
-zero 0
-annihilator 0
-same_combination 0
-typep 0
+create 1
+unit 1
+zero 1
+annihilator 1
+same_combination 1
+typep 1
 inhabited_down 0
-_disjoint_down 0
-subtypep 0
+_disjoint_down 1
+subtypep 1
 canonicalize_once 0
 compute_dnf 0
 """
 import simple_type_d
+import utils
 
 class SAnd(SimpleTypeD):
 	"""An intersection type, which is the intersection of zero or more types.
@@ -54,9 +55,75 @@ class SAnd(SimpleTypeD):
 		s += "]"
 		return s
 
-	def unit:
-		#implement when STop is implemented
-		raise NotImplementedError
+    @staticmethod
+    def create(tds):
+        return SAnd(tds)
+
+	unit = STop
+    zero = SEmpty
+
+    @staticmethod
+    def annihilator(a, b):
+        return b.supertypep(a)
+
+    @staticmethod
+    def same_combination(td):
+        return type(td) == SAnd
+
+    def typep(a):
+        return any(t.typep(a) for t in self.tds)
+
+    def inhabited_down(self, opt):
+
+        dnf = generate_lazy_val(canonicalize, Dnf)
+        cnf = generate_lazy_val(canonicalize, Cnf)
+
+        dot_inhabited = lambda x : x.inhabited
+        inhabited_dnf = generate_lazy_val(dot_inhabited, dnf)
+        inhabited_cnf = generate_lazy_val(dot_inhabited, cnf)
+
+        if any(t.contains(False) for t in self.tds):
+            return False
+        elif all(type(t) == SAtomic for t in self.tds):
+            #TODO I may need explanations on this one
+        elif dnf() != self and inhabited_dnf():
+            return inhabited_dnf()
+        elif cnf() != self and inhabited_cnf():
+            return inhabited_cnf()
+        else:
+            super()._inhabited_down
+
+    def _disjoint_down(self, t):
+        dot_inhabited_true = lambda x: x.inhabited() == True
+        inhabited_t = generate_lazy_val(dot_inhabited_true, t)
+        inhabited_self = generate_lazy_val(dot_inhabited_true, self)
+
+        if any(t._disjoint_down(t)):
+            return True
+        elif t in self.tds and inhabited_t() and inhabited_self():
+            return False
+        elif inhabited_t() and inhabited_self() and any(x.subtypep(t) or t.subtypep(x) for x in self.tds):
+            return False
+        else:
+            return super()._disjoint_down(t)
+
+    def subtypep(t):
+        if not self.tds:
+            return STop.subtypep(t)
+        elif any(t.subtypep(t) for t in tds):
+            return True
+        elif t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
+            return False
+        else:
+            return super().subtypep(t)
+
+    def canonicalize_once(nf):
+        #TODO
+        pass
+
+    def compute_dnf():
+        #TODO I need explanation for this one
+
 
 """
 object t_SAnd {
