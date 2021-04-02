@@ -59,8 +59,8 @@ class SAnd(SimpleTypeD):
     def create(tds):
         return SAnd(tds)
 
-	unit = STop
-    zero = SEmpty
+	unit = STop.get_omega()
+    zero = SEmpty.get_epsilon()
 
     @staticmethod
     def annihilator(a, b):
