@@ -22,6 +22,20 @@
 from types import NormalForm
 from simple_type_d import SimpleTypeD
 
+"""
+[0-3] Advancement tracker
+__init__ 1
+__str__ 1
+typep 1
+_inhabited_down 1
+_disjoint_down 1
+subtypep 1
+canonicalize_once 1
+compute_dnf 0
+compute_cnf 1
+cmp_to_same_class_obj 0
+"""
+
 class SNot(SimpleTypeD):
 	"""A negation of a type.
 	@param s the type we want to get the complement"""
