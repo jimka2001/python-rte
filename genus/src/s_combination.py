@@ -32,7 +32,7 @@ unit 1
 zero 1
 annihilator 1
 same_combination 1
-canonicalize_once 0
+canonicalize_once 1
 cmp_to_same_class 0
 """
 class SCombination(SimpleTypeD):
@@ -88,13 +88,14 @@ class SCombination(SimpleTypeD):
 		def l_3():
 			# (and A (not A)) --> SEmpty,  unit=STop,   zero=SEmpty
 			# (or A (not A)) --> STop,     unit=SEmpty, zero=STop
-			#TODO: implement when SNot is implemented
-			raise NotImplementedError
+			if any(map(lambda td: SNot(td) in self.arglist, self.arglist)):
+				return self.zero
+			else:
+				return self
 
 		def l_4():
 			# SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
 			# SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
-			#TODO: implement when I understand the _* idiom
 			if self.unit in self.arglist:
 				return self.create(list(filter(lambda x: x != self.unit)))
 			else:
@@ -133,8 +134,17 @@ class SCombination(SimpleTypeD):
 				return i2
 
 		def l_8():
-			#implement when SNot is done
-			raise NotImplementedError
+			#I'm not absolutely sure about this
+			def l_8_predicate(x):
+				for td in self.arglist:
+					if td == type(SNot) and annihilator(x, td.s) == True:
+						return True
+				return False
+			found = list(filter(l_8_predicate, self.arglist))
+			if found == []:
+				return self
+			else:
+				return self.zero
 
 		simplifiers = [l_1, l_2, l_3, l_4, l_5, l_6, l_7, l_8]
 		return self.find_simplifier(simplifiers)
@@ -144,7 +154,7 @@ class SCombination(SimpleTypeD):
 		if self == td:
 			return False
 		else:
-			tdif isinstance(td, SCombination):
+			if isinstance(td, SCombination):
 				#do it when Types is implemented
 				raise NotImplementedError
 			else:
