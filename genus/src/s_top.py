@@ -23,12 +23,12 @@ from simple_type_d import SimpleTypeD
 from s_empty import SEmpty
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
-__str__ 1
-typep   1
-_inhabited_down 1
-_disjoint_down  1
-subtypep    1
-cmp_to_same_class_obj   1
+__str__ 3
+typep   3
+_inhabited_down 3
+_disjoint_down  3
+subtypep    3
+cmp_to_same_class_obj   3
 """
 class STop(SimpleTypeD):
     """The super type, super type of all types."""
