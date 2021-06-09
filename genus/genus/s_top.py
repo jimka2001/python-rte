@@ -93,7 +93,7 @@ def t_STop():
 
     #a is never disjoint with anything but the empty subtype
     assert(not a._disjoint_down(object))
-    assert(a._disjoint_down(SEmpty()))
+    assert(a._disjoint_down(SEmpty().get_epsilon))
 
     #on the contrary, a is never a subtype of any type 
     #since types are sets and top is the set that contains all sets
