@@ -21,6 +21,7 @@
 
 from genus.simple_type_d import SimpleTypeD 
 from genus.s_empty import SEmpty
+import os
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
 __str__ 1
@@ -65,14 +66,23 @@ class STop(SimpleTypeD):
     def cmp_to_same_class_obj(self, t):
         return False
 
+def t_verboseonlyprint(s):
+    if 'genusverbose' in os.environ and os.environ['genusverbose'] == str(True):
+        print(s)
+
 #TODO: move the tests in their own files once this is packaged:
 def t_STop():
+    t_verboseonlyprint("getting the omega singleton from STop")
     a = STop.get_omega()
+    t_verboseonlyprint("success")
 
     #STop has to be unique
+    t_verboseonlyprint("checking unicity of omega")
     assert(id(a) == id(STop.get_omega()))
-    
+    t_verboseonlyprint("success")
+
     #STop has to be unique part 2: ensure the constructor throws an error
+    t_verboseonlyprint("ensuring constructor throws an error")
     pred = True
     try:
         b = STop()
@@ -80,29 +90,41 @@ def t_STop():
         assert(False)
     except Exception as e:
         assert(pred)
+    t_verboseonlyprint("success")
 
     #str(a) has to be "Top"
+    t_verboseonlyprint("ensuring str(STop.get_omega()) is Top")
     assert(str(a) == "Top")
+    t_verboseonlyprint("success")
 
     #a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
+    t_verboseonlyprint("running tests on typep")
     assert(a.typep(object))
     assert(a.typep(a))
+    t_verboseonlyprint("success")
 
     #obviously, a is inhabited as it contains everything by definition
+    t_verboseonlyprint("checking that omega is inhabited")
     assert(a._inhabited_down)
+    t_verboseonlyprint("success")
 
     #a is never disjoint with anything but the empty subtype
+    t_verboseonlyprint("checking that omega is disjoint only with the empty subtype")
     assert(not a._disjoint_down(object))
-    assert(a._disjoint_down(SEmpty().get_epsilon))
+    assert(a._disjoint_down(SEmpty.get_epsilon()))
+    t_verboseonlyprint("success")
 
     #on the contrary, a is never a subtype of any type 
     #since types are sets and top is the set that contains all sets
+    t_verboseonlyprint("checking that i is a subtype of nothing")
     assert(not a.subtypep(object))
     assert(not a.subtypep(type(a)))
 
     #my understanding is that the top type is unique so it can't be positively compared to any object
+    t_verboseonlyprint("checking that type is uncomparable")
     assert(not a.cmp_to_same_class_obj(a))
     assert(not a.cmp_to_same_class_obj(object))
+    t_verboseonlyprint("success")
 
 t_STop()
 
