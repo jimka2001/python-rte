@@ -19,14 +19,14 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from types import NormalForm
+#from genus.types import NormalForm
 from genus.simple_type_d import SimpleTypeD
 
 """
 [0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 1
+__init__ 3
+__str__ 3
+typep 3
 _inhabited_down 1
 _disjoint_down 1
 subtypep 1
@@ -39,15 +39,29 @@ cmp_to_same_class_obj 0
 class SNot(SimpleTypeD):
 	"""A negation of a type.
 	@param s the type we want to get the complement"""
+
+	__allowed_init = False
+
 	def __init__(self, s):
+		if not SNot.__allowed_init:
+		   raise Exception("Please use SNot.create() as only it can handle not not cases")
 		super(SNot, self).__init__()
 		self.s = s
+		SNot.__allowed_init = False
 	
-	__str__(self):
+	@staticmethod
+	def create(s):
+		SNot.__allowed_init = True
+		if type(s) == type(SNot([])):
+			return s.s
+		SNot.__allowed_init = True
+		return SNot(s)
+	
+	def __str__(self):
 		return "[Not " + str(self.s) + "]"
 	
-	def typep(a):
-		return not self.s.typep(a)
+	def typep(self, t):
+		return not self.s.typep(t)
 
 	def _inhabited_down(self):
 		nothing = type(None)
@@ -82,7 +96,7 @@ class SNot(SimpleTypeD):
 			return os.holding
 		if True in self.s.inhabited() and True in self.s.subtypep(t):
 			return False
-		elif os() #not empty:
+		elif os(): #not empty
 			return os()
 		else:
 			return super.subtypep(t)

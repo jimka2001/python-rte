@@ -26,7 +26,7 @@ typep 3
 __str__ 3
 _disjoint_down 1
 _inhabited_down 1
-subtypep 1
+subtypep 3
 cmp_to_same_class_obj 1
 apply 1
 """
@@ -40,7 +40,10 @@ class SCustom(SimpleTypeD):
     	self.printable = printable
 
     def typep(self, a):
-    	return self.f(a)
+        try:
+            return self.f(a)
+        except TypeError as e:
+            return False
 
     def __str__(self):
     	return self.printable + "?"
@@ -51,7 +54,7 @@ class SCustom(SimpleTypeD):
     def _inhabited_down(self):
     	return super()._inhabited_down()
 
-    def subtypep(t):
+    def subtypep(self, t):
     	return super().subtypep(t)
 
     def cmp_to_same_class_obj(self, t):
@@ -60,17 +63,3 @@ class SCustom(SimpleTypeD):
     @staticmethod
     def apply(f):
     	return SCustom(f, str(f))
-
-def t_scustom():
-	l_odd = lambda x : x % 2 == 1
-	guinea_pig = SCustom(l_odd, "[odd numbers]")
-	assert(guinea_pig.f == l_odd)
-	assert(guinea_pig.printable == "[odd numbers]")
-	assert( str(guinea_pig) == "[odd numbers]?")
-	for x in range(-100,100):
-		if x % 2 == 1:
-			assert(guinea_pig.typep(x))
-		else:
-			assert(not guinea_pig.typep(x))
-
-t_scustom()

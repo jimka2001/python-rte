@@ -168,7 +168,7 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def subtypep(self, t):
         #implement when SNot is implemented
-        raise NotImplementedError
+        return None
 
     @staticmethod
     def fixed_point(w, f, good_enough):

@@ -21,77 +21,86 @@
 
 """
 [0-3] Advancement tracker
-__init__ 1
-__str__ 1
-create 1
-unit 1
-zero 1
+__init__ 3
+__str__ 3
+create 3
+unit 3
+zero 3
 annihilator 1
-same_combination 1
-typep 1
+same_combination 3
+typep 3
 inhabited_down 0
 _disjoint_down 1
-subtypep 1
+subtypep 3
 canonicalize_once 0
 compute_dnf 0
 """
-import genus.simple_type_d
-import genus.utils
+from genus.simple_type_d import SimpleTypeD 
+from genus.s_empty import SEmpty
+from genus.s_top import STop
+from genus.utils import generate_lazy_val
 
 class SAnd(SimpleTypeD):
-	"""An intersection type, which is the intersection of zero or more types.
+    """An intersection type, which is the intersection of zero or more types.
     @param tds list, zero or more types"""
 
-	#equivalent to the scala "create"
-	def __init__(self, tds):
-		super(SAnd, self).__init__()
-		self.tds = tds
-	
-	def __str__(self):
-		s = "["
-		for arg in self.arg_list:
-			s += str(arg)
-			s += ","
-		s += "]"
-		return s
+    #equivalent to the scala "create"
+    def __init__(self, tds):
+        super(SAnd, self).__init__()
+        self.tds = tds
+    
+    def __str__(self):
+        s = "[And "
+        for arg in self.tds:
+            s += str(arg)
+            s += ","
+        s += "]"
+        return s
 
     @staticmethod
     def create(tds):
         return SAnd(tds)
 
-	unit = STop.get_omega()
+    unit = STop.get_omega()
     zero = SEmpty.get_epsilon()
 
     @staticmethod
     def annihilator(a, b):
         return b.supertypep(a)
 
-    @staticmethod
-    def same_combination(td):
-        return type(td) == SAnd
+    def same_combination(self, t):
+        if not type(t) == type(self):
+            return False
+        for arg in self.tds:
+            if not arg in t.tds:
+                return False
+        for arg in t.tds:
+            if not arg in self.tds:
+                return False
+        return True
 
-    def typep(a):
-        return any(t.typep(a) for t in self.tds)
+    def typep(self, a):
+        return all(t.typep(a) for t in self.tds)
 
     def inhabited_down(self, opt):
+        pass
+        # dnf = generate_lazy_val(canonicalize, Dnf)
+        # cnf = generate_lazy_val(canonicalize, Cnf)
 
-        dnf = generate_lazy_val(canonicalize, Dnf)
-        cnf = generate_lazy_val(canonicalize, Cnf)
+        # dot_inhabited = lambda x : x.inhabited
+        # inhabited_dnf = generate_lazy_val(dot_inhabited, dnf)
+        # inhabited_cnf = generate_lazy_val(dot_inhabited, cnf)
 
-        dot_inhabited = lambda x : x.inhabited
-        inhabited_dnf = generate_lazy_val(dot_inhabited, dnf)
-        inhabited_cnf = generate_lazy_val(dot_inhabited, cnf)
-
-        if any(t.contains(False) for t in self.tds):
-            return False
-        elif all(type(t) == SAtomic for t in self.tds):
-            #TODO I may need explanations on this one
-        elif dnf() != self and inhabited_dnf():
-            return inhabited_dnf()
-        elif cnf() != self and inhabited_cnf():
-            return inhabited_cnf()
-        else:
-            super()._inhabited_down
+        # if any(t.contains(False) for t in self.tds):
+        #     return False
+        # elif all(type(t) == SAtomic for t in self.tds):
+        #     #TODO I may need explanations on this one
+        # elif dnf() != self and inhabited_dnf():
+        #     return inhabited_dnf()
+        # elif cnf() != self and inhabited_cnf():
+        #     return inhabited_cnf()
+        # else:
+        #     super()._inhabited_down
 
     def _disjoint_down(self, t):
         dot_inhabited_true = lambda x: x.inhabited() == True
@@ -107,13 +116,15 @@ class SAnd(SimpleTypeD):
         else:
             return super()._disjoint_down(t)
 
-    def subtypep(t):
+    def subtypep(self, t):
         if not self.tds:
-            return STop.subtypep(t)
-        elif any(t.subtypep(t) for t in tds):
+            return STop.get_omega().subtypep(t)  
+        elif t in self.tds:
+            return True          
+        elif hasattr(t, "typep") and any(t.typep(arg) for arg in self.tds):
             return True
-        elif t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
-            return False
+        #elif hasattr(t, "inhabited") and t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
+        #    return False
         else:
             return super().subtypep(t)
 
@@ -123,31 +134,4 @@ class SAnd(SimpleTypeD):
 
     def compute_dnf():
         #TODO I need explanation for this one
-
-
-"""
-object t_SAnd {
-  def main(args: Array[String]): Unit = {
-
-    //test empty SAnd()
-    val a = new SAnd()
-    println(a.toString())
-
-    //test SAnd with primal types
-    val b = new SAnd(SAtomic(Types.Integer), SAtomic(Types.String), SAtomic(Types.Double))
-    println(b.toString())
-
-    //check Unit is valid
-    println(a.unit == b.unit && a.unit == STop)
-
-    //check Zero is valid
-    println(a.zero == b.zero && a.zero == SEmpty)
-
-    //check that create is working properly
-    val c = a.create(SAtomic(Types.Integer))
-    println(c.getClass() == a.getClass)
-    println(c.toString == SAnd(SAtomic(Types.Integer)).toString)
-
-  }
-}
-"""
+        pass

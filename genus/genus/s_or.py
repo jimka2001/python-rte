@@ -21,22 +21,24 @@
 """
 [0-3] Advancement tracker
 
-__init__ 1
-__str__ 1
-create 1
-unit 1
-zero 1
+__init__ 3
+__str__ 3
+create 3
+unit 3
+zero 3
 annihilator 1
-same_combination 1
-typep 1
+same_combination 3
+typep 3
 inhabited_down 0
 _disjoint_down 0
-subtypep 0
+subtypep 3
 canonicalize_once 0
-compute_cnf 0
+compute_dnf 0
 """
 
-import genus.simple_type_d
+from genus.simple_type_d import SimpleTypeD 
+from genus.s_empty import SEmpty
+from genus.s_top import STop
 
 class SOr(SimpleTypeD):
 	"""docstring for SOr"""
@@ -46,12 +48,13 @@ class SOr(SimpleTypeD):
 
 	def __str__(self):
 		s = "[Or "
-		for arg in self.arg_list:
+		for arg in self.tds:
 			s += str(arg)
 			s += ","
 		s += "]"
 		return s
 
+	@staticmethod
 	def create(tds):
 		return SOr(tds)
 
@@ -61,14 +64,35 @@ class SOr(SimpleTypeD):
 	def annihilator(a, b):
 		return b.subtypep(a)
 
-	def same_combination(self, td):
-		return td in self.tds #this may be wrong
+	def same_combination(self, t):
+		if not type(t) == type(self):
+			return False
+		for arg in self.tds:
+			if not arg in t.tds:
+				return False
+		for arg in t.tds:
+			if not arg in self.tds:
+				return False
+		return True
 
 	def typep(self, a):
-		for td in self.td:
+		for td in self.tds:
 			if(td.typep(a)):
 				return True
 		return False
 
+	def subtypep(self, t):
+	    if not self.tds:
+	        return SEmpty.get_epsilon().subtypep(t)        
+	    elif hasattr(t, "typep") and all(t.typep(arg) for arg in self.tds):
+	        return True
+	    #elif hasattr(t, "inhabited") and t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
+	    #    return False
+	    else:
+	        return super().subtypep(t)
+
 	def inhabited_down(self):
+		raise NotImplementedError
+
+	def _disjoint_down(self, t):
 		raise NotImplementedError
