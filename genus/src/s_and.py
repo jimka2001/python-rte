@@ -94,6 +94,7 @@ class SAnd(SCombination):
 			return super()._inhabited_down
 
 	def _disjoint_down(self, t):
+		assert isinstance(t,SimpleTypeD) 
 		inhabited_t = generate_lazy_val(lambda : t.inhabited())
 		inhabited_self = generate_lazy_val(lambda: self.inhabited())
 

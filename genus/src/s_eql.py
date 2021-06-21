@@ -57,6 +57,7 @@ class SEql(SMemberImpl):
 		return True
 
 	def _disjoint_down(self, t):
+		assert isinstance(t,SimpleTypeD) 
 		return not t.typep(self.a)
 
 	def subtypep(self, t):

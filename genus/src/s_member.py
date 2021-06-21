@@ -59,6 +59,7 @@ class SMemberImpl(SimpleTypeD):
 		return [] != self.arglist
 
 	def _disjoint_down(self,t2):
+		assert isinstance(t2,SimpleTypeD) 
 		return not any(t2.typep(a) for a in self.arglist)
 
 	def _subtypep_down(self,t2):

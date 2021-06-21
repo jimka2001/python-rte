@@ -95,6 +95,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 		pass
 
 	def _disjoint_down(self, t):
+		assert isinstance(t,SimpleTypeD) 
 		from s_empty import SEmptyImpl
 		# TODO: find a way to cmpte isfinal and isInterface if needed
 		if isinstance(t, SEmptyImpl):

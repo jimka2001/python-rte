@@ -55,6 +55,7 @@ class SCustom(SimpleTypeD, TerminalType):
 		return str(self.printable) + "?"
 
 	def _disjoint_down(self, t):
+		assert isinstance(t,SimpleTypeD) 
 		return super()._disjoint_down(t)
 
 	def _inhabited_down(self):

@@ -66,6 +66,7 @@ class SEmptyImpl(SimpleTypeD):
         return False
 
     def _disjoint_down(self, t):
+        assert isinstance(t,SimpleTypeD)
         return True
 
     def subtypep(self, t):

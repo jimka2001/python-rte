@@ -41,17 +41,15 @@ def t_fixed_point():
     assert fixed_point(0, (lambda x: x//2), (lambda x,y: x == y)) == 0
 
 def t_STop():
-    t_verboseonlyprint("getting the omega singleton from STop")
-    a = STop.get_omega()
-    t_verboseonlyprint("success")
+    from s_empty import SEmptyImpl
+    from s_top import STopImpl
+
+    a = STop
 
     #STop has to be unique
-    t_verboseonlyprint("checking unicity of omega")
-    assert(id(a) == id(STop.get_omega()))
-    t_verboseonlyprint("success")
+    assert(id(a) == id(STopImpl.get_omega()))
 
     #STop has to be unique part 2: ensure the constructor throws an error
-    t_verboseonlyprint("ensuring constructor throws an error")
     pred = True
     try:
         b = STop()
@@ -59,41 +57,29 @@ def t_STop():
         assert(False)
     except Exception as e:
         assert(pred)
-    t_verboseonlyprint("success")
 
     #str(a) has to be "Top"
-    t_verboseonlyprint("ensuring str(STop.get_omega()) is Top")
     assert(str(a) == "Top")
-    t_verboseonlyprint("success")
 
     #a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    t_verboseonlyprint("running tests on typep")
-    assert(a.typep(object))
+    assert(a.typep(SAtomic(object)))
     assert(a.typep(a))
-    t_verboseonlyprint("success")
 
     #obviously, a is inhabited as it contains everything by definition
-    t_verboseonlyprint("checking that omega is inhabited")
     assert(a._inhabited_down)
-    t_verboseonlyprint("success")
 
     #a is never disjoint with anything but the empty subtype
-    t_verboseonlyprint("checking that omega is disjoint only with the empty subtype")
-    assert(not a._disjoint_down(object))
-    assert(a._disjoint_down(SEmpty.get_epsilon()))
-    t_verboseonlyprint("success")
+    assert(not a._disjoint_down(SAtomic(object)))
+    assert(a._disjoint_down(SEmptyImpl.get_epsilon()))
 
     #on the contrary, a is never a subtype of any type 
     #since types are sets and top is the set that contains all sets
-    t_verboseonlyprint("checking that i is a subtype of nothing")
-    assert(not a.subtypep(SAtomic(object)))
-    assert(not a.subtypep(SAtomic(type(a))))
+    assert(a.subtypep(SAtomic(object)) is True)
+    assert( a.subtypep(a) is True)
 
     #my understanding is that the top type is unique so it can't be positively compared to any object
-    t_verboseonlyprint("checking that type is uncomparable")
     assert(not a.cmp_to_same_class_obj(a))
     assert(not a.cmp_to_same_class_obj(object))
-    t_verboseonlyprint("success")
 
 
 def t_scustom():
@@ -258,7 +244,7 @@ def t_SimpleTypeD():
         def typep(a):
             pass
 
-    child = ChildSTD()
+    child = SAtomic(ChildSTD())
 
     # _inhabited_down is None to indicate that we actually don't know
     # whether it is as this is the generic version
@@ -279,8 +265,8 @@ def t_SimpleTypeD():
 
     # fixed_point is just a way to incrementally apply a function on a value
     # until another function deem the delta between two consecutive values to be negligible
-    increment = lambda x: x;
-    evaluator = lambda x, y: x == y;
+    increment = lambda x: x
+    evaluator = lambda x, y: x == y
     assert (fixed_point(5, increment, evaluator) == 5)
     assert (fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
@@ -299,11 +285,10 @@ def t_SimpleTypeD():
 
 
 # TODO: move the tests in their own files once this is packaged:
-def t_STop():
-    a = STop.get_omega()
-
+def t_STop2():
+    from s_top import STopImpl
     # STop has to be unique
-    assert (id(a) == id(STop.get_omega()))
+    assert (id(STop) == id(STopImpl.get_omega()))
 
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
@@ -315,35 +300,34 @@ def t_STop():
         assert (pred)
 
     # str(a) has to be "Top"
-    assert (str(a) == "Top")
+    assert (str(STop) == "Top")
 
-    # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert (a.typep(object))
-    assert (a.typep(a))
+    # a.subtypep(t) indicates whether t is a subtype of a, which is always the case by definition
+    assert (STop.subtypep(SAtomic(object)))
+    assert (STop.subtypep(STop))
 
     # obviously, a is inhabited as it contains everything by definition
-    assert (a._inhabited_down)
+    assert (STop._inhabited_down)
 
     # a is never disjoint with anything but the empty subtype
-    assert (not a._disjoint_down(object))
-    assert (a._disjoint_down(SEmpty()))
+    assert (not STop._disjoint_down(SAtomic(object)))
+    assert (STop._disjoint_down(SEmpty))
 
     # on the contrary, a is never a subtype of any type
     # since types are sets and top is the set that contains all sets
-    assert (not a.subtypep(object))
-    assert (not a.subtypep(type(a)))
+    assert (STop.subtypep(SAtomic(object)) is not False)
+    assert (STop.subtypep(STop) is True)
 
     # my understanding is that the top type is unique so it can't be positively compared to any object
-    assert (not a.cmp_to_same_class_obj(a))
-    assert (not a.cmp_to_same_class_obj(object))
+    assert (not STop.cmp_to_same_class_obj(STop))
+    assert (not STop.cmp_to_same_class_obj(SAtomic(object)))
 
 
 # TODO: move the tests in their own files once this is packaged:
 def t_SEmpty():
-    a = SEmpty.get_epsilon()
-
+    from s_empty import SEmptyImpl
     # SEmpty has to be unique
-    assert (id(a) == id(SEmpty.get_epsilon()))
+    assert (id(SEmpty) == id(SEmptyImpl.get_epsilon()))
 
     # SEmpty has to be unique part 2: ensure the constructor throws an error
     pred = True
@@ -355,26 +339,26 @@ def t_SEmpty():
         assert (pred)
 
     # str(a) has to be "Empty"
-    assert (str(a) == "Empty")
+    assert (str(SEmpty) == "Empty")
 
     # a.typep(t) indicates whether t is a subtype of a, which is never the case
-    assert (not a.typep(object))
-    assert (not a.typep(a))
+    assert (not SEmpty.typep(SAtomic(object)))
+    assert (SEmpty.subtypep(SEmpty))
 
     # obviously, a is not inhabited as it is by definition empty
-    assert (not a._inhabited_down())
+    assert (not SEmpty._inhabited_down())
 
     # a is disjoint with anything as it is empty
-    assert (a._disjoint_down(object))
+    assert (SEmpty._disjoint_down(SAtomic(object)))
 
     # on the contrary, a is always a subtype of any type
     # since types are sets and the empty set is a subset of all sets
-    assert (a.subtypep(object))
-    assert (a.subtypep(type(a)))
+    assert (SEmpty.subtypep(SAtomic(object)) is True)
+    assert (SEmpty.subtypep(SEmpty) is True)
 
     # my understanding is that the empty type is unique so it can't be positively compared to any object
-    assert (not a.cmp_to_same_class_obj(a))
-    assert (not a.cmp_to_same_class_obj(object))
+    assert (not SEmpty.cmp_to_same_class_obj(SEmpty))
+    assert (not SEmpty.cmp_to_same_class_obj(SAtomic(object)))
 
 
 def t_scustom2():
@@ -400,8 +384,8 @@ t_sand1()
 t_sand2()
 t_sor()
 t_snot()
+t_STop()
+t_STop2()
+t_SEmpty()
 #t_SimpleTypeD()
-#t_STop()
-#t_SEmpty()
-#t_STop()
 
