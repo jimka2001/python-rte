@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD 
-from s_empty import SEmpty
+from s_empty import SEmptyImpl
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
 __str__ 1
@@ -30,22 +30,22 @@ _disjoint_down  1
 subtypep    1
 cmp_to_same_class_obj   1
 """
-class STop(SimpleTypeD):
+class STopImpl(SimpleTypeD):
     """The super type, super type of all types."""
     __instance = None
 
     @staticmethod
     def get_omega():
-        if STop.__instance is None:
-            STop()
-        return STop.__instance
+        if STopImpl.__instance is None:
+            STopImpl()
+        return STopImpl.__instance
 
     def __init__(self):
-        super(STop, self).__init__()
-        if STop.__instance is not None:
+        super(STopImpl, self).__init__()
+        if STopImpl.__instance is not None:
            raise Exception("Please use STop.get_omega() as STop is unique and can't be duplicated")
         else:
-           STop.__instance = self
+           STopImpl.__instance = self
 
     def __str__(self):
         return "Top"
@@ -57,7 +57,7 @@ class STop(SimpleTypeD):
         return True
 
     def _disjoint_down(self, t):
-        return type(t) is SEmpty
+        return type(t) is SEmptyImpl
 
     def _subtypep_down(self, t):
         from s_not import SNot
@@ -72,20 +72,5 @@ class STop(SimpleTypeD):
     def cmp_to_same_class_obj(self, t):
         return False
 
-"""
-object t_STop {
-  def main(args: Array[String]): Unit = {
-    println(STop.toString() == "Top")
-    println(STop.typep(Types.Integer))
-    println(STop.inhabitedDown.contains(true))
 
-    //println(STop.disjointDown(SAtomic(Types.Integer)).contains(false))
-    //println(STop.disjointDown((SEmpty)).contains(true))
-    println(STop.subtypep(SAtomic(Types.Integer)).contains(false))
-    println(STop.subtypep((STop)).contains(true))
-
-    println(!STop.cmpToSameClassObj(STop))
-    println(!STop.cmpToSameClassObj(SAtomic(Types.Integer)))
-  }
-}
-"""
+STop = STopImpl.get_omega()

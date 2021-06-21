@@ -52,9 +52,9 @@ class SAtomic(SimpleTypeD, TerminalType):
 	@classmethod
 	def apply(cls, ct):
 		if ct == type(None):
-			return SEmpty.get_epsilon()
+			return SEmpty
 		elif ct == type(object):
-			return STop.get_omega()
+			return STop
 		else:
 			return cls(ct)
 
@@ -72,7 +72,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 			#the try block may only fail if self.wrapped_class is not a class, in which case it is a value and contains nothing
 			return False 
 		
-	@static
+	@staticmethod
 	def is_final():
 		"""Okay, so, python does not per say handle final classes,
 		however since python3.8, the community added a @final
@@ -98,7 +98,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 
 	def _disjoint_down(self, t):
 		#TODO: find a way to cmpte isfinal and isInterface if needed
-		if isinstance(t, SEmpty):
+		if isinstance(t, SEmptyImpl):
 			return True
 		elif isinstance(t, STop):
 			return False
@@ -117,7 +117,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 			return super()._disjoint_down(t)
 
 	def _subtypep_down(self, s):
-		if isinstance(s, SEmpty):
+		if isinstance(s, SEmptyImpl):
 			return False
 		elif isinstance(s, STop):
 			return True

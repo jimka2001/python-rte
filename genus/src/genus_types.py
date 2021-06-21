@@ -101,8 +101,8 @@ def topp(this):
 
 
 def emptyp(this):
-	from s_empty import SEmpty
-	return isinstance(this, SEmpty)
+	from s_empty import SEmptyImpl
+	return isinstance(this, SEmptyImpl)
 
 
 def memberp(this):

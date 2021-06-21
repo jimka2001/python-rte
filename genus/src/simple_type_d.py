@@ -115,10 +115,10 @@ class SimpleTypeD(metaclass=ABCMeta):
         td_canonicalized = generate_lazy_val(lambda: td.canonicalize())
 
         #og_name in scala lazy: dc12
-        canon_self_disjoint_td = generate_lazy_val(lambda: self_canonicalized._disjoint_down(td_canonicalized))
+        canon_self_disjoint_td = generate_lazy_val(lambda: self_canonicalized()._disjoint_down(td_canonicalized))
 
         #og_name in scala lazy: dc21
-        canon_td_disjoint_self = generate_lazy_val(lambda: td_canonicalized._disjoint_down(self_canonicalized))
+        canon_td_disjoint_self = generate_lazy_val(lambda: td_canonicalized()._disjoint_down(self_canonicalized))
 
         if self == td and self.inhabited() is not None:
             return not self.inhabited()
@@ -154,7 +154,7 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def subtypep(self, t):
         #implement when SNot is implemented
-        from genus_types import orp, andp
+        from genus_types import orp, andp, topp
         from s_top import STop
         def or_result():
             return True if orp(t) and any(self.subtypep(a) is True for a in t.tds) \
@@ -164,9 +164,11 @@ class SimpleTypeD(metaclass=ABCMeta):
             return True if andp(t) and all(self.subtypep(a) is True for a in t.tds) \
                 else None
 
+        print(f"t={t}  t.canonicalize()={t.canonicalize}")
+
         if type(self) == type(t) and self == t:
             return True
-        elif isinstance(t.canonicalize(),STop):
+        elif topp(t.canonicalize()):
             return True
         elif or_result() is True:
             return True
@@ -224,13 +226,14 @@ class SimpleTypeD(metaclass=ABCMeta):
     canonicalized_hash = {}
 
     def canonicalize(self, nf = None):
+        from utils import fixed_point
         if not nf in self.canonicalized_hash:
             #we're in the case were the result isn't memoized,
             #so we compute it
             processor = lambda t: t.canonicalize_once(nf)
             good_enough = lambda a, b: type(a) == type(b) and a == b
             
-            res = SimpleTypeD.fixed_point(self, processor, good_enough)
+            res = fixed_point(self, processor, good_enough)
             
             self.canonicalized_hash |= {nf: res}
 

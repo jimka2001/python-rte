@@ -33,22 +33,22 @@ cmp_to_same_class_obj 3
 
 TODO: move the tests on their own
 """
-class SEmpty(SimpleTypeD):
+class SEmptyImpl(SimpleTypeD):
     """The empty type, subtype of all types."""
     __instance = None
 
     @staticmethod
     def get_epsilon():
-        if SEmpty.__instance is None:
-            SEmpty()
-        return SEmpty.__instance
+        if SEmptyImpl.__instance is None:
+            SEmptyImpl()
+        return SEmptyImpl.__instance
 
     def __init__(self):
-        super(SEmpty, self).__init__()
-        if SEmpty.__instance is not None:
-           raise Exception("Please use SEmpty.get_epsilon() as SEmpty is unique and can't be duplicated")
+        super(SEmptyImpl, self).__init__()
+        if SEmptyImpl.__instance is not None:
+           raise Exception("Please use SEmptyImpl.get_epsilon() as SEmpty is unique and can't be duplicated")
         else:
-           SEmpty.__instance = self
+           SEmptyImpl.__instance = self
 
     def __str__(self):
         return "Empty"
@@ -68,20 +68,6 @@ class SEmpty(SimpleTypeD):
     def cmp_to_same_class_obj(self, t):
         return False
 
-""" Scala code to print values used for testing:
+SEmpty = SEmptyImpl.get_epsilon()
 
-object t_SEmpty {
-  def main(args: Array[String]): Unit = {
-    println(SEmpty.toString() == "Empty")
-    println(!SEmpty.typep(Types.Integer))
-    println(SEmpty.inhabitedDown.contains(false))
 
-    //println(SEmpty.disjointDown(SAtomic(Types.Integer)).contains(true))
-    println(SEmpty.subtypep(SAtomic(Types.Integer)).contains(true))
-    println(SEmpty.subtypep((SEmpty)).contains(true))
-
-    println(!SEmpty.cmpToSameClassObj(SEmpty))
-    println(!SEmpty.cmpToSameClassObj(SAtomic(Types.Integer)))
-  }
-}
-"""

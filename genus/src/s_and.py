@@ -60,8 +60,8 @@ class SAnd(SCombination):
 	def create(self,tds):
 		return createSAnd(tds)
 
-	unit = STop.get_omega()
-	zero = SEmpty.get_epsilon()
+	unit = STop
+	zero = SEmpty
 
 	def annihilator(self, a, b):
 		return b.supertypep(a)
@@ -129,29 +129,3 @@ class SAnd(SCombination):
 		#TODO I need explanation for this one
 		return self
 
-"""
-object t_SAnd {
-  def main(args: Array[String]): Unit = {
-
-	//test empty SAnd()
-	val a = new SAnd()
-	println(a.toString())
-
-	//test SAnd with primal types
-	val b = new SAnd(SAtomic(Types.Integer), SAtomic(Types.String), SAtomic(Types.Double))
-	println(b.toString())
-
-	//check Unit is valid
-	println(a.unit == b.unit && a.unit == STop)
-
-	//check Zero is valid
-	println(a.zero == b.zero && a.zero == SEmpty)
-
-	//check that create is working properly
-	val c = a.create(SAtomic(Types.Integer))
-	println(c.getClass() == a.getClass)
-	println(c.toString == SAnd(SAtomic(Types.Integer)).toString)
-
-  }
-}
-"""

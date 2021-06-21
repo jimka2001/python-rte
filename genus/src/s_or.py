@@ -54,8 +54,8 @@ class SOr(SCombination):
 	def create(self, tds):
 		return createSOr(tds)
 
-	unit = SEmpty.get_epsilon()
-	zero = STop.get_omega()
+	unit = SEmpty
+	zero = STop
 
 	def annihilator(self, a, b):
 		return b.subtypep(a)
