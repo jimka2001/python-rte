@@ -1,10 +1,35 @@
+# Copyright (©) 2021 EPITA Research and Development Laboratory
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation
+# files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
 import os
 def t_verboseonlyprint(s):
     if 'genusverbose' in os.environ and os.environ['genusverbose'] == str(True):
         print(s)
 
-from genus.s_top import STop
-from genus.s_empty import SEmpty
+from s_top import STop
+from s_empty import SEmpty
+from simple_type_d import SimpleTypeD
+from s_atomic import SAtomic
+
 def t_STop():
     t_verboseonlyprint("getting the omega singleton from STop")
     a = STop.get_omega()
@@ -51,8 +76,8 @@ def t_STop():
     #on the contrary, a is never a subtype of any type 
     #since types are sets and top is the set that contains all sets
     t_verboseonlyprint("checking that i is a subtype of nothing")
-    assert(not a.subtypep(object))
-    assert(not a.subtypep(type(a)))
+    assert(not a.subtypep(SAtomic(object)))
+    assert(not a.subtypep(SAtomic(type(a))))
 
     #my understanding is that the top type is unique so it can't be positively compared to any object
     t_verboseonlyprint("checking that type is uncomparable")
@@ -224,6 +249,9 @@ t_snot()
 
 
 def t_SimpleTypeD():
+    from simple_type_d import NormalForm
+    from utils import fixed_point
+
     # ensuring SimpleTypeD is abstract
     pred = True
     try:
@@ -280,8 +308,8 @@ def t_SimpleTypeD():
     # until another function deem the delta between two consecutive values to be negligible
     increment = lambda x: x;
     evaluator = lambda x, y: x == y;
-    assert (SimpleTypeD.fixed_point(5, increment, evaluator) == 5)
-    assert (SimpleTypeD.fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
+    assert (fixed_point(5, increment, evaluator) == 5)
+    assert (fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
     assert (child == child.canonicalize_once())
     assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
