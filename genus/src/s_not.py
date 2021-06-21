@@ -45,11 +45,19 @@ class SNot(SimpleTypeD):
 	@param s the type we want to get the complement"""
 	def __init__(self, s):
 		super(SNot, self).__init__()
+		assert isinstance(s,SimpleTypeD)
 		self.s = s
 	
 	def __str__(self):
-		return "[Not " + str(self.s) + "]"
-	
+		return "[SNot " + str(self.s) + "]"
+
+	def __eq__(self, that):
+		return type(self) is type(that) and \
+			self.s == that.s
+
+	def __hash__(self):
+		return hash(self.s)
+
 	def typep(self,a):
 		return not self.s.typep(a)
 
@@ -100,16 +108,16 @@ class SNot(SimpleTypeD):
 	def canonicalize_once(self, nf = None):
 		from genus_types import notp, topp, emptyp
 		if notp(self.s):
-			return self.s.canonicalize_once(nf)
+			return self.s.s.canonicalize_once(nf)
 		elif topp(self.s):
 			return SEmpty
 		elif emptyp(self.s):
 			return STop
 		else:
+
 			return SNot(self.s.canonicalize_once(nf))
 
 	def compute_dnf(self):
-		#TODO: implement when SAnd and SOr are done
 		raise NotImplementedError
 
 	def compute_cnf(self):

@@ -40,6 +40,14 @@ class SCustom(SimpleTypeD, TerminalType):
 		self.printable = printable
 		super().__init__()
 
+	def __eq__(self, that):
+		return type(self) is type(that) \
+				and self.f == that.f \
+				and self.printable == that.printable
+
+	def __hash__(self):
+		return hash((self.f,self.printable))
+
 	def typep(self, a):
 		return (self.f(a))
 

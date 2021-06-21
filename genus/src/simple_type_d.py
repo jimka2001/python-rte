@@ -97,6 +97,7 @@ class SimpleTypeD(metaclass=ABCMeta):
             @return a Boolean which is true is a is of this type"""
 
     def disjoint(self, td):
+        assert isinstance(td,SimpleTypeD)
         """okay, here I am doing some weird magic so I'll explain:
         python does NOT have a lazy keyword, so I need to emulate it
         I thus create utility functions within disjoint and within them,
@@ -149,12 +150,14 @@ class SimpleTypeD(metaclass=ABCMeta):
         return self.hold_inhabited
 
     def _disjoint_down(self, t):
+        assert isinstance(t,SimpleTypeD)
         if(self.inhabited() is False):
             return True
         else:
             return None
 
     def subtypep(self, t):
+        assert isinstance(t,SimpleTypeD)
         from genus_types import orp, andp, topp
         def or_result():
             return True if orp(t) and any(self.subtypep(a) is True for a in t.tds) \

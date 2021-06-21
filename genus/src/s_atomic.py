@@ -57,7 +57,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 			and self.wrapped_class is that.wrapped_class
 
 	def __hash__(self):
-		hash(self.wrapped_class)
+		return hash(self.wrapped_class)
 	
 	def typep(self, a):
 		# check that this does what we want (looks like it does but eh)

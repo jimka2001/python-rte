@@ -43,6 +43,13 @@ class SEql(SMemberImpl):
 	def __str__(self):
 		return "[= " + str(self.a) + "]"
 
+	def __eq__(self, that):
+		return type(self) is type(that) and \
+			self.a == that.a
+
+	def __hash__(self):
+		return hash(self.a)
+
 	def typep(self, b):
 		return self.a == b;
 

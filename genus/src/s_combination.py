@@ -42,11 +42,19 @@ class SCombination(SimpleTypeD):
 	"""SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 	def __init__(self, tds):
 		self.tds = tds
+		assert all(isinstance(td,SimpleTypeD) for td in tds)
 		super().__init__()
 
 	@abstractmethod
 	def create(self,tds):
 		pass
+
+	def __eq__(self, that):
+		return type(self) is type(that) \
+			   and self.tds == that.tds
+
+	def __hash__(self):
+		return hash(self.tds)
 
 	@property
 	@abstractmethod

@@ -50,6 +50,12 @@ class SEmptyImpl(SimpleTypeD):
         else:
            SEmptyImpl.__instance = self
 
+    def __eq__(self, that):
+        return type(self) is type(that)
+
+    def __hash__(self):
+        return hash(0)
+
     def __str__(self):
         return "Empty"
 

@@ -97,7 +97,7 @@ def t_STop():
 
 
 def t_scustom():
-    l_odd = lambda x : x % 2 == 1
+    l_odd = lambda x : isinstance(x,int) and x % 2 == 1
     guinea_pig = SCustom(l_odd, "[odd numbers]")
     assert(guinea_pig.f == l_odd)
     assert(guinea_pig.printable == "[odd numbers]")
@@ -108,7 +108,7 @@ def t_scustom():
         else:
             assert(not guinea_pig.typep(x))
     assert(not guinea_pig.typep("hello"))
-    assert(guinea_pig.subtypep(type(4)) == None)
+    assert(guinea_pig.subtypep(SAtomic(type(4))) is None)
 
 def t_sand1():
     from genus_types import createSAnd
@@ -157,20 +157,16 @@ def t_sand2():
     assert(not tri_n_quad.same_combination(createSAnd([])))
 
 def t_sor():
-    quadruple = SCustom(lambda x: x % 4 == 0, "quadruple")
-    triple = SCustom(lambda x: x % 3 == 0, "triple")
+    from genus_types import createSOr
+    quadruple = SCustom(lambda x: isinstance(x,int) and x % 4 == 0, "quadruple")
+    triple = SCustom(lambda x: isinstance(x,int) and x % 3 == 0, "triple")
     
-    t_verboseonlyprint("testing SOr.__init__")
     tri_o_quad = SOr([triple, quadruple])
-    create_tri_o_quad = SOr.create([triple, quadruple])
-    t_verboseonlyprint("success")
+    create_tri_o_quad = createSOr([triple, quadruple])
 
-    t_verboseonlyprint("testing SOr.__str__")
-    assert(str(tri_o_quad) == "[Or triple?,quadruple?,]")
-    assert(str(create_tri_o_quad) == "[Or triple?,quadruple?,]")
-    t_verboseonlyprint("success")
+    assert(str(tri_o_quad) == "[SOr triple?,quadruple?]")
+    assert(str(create_tri_o_quad) == "[SOr triple?,quadruple?]")
 
-    t_verboseonlyprint("testing SOr.typep")
     assert(tri_o_quad.typep(12))
     assert(create_tri_o_quad.typep(12))
     
@@ -188,33 +184,23 @@ def t_sor():
     
     assert(not tri_o_quad.typep("hello"))
     assert(not create_tri_o_quad.typep("hello"))
-    t_verboseonlyprint("success")
 
-    t_verboseonlyprint("testing SOr.unit")
     assert(SOr.unit == SEmpty.get_epsilon())
-    t_verboseonlyprint("success")
 
-    t_verboseonlyprint("testing SOr.zero")
     assert(SOr.zero == STop.get_omega())
-    t_verboseonlyprint("success")
 
-    t_verboseonlyprint("testing SAnd.subtypep")
     assert(tri_o_quad.subtypep(STop.get_omega()))
-    assert(tri_o_quad.subtypep(type(5)) == None)
-    t_verboseonlyprint("success")
+    assert(tri_o_quad.subtypep(SAtomic(type(5))) == None)
 
-    t_verboseonlyprint("testing SOr.same_combination")
     assert(tri_o_quad.same_combination(create_tri_o_quad))
-    assert(tri_o_quad.same_combination(SOr.create([quadruple, triple])))
+    assert(tri_o_quad.same_combination(createSOr([quadruple, triple])))
 
     assert(not tri_o_quad.same_combination(STop.get_omega()))
-    assert(not tri_o_quad.same_combination(SOr.create([])))
-    t_verboseonlyprint("success")
+    assert(not tri_o_quad.same_combination(createSOr([])))
 
 def t_snot():
-    pair = SCustom(lambda x: x & 1 == 0, "pair")
+    pair = SCustom(lambda x: isinstance(x,int) and x & 1 == 0, "pair")
     
-    t_verboseonlyprint("SNot: ensuring constructor throws an error")
     pred = True
     try:
         b = SNot([])
@@ -222,27 +208,17 @@ def t_snot():
         assert(False)
     except Exception as e:
         assert(pred)
-    t_verboseonlyprint("success")
 
-    t_verboseonlyprint("testing SNot.create")
-    npair = SNot.create(pair)
-    t_verboseonlyprint("success")
+    npair = SNot(pair)
 
-    t_verboseonlyprint("testing that not not foo == foo")
-    assert(SNot.create(SNot.create(pair)) == pair)
-    t_verboseonlyprint("success")
+    assert SNot(SNot(pair)).canonicalize() == pair
 
-    t_verboseonlyprint("testing SNot.__str__")
-    assert(str(npair) == "[Not pair?]")
-    t_verboseonlyprint("success")
-    
-    t_verboseonlyprint("testing SNot.typep")
+    assert(str(npair) == "[SNot pair?]")
+
     assert(npair.typep(5))
     assert(npair.typep("hello"))
     assert(not npair.typep(4))
     assert(not npair.typep(0))
-    t_verboseonlyprint("success")
-
 
 
 def t_SimpleTypeD():
@@ -401,18 +377,17 @@ def t_SEmpty():
     assert (not a.cmp_to_same_class_obj(object))
 
 
-
-def t_scustom():
-	l_odd = lambda x : x % 2 == 1
-	guinea_pig = SCustom(l_odd, "[odd numbers]")
-	assert(guinea_pig.f == l_odd)
-	assert(guinea_pig.printable == "[odd numbers]")
-	assert( str(guinea_pig) == "[odd numbers]?")
-	for x in range(-100,100):
-		if x % 2 == 1:
-			assert(guinea_pig.typep(x))
-		else:
-			assert(not guinea_pig.typep(x))
+def t_scustom2():
+    l_odd = lambda x : isinstance(x,int) and x % 2 == 1
+    guinea_pig = SCustom(l_odd, "[odd numbers]")
+    assert(guinea_pig.f == l_odd)
+    assert(guinea_pig.printable == "[odd numbers]")
+    assert( str(guinea_pig) == "[odd numbers]?")
+    for x in range(-100,100):
+        if x % 2 == 1:
+            assert guinea_pig.typep(x)
+        else:
+            assert not guinea_pig.typep(x)
 
 
 
@@ -420,10 +395,11 @@ def t_scustom():
 
 t_fixed_point()
 t_scustom()
+t_scustom2()
 t_sand1()
 t_sand2()
-#t_sor()
-#t_snot()
+t_sor()
+t_snot()
 #t_SimpleTypeD()
 #t_STop()
 #t_SEmpty()

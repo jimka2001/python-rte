@@ -22,7 +22,7 @@ class depth_generator(object):
 
 	def rand_lambda_str_generator(self):
 		rand_k = random.randint(1, math.pow(2, self.k))
-		return (lambda x : x % rand_k == 0, "mod"+str(rand_k))
+		return (lambda x : isinstance(x,int) and x % rand_k == 0, "mod"+str(rand_k))
 
 	def _generate_tree(self, c):
 		curr_depth = c - 1
