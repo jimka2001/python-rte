@@ -21,10 +21,6 @@
 
 
 import os
-def t_verboseonlyprint(s):
-    if 'genusverbose' in os.environ and os.environ['genusverbose'] == str(True):
-        print(s)
-
 
 from s_not import SNot
 from s_or import SOr
@@ -35,10 +31,17 @@ from s_atomic import SAtomic
 from s_custom import SCustom
 from s_and import SAnd
 
+
+def t_verboseonlyprint(s):
+    if 'genusverbose' in os.environ and os.environ['genusverbose'] == str(True):
+        print(s)
+
+
 def t_fixed_point():
     from utils import fixed_point
-    assert fixed_point(0, (lambda x: x), (lambda x,y: x == y)) == 0
-    assert fixed_point(0, (lambda x: x//2), (lambda x,y: x == y)) == 0
+    assert fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0
+    assert fixed_point(0, (lambda x: x//2), (lambda x, y: x == y)) == 0
+
 
 def t_STop():
     from s_empty import SEmptyImpl
@@ -46,61 +49,64 @@ def t_STop():
 
     a = STop
 
-    #STop has to be unique
+    # STop has to be unique
     assert(id(a) == id(STopImpl.get_omega()))
 
-    #STop has to be unique part 2: ensure the constructor throws an error
+    # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
         b = STop()
         pred = False
-        assert(False)
+        assert False
     except Exception as e:
-        assert(pred)
+        assert pred
 
-    #str(a) has to be "Top"
+    # str(a) has to be "Top"
     assert(str(a) == "Top")
 
-    #a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
+    # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
     assert(a.typep(SAtomic(object)))
     assert(a.typep(a))
 
-    #obviously, a is inhabited as it contains everything by definition
-    assert(a._inhabited_down)
+    # obviously, a is inhabited as it contains everything by definition
+    assert(a.inhabited() is True)
 
-    #a is never disjoint with anything but the empty subtype
-    assert(not a._disjoint_down(SAtomic(object)))
-    assert(a._disjoint_down(SEmptyImpl.get_epsilon()))
+    # a is never disjoint with anything but the empty subtype
+    assert a.disjoint(SAtomic(object)) is False
+    assert a.disjoint(SEmptyImpl.get_epsilon()) is True
 
-    #on the contrary, a is never a subtype of any type 
-    #since types are sets and top is the set that contains all sets
+    # on the contrary, a is never a subtype of any type
+    # since types are sets and top is the set that contains all sets
     assert(a.subtypep(SAtomic(object)) is True)
-    assert( a.subtypep(a) is True)
+    assert a.subtypep(a) is True
 
-    #my understanding is that the top type is unique so it can't be positively compared to any object
+    # my understanding is that the top type is unique so it can't be positively compared to any object
     assert(not a.cmp_to_same_class_obj(a))
     assert(not a.cmp_to_same_class_obj(object))
 
 
 def t_scustom():
-    l_odd = lambda x : isinstance(x,int) and x % 2 == 1
+    def l_odd(n):
+        return isinstance(n, int) and n % 2 == 1
+
     guinea_pig = SCustom(l_odd, "[odd numbers]")
-    assert(guinea_pig.f == l_odd)
-    assert(guinea_pig.printable == "[odd numbers]")
-    assert( str(guinea_pig) == "[odd numbers]?")
-    for x in range(-100,100):
+    assert guinea_pig.f == l_odd
+    assert guinea_pig.printable == "[odd numbers]"
+    assert str(guinea_pig) == "[odd numbers]?"
+    for x in range(-100, 100):
         if x % 2 == 1:
-            assert(guinea_pig.typep(x))
+            assert guinea_pig.typep(x)
         else:
-            assert(not guinea_pig.typep(x))
+            assert not guinea_pig.typep(x)
     assert(not guinea_pig.typep("hello"))
     assert(guinea_pig.subtypep(SAtomic(type(4))) is None)
+
 
 def t_sand1():
     from genus_types import createSAnd
     quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
-    triple = SCustom(lambda x: isinstance(x,int) and (x % 3 == 0), "triple")
+    triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
     
     tri_n_quad = SAnd([triple, quadruple])
     create_tri_n_quad = createSAnd([triple, quadruple])
@@ -119,6 +125,7 @@ def t_sand1():
     assert(not tri_n_quad.typep("hello"))
     assert(not create_tri_n_quad.typep("hello"))
 
+
 def t_sand2():
     from genus_types import createSAnd
     quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
@@ -131,7 +138,7 @@ def t_sand2():
     assert(tri_n_quad.subtypep(triple))
 
     assert(tri_n_quad.subtypep(quadruple))
-    assert tri_n_quad.subtypep(SAtomic(type(5))) == None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
+    assert tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
 
     assert(SAnd.unit == STop)
     assert(SAnd.zero == SEmpty)
@@ -142,10 +149,11 @@ def t_sand2():
     assert(not tri_n_quad.same_combination(STop))
     assert(not tri_n_quad.same_combination(createSAnd([])))
 
+
 def t_sor():
     from genus_types import createSOr
-    quadruple = SCustom(lambda x: isinstance(x,int) and x % 4 == 0, "quadruple")
-    triple = SCustom(lambda x: isinstance(x,int) and x % 3 == 0, "triple")
+    quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
+    triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
     
     tri_o_quad = SOr([triple, quadruple])
     create_tri_o_quad = createSOr([triple, quadruple])
@@ -176,7 +184,7 @@ def t_sor():
     assert(SOr.zero == STop.get_omega())
 
     assert(tri_o_quad.subtypep(STop.get_omega()))
-    assert(tri_o_quad.subtypep(SAtomic(type(5))) == None)
+    assert(tri_o_quad.subtypep(SAtomic(type(5))) is None)
 
     assert(tri_o_quad.same_combination(create_tri_o_quad))
     assert(tri_o_quad.same_combination(createSOr([quadruple, triple])))
@@ -184,16 +192,17 @@ def t_sor():
     assert(not tri_o_quad.same_combination(STop.get_omega()))
     assert(not tri_o_quad.same_combination(createSOr([])))
 
+
 def t_snot():
-    pair = SCustom(lambda x: isinstance(x,int) and x & 1 == 0, "pair")
+    pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
     
     pred = True
     try:
         b = SNot([])
         pred = False
-        assert(False)
+        assert False
     except Exception as e:
-        assert(pred)
+        assert pred
 
     npair = SNot(pair)
 
@@ -216,9 +225,9 @@ def t_SimpleTypeD():
     try:
         foo = SimpleTypeD()
         pred = False
-        assert (False)
+        assert False
     except:
-        assert (pred)
+        assert pred
 
     # ensuring typep is an abstract method
     try:
@@ -241,7 +250,7 @@ def t_SimpleTypeD():
         def __init__(self):
             super(ChildSTD, self).__init__()
 
-        def typep(a):
+        def typep(self, a):
             pass
 
     child = SAtomic(ChildSTD)
@@ -264,8 +273,12 @@ def t_SimpleTypeD():
 
     # fixed_point is just a way to incrementally apply a function on a value
     # until another function deem the delta between two consecutive values to be negligible
-    increment = lambda x: x
-    evaluator = lambda x, y: x == y
+    def increment(x):
+        return x
+
+    def evaluator(x, y):
+        return x == y
+
     assert (fixed_point(5, increment, evaluator) == 5)
     assert (fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
@@ -275,37 +288,37 @@ def t_SimpleTypeD():
     assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
 
     # ensuring cmp_to_same_class_obj() throws no error
-    assert child.cmp_to_same_class_obj(child) == False
+    assert child.cmp_to_same_class_obj(child) is False
 
 
 # TODO: move the tests in their own files once this is packaged:
 def t_STop2():
     from s_top import STopImpl
     # STop has to be unique
-    assert (id(STop) == id(STopImpl.get_omega()))
+    assert id(STop) == id(STopImpl.get_omega())
 
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
         b = STop()
         pred = False
-        assert (False)
+        assert False
     except Exception as e:
-        assert (pred)
+        assert pred
 
     # str(a) has to be "Top"
-    assert (str(STop) == "Top")
+    assert str(STop) == "Top"
 
     # a.subtypep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert (STop.subtypep(SAtomic(object)))
-    assert (STop.subtypep(STop))
+    assert STop.subtypep(SAtomic(object)) is True
+    assert STop.subtypep(STop) is True
 
     # obviously, a is inhabited as it contains everything by definition
-    assert (STop._inhabited_down)
+    assert STop.inhabited() is True
 
     # a is never disjoint with anything but the empty subtype
-    assert (not STop._disjoint_down(SAtomic(object)))
-    assert (STop._disjoint_down(SEmpty))
+    assert STop.disjoint(SAtomic(object)) is False
+    assert STop.disjoint(SEmpty) is True
 
     # on the contrary, a is never a subtype of any type
     # since types are sets and top is the set that contains all sets
@@ -328,27 +341,27 @@ def t_SEmpty():
     try:
         b = SEmpty()
         pred = False
-        assert (False)
+        assert False
     except Exception as e:
-        assert (pred)
+        assert pred
 
     # str(a) has to be "Empty"
-    assert (str(SEmpty) == "Empty")
+    assert str(SEmpty) == "Empty"
 
     # a.typep(t) indicates whether t is a subtype of a, which is never the case
-    assert (not SEmpty.typep(SAtomic(object)))
-    assert (SEmpty.subtypep(SEmpty))
+    assert SEmpty.typep(3) is False
+    assert SEmpty.subtypep(SEmpty) is True
 
     # obviously, a is not inhabited as it is by definition empty
-    assert (not SEmpty._inhabited_down())
+    assert SEmpty.inhabited() is False
 
     # a is disjoint with anything as it is empty
-    assert (SEmpty._disjoint_down(SAtomic(object)))
+    assert SEmpty.disjoint(SAtomic(object)) is True
 
     # on the contrary, a is always a subtype of any type
     # since types are sets and the empty set is a subset of all sets
-    assert (SEmpty.subtypep(SAtomic(object)) is True)
-    assert (SEmpty.subtypep(SEmpty) is True)
+    assert SEmpty.subtypep(SAtomic(object)) is True
+    assert SEmpty.subtypep(SEmpty) is True
 
     # my understanding is that the empty type is unique so it can't be positively compared to any object
     assert (not SEmpty.cmp_to_same_class_obj(SEmpty))
@@ -356,18 +369,17 @@ def t_SEmpty():
 
 
 def t_scustom2():
-    def l_odd(x):
-        return isinstance(x,int) and x % 2 == 1
+    def l_odd(n):
+        return isinstance(n, int) and n % 2 == 1
     guinea_pig = SCustom(l_odd, "[odd numbers]")
-    assert(guinea_pig.f == l_odd)
-    assert(guinea_pig.printable == "[odd numbers]")
-    assert( str(guinea_pig) == "[odd numbers]?")
-    for x in range(-100,100):
+    assert guinea_pig.f == l_odd
+    assert guinea_pig.printable == "[odd numbers]"
+    assert str(guinea_pig) == "[odd numbers]?"
+    for x in range(-100, 100):
         if x % 2 == 1:
             assert guinea_pig.typep(x)
         else:
             assert not guinea_pig.typep(x)
-
 
 
 #   calling the test functions
@@ -383,4 +395,3 @@ t_STop()
 t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
-
