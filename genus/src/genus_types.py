@@ -96,8 +96,8 @@ def atomicp(this):
 
 
 def topp(this):
-	from s_top import STop
-	return isinstance(this, STop)
+	from s_top import STopImpl
+	return isinstance(this, STopImpl)
 
 
 def emptyp(this):

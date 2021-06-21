@@ -38,12 +38,13 @@ class SCustom(SimpleTypeD, TerminalType):
 	def __init__(self, f, printable):
 		self.f = f
 		self.printable = printable
+		super().__init__()
 
 	def typep(self, a):
-		return self.f(a)
+		return (self.f(a))
 
 	def __str__(self):
-		return self.printable + "?"
+		return str(self.printable) + "?"
 
 	def _disjoint_down(self, t):
 		return super()._disjoint_down(t)

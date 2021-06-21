@@ -42,7 +42,7 @@ class SCombination(SimpleTypeD):
 	"""SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 	def __init__(self, tds):
 		self.tds = tds
-		pass
+		super().__init__()
 
 	@abstractmethod
 	def create(self,tds):
@@ -130,6 +130,8 @@ class SCombination(SimpleTypeD):
 				return self.create(flat_map(flat_lambda, self.tds))
 
 		def l_7():
+			from genus_types import cmp_type_designators
+
 			i2 = self.create(map(lambda t: t.canonicalize(nf).sort(), self.tds).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
 			if self == i2:
 				return self

@@ -50,9 +50,8 @@ class SAnd(SCombination):
 	@param tds list, zero or more types"""
 
 	#equivalent to the scala "create"
-	#def __init__(self, tds):
-	#	super(SAnd, self).__init__()
-	#	self.tds = tds
+	def __init__(self, tds):
+		super(SAnd, self).__init__(tds)
 	
 	def __str__(self):
 		return "[SAnd " + ",".join([str(td) for td in self.tds]) + "]"
@@ -67,7 +66,7 @@ class SAnd(SCombination):
 		return b.supertypep(a)
 
 	def typep(self,a):
-		return all(t.typep(a) for t in self.tds)
+		return all(td.typep(a) for td in self.tds)
 
 	def inhabited_down(self, opt):
 

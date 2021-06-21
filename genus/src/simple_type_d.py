@@ -59,11 +59,13 @@ class TerminalType(metaclass=ABCMeta):
     """This class is just here to emulate the TerminalType trait in Scala"""
     @abstractmethod
     def __init__(self):
-        pass
+        super().__init__()
 
 class SimpleTypeD(metaclass=ABCMeta):
     """SimpleTypeD is the abstract class that mothers all of the 
     representations of type in Genus"""
+    def __init__(self):
+        self.canonicalized_hash = {}
 
     #overloading operators
     def __or__(self, t):
@@ -153,9 +155,7 @@ class SimpleTypeD(metaclass=ABCMeta):
             return None
 
     def subtypep(self, t):
-        #implement when SNot is implemented
         from genus_types import orp, andp, topp
-        from s_top import STop
         def or_result():
             return True if orp(t) and any(self.subtypep(a) is True for a in t.tds) \
                 else None
@@ -163,8 +163,6 @@ class SimpleTypeD(metaclass=ABCMeta):
         def and_result():
             return True if andp(t) and all(self.subtypep(a) is True for a in t.tds) \
                 else None
-
-        print(f"t={t}  t.canonicalize()={t.canonicalize}")
 
         if type(self) == type(t) and self == t:
             return True
@@ -177,7 +175,6 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return self._subtypep_down(t)
 
-
     def _subtypep_down(self,t):
         from genus_types import notp
         if notp(t) and self.disjoint(t.s):
@@ -188,7 +185,6 @@ class SimpleTypeD(metaclass=ABCMeta):
             return False
         else:
             return None
-
 
     #for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
     def _compute_dnf(self):
@@ -223,23 +219,21 @@ class SimpleTypeD(metaclass=ABCMeta):
     def canonicalize_once(self, nf = None):
         return self
 
-    canonicalized_hash = {}
-
     def canonicalize(self, nf = None):
         from utils import fixed_point
-        if not nf in self.canonicalized_hash:
-            #we're in the case were the result isn't memoized,
-            #so we compute it
-            processor = lambda t: t.canonicalize_once(nf)
-            good_enough = lambda a, b: type(a) == type(b) and a == b
+
+        if nf not in self.canonicalized_hash:
+            def processor(td):
+                return td.canonicalize_once(nf)
+
+            def good_enough(a,b):
+                return type(a) == type(b) and a == b
             
             res = fixed_point(self, processor, good_enough)
-            
             self.canonicalized_hash |= {nf: res}
 
         #tell the perhaps new object it is already canonicalized (TODO: could I just put this in the if ?)
         self.canonicalized_hash[nf].canonicalized_hash[nf] = self.canonicalized_hash[nf]
-        
         return self.canonicalized_hash[nf]
 
     def supertypep(self, t):
