@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD, TerminalType
-from s_top import STop
+from s_top import STop, STopImpl
 
 """
 [0-3] Advancement tracker
@@ -46,7 +46,9 @@ class SAtomic(SimpleTypeD, TerminalType):
 	# in addition, all classes are types and all types are classes
 
 	def __init__(self, wrapped_class):
+		import inspect
 		super(SAtomic, self).__init__()
+		assert inspect.isclass(wrapped_class)
 		self.wrapped_class = wrapped_class
 
 	def __str__(self):
@@ -100,7 +102,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 		# TODO: find a way to cmpte isfinal and isInterface if needed
 		if isinstance(t, SEmptyImpl):
 			return True
-		elif isinstance(t, STop):
+		elif isinstance(t, STopImpl):
 			return False
 		elif isinstance(t, SAtomic):
 			if t == self.wrapped_class:

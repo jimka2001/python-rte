@@ -244,17 +244,16 @@ def t_SimpleTypeD():
         def typep(a):
             pass
 
-    child = SAtomic(ChildSTD())
+    child = SAtomic(ChildSTD)
 
     # _inhabited_down is None to indicate that we actually don't know
     # whether it is as this is the generic version
-    assert (child.inhabited() is None)
+    assert (child.inhabited() is True)
 
     # this one is weird. How come we can't detect that it is the same set?
     # anyway, this is how the scala code seems to behave
     # as a reminder: True means yes, False means no, None means maybe
-    assert (child._disjoint_down(child) is None)
-    assert (child.disjoint(child) is None)
+    assert (child.disjoint(child) is False)
 
     assert (child == child.to_dnf())
     assert (child == child.to_cnf())
@@ -275,13 +274,8 @@ def t_SimpleTypeD():
     # the second time is to make sure it isn't adding the same twice
     assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
 
-    # ensuring cmp_to_same_class_obj() throws an error
-    try:
-        child.cmp_to_same_class_obj(child)
-        pred = False
-        assert (False)
-    except:
-        assert (pred)
+    # ensuring cmp_to_same_class_obj() throws no error
+    assert child.cmp_to_same_class_obj(child) == False
 
 
 # TODO: move the tests in their own files once this is packaged:
@@ -387,5 +381,5 @@ t_snot()
 t_STop()
 t_STop2()
 t_SEmpty()
-#t_SimpleTypeD()
+t_SimpleTypeD()
 
