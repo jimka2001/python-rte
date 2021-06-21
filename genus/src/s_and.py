@@ -35,118 +35,121 @@ subtypep 1
 canonicalize_once 0
 compute_dnf 0
 """
-import simple_type_d
-import utils
+from simple_type_d import SimpleTypeD
+from s_top import STop
+from s_empty import SEmpty
+from s_atomic import SAtomic
+from s_combination import SCombination
+from utils import generate_lazy_val
+from genus_types import NormalForm,createSAnd
 
-class SAnd(SimpleTypeD):
+class SAnd(SCombination):
 	"""An intersection type, which is the intersection of zero or more types.
-    @param tds list, zero or more types"""
+	@param tds list, zero or more types"""
 
 	#equivalent to the scala "create"
-	def __init__(self, tds):
-		super(SAnd, self).__init__()
-		self.tds = tds
+	#def __init__(self, tds):
+	#	super(SAnd, self).__init__()
+	#	self.tds = tds
 	
 	def __str__(self):
-		s = "["
-		for arg in self.arg_list:
-			s += str(arg)
-			s += ","
-		s += "]"
-		return s
+		return "[SAnd " + ",".join([str(td) for td in self.tds]) + "]"
 
-    @staticmethod
-    def create(tds):
-        return SAnd(tds)
+	@staticmethod
+	def create(tds):
+		return createSAnd(tds)
 
 	unit = STop.get_omega()
-    zero = SEmpty.get_epsilon()
+	zero = SEmpty.get_epsilon()
 
-    @staticmethod
-    def annihilator(a, b):
-        return b.supertypep(a)
+	def annihilator(this, a, b):
+		return b.supertypep(a)
 
-    @staticmethod
-    def same_combination(td):
-        return type(td) == SAnd
+	def typep(self,a):
+		return all(t.typep(a) for t in self.tds)
 
-    def typep(a):
-        return any(t.typep(a) for t in self.tds)
+	def inhabited_down(self, opt):
 
-    def inhabited_down(self, opt):
+		dnf = generate_lazy_val(lambda : self.canonicalize(NormalForm.DNF))
+		cnf = generate_lazy_val(lambda : self.canonicalize(NormalForm.CNF))
 
-        dnf = generate_lazy_val(canonicalize, Dnf)
-        cnf = generate_lazy_val(canonicalize, Cnf)
+		inhabited_dnf = generate_lazy_val(lambda : dnf.inhabited())
+		inhabited_cnf = generate_lazy_val(lambda : cnf.inhabited())
 
-        dot_inhabited = lambda x : x.inhabited
-        inhabited_dnf = generate_lazy_val(dot_inhabited, dnf)
-        inhabited_cnf = generate_lazy_val(dot_inhabited, cnf)
+		if any(t.contains(False) for t in self.tds):
+			return False
+		elif all(type(t) == SAtomic for t in self.tds):
+		#   here we would like to check every 2-element subset
+		#   if we find a,b such that a and b are disjoint,
+		#   then we know self is not inhabited
+			any(self.tds[a].disjointp( self.tds[b])
+				for a in range(self.tds.length)
+				for b in range(a,self.tds.length)
+				if a > b)
+		elif dnf() != self and inhabited_dnf():
+			return inhabited_dnf()
+		elif cnf() != self and inhabited_cnf():
+			return inhabited_cnf()
+		else:
+			return super()._inhabited_down
 
-        if any(t.contains(False) for t in self.tds):
-            return False
-        elif all(type(t) == SAtomic for t in self.tds):
-            #TODO I may need explanations on this one
-        elif dnf() != self and inhabited_dnf():
-            return inhabited_dnf()
-        elif cnf() != self and inhabited_cnf():
-            return inhabited_cnf()
-        else:
-            super()._inhabited_down
+	def _disjoint_down(self, t):
+		inhabited_t = generate_lazy_val(lambda : t.inhabited())
+		inhabited_self = generate_lazy_val(lambda: self.inhabited())
 
-    def _disjoint_down(self, t):
-        dot_inhabited_true = lambda x: x.inhabited() == True
-        inhabited_t = generate_lazy_val(dot_inhabited_true, t)
-        inhabited_self = generate_lazy_val(dot_inhabited_true, self)
+		if any(t.disjoint(t2) for t2 in self.tds):
+			return True
+		elif t in self.tds and inhabited_t() and inhabited_self():
+			return False
+		elif inhabited_t() \
+				and inhabited_self() \
+				and any(x.subtypep(t)==True
+						or t.subtypep(x)==True
+						for x in self.tds):
+			return False
+		else:
+			return super()._disjoint_down(t)
 
-        if any(t._disjoint_down(t)):
-            return True
-        elif t in self.tds and inhabited_t() and inhabited_self():
-            return False
-        elif inhabited_t() and inhabited_self() and any(x.subtypep(t) or t.subtypep(x) for x in self.tds):
-            return False
-        else:
-            return super()._disjoint_down(t)
+	def _subtypep_down(self,t):
+		if not self.tds:
+			return STop.subtypep(t)
+		elif any(t2.subtypep(t) for t2 in self.tds):
+			return True
+		elif t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
+			return False
+		else:
+			return super()._subtypep_down(t)
 
-    def subtypep(t):
-        if not self.tds:
-            return STop.subtypep(t)
-        elif any(t.subtypep(t) for t in tds):
-            return True
-        elif t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
-            return False
-        else:
-            return super().subtypep(t)
+	def canonicalize_once(self,nf):
+		#TODO
+		return self
 
-    def canonicalize_once(nf):
-        #TODO
-        pass
-
-    def compute_dnf():
-        #TODO I need explanation for this one
-
+	def compute_dnf(self):
+		#TODO I need explanation for this one
+		return self
 
 """
 object t_SAnd {
   def main(args: Array[String]): Unit = {
 
-    //test empty SAnd()
-    val a = new SAnd()
-    println(a.toString())
+	//test empty SAnd()
+	val a = new SAnd()
+	println(a.toString())
 
-    //test SAnd with primal types
-    val b = new SAnd(SAtomic(Types.Integer), SAtomic(Types.String), SAtomic(Types.Double))
-    println(b.toString())
+	//test SAnd with primal types
+	val b = new SAnd(SAtomic(Types.Integer), SAtomic(Types.String), SAtomic(Types.Double))
+	println(b.toString())
 
-    //check Unit is valid
-    println(a.unit == b.unit && a.unit == STop)
+	//check Unit is valid
+	println(a.unit == b.unit && a.unit == STop)
 
-    //check Zero is valid
-    println(a.zero == b.zero && a.zero == SEmpty)
+	//check Zero is valid
+	println(a.zero == b.zero && a.zero == SEmpty)
 
-    //check that create is working properly
-    val c = a.create(SAtomic(Types.Integer))
-    println(c.getClass() == a.getClass)
-    println(c.toString == SAnd(SAtomic(Types.Integer)).toString)
+	//check that create is working properly
+	val c = a.create(SAtomic(Types.Integer))
+	println(c.getClass() == a.getClass)
+	println(c.toString == SAnd(SAtomic(Types.Integer)).toString)
 
   }
 }

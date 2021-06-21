@@ -221,3 +221,123 @@ def t_snot():
     assert(not npair.typep(0))
     t_verboseonlyprint("success")
 t_snot()
+
+
+def t_SimpleTypeD():
+    # ensuring SimpleTypeD is abstract
+    pred = True
+    try:
+        foo = SimpleTypeD()
+        pred = False
+        assert (False)
+    except:
+        assert (pred)
+
+    # ensuring typep is an abstract method
+    try:
+        class ChildSTDNoTypep(SimpleTypeD):
+            """just for testing"""
+
+            def __init__(self):
+                super(ChildSTDNoTypep, self).__init__()
+
+        foo = ChildSTDNoTypep()
+        del ChildSTDNoTypep
+        pred = False
+        assert (False)
+    except:
+        assert (pred)
+
+    class ChildSTD(SimpleTypeD):
+        """docstring for ChildSTD"""
+
+        def __init__(self):
+            super(ChildSTD, self).__init__()
+
+        def typep(a):
+            pass
+
+    child = ChildSTD()
+
+    # _inhabited_down is None to indicate that we actually don't know
+    # whether it is as this is the generic version
+    assert (child.inhabited() is None)
+
+    # this one is weird. How come we can't detect that it is the same set?
+    # anyway, this is how the scala code seems to behave
+    # as a reminder: True means yes, False means no, None means maybe
+    assert (child._disjoint_down(child) is None)
+    assert (child.disjoint(child) is None)
+
+    assert (child == child.to_dnf())
+    assert (child == child.to_cnf())
+
+    nf = [NormalForm.DNF, NormalForm.CNF]
+    assert (child == child.maybe_dnf(nf))
+    assert (child == child.maybe_cnf(nf))
+
+    # fixed_point is just a way to incrementally apply a function on a value
+    # until another function deem the delta between two consecutive values to be negligible
+    increment = lambda x: x;
+    evaluator = lambda x, y: x == y;
+    assert (SimpleTypeD.fixed_point(5, increment, evaluator) == 5)
+    assert (SimpleTypeD.fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
+
+    assert (child == child.canonicalize_once())
+    assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
+    # the second time is to make sure it isn't adding the same twice
+    assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
+
+    # ensuring cmp_to_same_class_obj() throws an error
+    try:
+        child.cmp_to_same_class_obj(child)
+        pred = False
+        assert (False)
+    except:
+        assert (pred)
+
+
+t_SimpleTypeD()
+
+
+# TODO: move the tests in their own files once this is packaged:
+def t_STop():
+    a = STop.get_omega()
+
+    # STop has to be unique
+    assert (id(a) == id(STop.get_omega()))
+
+    # STop has to be unique part 2: ensure the constructor throws an error
+    pred = True
+    try:
+        b = STop()
+        pred = False
+        assert (False)
+    except Exception as e:
+        assert (pred)
+
+    # str(a) has to be "Top"
+    assert (str(a) == "Top")
+
+    # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
+    assert (a.typep(object))
+    assert (a.typep(a))
+
+    # obviously, a is inhabited as it contains everything by definition
+    assert (a._inhabited_down)
+
+    # a is never disjoint with anything but the empty subtype
+    assert (not a._disjoint_down(object))
+    assert (a._disjoint_down(SEmpty()))
+
+    # on the contrary, a is never a subtype of any type
+    # since types are sets and top is the set that contains all sets
+    assert (not a.subtypep(object))
+    assert (not a.subtypep(type(a)))
+
+    # my understanding is that the top type is unique so it can't be positively compared to any object
+    assert (not a.cmp_to_same_class_obj(a))
+    assert (not a.cmp_to_same_class_obj(object))
+
+
+t_STop()

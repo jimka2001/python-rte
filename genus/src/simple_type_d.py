@@ -51,6 +51,8 @@ cmp_to_same_class_obj   3
 
 from genus_types import NormalForm
 from abc import ABCMeta, abstractmethod
+from utils import generate_lazy_val
+
 
 #is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
@@ -104,52 +106,36 @@ class SimpleTypeD(metaclass=ABCMeta):
         this_disjoint_td = self._disjoint_down(td)
         
         #og_name in scala lazy: d2
-        def td_disjoint_this():
-            if not hasattr(td_disjoint_this, "holding"):
-                td_disjoint_this.holding = td._disjoint_down(self)
-            return td_disjoint_this.holding
+        td_disjoint_this = generate_lazy_val(lambda: td._disjoint_down(self))
 
         #og_name in scala lazy: c1
-        def self_canonicalized():
-            if not hasattr(self_canonicalized, "holding"):
-                self_canonicalized.holding = self.canonicalize()
-            return self_canonicalized.holding
+        self_canonicalized = generate_lazy_val(lambda: self.canonicalize())
 
         #og_name in scala lazy: c2
-        def td_canonicalized():
-            if not hasattr(td_canonicalized, "holding"):
-                td_canonicalized.holding = td.canonicalize()
-            return td_canonicalized.holding
+        td_canonicalized = generate_lazy_val(lambda: td.canonicalize())
 
         #og_name in scala lazy: dc12
-        def canon_self_disjoint_td():
-            if not hasattr(canon_self_disjoint_td, "holding"):
-                canon_self_disjoint_td.holding = self_canonicalized()._disjoint_down(td_canonicalized())
-            return canon_self_disjoint_td.holding
+        canon_self_disjoint_td = generate_lazy_val(lambda: self_canonicalized._disjoint_down(td_canonicalized))
 
         #og_name in scala lazy: dc21
-        def canon_td_disjoint_self():
-            if not hasattr(canon_td_disjoint_self, "holding"):
-                canon_td_disjoint_self.holding = td_canonicalized()._disjoint_down(self_canonicalized())
-            return canon_td_disjoint_self.holding
+        canon_td_disjoint_self = generate_lazy_val(lambda: td_canonicalized._disjoint_down(self_canonicalized))
 
-        #todo: check that "_.nonEmpty" is well translated as "inhabited not none"
         if self == td and self.inhabited() is not None:
-            return map(lambda x: unary_not(x), self.inhabited())
+            return not self.inhabited()
         
-        elif this_disjoint_td and this_disjoint_td is not None:
-            return this_disjoint_td()
+        elif this_disjoint_td is not None:
+            return this_disjoint_td
 
-        elif td_disjoint_this() and td_disjoint_this is not None:
+        elif not td_disjoint_this() is None:
             return td_disjoint_this()
         
         elif self_canonicalized() == td_canonicalized() and self_canonicalized().inhabited() is not None:
-            return map(lambda x: unary_not(x), self_canonicalized().inhabited())
+            return not self_canonicalized().inhabited()
         
         elif canon_self_disjoint_td() is not None:
             return canon_self_disjoint_td()
         else:
-            canon_td_disjoint_self()
+            return canon_td_disjoint_self()
 
     #for performance reasons, do not call directly, rather use the inhabited method as it stores the result
     def _inhabited_down(self):
@@ -168,54 +154,40 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def subtypep(self, t):
         #implement when SNot is implemented
-        raise NotImplementedError
+        from genus_types import orp, andp
+        from s_top import STop
+        def or_result():
+            return True if orp(t) and any(self.subtypep(a) == True for a in t.tds) \
+                else None
 
-    @staticmethod
-    def fixed_point(w, f, good_enough):
-        v = w
-        history = []
+        def and_result():
+            return True if andp(t) and all(self.subtypep(a) == True for a in t.tds) \
+                else None
 
-        while(True):
-            v2 = f(v)
-            if good_enough(v, v2):
-                return v    
-            if v2 in history:
-                for debug_v2 in history:
-                    print(debug_v2)
-                raise AssertionError("Failed: fixedPoint encountered the same value twice:", v2)
-            else:
-                history.append(v)
-                v = v2
-        return v
-
-    def debug_find_simplifier(tag, t, simplifiers):
-        """this debug version displays the simplification step tag went through"""
-        print(tag, "starting with", t)
-        found = find_simplifier(simplifiers)
-        if found == t:
-            print(tag, "remained", found)
+        if type(self) == type(t) and self == t:
+            return True
+        elif isinstance(t.canonicalize(),STop):
+            return True
+        elif or_result() is True:
+            return True
+        elif and_result() is True:
+            return True
         else:
-            print(tag)
-            print("changed to")
-            print(found)
+            return self._subtypep_down(t)
 
-    def find_simplifier(self, simplifiers):
-        """simplifiers is a list of 0-ary functions.   
-        Calling such a function either returns `this` or something else.  
-        We call all the functions in turn, as long as they return `this`.  
-        As soon as such a function returns something other than `this`, 
-        then that new value is returned from find_simplifier.
-        As a last resort, `this` is returned."""
 
-        if simplifiers is None:
-            return self
+    def _subtypep_down(self,t):
+        from genus_types import notp
+        if notp(t) and self.disjoint(t.s):
+            return True
+        elif self.inhabited() is False:
+            return True
+        elif self.inhabited is True and t.inhabited is False:
+            return False
+        else:
+            return None
 
-        for s in simplifiers:
-            out = s()
-            if self == t2:
-                continue
-            return out
-    
+
     #for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
     def _compute_dnf(self):
         return self
@@ -235,13 +207,13 @@ class SimpleTypeD(metaclass=ABCMeta):
         return self.hold_tocnf
 
     def maybe_dnf(self, nf):
-        if NormalForm.DNF in nf:
+        if NormalForm.DNF is nf:
             return self.to_dnf()
         else:
             return self
 
     def maybe_cnf(self, nf):
-        if NormalForm.CNF in nf:
+        if NormalForm.CNF is nf:
             return self.to_cnf()
         else:
             return self
@@ -278,80 +250,3 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def cmp_to_same_class_obj(self, t):
         raise TypeError('cannot compare type designators', type(self), 'vs', type(t))
-
-def t_SimpleTypeD():
-
-    #ensuring SimpleTypeD is abstract
-    pred = True
-    try:
-        foo = SimpleTypeD()
-        pred = False
-        assert(False)
-    except:
-        assert(pred)
-
-    #ensuring typep is an abstract method
-    try:
-        class ChildSTDNoTypep(SimpleTypeD):
-            """just for testing"""
-            def __init__(self):
-                super(ChildSTDNoTypep, self).__init__() 
-        foo = ChildSTDNoTypep()
-        del ChildSTDNoTypep
-        pred = False
-        assert(False)
-    except:
-        assert(pred)
-
-    class ChildSTD(SimpleTypeD):
-        """docstring for ChildSTD"""
-        def __init__(self):
-            super(ChildSTD, self).__init__()
-            
-        def typep(a):
-            pass
-
-    child = ChildSTD()
-
-    #_inhabited_down is None to indicate that we actually don't know
-    #whether it is as this is the generic version
-    assert(child.inhabited() is None)
-
-    #this one is weird. How come we can't detect that it is the same set?
-    #anyway, this is how the scala code seems to behave
-    #as a reminder: True means yes, False means no, None means maybe
-    assert(child._disjoint_down(child) is None)
-    assert(child.disjoint(child) is None)
-
-    assert(child == child.to_dnf())
-    assert(child == child.to_cnf())
-
-    nf = [NormalForm.DNF, NormalForm.CNF]
-    assert(child == child.maybe_dnf(nf))
-    assert(child == child.maybe_cnf(nf))
-
-    #fixed_point is just a way to incrementally apply a function on a value
-    #until another function deem the delta between two consecutive values to be negligible 
-    increment = lambda x: x;
-    evaluator = lambda x, y: x == y;
-    assert(SimpleTypeD.fixed_point(5, increment, evaluator) == 5)
-    assert(SimpleTypeD.fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
-
-    assert(child == child.canonicalize_once())
-    assert(child == child.canonicalize() and child.canonicalized_hash == {None: child})
-    #the second time is to make sure it isn't adding the same twice
-    assert(child == child.canonicalize() and child.canonicalized_hash == {None: child})
-
-    #ensuring cmp_to_same_class_obj() throws an error
-    try:
-        child.cmp_to_same_class_obj(child)
-        pred = False
-        assert(False)
-    except:
-        assert(pred)
-
-t_SimpleTypeD()
-
-
-        
-                    

@@ -19,8 +19,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from types import NormalForm
 from simple_type_d import SimpleTypeD
+from s_atomic import SAtomic
+from s_top import STop
+from s_empty import SEmpty
+
 
 """
 [0-3] Advancement tracker
@@ -36,6 +39,7 @@ compute_cnf 1
 cmp_to_same_class_obj 0
 """
 
+
 class SNot(SimpleTypeD):
 	"""A negation of a type.
 	@param s the type we want to get the complement"""
@@ -43,28 +47,30 @@ class SNot(SimpleTypeD):
 		super(SNot, self).__init__()
 		self.s = s
 	
-	__str__(self):
+	def __str__(self):
 		return "[Not " + str(self.s) + "]"
 	
-	def typep(a):
+	def typep(self,a):
 		return not self.s.typep(a)
 
 	def _inhabited_down(self):
-		nothing = type(None)
-		any = object
-		if self.s == STop.get_omega():
+		from genus_types import topp, emptyp, memberp, eqlp, atomicp, notp
+		if topp(self.s):
 			return False
-		elif self.s == STop.get_epsilon():
+		elif emptyp(self.s):
 			return True
-		elif self.s == SAtomic(type(None)):
-			return True
+		# TODO is there a type Nothing in python?
+		#elif self.s == SAtomic(type(None)):
+		#	return True
 		elif self.s == SAtomic(object):
 			return False
-		elif isinstance(self.s, SAtomic):
+		elif atomicp(self.s):
 			return True
-		#elif SMember
-		#elif SEql
-		elif isinstance(self.s, SNot):
+		elif memberp(self.s):
+			return True
+		elif eqlp(self.s):
+			return True
+		elif notp(self.s):
 			return self.s.s.inhabited()
 		else:
 			return None
@@ -73,46 +79,48 @@ class SNot(SimpleTypeD):
 		if t.subtypep(self.s) : #if it is empty this is empty and is thus evaluated as False
 			return True
 		else:
-			return super._disjoint_down(t)
+			return super()._disjoint_down(t)
 
-	def subtypep(self, t):
-		def os(t):
-			if not hasattr(os, "holding"):
-				os.holding = lambda b: b.subtypep(self.s) if subclass(b, SNot) else None
-			return os.holding
-		if True in self.s.inhabited() and True in self.s.subtypep(t):
+	def _subtypep_down(self, t):
+		from utils import generate_lazy_val
+		from genus_types import notp, atomicp
+
+		os = generate_lazy_val(lambda : t.s.subtypep(self.s) if notp(t) else None)
+		hosted = generate_lazy_val(lambda: self.s.disjoint(t) if atomicp(self.s) and atomicp(t) else None)
+
+		if self.s.inhabited() is True and self.s.subtypep(t) is True:
 			return False
-		elif os() #not empty:
+		elif not hosted() is None:
+			return hosted()
+		elif not os() is None:
 			return os()
 		else:
-			return super.subtypep(t)
+			return super().supertypep(t)
 
 	def canonicalize_once(self, nf = None):
-		if subclass(self.s, SNot):
+		from genus_types import notp, topp, emptyp
+		if notp(self.s):
 			return self.s.canonicalize_once(nf)
-		elif subclass(self.s, STop):
+		elif topp(self.s):
 			return SEmpty
-		elif subclass(self.s, SEmpty):
+		elif emptyp(self.s):
 			return STop
-		elif subclass(self.s, SimpleTypeD):
-			return SNot(self.s.canonicalize_once(nf))
 		else:
-			raise TypeError("invalid given type ", type(self.s), " is not a SimpleTypeD")
+			return SNot(self.s.canonicalize_once(nf))
 
 	def compute_dnf(self):
 		#TODO: implement when SAnd and SOr are done
 		raise NotImplementedError
 
 	def compute_cnf(self):
-		#wait, what? This one was unexpected
+		# we convert a not to DNF or CNF the same way
 		return self.to_dnf()
 
 	def cmp_to_same_class_obj(self, td):
+		from genus_types import notp, cmp_type_designators
 		if self == td:
 			return False
-		elif subclass(td, SNot):
-			raise NotImplementedError
-			#uncomment when cmp_type_designator is done
-			#return cmp_type_designator(self.s, td)
+		elif notp(td):
+			cmp_type_designators(self.s, td.s)
 		else:
-			return super.cmp_to_same_class_obj(td)
+			return super().cmp_to_same_class_obj(td)

@@ -52,11 +52,11 @@ class SAtomic(SimpleTypeD, TerminalType):
 	@classmethod
 	def apply(cls, ct):
 		if ct == type(None):
-			return SEmpty.get_epsilon();
+			return SEmpty.get_epsilon()
 		elif ct == type(object):
-			return STop.get_omega();
+			return STop.get_omega()
 		else:
-			return cls(ct);
+			return cls(ct)
 
 	def __str__(self):
 		return str(self.wrapped_class)
@@ -107,16 +107,16 @@ class SAtomic(SimpleTypeD, TerminalType):
 				return False
 			elif issubclass(self.wrapped_class, t) or issubclass(t, self.wrapped_class):
 				return False
-			"""elif is_final(self.wrapped_class) or is_final(t):
-				return True
-			elif is_interface(self.wrapped_class) or is_interface(t):
-				return False # maybe ?"""
+			#elif is_final(self.wrapped_class) or is_final(t):
+			#	return True
+			#elif is_interface(self.wrapped_class) or is_interface(t):
+			#	return False # maybe ?"""
 			else:
 				return True
 		else:
-			return super._disjoint_down(t)
+			return super()._disjoint_down(t)
 
-	def subtypep(self, s):
+	def _subtypep_down(self, s):
 		if isinstance(s, SEmpty):
 			return False
 		elif isinstance(s, STop):
@@ -130,7 +130,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 		#TODO: implement when SAnd is done
 		#TODO: implement when SCustom is done
 
-	def canonicalize_once(nf = None):
+	def canonicalize_once(self,nf = None):
 		return SAtomic(self.wrapped_class)
 
 	def cmp_to_same_class_obj(self, td):

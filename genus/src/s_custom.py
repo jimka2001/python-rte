@@ -51,8 +51,8 @@ class SCustom(SimpleTypeD):
     def _inhabited_down(self):
     	return super()._inhabited_down()
 
-    def subtypep(t):
-    	return super().subtypep(t)
+    def _subtypep_down(t):
+    	return super()._subtypep_down(t)
 
     def cmp_to_same_class_obj(self, t):
     	return str(self) < str(t)

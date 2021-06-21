@@ -20,8 +20,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from abc import ABCMeta, abstractmethod
-from types import NormalForm
+from genus_types import NormalForm
 from simple_type_d import SimpleTypeD
+from s_not import SNot
 
 """
 [0-3] Advancement tracker
@@ -37,58 +38,58 @@ cmp_to_same_class 0
 """
 class SCombination(SimpleTypeD):
 	"""SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
-	def __init__(self, arglist):
-		self.arglist = arglist
+	def __init__(self, tds):
+		self.tds = tds
 		pass
 
 	@abstractmethod
 	def create(self):
-		pass
+		raise NotImplementedError
 
 	@property
 	@abstractmethod
 	def unit(self):
-		pass
+		raise NotImplementedError
 
 	@property
 	@abstractmethod
 	def zero(self):
-		pass
+		raise NotImplementedError
 
 	@abstractmethod
-	def annihilator(a, b):
+	def annihilator(self,a, b):
 		#apparently this name may change, so keep track of it
-		pass
+		raise NotImplementedError
 	
-	def same_combination(td):
-		return False
+	def same_combination(self,td):
+		return type(self) == type(td)
 
 	def canonicalize_once(self, nf = None):
 		#lambdas in python can only carry one expression, so i need inside defs
 		def l_1():
-			if not self.arglist: #empty or none
+			if not self.tds: #empty or none
 				# (and) -> STop,  unit=STop,   zero=SEmpty
 				# (or) -> SEmpty, unit=SEmpty,   zero=STop
-				return unit
+				return self.unit()
 				# (and A) -> A
 				# (or A) -> A
-			elif len(self.arglist) == 1: 
-				return self.arglist[0]
+			elif len(self.tds) == 1:
+				return self.tds[0]
 			else:
 				return self
 
 		def l_2():
 			# (and A B SEmpty C D) -> SEmpty,  unit=STop,   zero=SEmpty
 			# (or A B STop C D) -> STop,     unit=SEmpty,   zero=STop
-			if zero in self.arglist:
-				return zero
+			if self.zero() in self.tds:
+				return self.zero()
 			else:
 				return self
 
 		def l_3():
 			# (and A (not A)) --> SEmpty,  unit=STop,   zero=SEmpty
 			# (or A (not A)) --> STop,     unit=SEmpty, zero=STop
-			if any(map(lambda td: SNot(td) in self.arglist, self.arglist)):
+			if any(map(lambda td: SNot(td) in self.tds, self.tds)):
 				return self.zero
 			else:
 				return self
@@ -96,7 +97,7 @@ class SCombination(SimpleTypeD):
 		def l_4():
 			# SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
 			# SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
-			if self.unit in self.arglist:
+			if self.unit in self.tds:
 				return self.create(list(filter(lambda x: x != self.unit)))
 			else:
 				return self
@@ -105,12 +106,12 @@ class SCombination(SimpleTypeD):
 			# (and A B A C) -> (and A B C)
 			# (or A B A C) -> (or A B C)
 			#list(set(x)) with x is a list ensures the elements are distinct
-			return self.create(list(set(self.arglist)))
+			return self.create(list(set(self.tds)))
 		
 		def l_6():
 			# (and A (and B C) D) --> (and A B C D)
 			# (or A (or B C) D) --> (or A B C D)
-			if same_combination not in self.arglist:
+			if self.same_combination(td) not in self.tds:
 				return self
 			else:
 				def flat_map(f, xs):
@@ -121,13 +122,13 @@ class SCombination(SimpleTypeD):
 
 				def flat_lambda(td):
 					if isinstance(td, SCombination) and self.same_combination(td):
-						return td.arglist
+						return td.tds
 					else:
 						return [td]
-				return self.create(flat_map(flat_lambda, self.arglist)) 
+				return self.create(flat_map(flat_lambda, self.tds))
 
 		def l_7():
-			i2 = self.create(map(lambda t: t.canonicalize(nf).sort(), self.arglist).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
+			i2 = self.create(map(lambda t: t.canonicalize(nf).sort(), self.tds).sort(key = cmp_type_designators)).maybe_dnf(nf).maybe_cnf(nf)
 			if self == i2:
 				return self
 			else:
@@ -136,11 +137,11 @@ class SCombination(SimpleTypeD):
 		def l_8():
 			#I'm not absolutely sure about this
 			def l_8_predicate(x):
-				for td in self.arglist:
-					if td == type(SNot) and annihilator(x, td.s) == True:
+				for td in self.tds:
+					if td == type(SNot) and self.annihilator(x, td.s) == True:
 						return True
 				return False
-			found = list(filter(l_8_predicate, self.arglist))
+			found = list(filter(l_8_predicate, self.tds))
 			if found == []:
 				return self
 			else:
@@ -158,4 +159,4 @@ class SCombination(SimpleTypeD):
 				#do it when Types is implemented
 				raise NotImplementedError
 			else:
-				return super.cmp_to_same_class_obj(td)
+				return super().cmp_to_same_class_obj(td)

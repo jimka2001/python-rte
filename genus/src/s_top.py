@@ -59,52 +59,18 @@ class STop(SimpleTypeD):
     def _disjoint_down(self, t):
         return type(t) is SEmpty
 
-    def subtypep(self, t):
-        return type(t) == STop
+    def _subtypep_down(self, t):
+        from s_not import SNot
+        inh = SNot(t).inhabited()
+        if inh is None:
+            return None
+        elif inh is True:
+            return False
+        else:
+            return True
 
     def cmp_to_same_class_obj(self, t):
         return False
-
-#TODO: move the tests in their own files once this is packaged:
-def t_STop():
-    a = STop.get_omega()
-
-    #STop has to be unique
-    assert(id(a) == id(STop.get_omega()))
-    
-    #STop has to be unique part 2: ensure the constructor throws an error
-    pred = True
-    try:
-        b = STop()
-        pred = False
-        assert(False)
-    except Exception as e:
-        assert(pred)
-
-    #str(a) has to be "Top"
-    assert(str(a) == "Top")
-
-    #a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert(a.typep(object))
-    assert(a.typep(a))
-
-    #obviously, a is inhabited as it contains everything by definition
-    assert(a._inhabited_down)
-
-    #a is never disjoint with anything but the empty subtype
-    assert(not a._disjoint_down(object))
-    assert(a._disjoint_down(SEmpty()))
-
-    #on the contrary, a is never a subtype of any type 
-    #since types are sets and top is the set that contains all sets
-    assert(not a.subtypep(object))
-    assert(not a.subtypep(type(a)))
-
-    #my understanding is that the top type is unique so it can't be positively compared to any object
-    assert(not a.cmp_to_same_class_obj(a))
-    assert(not a.cmp_to_same_class_obj(object))
-
-t_STop()
 
 """
 object t_STop {

@@ -30,6 +30,8 @@ subtypep 1
 cmp_to_same_class_obj 1
 """
 
+from s_member import SMemberImpl
+
 class SEql(SMemberImpl):
 	"""The equal type, a type that is equal to a given object.
 	It has holds an "a" which is the object defining the type
@@ -39,10 +41,10 @@ class SEql(SMemberImpl):
 		self.a = a
 	
 	def __str__(self):
-		return "[= " + self.a + "]"
+		return "[= " + str(self.a) + "]"
 
 	def typep(self, b):
-		return a == b;
+		return self.a == b;
 
 	def _inhabited_down(self):
 		return True
@@ -58,10 +60,12 @@ class SEql(SMemberImpl):
 			return False
 		elif type(t) == SEql:
 			if not type(self.a) == type(t.a):
+				# if the types are different compare the type names alphabetically
+				return str(type(self.a)) <= str(type(t.a))
+			elif not str(self.a) == str(t.a):
+				# if the types are the same, then compare the objects alphabetically
 				return str(self.a) <= str(t.a)
-			elif not str(self.a) == str(self.b):
-				return str(a) <= str(b)
 			else:
 				raise TypeError('cannot compare(',str(self),') and (', str(t),') because they have different types but those types\' str are the same')
 		else:
-			return super.cmp_to_same_class_obj(t)
+			return super().cmp_to_same_class_obj(t)

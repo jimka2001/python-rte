@@ -36,61 +36,48 @@ cmp_to_same_class_obj 0
 <???> case class SMember </???>
 """
 
-class SMemberImpl(SimpleTypeD, TerminalType):
+class SMemberImpl(SimpleTypeD):
 	"""docstring for SMemberImpl"""
 	def __init__(self, arglist):
 		super(SMemberImpl, self).__init__()
 		self.arglist = arglist
 	
 	def __str__(self):
-		out = "[Member "
-		for arg in self.arglist:
-			out += str(arg)
-			out += ","
-		out += "]"
+		return "[Member " + ",".join([str(x) for x in self.arglist]) + "]"
 
 	def typep(self, a):
 		return a in self.arglist
 
 	def inhabited_down(self):
-		return self.arglist #arglist not empty
+		return [] != self.arglist
 
-	def _disjoint_down(self):
-		for arg in arglist:
-			if t.typep(arg):
-				return False
-		return True
+	def _disjoint_down(self,t2):
+		return not any(t2.typep(a) for a in self.arglist)
 
-	def subtypep(t):
-		return all(map(lambda x: t.typep(x), self.arglist))
+	def _subtypep_down(self,t2):
+		return all(t2.typep(a) for a in self.arglist)
 
 	def canonicalizeOnce(self, nf):
-		def cmp(a, b):
-			if a == b:
-				return False
-			elif type(a) != type(b):
-				return str(type(a)) < str(type(b))
-			elif str(a) != str(b):
-				return str(a) < str(b)
-			else:
-				raise Exception("Cannot canonicalize", self, "because it contains two different elements with the same str():", str(a))
-
-		if type(self.arglist) is list and not self.arglist:
-			return SEmpty()
-		elif type(self.arglist) is list:
-			#TODO: implement once SEql is implemented
-			raise NotImplementedError
-		else:
-			#TODO: implement once Types.scala is implemented
-			raise NotImplementedError
+		return self
 
 	def cmp_to_same_class_obj(self, t):
-		raise NotImplementedError 
-		if this == t:
-			return True
+		if self == t:
+			return False
 		else:
-			if type(t) is SMember:
-				def comp(a, b):
-					if not (a and b):
-						raise Exception("not expecting equal sequences $xs, $ys")
+			def comp(a, b):
+				if not a and not b:
+					raise Exception(f"not expecting equal sequences {self.arglist}, {t.arglist}")
+				elif not a:
+					return True
+				elif not b:
+					return False
+				elif a[0] == b[0]:
+					return comp(a[1:-1],b[1:-1])
+				elif str(a[0]) != str(b[0]):
+					return str(a[0]) < str(b[0])
+				else:
+					raise Exception(f"different values which print the same {a[0]} va {b[0]}")
+			return comp(self.arglist,t.arglist)
 
+class SMember(SMemberImpl,TerminalType):
+	pass
