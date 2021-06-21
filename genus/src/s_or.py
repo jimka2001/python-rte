@@ -36,39 +36,31 @@ canonicalize_once 0
 compute_cnf 0
 """
 
-import simple_type_d
+from s_combination import SCombination
+from genus_types import createSOr
+from s_empty import SEmpty
+from s_top import STop
 
-class SOr(SimpleTypeD):
+
+class SOr(SCombination):
 	"""docstring for SOr"""
 	def __init__(self, tds):
-		super(SOr, self).__init__()
-		self.tds = tds
+		super(SOr, self).__init__(tds)
 
 	def __str__(self):
-		s = "[Or "
-		for arg in self.arg_list:
-			s += str(arg)
-			s += ","
-		s += "]"
-		return s
+		return "[SOr " + ",".join([str(td) for td in self.tds]) + "]"
 
-	def create(tds):
-		return SOr(tds)
+	def create(self, tds):
+		return createSOr(tds)
 
-	unit = SEmpty.get_epsilon()
-	zero = STop.get_omega()
+	unit = SEmpty
+	zero = STop
 
-	def annihilator(a, b):
+	def annihilator(self, a, b):
 		return b.subtypep(a)
 
-	def same_combination(self, td):
-		return td in self.tds #this may be wrong
-
 	def typep(self, a):
-		for td in self.td:
-			if(td.typep(a)):
-				return True
-		return False
+		return any(td.typep(a) for td in self.tds)
 
 	def inhabited_down(self):
 		raise NotImplementedError

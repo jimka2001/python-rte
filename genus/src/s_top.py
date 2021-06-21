@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD 
-from s_empty import SEmpty
+from s_empty import SEmptyImpl
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
 __str__ 1
@@ -30,25 +30,31 @@ _disjoint_down  1
 subtypep    1
 cmp_to_same_class_obj   1
 """
-class STop(SimpleTypeD):
+class STopImpl(SimpleTypeD):
     """The super type, super type of all types."""
     __instance = None
 
     @staticmethod
     def get_omega():
-        if STop.__instance == None:
-            STop()
-        return STop.__instance
+        if STopImpl.__instance is None:
+            STopImpl()
+        return STopImpl.__instance
 
     def __init__(self):
-        super(STop, self).__init__()
-        if STop.__instance != None:
+        super(STopImpl, self).__init__()
+        if STopImpl.__instance is not None:
            raise Exception("Please use STop.get_omega() as STop is unique and can't be duplicated")
         else:
-           STop.__instance = self
+           STopImpl.__instance = self
 
     def __str__(self):
         return "Top"
+
+    def __eq__(self, that):
+        return type(self) is type(that)
+
+    def __hash__(self):
+        return hash(1)
 
     def typep(self, any):
         return True
@@ -57,69 +63,21 @@ class STop(SimpleTypeD):
         return True
 
     def _disjoint_down(self, t):
-        return type(t) is SEmpty
+        assert isinstance(t,SimpleTypeD)
+        return type(t) is SEmptyImpl
 
-    def subtypep(self, t):
-        return type(t) == STop
+    def _subtypep_down(self, t):
+        from s_not import SNot
+        inh = SNot(t).inhabited()
+        if inh is None:
+            return None
+        elif inh is True:
+            return False
+        else:
+            return True
 
     def cmp_to_same_class_obj(self, t):
         return False
 
-#TODO: move the tests in their own files once this is packaged:
-def t_STop():
-    a = STop.get_omega()
 
-    #STop has to be unique
-    assert(id(a) == id(STop.get_omega()))
-    
-    #STop has to be unique part 2: ensure the constructor throws an error
-    pred = True
-    try:
-        b = STop()
-        pred = False
-        assert(False)
-    except Exception as e:
-        assert(pred)
-
-    #str(a) has to be "Top"
-    assert(str(a) == "Top")
-
-    #a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert(a.typep(object))
-    assert(a.typep(a))
-
-    #obviously, a is inhabited as it contains everything by definition
-    assert(a._inhabited_down)
-
-    #a is never disjoint with anything but the empty subtype
-    assert(not a._disjoint_down(object))
-    assert(a._disjoint_down(SEmpty()))
-
-    #on the contrary, a is never a subtype of any type 
-    #since types are sets and top is the set that contains all sets
-    assert(not a.subtypep(object))
-    assert(not a.subtypep(type(a)))
-
-    #my understanding is that the top type is unique so it can't be positively compared to any object
-    assert(not a.cmp_to_same_class_obj(a))
-    assert(not a.cmp_to_same_class_obj(object))
-
-t_STop()
-
-"""
-object t_STop {
-  def main(args: Array[String]): Unit = {
-    println(STop.toString() == "Top")
-    println(STop.typep(Types.Integer))
-    println(STop.inhabitedDown.contains(true))
-
-    //println(STop.disjointDown(SAtomic(Types.Integer)).contains(false))
-    //println(STop.disjointDown((SEmpty)).contains(true))
-    println(STop.subtypep(SAtomic(Types.Integer)).contains(false))
-    println(STop.subtypep((STop)).contains(true))
-
-    println(!STop.cmpToSameClassObj(STop))
-    println(!STop.cmpToSameClassObj(SAtomic(Types.Integer)))
-  }
-}
-"""
+STop = STopImpl.get_omega()

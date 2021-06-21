@@ -21,9 +21,12 @@
 
 from enum import Enum
 
+
 class NormalForm(Enum):
-	DNF = 0,
-	CNF = 1
+	NONE = 0
+	DNF = 1
+	CNF = 2
+
 
 def is_even(x):
 	return type(x) is int and not (x & 1)
@@ -33,6 +36,80 @@ def cmp_type_designators(a, b):
 	if a == b:
 		return False
 	elif type(a) == b:
-		a.cmp_to_same_class_obj(b)
+		return a.cmp_to_same_class_obj(b)
 	else:
-		str(type(a)) < str(type(b))
+		return str(type(a)) < str(type(b))
+
+
+def createSAnd(tds):
+	from s_top import STop
+	from s_and import SAnd
+	if not tds:
+		return STop
+	elif len(tds) == 1:
+		return tds[0]
+	else:
+		return SAnd(tds)
+
+
+def createSOr(tds):
+	from s_empty import SEmpty
+	from s_or import SOr
+	if not tds:
+		return SEmpty
+	elif len(tds) == 1:
+		return tds[0]
+	else:
+		return SOr(tds)
+
+
+def createSMember(items):
+	from s_empty import SEmpty
+	from s_member import SMember
+	from s_eql import SEql
+	if not items:
+		return SEmpty
+	elif len(items) == 1:
+		return SEql(items(0))
+	else:
+		return SMember(items)
+
+
+def orp(this):
+	from s_or import SOr
+	return isinstance(this, SOr)
+
+
+def andp(this):
+	from s_and import SAnd
+	return isinstance(this, SAnd)
+
+
+def notp(this):
+	from s_not import SNot
+	return isinstance(this, SNot)
+
+
+def atomicp(this):
+	from s_atomic import SAtomic
+	return isinstance(this, SAtomic)
+
+
+def topp(this):
+	from s_top import STopImpl
+	return isinstance(this, STopImpl)
+
+
+def emptyp(this):
+	from s_empty import SEmptyImpl
+	return isinstance(this, SEmptyImpl)
+
+
+def memberp(this):
+	from s_member import SMember
+	return isinstance(this, SMember)
+
+
+def eqlp(this):
+	from s_eql import SEql
+	return isinstance(this, SEql)

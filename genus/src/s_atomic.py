@@ -20,8 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD, TerminalType
-from s_empty import SEmpty
-from s_top import STop
+from s_top import STop, STopImpl
 
 """
 [0-3] Advancement tracker
@@ -36,43 +35,44 @@ cmp_to_same_class_obj 1
 apply 1
 """
 
+
 class SAtomic(SimpleTypeD, TerminalType):
 	"""The atoms of our type system: a simple type built from a native python type."""
 	# reminder: the types are:
-		# numerical: "int", "float", "complex"
-		# sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
-		# binary sequential: "bytes", "bytearray", "memoryview"
-		# text sequential: "str"
-		# in addition, all classes are types and all types are classes
+	# numerical: "int", "float", "complex"
+	# sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
+	# binary sequential: "bytes", "bytearray", "memoryview"
+	# text sequential: "str"
+	# in addition, all classes are types and all types are classes
 
 	def __init__(self, wrapped_class):
+		import inspect
 		super(SAtomic, self).__init__()
+		assert inspect.isclass(wrapped_class)
 		self.wrapped_class = wrapped_class
 
-	@classmethod
-	def apply(cls, ct):
-		if ct == type(None):
-			return SEmpty.get_epsilon();
-		elif ct == type(object):
-			return STop.get_omega();
-		else:
-			return cls(ct);
-
 	def __str__(self):
-		return str(self.wrapped_class)
+		return "SAtomic(" + str(self.wrapped_class) + ")"
+
+	def __eq__(self, that):
+		return isinstance(that, SAtomic) \
+			and self.wrapped_class is that.wrapped_class
+
+	def __hash__(self):
+		return hash(self.wrapped_class)
 	
 	def typep(self, a):
-		#check that this does what we want (looks like it does but eh)
+		# check that this does what we want (looks like it does but eh)
 		return isinstance(self.wrapped_class, a)
 
 	def _inhabited_down(self):
 		try:
 			return not issubclass(self.wrapped_class, type(None))
 		except Exception as e:
-			#the try block may only fail if self.wrapped_class is not a class, in which case it is a value and contains nothing
+			# the try block may only fail if self.wrapped_class is not a class, in which case it is a value and contains nothing
 			return False 
 		
-	@static
+	@staticmethod
 	def is_final():
 		"""Okay, so, python does not per say handle final classes,
 		however since python3.8, the community added a @final
@@ -97,48 +97,51 @@ class SAtomic(SimpleTypeD, TerminalType):
 		pass
 
 	def _disjoint_down(self, t):
-		#TODO: find a way to cmpte isfinal and isInterface if needed
-		if isinstance(t, SEmpty):
+		assert isinstance(t,SimpleTypeD) 
+		from s_empty import SEmptyImpl
+		# TODO: find a way to cmpte isfinal and isInterface if needed
+		if isinstance(t, SEmptyImpl):
 			return True
-		elif isinstance(t, STop):
+		elif isinstance(t, STopImpl):
 			return False
 		elif isinstance(t, SAtomic):
 			if t == self.wrapped_class:
 				return False
-			elif issubclass(self.wrapped_class, t) or issubclass(t, self.wrapped_class):
+			elif issubclass(self.wrapped_class, t.wrapped_class) or issubclass(t.wrapped_class, self.wrapped_class):
 				return False
-			"""elif is_final(self.wrapped_class) or is_final(t):
-				return True
-			elif is_interface(self.wrapped_class) or is_interface(t):
-				return False # maybe ?"""
+			# elif is_final(self.wrapped_class) or is_final(t):
+			# 	return True
+			# elif is_interface(self.wrapped_class) or is_interface(t):
+			# 	return False # maybe ?"""
 			else:
 				return True
 		else:
-			return super._disjoint_down(t)
+			return super()._disjoint_down(t)
 
-	def subtypep(self, s):
-		if isinstance(s, SEmpty):
+	def _subtypep_down(self, s):
+		from s_empty import SEmptyImpl
+		if isinstance(s, SEmptyImpl):
 			return False
 		elif isinstance(s, STop):
 			return True
 		elif isinstance(s, SAtomic):
 			return isinstance(s, self.wrapped_class)
-		#TODO: implement when SMember is done
-		#TODO: implement when SEql is done
-		#TODO: implement when SNot is done
-		#TODO: implement when SOr is done
-		#TODO: implement when SAnd is done
-		#TODO: implement when SCustom is done
+		# TODO: implement when SMember is done
+		# TODO: implement when SEql is done
+		# TODO: implement when SNot is done
+		# TODO: implement when SOr is done
+		# TODO: implement when SAnd is done
+		# TODO: implement when SCustom is done
 
-	def canonicalize_once(nf = None):
+	def canonicalize_once(self, nf=None):
 		return SAtomic(self.wrapped_class)
 
 	def cmp_to_same_class_obj(self, td):
 		if self == td:
 			return False
 		elif isinstance(td, SAtomic):
-			return str(self.wrapped_class) < str(self.td)
+			return str(self.wrapped_class) < str(td.wrapped_class)
 		else:
-			super.cmp_to_same_class_obj(td)
+			super().cmp_to_same_class_obj(td)
 
-#TODO: ask about what object SAtomic is exactly
+# TODO: ask about what object SAtomic is exactly
