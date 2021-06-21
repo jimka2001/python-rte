@@ -35,13 +35,15 @@ subtypep 1
 canonicalize_once 0
 compute_dnf 0
 """
-from simple_type_d import SimpleTypeD
+
+
 from s_top import STop
 from s_empty import SEmpty
 from s_atomic import SAtomic
 from s_combination import SCombination
 from utils import generate_lazy_val
 from genus_types import NormalForm,createSAnd
+
 
 class SAnd(SCombination):
 	"""An intersection type, which is the intersection of zero or more types.
@@ -55,14 +57,13 @@ class SAnd(SCombination):
 	def __str__(self):
 		return "[SAnd " + ",".join([str(td) for td in self.tds]) + "]"
 
-	@staticmethod
-	def create(tds):
+	def create(self,tds):
 		return createSAnd(tds)
 
 	unit = STop.get_omega()
 	zero = SEmpty.get_epsilon()
 
-	def annihilator(this, a, b):
+	def annihilator(self, a, b):
 		return b.supertypep(a)
 
 	def typep(self,a):
@@ -103,8 +104,8 @@ class SAnd(SCombination):
 			return False
 		elif inhabited_t() \
 				and inhabited_self() \
-				and any(x.subtypep(t)==True
-						or t.subtypep(x)==True
+				and any(x.subtypep(t) is True
+						or t.subtypep(x) is True
 						for x in self.tds):
 			return False
 		else:

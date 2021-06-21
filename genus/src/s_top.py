@@ -36,13 +36,13 @@ class STop(SimpleTypeD):
 
     @staticmethod
     def get_omega():
-        if STop.__instance == None:
+        if STop.__instance is None:
             STop()
         return STop.__instance
 
     def __init__(self):
         super(STop, self).__init__()
-        if STop.__instance != None:
+        if STop.__instance is not None:
            raise Exception("Please use STop.get_omega() as STop is unique and can't be duplicated")
         else:
            STop.__instance = self

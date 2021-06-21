@@ -15,4 +15,4 @@ class Unique(SimpleTypeD):
         cls._cache = {}
 
     def typep(self, any):
-    	raise NotImplementedError
+        raise NotImplementedError

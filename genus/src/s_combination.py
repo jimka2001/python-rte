@@ -36,6 +36,8 @@ same_combination 1
 canonicalize_once 1
 cmp_to_same_class 0
 """
+
+
 class SCombination(SimpleTypeD):
 	"""SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 	def __init__(self, tds):
@@ -43,8 +45,8 @@ class SCombination(SimpleTypeD):
 		pass
 
 	@abstractmethod
-	def create(self):
-		raise NotImplementedError
+	def create(self,tds):
+		pass
 
 	@property
 	@abstractmethod
@@ -138,7 +140,7 @@ class SCombination(SimpleTypeD):
 			#I'm not absolutely sure about this
 			def l_8_predicate(x):
 				for td in self.tds:
-					if td == type(SNot) and self.annihilator(x, td.s) == True:
+					if td == type(SNot) and self.annihilator(x, td.s) is True:
 						return True
 				return False
 			found = list(filter(l_8_predicate, self.tds))

@@ -147,7 +147,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         return self.hold_inhabited
 
     def _disjoint_down(self, t):
-        if(self.inhabited() == False):
+        if(self.inhabited() is False):
             return True
         else:
             return None
@@ -157,11 +157,11 @@ class SimpleTypeD(metaclass=ABCMeta):
         from genus_types import orp, andp
         from s_top import STop
         def or_result():
-            return True if orp(t) and any(self.subtypep(a) == True for a in t.tds) \
+            return True if orp(t) and any(self.subtypep(a) is True for a in t.tds) \
                 else None
 
         def and_result():
-            return True if andp(t) and all(self.subtypep(a) == True for a in t.tds) \
+            return True if andp(t) and all(self.subtypep(a) is True for a in t.tds) \
                 else None
 
         if type(self) == type(t) and self == t:

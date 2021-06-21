@@ -341,3 +341,61 @@ def t_STop():
 
 
 t_STop()
+
+
+# TODO: move the tests in their own files once this is packaged:
+def t_SEmpty():
+    a = SEmpty.get_epsilon()
+
+    # SEmpty has to be unique
+    assert (id(a) == id(SEmpty.get_epsilon()))
+
+    # SEmpty has to be unique part 2: ensure the constructor throws an error
+    pred = True
+    try:
+        b = SEmpty()
+        pred = False
+        assert (False)
+    except Exception as e:
+        assert (pred)
+
+    # str(a) has to be "Empty"
+    assert (str(a) == "Empty")
+
+    # a.typep(t) indicates whether t is a subtype of a, which is never the case
+    assert (not a.typep(object))
+    assert (not a.typep(a))
+
+    # obviously, a is not inhabited as it is by definition empty
+    assert (not a._inhabited_down())
+
+    # a is disjoint with anything as it is empty
+    assert (a._disjoint_down(object))
+
+    # on the contrary, a is always a subtype of any type
+    # since types are sets and the empty set is a subset of all sets
+    assert (a.subtypep(object))
+    assert (a.subtypep(type(a)))
+
+    # my understanding is that the empty type is unique so it can't be positively compared to any object
+    assert (not a.cmp_to_same_class_obj(a))
+    assert (not a.cmp_to_same_class_obj(object))
+
+
+t_SEmpty()
+
+
+
+def t_scustom():
+	l_odd = lambda x : x % 2 == 1
+	guinea_pig = SCustom(l_odd, "[odd numbers]")
+	assert(guinea_pig.f == l_odd)
+	assert(guinea_pig.printable == "[odd numbers]")
+	assert( str(guinea_pig) == "[odd numbers]?")
+	for x in range(-100,100):
+		if x % 2 == 1:
+			assert(guinea_pig.typep(x))
+		else:
+			assert(not guinea_pig.typep(x))
+
+t_scustom()

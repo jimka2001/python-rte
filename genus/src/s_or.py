@@ -36,11 +36,11 @@ canonicalize_once 0
 compute_cnf 0
 """
 
-import simple_type_d
 from s_combination import SCombination
 from genus_types import createSOr
 from s_empty import SEmpty
 from s_top import STop
+
 
 class SOr(SCombination):
 	"""docstring for SOr"""
@@ -51,7 +51,7 @@ class SOr(SCombination):
 	def __str__(self):
 		return "[SOr " + ",".join([str(td) for td in self.tds]) + "]"
 
-	def create(tds):
+	def create(self, tds):
 		return createSOr(tds)
 
 	unit = SEmpty.get_epsilon()
