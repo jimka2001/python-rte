@@ -356,7 +356,8 @@ def t_SEmpty():
 
 
 def t_scustom2():
-    l_odd = lambda x : isinstance(x,int) and x % 2 == 1
+    def l_odd(x):
+        return isinstance(x,int) and x % 2 == 1
     guinea_pig = SCustom(l_odd, "[odd numbers]")
     assert(guinea_pig.f == l_odd)
     assert(guinea_pig.printable == "[odd numbers]")
