@@ -70,7 +70,7 @@ def createSMember(items):
 	if not items:
 		return SEmpty
 	elif len(items) == 1:
-		return SEql(items(0))
+		return SEql(items[0])
 	else:
 		return SMember(*items)
 
