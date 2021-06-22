@@ -17,7 +17,6 @@ def generate_lazy_val(func):
 def fixed_point(v, f, good_enough):
     history = []
     while True:
-
         v2 = f(v)
         if good_enough(v, v2):
             return v

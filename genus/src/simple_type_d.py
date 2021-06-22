@@ -54,12 +54,13 @@ from abc import ABCMeta, abstractmethod
 from utils import generate_lazy_val
 
 
-#is it useful, though ? all classes are types by default in python
+# is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
     """This class is just here to emulate the TerminalType trait in Scala"""
     @abstractmethod
     def __init__(self):
         super().__init__()
+
 
 class SimpleTypeD(metaclass=ABCMeta):
     """SimpleTypeD is the abstract class that mothers all of the 
@@ -67,37 +68,37 @@ class SimpleTypeD(metaclass=ABCMeta):
     def __init__(self):
         self.canonicalized_hash = {}
 
-    #overloading operators
+    # overloading operators
     def __or__(self, t):
-        #implement when SOr is implemented
+        # implement when SOr is implemented
         raise NotImplementedError
 
     def __and__(self, t):
-        #implement when SAnd is implemented
+        # implement when SAnd is implemented
         raise NotImplementedError
 
-    #unfortunately, this one can't be overloaded
+    # unfortunately, this one can't be overloaded
     def unary_not(self):
-        #implement when SNot is implemented
+        # implement when SNot is implemented
         raise NotImplementedError
 
     def __sub__(self, t):
-        #implement when SAnd and SNot are implemented
+        # implement when SAnd and SNot are implemented
         raise NotImplementedError
 
     def __xor__(self, t):
-        #implement when SNot, SAnd and SOr are implemented
+        # implement when SNot, SAnd and SOr are implemented
         raise NotImplementedError
 
     @abstractmethod
-    def typep(self, any):
+    def typep(self, a):
         """Returns whether a given object belongs to this type.
         It is a set membership test.
             @param a the object we want to check the type
             @return a Boolean which is true is a is of this type"""
 
     def disjoint(self, td):
-        assert isinstance(td,SimpleTypeD)
+        assert isinstance(td, SimpleTypeD)
         """okay, here I am doing some weird magic so I'll explain:
         python does NOT have a lazy keyword, so I need to emulate it
         I thus create utility functions within disjoint and within them,
@@ -105,23 +106,23 @@ class SimpleTypeD(metaclass=ABCMeta):
         the computations are performed and then cached in said
         static attribute, so that on later calls they are output in O(1)"""
         
-        #og_name in scala: d1
+        # og_name in scala: d1
         this_disjoint_td = self._disjoint_down(td)
         
-        #og_name in scala lazy: d2
+        # og_name in scala lazy: d2
         td_disjoint_this = generate_lazy_val(lambda: td._disjoint_down(self))
 
-        #og_name in scala lazy: c1
+        # og_name in scala lazy: c1
         self_canonicalized = generate_lazy_val(lambda: self.canonicalize())
 
-        #og_name in scala lazy: c2
+        # og_name in scala lazy: c2
         td_canonicalized = generate_lazy_val(lambda: td.canonicalize())
 
-        #og_name in scala lazy: dc12
-        canon_self_disjoint_td = generate_lazy_val(lambda: self_canonicalized()._disjoint_down(td_canonicalized))
+        # og_name in scala lazy: dc12
+        canon_self_disjoint_td = generate_lazy_val(lambda: self_canonicalized()._disjoint_down(td_canonicalized()))
 
-        #og_name in scala lazy: dc21
-        canon_td_disjoint_self = generate_lazy_val(lambda: td_canonicalized()._disjoint_down(self_canonicalized))
+        # og_name in scala lazy: dc21
+        canon_td_disjoint_self = generate_lazy_val(lambda: td_canonicalized()._disjoint_down(self_canonicalized()))
 
         if self == td and self.inhabited() is not None:
             return not self.inhabited()
@@ -140,7 +141,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return canon_td_disjoint_self()
 
-    #for performance reasons, do not call directly, rather use the inhabited method as it stores the result
+    # for performance reasons, do not call directly, rather use the inhabited method as it stores the result
     def _inhabited_down(self):
         return None
 
@@ -150,15 +151,16 @@ class SimpleTypeD(metaclass=ABCMeta):
         return self.hold_inhabited
 
     def _disjoint_down(self, t):
-        assert isinstance(t,SimpleTypeD)
-        if(self.inhabited() is False):
+        assert isinstance(t, SimpleTypeD)
+        if self.inhabited() is False:
             return True
         else:
             return None
 
     def subtypep(self, t):
-        assert isinstance(t,SimpleTypeD)
+        assert isinstance(t, SimpleTypeD)
         from genus_types import orp, andp, topp
+
         def or_result():
             return True if orp(t) and any(self.subtypep(a) is True for a in t.tds) \
                 else None
@@ -178,7 +180,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return self._subtypep_down(t)
 
-    def _subtypep_down(self,t):
+    def _subtypep_down(self, t):
         from genus_types import notp
         if notp(t) and self.disjoint(t.s):
             return True
@@ -189,7 +191,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return None
 
-    #for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
+    # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
     def _compute_dnf(self):
         return self
 
@@ -198,7 +200,7 @@ class SimpleTypeD(metaclass=ABCMeta):
             self.hold_todnf = self._compute_dnf()
         return self.hold_todnf
 
-    #for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
+    # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
     def _compute_cnf(self):
         return self
 
@@ -219,23 +221,23 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return self
 
-    def canonicalize_once(self, nf = None):
+    def canonicalize_once(self, nf=None):
         return self
 
-    def canonicalize(self, nf = None):
+    def canonicalize(self, nf=None):
         from utils import fixed_point
 
         if nf not in self.canonicalized_hash:
             def processor(td):
                 return td.canonicalize_once(nf)
 
-            def good_enough(a,b):
+            def good_enough(a, b):
                 return type(a) == type(b) and a == b
             
             res = fixed_point(self, processor, good_enough)
             self.canonicalized_hash |= {nf: res}
 
-        #tell the perhaps new object it is already canonicalized (TODO: could I just put this in the if ?)
+        # tell the perhaps new object it is already canonicalized (TODO: could I just put this in the if ?)
         self.canonicalized_hash[nf].canonicalized_hash[nf] = self.canonicalized_hash[nf]
         return self.canonicalized_hash[nf]
 

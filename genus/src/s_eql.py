@@ -31,6 +31,8 @@ cmp_to_same_class_obj 1
 """
 
 from s_member import SMemberImpl
+from simple_type_d import SimpleTypeD
+
 
 class SEql(SMemberImpl):
 	"""The equal type, a type that is equal to a given object.
@@ -51,13 +53,13 @@ class SEql(SMemberImpl):
 		return hash(self.a)
 
 	def typep(self, b):
-		return self.a == b;
+		return self.a == b
 
 	def _inhabited_down(self):
 		return True
 
 	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
+		assert isinstance(t, SimpleTypeD)
 		return not t.typep(self.a)
 
 	def subtypep(self, t):
@@ -67,13 +69,14 @@ class SEql(SMemberImpl):
 		if self == t:
 			return False
 		elif type(t) == SEql:
-			if not type(self.a) == type(t.a):
+			if not type(self.a) is type(t.a):
 				# if the types are different compare the type names alphabetically
 				return str(type(self.a)) <= str(type(t.a))
 			elif not str(self.a) == str(t.a):
 				# if the types are the same, then compare the objects alphabetically
 				return str(self.a) <= str(t.a)
 			else:
-				raise TypeError('cannot compare(',str(self),') and (', str(t),') because they have different types but those types\' str are the same')
+				msg = f"cannot compare {self} and {t} because they have different types {type(self)} vs {type(t)}"
+				raise TypeError(msg)
 		else:
 			return super().cmp_to_same_class_obj(t)
