@@ -108,7 +108,7 @@ def t_sand1():
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
     
-    tri_n_quad = SAnd([triple, quadruple])
+    tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
 
     assert(str(tri_n_quad) == "[SAnd triple?,quadruple?]")
@@ -132,7 +132,7 @@ def t_sand2():
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
 
-    tri_n_quad = SAnd([triple, quadruple])
+    tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
     assert(tri_n_quad.subtypep(STop))
     assert(tri_n_quad.subtypep(triple))
@@ -155,7 +155,7 @@ def t_sor():
     quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
     triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
     
-    tri_o_quad = SOr([triple, quadruple])
+    tri_o_quad = SOr(triple, quadruple)
     create_tri_o_quad = createSOr([triple, quadruple])
 
     assert(str(tri_o_quad) == "[SOr triple?,quadruple?]")
@@ -189,7 +189,7 @@ def t_sor():
     assert(tri_o_quad.same_combination(create_tri_o_quad))
     assert(tri_o_quad.same_combination(createSOr([quadruple, triple])))
 
-    assert(not tri_o_quad.same_combination(STop.get_omega()))
+    assert(not tri_o_quad.same_combination(STop))
     assert(not tri_o_quad.same_combination(createSOr([])))
 
 

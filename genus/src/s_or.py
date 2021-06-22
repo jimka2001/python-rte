@@ -44,7 +44,7 @@ from s_top import STop
 
 class SOr(SCombination):
 	"""docstring for SOr"""
-	def __init__(self, tds):
+	def __init__(self, *tds):
 		super(SOr, self).__init__(tds)
 
 	def __str__(self):

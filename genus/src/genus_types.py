@@ -49,7 +49,7 @@ def createSAnd(tds):
 	elif len(tds) == 1:
 		return tds[0]
 	else:
-		return SAnd(tds)
+		return SAnd(*tds)
 
 
 def createSOr(tds):
@@ -60,7 +60,7 @@ def createSOr(tds):
 	elif len(tds) == 1:
 		return tds[0]
 	else:
-		return SOr(tds)
+		return SOr(*tds)
 
 
 def createSMember(items):
@@ -72,7 +72,7 @@ def createSMember(items):
 	elif len(items) == 1:
 		return SEql(items(0))
 	else:
-		return SMember(items)
+		return SMember(*items)
 
 
 def orp(this):

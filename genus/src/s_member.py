@@ -36,9 +36,10 @@ cmp_to_same_class_obj 0
 <???> case class SMember </???>
 """
 
+
 class SMemberImpl(SimpleTypeD):
 	"""docstring for SMemberImpl"""
-	def __init__(self, arglist):
+	def __init__(self, *arglist):
 		super(SMemberImpl, self).__init__()
 		self.arglist = arglist
 	

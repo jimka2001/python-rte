@@ -50,7 +50,7 @@ class SAnd(SCombination):
 	@param tds list, zero or more types"""
 
 	#equivalent to the scala "create"
-	def __init__(self, tds):
+	def __init__(self, *tds):
 		super(SAnd, self).__init__(tds)
 	
 	def __str__(self):
