@@ -382,6 +382,25 @@ def t_scustom2():
             assert not guinea_pig.typep(x)
 
 
+def t_subtypep1():
+    from depth_generator import random_type_designator
+    for depth in range(0,4):
+        for _ in range(1000):
+            td1 = random_type_designator(depth)
+            td2 = random_type_designator(depth)
+            assert td1.subtypep(td1) is True
+            assert SAnd(td1,td2).subtypep(td1) is not False
+            assert td1.subtypep(SOr(td1,td2)) is not False
+            assert SAnd(td1,td2).subtypep(SAnd(td2,td1)) is not False
+            assert SOr(td1,td2).subtypep(SOr(td2,td2)) is not False
+            assert SAnd(td1,td2).subtypep(SOr(td1,td2)) is not False
+            assert SAnd(SNot(td1),SNot(td2)).subtypep(SNot(SOr(td1,td2))) is not False
+            assert SOr(SNot(td1),SNot(td2)).subtypep(SNot(SAnd(td1,td2))) is not False
+            assert SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False
+            assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
+
+
+
 #   calling the test functions
 
 t_fixed_point()
@@ -395,3 +414,4 @@ t_STop()
 t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
+t_subtypep1()
