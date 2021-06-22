@@ -412,12 +412,11 @@ class SCombination(SimpleTypeD):
         return find_simplifier(self, simplifiers)
 
     def cmp_to_same_class_obj(self, td):
-        # TODO: check this, this is is probably wrong
+        from utils import compare_sequence
         if self == td:
             return False
         else:
             if isinstance(td, SCombination):
-                # do it when Types is implemented
-                raise NotImplementedError
+                return compare_sequence(this.tds,td.tds)
             else:
                 return super().cmp_to_same_class_obj(td)
