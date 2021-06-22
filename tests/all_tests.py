@@ -432,9 +432,26 @@ def t_lazy():
     assert f() == 2
     assert c == 2
 
+
+def t_discovered_cases():
+    def f(_a):
+        return False
+
+    assert SNot(SAtomic(int)).subtypep(SNot(SCustom(f,"f"))) is None
+    assert SAtomic(int).disjoint(SCustom(f,"f")) is None
+    assert SAtomic(int).disjoint(SNot(SCustom(f,"f"))) is None
+    assert SNot(SAtomic(int)).disjoint(SCustom(f,"f")) is None
+    assert SNot(SAtomic(int)).disjoint(SNot(SCustom(f,"f"))) is None
+
+    assert SAtomic(int).subtypep(SCustom(f,"f")) is None
+    assert SAtomic(int).subtypep(SNot(SCustom(f,"f"))) is None
+    assert SNot(SAtomic(int)).subtypep(SCustom(f,"f")) is None
+
+
 #   calling the test functions
 
 
+t_discovered_cases()
 t_lazy()
 t_uniquify()
 t_fixed_point()
