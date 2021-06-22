@@ -59,14 +59,14 @@ class SMemberImpl(SimpleTypeD):
 	def inhabited_down(self):
 		return [] != self.arglist
 
-	def _disjoint_down(self,t2):
-		assert isinstance(t2,SimpleTypeD) 
+	def _disjoint_down(self, t2):
+		assert isinstance(t2, SimpleTypeD)
 		return not any(t2.typep(a) for a in self.arglist)
 
-	def _subtypep_down(self,t2):
+	def _subtypep_down(self, t2):
 		return all(t2.typep(a) for a in self.arglist)
 
-	def canonicalizeOnce(self, nf):
+	def canonicalizeOnce(self, _nf):
 		return self
 
 	def cmp_to_same_class_obj(self, t):
@@ -81,12 +81,13 @@ class SMemberImpl(SimpleTypeD):
 				elif not b:
 					return False
 				elif a[0] == b[0]:
-					return comp(a[1:-1],b[1:-1])
+					return comp(a[1:-1], b[1:-1])
 				elif str(a[0]) != str(b[0]):
 					return str(a[0]) < str(b[0])
 				else:
 					raise Exception(f"different values which print the same {a[0]} va {b[0]}")
-			return comp(self.arglist,t.arglist)
+			return comp(self.arglist, t.arglist)
 
-class SMember(SMemberImpl,TerminalType):
+
+class SMember(SMemberImpl, TerminalType):
 	pass
