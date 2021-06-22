@@ -55,10 +55,10 @@ def t_STop():
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
-        b = STop()
+        _b = STop()
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _e:
         assert pred
 
     # str(a) has to be "Top"
@@ -198,10 +198,10 @@ def t_snot():
     
     pred = True
     try:
-        b = SNot([])
+        _b = SNot([])
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _e:
         assert pred
 
     npair = SNot(pair)
@@ -223,7 +223,7 @@ def t_SimpleTypeD():
     # ensuring SimpleTypeD is abstract
     pred = True
     try:
-        foo = SimpleTypeD()
+        _foo = SimpleTypeD()
         pred = False
         assert False
     except:
@@ -237,12 +237,12 @@ def t_SimpleTypeD():
             def __init__(self):
                 super(ChildSTDNoTypep, self).__init__()
 
-        foo = ChildSTDNoTypep()
+        _ = ChildSTDNoTypep()
         del ChildSTDNoTypep
         pred = False
-        assert (False)
+        assert False
     except:
-        assert (pred)
+        assert pred
 
     class ChildSTD(SimpleTypeD):
         """docstring for ChildSTD"""
@@ -300,10 +300,10 @@ def t_STop2():
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
-        b = STop()
+        _ = STop()
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _:
         assert pred
 
     # str(a) has to be "Top"
@@ -339,10 +339,10 @@ def t_SEmpty():
     # SEmpty has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
-        b = SEmpty()
+        _ = SEmpty()
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _e:
         assert pred
 
     # str(a) has to be "Empty"
