@@ -63,7 +63,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 	
 	def typep(self, a):
 		# check that this does what we want (looks like it does but eh)
-		return isinstance(self.wrapped_class, a)
+		return isinstance(a,self.wrapped_class)
 
 	def _inhabited_down(self):
 		try:
@@ -122,7 +122,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 		from s_empty import SEmptyImpl
 		if isinstance(s, SEmptyImpl):
 			return False
-		elif isinstance(s, STop):
+		elif isinstance(s, STopImpl):
 			return True
 		elif isinstance(s, SAtomic):
 			return isinstance(s, self.wrapped_class)
