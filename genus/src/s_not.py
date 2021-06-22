@@ -130,6 +130,6 @@ class SNot(SimpleTypeD):
 		if self == td:
 			return False
 		elif notp(td):
-			cmp_type_designators(self.s, td.s)
+			return cmp_type_designators(self.s, td.s)
 		else:
 			return super().cmp_to_same_class_obj(td)
