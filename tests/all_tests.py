@@ -411,8 +411,31 @@ def t_uniquify():
     assert uniquify([1,2,1]) == [2,1]
 
 
+def t_lazy():
+    from utils import generate_lazy_val
+
+    c = 0
+
+    def g():
+        nonlocal c
+        c = c + 1
+        return c
+
+    assert c == 0
+    assert g() == 1
+    assert c == 1
+
+    f = generate_lazy_val(lambda: g())
+    assert c == 1
+    assert f() == 2
+    assert c == 2
+    assert f() == 2
+    assert c == 2
+
 #   calling the test functions
 
+
+t_lazy()
 t_uniquify()
 t_fixed_point()
 t_scustom()
