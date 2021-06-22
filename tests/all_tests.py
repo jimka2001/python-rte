@@ -226,7 +226,7 @@ def t_SimpleTypeD():
         _foo = SimpleTypeD()
         pred = False
         assert False
-    except:
+    except Exception:
         assert pred
 
     # ensuring typep is an abstract method
@@ -241,7 +241,7 @@ def t_SimpleTypeD():
         del ChildSTDNoTypep
         pred = False
         assert False
-    except:
+    except Exception:
         assert pred
 
     class ChildSTD(SimpleTypeD):
