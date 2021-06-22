@@ -99,39 +99,73 @@ class SAtomic(SimpleTypeD, TerminalType):
 	def _disjoint_down(self, t):
 		assert isinstance(t, SimpleTypeD)
 		from s_empty import SEmptyImpl
-		# TODO: find a way to cmpte isfinal and isInterface if needed
+		ct = self.wrapped_class
+
 		if isinstance(t, SEmptyImpl):
 			return True
 		elif isinstance(t, STopImpl):
 			return False
 		elif isinstance(t, SAtomic):
-			if t == self.wrapped_class:
-				return False
-			elif issubclass(self.wrapped_class, t.wrapped_class) or issubclass(t.wrapped_class, self.wrapped_class):
-				return False
-			# elif is_final(self.wrapped_class) or is_final(t):
-			# 	return True
-			# elif is_interface(self.wrapped_class) or is_interface(t):
-			# 	return False # maybe ?"""
-			else:
+			tp = t.wrapped_class
+			if self.inhabited() is False:
 				return True
+			elif tp == ct:
+				return False
+			elif issubclass(tp, ct) or issubclass(ct, tp):
+				return False
+			else:
+				return True # TODO for the moment assume two classes are disjoint
 		else:
 			return super()._disjoint_down(t)
 
 	def _subtypep_down(self, s):
-		from s_empty import SEmptyImpl
-		if isinstance(s, SEmptyImpl):
-			return False
+		from s_empty import SEmptyImpl, SEmpty
+		from s_member import SMemberImpl
+		from s_not import SNot
+		from s_or import SOr
+		from s_and import SAnd
+		from s_custom import SCustom
+
+		if self.inhabited() is False:
+			return True
+		elif isinstance(s, SEmptyImpl):
+			# here we know self.inhabited() is either None or True
+			return None if self.inhabited() is None else True
 		elif isinstance(s, STopImpl):
 			return True
 		elif isinstance(s, SAtomic):
-			return isinstance(s, self.wrapped_class)
-		# TODO: implement when SMember is done
-		# TODO: implement when SEql is done
-		# TODO: implement when SNot is done
-		# TODO: implement when SOr is done
-		# TODO: implement when SAnd is done
-		# TODO: implement when SCustom is done
+			if s.inhabited() is False:
+				return self.subtypep(SEmpty)
+			elif s.inhabited() is None:
+				return None
+			elif self.inhabited() is None and s.inhabited() is True:
+				return None
+			elif self.inhabited() is True and s.inhabited() is True:
+				return issubclass(self.wrapped_class, s.wrapped_class)
+			else:
+				raise NotImplementedError
+		elif isinstance(s, SMemberImpl):
+			return False  # no finite list exhausts all elements of a class
+		elif isinstance(s, SNot):
+			return super()._subtypep_down(s)
+		elif isinstance(s, SOr):
+			if any(self.subtypep(td) is True for td in s.tds):
+				return True
+			elif all(self.disjoint(td) is True for td in s.tds):
+				return False
+			else:
+				return super()._subtypep_down(s)
+		elif isinstance(s, SAnd):
+			if all(self.subtypep(td) is True for td in s.tds):
+				return True
+			elif all(self.disjoint(td) is True for td in s.tds):
+				return False
+			else:
+				return super()._subtypep_down(s)
+		elif isinstance(s, SCustom):
+			return super()._subtypep_down(s)
+		else:
+			return super()._subtypep_down(s)
 
 	def canonicalize_once(self, nf=None):
 		return SAtomic(self.wrapped_class)
