@@ -85,6 +85,11 @@ def andp(this):
 	return isinstance(this, SAnd)
 
 
+def combop(this):
+	from s_combination import SCombination
+	return isinstance(this, SCombination)
+
+
 def notp(this):
 	from s_not import SNot
 	return isinstance(this, SNot)
@@ -103,6 +108,11 @@ def topp(this):
 def emptyp(this):
 	from s_empty import SEmptyImpl
 	return isinstance(this, SEmptyImpl)
+
+
+def memberimplp(this):
+	from s_member import SMemberImpl
+	return isinstance(this, SMemberImpl)
 
 
 def memberp(this):

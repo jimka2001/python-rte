@@ -62,8 +62,27 @@ class SOr(SCombination):
 	def annihilator(self, a, b):
 		return b.subtypep(a)
 
+	def dual_combination(self, td):
+		from genus_types import andp
+		return andp(td)
+
+	def dual_combinator(self, a, b):
+		return [x for x in a if x in b]
+
+	def combinator(self, a, b):
+		from utils import uniquify
+		return uniquify(a + b)
+
+	def create_dual(self, tds):
+		from genus_types import createSAnd
+		return createSAnd(tds)
+
 	def typep(self, a):
 		return any(td.typep(a) for td in self.tds)
 
 	def inhabited_down(self):
 		raise NotImplementedError
+
+	def canonicalize_once(self, nf=None):
+		from utils import find_simplifier
+		return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])

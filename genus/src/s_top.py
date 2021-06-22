@@ -30,6 +30,8 @@ _disjoint_down  1
 subtypep    1
 cmp_to_same_class_obj   1
 """
+
+
 class STopImpl(SimpleTypeD):
     """The super type, super type of all types."""
     __instance = None
@@ -43,9 +45,9 @@ class STopImpl(SimpleTypeD):
     def __init__(self):
         super(STopImpl, self).__init__()
         if STopImpl.__instance is not None:
-           raise Exception("Please use STop.get_omega() as STop is unique and can't be duplicated")
+            raise Exception("Please use STop.get_omega() as STop is unique and can't be duplicated")
         else:
-           STopImpl.__instance = self
+            STopImpl.__instance = self
 
     def __str__(self):
         return "Top"
@@ -56,14 +58,14 @@ class STopImpl(SimpleTypeD):
     def __hash__(self):
         return hash(1)
 
-    def typep(self, any):
+    def typep(self, _any):
         return True
 
     def _inhabited_down(self):
         return True
 
     def _disjoint_down(self, t):
-        assert isinstance(t,SimpleTypeD)
+        assert isinstance(t, SimpleTypeD)
         return type(t) is SEmptyImpl
 
     def _subtypep_down(self, t):

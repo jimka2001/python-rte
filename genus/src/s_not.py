@@ -45,7 +45,7 @@ class SNot(SimpleTypeD):
 	@param s the type we want to get the complement"""
 	def __init__(self, s):
 		super(SNot, self).__init__()
-		assert isinstance(s,SimpleTypeD)
+		assert isinstance(s, SimpleTypeD)
 		self.s = s
 	
 	def __str__(self):
@@ -58,7 +58,7 @@ class SNot(SimpleTypeD):
 	def __hash__(self):
 		return hash(self.s)
 
-	def typep(self,a):
+	def typep(self, a):
 		return not self.s.typep(a)
 
 	def _inhabited_down(self):
@@ -68,8 +68,8 @@ class SNot(SimpleTypeD):
 		elif emptyp(self.s):
 			return True
 		# TODO is there a type Nothing in python?
-		#elif self.s == SAtomic(type(None)):
-		#	return True
+		# elif self.s == SAtomic(type(None)):
+		# 	return True
 		elif self.s == SAtomic(object):
 			return False
 		elif atomicp(self.s):
@@ -84,8 +84,8 @@ class SNot(SimpleTypeD):
 			return None
 
 	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
-		if t.subtypep(self.s) : #if it is empty this is empty and is thus evaluated as False
+		assert isinstance(t, SimpleTypeD)
+		if t.subtypep(self.s):  # if it is empty this is empty and is thus evaluated as False
 			return True
 		else:
 			return super()._disjoint_down(t)
@@ -94,7 +94,7 @@ class SNot(SimpleTypeD):
 		from utils import generate_lazy_val
 		from genus_types import notp, atomicp
 
-		os = generate_lazy_val(lambda : t.s.subtypep(self.s) if notp(t) else None)
+		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
 		hosted = generate_lazy_val(lambda: self.s.disjoint(t) if atomicp(self.s) and atomicp(t) else None)
 
 		if self.s.inhabited() is True and self.s.subtypep(t) is True:
@@ -106,7 +106,7 @@ class SNot(SimpleTypeD):
 		else:
 			return super().supertypep(t)
 
-	def canonicalize_once(self, nf = None):
+	def canonicalize_once(self, nf=None):
 		from genus_types import notp, topp, emptyp
 		if notp(self.s):
 			return self.s.s.canonicalize_once(nf)

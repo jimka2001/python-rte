@@ -400,9 +400,20 @@ def t_subtypep1():
             assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
 
 
+def t_uniquify():
+    from utils import uniquify
+    assert uniquify([]) == []
+    assert uniquify([1]) == [1]
+    assert uniquify([5,4,3,2,1]) == [5,4,3,2,1]
+    assert uniquify([1,2,3,4,5]) == [1,2,3,4,5]
+    assert uniquify([1,1,1,1,1]) == [1]
+    assert uniquify([1,2,1,2]) == [1,2]
+    assert uniquify([1,2,1]) == [2,1]
+
 
 #   calling the test functions
 
+t_uniquify()
 t_fixed_point()
 t_scustom()
 t_scustom2()

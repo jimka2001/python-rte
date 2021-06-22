@@ -42,3 +42,40 @@ def find_simplifier(self, simplifiers):
         if self != out:
             return out
     return self
+
+
+def uniquify(seq):
+    """remove duplicates from a list, but preserve the order.
+    If duplicates occur in the given list, then left-most occurrences
+    are removed, so that the right-most occurrence remains.
+    E.g., uniquify([1,2,3,2]) --> [1,3,2]"""
+    from collections import OrderedDict
+
+    return list(reversed(list(OrderedDict.fromkeys(reversed(seq)))))
+
+
+def flat_map(f, xs):
+    return [y for z in xs for y in f(z)]
+
+
+def search_replace_splice(xs, search, replace):
+    def select(x):
+        if x == search:
+            return replace
+        else:
+            return [x]
+    return flat_map(select, xs)
+
+
+def search_replace(xs, search, replace):
+    return search_replace_splice(xs, search, [replace])
+
+
+def remove_element(xs, search):
+    return search_replace_splice(xs, search, [])
+
+
+# find first element of list which makes the predicate true
+# if no such element is found, return the given default or None
+def find_first(pred, xs, default=None):
+    return next(filter(pred, xs), default)

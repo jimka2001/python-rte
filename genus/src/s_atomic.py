@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD, TerminalType
-from s_top import STop, STopImpl
+from s_top import STopImpl
 
 """
 [0-3] Advancement tracker
@@ -63,12 +63,12 @@ class SAtomic(SimpleTypeD, TerminalType):
 	
 	def typep(self, a):
 		# check that this does what we want (looks like it does but eh)
-		return isinstance(a,self.wrapped_class)
+		return isinstance(a, self.wrapped_class)
 
 	def _inhabited_down(self):
 		try:
 			return not issubclass(self.wrapped_class, type(None))
-		except Exception as e:
+		except Exception as _e:
 			# the try block may only fail if self.wrapped_class is not a class, in which case it is a value and contains nothing
 			return False 
 		
@@ -78,12 +78,12 @@ class SAtomic(SimpleTypeD, TerminalType):
 		however since python3.8, the community added a @final
 		decorator and it got added to the language. 
 		
-		At the same time, for backcompatibility reasons, many
+		At the same time, for back compatibility reasons, many
 		people still use various hacks like making a final
 		class to hijack the __new__ and raise an exception
 		on subclassing.
 
-		Even Guido used a haxx (through the C API) to make
+		Even Guido used a hack (through the C API) to make
 		a few classes (like the bool class) final ! 
 		To deal with everything people used, use, or will use,
 		my solution is to just make use of the duck typing magic.
@@ -97,7 +97,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 		pass
 
 	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
+		assert isinstance(t, SimpleTypeD)
 		from s_empty import SEmptyImpl
 		# TODO: find a way to cmpte isfinal and isInterface if needed
 		if isinstance(t, SEmptyImpl):

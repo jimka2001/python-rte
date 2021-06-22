@@ -75,96 +75,340 @@ class SCombination(SimpleTypeD):
     def same_combination(self, td):
         return type(self) == type(td)
 
-    def canonicalize_once(self, nf=None):
-        # lambdas in python can only carry one expression, so i need inside defs
-        def l_1():
-            if not self.tds:  # empty or none
-                # (and) -> STop,  unit=STop,   zero=SEmpty
-                # (or) -> SEmpty, unit=SEmpty,   zero=STop
-                return self.unit()
-            # (and A) -> A
-            # (or A) -> A
-            elif len(self.tds) == 1:
-                return self.tds[0]
+    def dual_combination(self, td):
+        raise NotImplementedError
+
+    def combinator(self, a, b):
+        raise NotImplementedError
+
+    def dual_combinator(self, a, b):
+        raise NotImplementedError
+
+    def create_dual(self, tds):
+        raise NotImplementedError
+
+    def conversion1(self):
+        # (and) -> STop, unit = STop, zero = SEmpty
+        # (or) -> SEmpty, unit = SEmpty, zero = STop
+        if not self.tds:  # tds == []
+            return self.unit()
+        elif len(self.tds) == 1:
+            return self.tds[0]
+        else:
+            return self
+
+    def conversion2(self):
+        # (and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
+        # (or A B STop C D) -> STop, unit = SEmpty, zero = STop
+        if self.zero() in self.tds:
+            return self.zero()
+        else:
+            return self
+
+    def conversion3(self):
+        # (and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
+        # (or A ( not A)) --> STop, unit = SEmpty, zero = STop
+        if any(SNot(td) in self.tds for td in self.tds):
+            return self.zero()
+        else:
+            return self
+
+    def conversion4(self):
+        # SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
+        # SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop
+        if self.unit() in self.tds:
+            return self.create([td for td in self.tds if td is not self.unit()])
+        else:
+            return self
+
+    def conversion5(self):
+        # (and A B A C) -> (and A B C)
+        # (or A B A C) -> (or A B C)
+        from utils import uniquify
+        return self.create(uniquify(self.tds))
+
+    def conversion6(self):
+        # (and A ( and B C) D) --> (and A B C D)
+        # (or A ( or B C) D) --> (or A B C D)
+        if not any(self.same_combination(td) for td in self.tds):
+            return self
+        else:
+            from genus_types import combop
+            from utils import flat_map
+
+            def f(td):
+                if not combop(td):
+                    return [td]
+                elif self.same_combination(td):
+                    return td.tds
+                else:
+                    return [td]
+
+            return self.create(flat_map(f, self.tds))
+
+    def conversion7(self, nf):
+        import functools
+        from genus_types import cmp_type_designators
+        mapped = [td.canonicalize(nf) for td in self.tds]
+        ordered = sorted(mapped, key=functools.cmp_to_key(cmp_type_designators))
+        return self.create(ordered).maybe_dnf(nf).maybe_cnf(nf)
+
+    def conversion8(self):
+        # (or A ( not B)) --> STop if B is subtype of A, zero = STop
+        # (and A ( not B)) --> SEmpty if B is supertype of A, zero = SEmpty
+        from genus_types import notp
+        for a in self.tds:
+            for n in self.tds:
+                if notp(n) and self.annihilator(a, n.s):
+                    return self.zero()
+        return self
+
+    def conversion9(self):
+        # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
+        # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
+        # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
+        from genus_types import combop, notp
+        from utils import search_replace, remove_element, find_first
+        combos = filter(combop, self.tds)
+        duals = filter(lambda td: self.dual_combination(td), combos)
+
+        def f(td):
+            if td not in duals:
+                return td
             else:
-                return self
+                # A + !B + C -> A + C
+                # A + B + C -> A + B + C
+                # X -> X
+                def pred(n):
+                    return notp(n) and any(d.tds == search_replace(td.tds, n, n.s) for d in duals)
 
-        def l_2():
-            # (and A B SEmpty C D) -> SEmpty,  unit=STop,   zero=SEmpty
-            # (or A B STop C D) -> STop,     unit=SEmpty,   zero=STop
-            if self.zero() in self.tds:
-                return self.zero()
-            else:
-                return self
+                # find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
+                to_remove = find_first(pred, td.tds)
+                if to_remove is not None:
+                    # if we found such a !B, then return (A+C)
 
-        def l_3():
-            # (and A (not A)) --> SEmpty,  unit=STop,   zero=SEmpty
-            # (or A (not A)) --> STop,     unit=SEmpty, zero=STop
-            if any(map(lambda td: SNot(td) in self.tds, self.tds)):
-                return self.zero()
-            else:
-                return self
+                    return td.create(remove_element(td.tds, to_remove))
+                else:
+                    return td
 
-        def l_4():
-            # SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
-            # SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
-            if self.unit() in self.tds:
-                return self.create(list(filter(lambda x: x != self.unit())))
-            else:
-                return self
+        # if the arglist contains both (A+!B+C) and (A+B+C)
+        #    then replace (A+!B+C) with (A+C) in the arglist
+        return self.create([f(td) for td in self.tds])
 
-        def l_5():
-            # (and A B A C) -> (and A B C)
-            # (or A B A C) -> (or A B C)
-            # list(set(x)) with x is a list ensures the elements are distinct
-            return self.create(list(set(self.tds)))
+    def conversion10(self):
+        # (and A B C) --> (and A C) if A is subtype of B
+        # (or A B C) -->  (or B C) if A is subtype of B
+        from utils import find_first
 
-        def l_6():
-            # (and A (and B C) D) --> (and A B C D)
-            # (or A (or B C) D) --> (or A B C D)
-            if all(not self.same_combination(td) for td in self.tds):
-                return self
-            else:
-                def flat_map(f, xs):
-                    ys = []
-                    for x in xs:
-                        ys.extend(f(x))
-                    return ys
+        def pred(sub):
+            return any(sup for sup in self.tds if sub != sup and self.annihilator(sub, sup) is True)
 
-                def flat_lambda(td):
-                    if isinstance(td, SCombination) and self.same_combination(td):
-                        return td.tds
-                    else:
-                        return [td]
+        sub = find_first(pred, self.tds)
+        if sub is None:
+            return self
+        else:
+            # for SAnd
+            #   throw away all proper superclasses of sub, i.e., keep everything that is not
+            #   a superclass of sub and also keep sub itself.  keep false and dont-know
+            # for SOr
+            #   throw away all proper subclasses of sub, i.e., keep everything that is not
+            #   a subclass of sub and also keep sub itself.  keep false and dont-know
+            keep = [sup for sup in self.tds if sup == sub or not self.annihilator(sub, sup) is True]
+            return self.create(keep)
 
-                return self.create(flat_map(flat_lambda, self.tds))
+    def conversion11(self):
+        # A + A! B -> A + B
+        # A + A! BX + Y = (A + BX + Y)
+        # A + ABX + Y = (A + Y)
+        from utils import find_first, flat_map, remove_element
+        from genus_types import combop
 
-        def l_7():
-            from genus_types import cmp_type_designators
+        def pred(a):
+            return any(td for td in self.tds if combop(td)
+                       and self.dual_combination(td)
+                       and (a in td.tds
+                            or any(b for b in td.tds if a == SNot(b))))
+
+        ao = find_first(pred, self.tds)
+        if ao is None:
+            return self
+        else:
+            def consume(td):
+                if not combop(td):
+                    return [td]
+                elif self.same_combination(td):
+                    return [td]
+                elif ao in td.tds:
+                    return []  # (A + ABX + Y) --> (A + Y)
+                elif SNot(ao) in td.tds:
+                    # td is a dual, so td.create creates a dual
+                    # (A + !ABX + Y) --> (A + BX + Y)
+                    return [td.create(remove_element(td.tds, SNot(ao)))]
+                else:
+                    return [td]
+
+            return self.create(flat_map(consume, self.tds))
+
+    def conversion12(self):
+        # AXBC + !X = ABC + !X
+        # find !X
+        from genus_types import combop, notp
+        from utils import remove_element
+        combos = filter(combop, self.tds)
+        duals = filter(lambda td: self.dual_combination(td), combos)
+        comp = next((n for n in self.tds if notp(n) and any(td for td in duals if n.s in td.tds)),
+                    None)
+        if comp is None:
+            return self
+        else:
+            def f(td):
+                if not combop(td):
+                    return td
+                elif not self.dual_combination(td):
+                    return td
+                else:
+                    # td is a dual so td.create() creates a dual
+                    # convert AXBC -> ABC by removing X because we found !X elsewhere
+                    return td.create(remove_element(comp.s, td.tds))
+            return self.create([f(td) for td in self.tds])
+
+    def conversion13(self):
+        # multiple !member
+        # SOr(x,!{-1, 1},!{1, 2, 3, 4})
+        # --> SOr(x,!{1}) // intersection of non-member
+        # SAnd(x,!{-1, 1},!{1, 2, 3, 4})
+        # --> SOr(x,!{-1, 1, 2, 3, 4}) // union of non-member
+        from genus_types import notp, memberimplp, createSMember
+        from utils import uniquify
+        not_members = [td for td in self.tds if notp(td) and memberimplp(td.s)]
+        if len(not_members) <= 1:
+            return self
+        else:
             import functools
-            sorted_args = sorted([t.canonicalize(nf) for t in self.tds],
-                                 key=functools.cmp_to_key(cmp_type_designators))
-            i2 = self.create(sorted_args).maybe_dnf(nf).maybe_cnf(nf)
-            if self == i2:
-                return self
+            # find all the items in all the SNot(SMember(...)) elements
+            #    this is a list of lists
+            items = [n.s.arglist for n in not_members]
+            # flatten the list of lists into a single list, either by
+            #   union or intersection depending on SOr or SAnd
+            combined = functools.reduce(lambda x, y: self.dual_combinator(x, y),
+                                        items[1:-1],
+                                        items[0])
+            new_not_member = SNot(createSMember(combined))
+
+            def f(td):
+                if td in not_members:
+                    return new_not_member
+                else:
+                    return td
+            # we replace all SNot(SMember(...)) with the newly computed
+            #  SNot(SMember(...)), the remove duplicates.  This effectively
+            #  replaces the right-most one, and removes all others.
+            return self.create(uniquify([f(td) for td in self.tds]))
+
+    def conversion14(self):
+        # multiple member
+        # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+        # (or String (member 1 2 "3") (member 2 3 4 "5")) --> (or String (member 1 2 4))
+        # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
+        from genus_types import memberimplp, createSMember
+        import functools
+        from utils import uniquify
+
+        members = [td for td in self.tds if memberimplp(td)]
+        if len(members) <= 1:
+            return self
+        else:
+            items = [m.arglist for m in members]
+            combined = functools.reduce(lambda x, y: self.combinator(x, y),
+                                        items[1:-1],
+                                        items[0])
+            new_member = createSMember(combined)
+
+            def f(td):
+                if td in members:
+                    return new_member
+                else:
+                    return td
+
+            return self.create(uniquify([f(td) for td in self.tds]))
+
+    def conversion15(self):
+        # SAnd(X, member, not-member)
+        # SOr(X, member, not-member)
+        # after conversion13 and conversion14 there is a maximum of one SMember(...) and
+        # a maximum of one SNot(SMember(...))
+        from utils import find_first, flat_map
+        from genus_types import memberimplp, notp, andp, orp, createSMember
+
+        def diff(xs, ys):
+            return [x for x in xs if x not in ys]
+
+        member = find_first(memberimplp, self.tds, None)
+        not_member = find_first(lambda x: notp(x) and memberimplp(x.s), self.tds, None)
+        if member is None:
+            return self
+        elif not_member is None:
+            return self
+        # so we have a member and a not_member
+        elif andp(self):
+            def f(td):
+                if td == not_member:
+                    return []
+                elif td == member:
+                    return [createSMember(diff(member.arglist, not_member.s.arglist))]
+                else:
+                    return [td]
+            return self.create(flat_map(f, self.tds))
+        else:  # orp(self)
+            assert orp(self)
+
+            def f(td):
+                if td == member:
+                    return []
+                elif td == not_member:
+                    return [SNot(createSMember(diff(not_member.s.arglist, member.arglist)))]
+                else:
+                    return [td]
+
+            return self.create(flat_map(f, self.tds))
+
+    def conversion16(self):
+        # Now(after conversions 13, 14, and 15, there is at most one SMember(...) and
+        # at most one SNot(SMember(...))
+
+        # (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
+        from genus_types import memberimplp, notp, createSMember
+        fewer = [td for td in self.tds
+                 if not memberimplp(td)
+                 and not (notp(td) and memberimplp(td.s))]
+        stricter = self.create(fewer)
+
+        def f(td):
+            if memberimplp(td):
+                return createSMember(list(filter(stricter.typep, td.arglist)))
+            elif notp(td) and memberimplp(td.s):
+                return SNot(createSMember(list(filter(stricter.typep, td.s.arglist))))
             else:
-                return i2
+                return td
+        return self.create([f(td) for td in self.tds])
 
-        def l_8():
-            # I'm not absolutely sure about this
-            def l_8_predicate(x):
-                for td in self.tds:
-                    if td == type(SNot) and self.annihilator(x, td.s) is True:
-                        return True
-                return False
-
-            found = list(filter(l_8_predicate, self.tds))
-            if found == []:
-                return self
-            else:
-                return self.zero()
-
-        simplifiers = [l_1, l_2, l_3, l_4, l_5, l_6, l_7, l_8]
+    def canonicalize_once(self, nf=None):
+        simplifiers = [lambda: self.conversion1(),  # should also work self.conversion1, self.conversion2 ...
+                       lambda: self.conversion2(),
+                       lambda: self.conversion3(),
+                       lambda: self.conversion4(),
+                       lambda: self.conversion5(),
+                       lambda: self.conversion6(),
+                       lambda: self.conversion7(nf),
+                       lambda: self.conversion8(),
+                       lambda: self.conversion9(),
+                       lambda: self.conversion10(),
+                       lambda: self.conversion11(),
+                       lambda: self.conversion12(),
+                       lambda: self.conversion13(),
+                       lambda: self.conversion14(),
+                       lambda: self.conversion15(),
+                       lambda: self.conversion16()]
         return find_simplifier(self, simplifiers)
 
     def cmp_to_same_class_obj(self, td):
