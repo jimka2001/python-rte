@@ -43,7 +43,7 @@ from s_atomic import SAtomic
 from s_combination import SCombination
 from utils import generate_lazy_val
 from genus_types import NormalForm,createSAnd
-
+from simple_type_d import SimpleTypeD
 
 class SAnd(SCombination):
 	"""An intersection type, which is the intersection of zero or more types.
@@ -59,8 +59,11 @@ class SAnd(SCombination):
 	def create(self,tds):
 		return createSAnd(tds)
 
-	unit = STop
-	zero = SEmpty
+	def unit(self):
+		return STop
+
+	def zero(self):
+		return SEmpty
 
 	def annihilator(self, a, b):
 		return b.supertypep(a)

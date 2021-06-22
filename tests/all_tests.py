@@ -140,8 +140,8 @@ def t_sand2():
     assert(tri_n_quad.subtypep(quadruple))
     assert tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
 
-    assert(SAnd.unit == STop)
-    assert(SAnd.zero == SEmpty)
+    assert(SAnd().unit() == STop)
+    assert(SAnd().zero() == SEmpty)
 
     assert(tri_n_quad.same_combination(create_tri_n_quad))
     assert(tri_n_quad.same_combination(createSAnd([quadruple, triple])))
@@ -179,9 +179,9 @@ def t_sor():
     assert(not tri_o_quad.typep("hello"))
     assert(not create_tri_o_quad.typep("hello"))
 
-    assert(SOr.unit == SEmpty.get_epsilon())
+    assert(SOr().unit() == SEmpty.get_epsilon())
 
-    assert(SOr.zero == STop.get_omega())
+    assert(SOr().zero() == STop.get_omega())
 
     assert(tri_o_quad.subtypep(STop.get_omega()))
     assert(tri_o_quad.subtypep(SAtomic(type(5))) is None)
