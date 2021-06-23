@@ -66,4 +66,7 @@ class SCustom(SimpleTypeD, TerminalType):
 		return super()._subtypep_down(t)
 
 	def cmp_to_same_class_obj(self, t):
-		return str(self) < str(t)
+		if type(self) != type(t):
+			return super().cmp_to_same_class_obj(t)
+		else:
+			return str(self) < str(t)

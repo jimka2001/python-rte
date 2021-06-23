@@ -75,7 +75,10 @@ class SEmptyImpl(SimpleTypeD):
         return True
 
     def cmp_to_same_class_obj(self, t):
-        return False
+        if type(self) != type(t):
+            return super().cmp_to_same_class_obj(t)
+        else:
+            return False
 
 
 SEmpty = SEmptyImpl.get_epsilon()

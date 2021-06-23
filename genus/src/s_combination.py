@@ -417,10 +417,10 @@ class SCombination(SimpleTypeD):
 
     def cmp_to_same_class_obj(self, td):
         from utils import compare_sequence
-        if self == td:
+        if type(self) != type(td):
+            return super().cmp_to_same_class_obj(td)
+        elif self == td:
             return False
         else:
-            if isinstance(td, SCombination):
-                return compare_sequence(self.tds, td.tds)
-            else:
-                return super().cmp_to_same_class_obj(td)
+            return compare_sequence(self.tds, td.tds)
+

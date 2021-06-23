@@ -171,11 +171,9 @@ class SAtomic(SimpleTypeD, TerminalType):
 		return SAtomic(self.wrapped_class)
 
 	def cmp_to_same_class_obj(self, td):
-		if self == td:
+		if type(self) != type(td):
+			return super().cmp_to_same_class_obj(td)
+		elif self == td:
 			return False
-		elif isinstance(td, SAtomic):
-			return str(self.wrapped_class) < str(td.wrapped_class)
 		else:
-			super().cmp_to_same_class_obj(td)
-
-# TODO: ask about what object SAtomic is exactly
+			return self.wrapped_class.__name__ < td.wrapped_class.__name__

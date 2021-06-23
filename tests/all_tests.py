@@ -82,10 +82,6 @@ def t_STop():
     assert(a.subtypep(SAtomic(object)) is True)
     assert a.subtypep(a) is True
 
-    # my understanding is that the top type is unique so it can't be positively compared to any object
-    assert(not a.cmp_to_same_class_obj(a))
-    assert(not a.cmp_to_same_class_obj(object))
-
 
 def t_scustom():
     def l_odd(n):
@@ -327,10 +323,6 @@ def t_STop2():
     assert (STop.subtypep(SAtomic(object)) is not False)
     assert (STop.subtypep(STop) is True)
 
-    # my understanding is that the top type is unique so it can't be positively compared to any object
-    assert (not STop.cmp_to_same_class_obj(STop))
-    assert (not STop.cmp_to_same_class_obj(SAtomic(object)))
-
 
 # TODO: move the tests in their own files once this is packaged:
 def t_SEmpty():
@@ -364,10 +356,6 @@ def t_SEmpty():
     # since types are sets and the empty set is a subset of all sets
     assert SEmpty.subtypep(SAtomic(object)) is True
     assert SEmpty.subtypep(SEmpty) is True
-
-    # my understanding is that the empty type is unique so it can't be positively compared to any object
-    assert (not SEmpty.cmp_to_same_class_obj(SEmpty))
-    assert (not SEmpty.cmp_to_same_class_obj(SAtomic(object)))
 
 
 def t_scustom2():
