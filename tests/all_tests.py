@@ -42,7 +42,7 @@ def t_verboseonlyprint(s):
 def t_fixed_point():
     from utils import fixed_point
     assert fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0
-    assert fixed_point(0, (lambda x: x//2), (lambda x, y: x == y)) == 0
+    assert fixed_point(0, (lambda x: x // 2), (lambda x, y: x == y)) == 0
 
 
 def t_STop():
@@ -52,7 +52,7 @@ def t_STop():
     a = STop
 
     # STop has to be unique
-    assert(id(a) == id(STopImpl.get_omega()))
+    assert (id(a) == id(STopImpl.get_omega()))
 
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
@@ -64,14 +64,14 @@ def t_STop():
         assert pred
 
     # str(a) has to be "Top"
-    assert(str(a) == "Top")
+    assert (str(a) == "STop")
 
     # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert(a.typep(SAtomic(object)))
-    assert(a.typep(a))
+    assert (a.typep(SAtomic(object)))
+    assert (a.typep(a))
 
     # obviously, a is inhabited as it contains everything by definition
-    assert(a.inhabited() is True)
+    assert (a.inhabited() is True)
 
     # a is never disjoint with anything but the empty subtype
     assert a.disjoint(SAtomic(object)) is False
@@ -79,12 +79,8 @@ def t_STop():
 
     # on the contrary, a is never a subtype of any type
     # since types are sets and top is the set that contains all sets
-    assert(a.subtypep(SAtomic(object)) is True)
+    assert (a.subtypep(SAtomic(object)) is True)
     assert a.subtypep(a) is True
-
-    # my understanding is that the top type is unique so it can't be positively compared to any object
-    assert(not a.cmp_to_same_class_obj(a))
-    assert(not a.cmp_to_same_class_obj(object))
 
 
 def t_scustom():
@@ -100,8 +96,8 @@ def t_scustom():
             assert guinea_pig.typep(x)
         else:
             assert not guinea_pig.typep(x)
-    assert(not guinea_pig.typep("hello"))
-    assert(guinea_pig.subtypep(SAtomic(type(4))) is None)
+    assert (not guinea_pig.typep("hello"))
+    assert (guinea_pig.subtypep(SAtomic(type(4))) is None)
 
 
 def t_sand1():
@@ -109,23 +105,23 @@ def t_sand1():
     quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
-    
+
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
 
-    assert(str(tri_n_quad) == "[SAnd triple?,quadruple?]")
-    assert(str(create_tri_n_quad) == "[SAnd triple?,quadruple?]")
+    assert (str(tri_n_quad) == "[SAnd triple?,quadruple?]")
+    assert (str(create_tri_n_quad) == "[SAnd triple?,quadruple?]")
 
-    assert(tri_n_quad.typep(12))
-    assert(create_tri_n_quad.typep(12))
-    assert(not tri_n_quad.typep(6))
-    assert(not create_tri_n_quad.typep(6))
-    assert(not tri_n_quad.typep(3))
-    assert(not create_tri_n_quad.typep(3))
-    assert(tri_n_quad.typep(0))
-    assert(create_tri_n_quad.typep(0))
-    assert(not tri_n_quad.typep("hello"))
-    assert(not create_tri_n_quad.typep("hello"))
+    assert (tri_n_quad.typep(12))
+    assert (create_tri_n_quad.typep(12))
+    assert (not tri_n_quad.typep(6))
+    assert (not create_tri_n_quad.typep(6))
+    assert (not tri_n_quad.typep(3))
+    assert (not create_tri_n_quad.typep(3))
+    assert (tri_n_quad.typep(0))
+    assert (create_tri_n_quad.typep(0))
+    assert (not tri_n_quad.typep("hello"))
+    assert (not create_tri_n_quad.typep("hello"))
 
 
 def t_sand2():
@@ -136,68 +132,68 @@ def t_sand2():
 
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
-    assert(tri_n_quad.subtypep(STop))
-    assert(tri_n_quad.subtypep(triple))
+    assert (tri_n_quad.subtypep(STop))
+    assert (tri_n_quad.subtypep(triple))
 
-    assert(tri_n_quad.subtypep(quadruple))
+    assert (tri_n_quad.subtypep(quadruple))
     assert tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
 
-    assert(SAnd().unit() == STop)
-    assert(SAnd().zero() == SEmpty)
+    assert (SAnd().unit() == STop)
+    assert (SAnd().zero() == SEmpty)
 
-    assert(tri_n_quad.same_combination(create_tri_n_quad))
-    assert(tri_n_quad.same_combination(createSAnd([quadruple, triple])))
+    assert (tri_n_quad.same_combination(create_tri_n_quad))
+    assert (tri_n_quad.same_combination(createSAnd([quadruple, triple])))
 
-    assert(not tri_n_quad.same_combination(STop))
-    assert(not tri_n_quad.same_combination(createSAnd([])))
+    assert (not tri_n_quad.same_combination(STop))
+    assert (not tri_n_quad.same_combination(createSAnd([])))
 
 
 def t_sor():
     from genus_types import createSOr
     quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
     triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
-    
+
     tri_o_quad = SOr(triple, quadruple)
     create_tri_o_quad = createSOr([triple, quadruple])
 
-    assert(str(tri_o_quad) == "[SOr triple?,quadruple?]")
-    assert(str(create_tri_o_quad) == "[SOr triple?,quadruple?]")
+    assert (str(tri_o_quad) == "[SOr triple?,quadruple?]")
+    assert (str(create_tri_o_quad) == "[SOr triple?,quadruple?]")
 
-    assert(tri_o_quad.typep(12))
-    assert(create_tri_o_quad.typep(12))
-    
-    assert(tri_o_quad.typep(6))
-    assert(create_tri_o_quad.typep(6))
-    
-    assert(tri_o_quad.typep(3))
-    assert(create_tri_o_quad.typep(3))
-    
-    assert(tri_o_quad.typep(0))
-    assert(create_tri_o_quad.typep(0))
+    assert (tri_o_quad.typep(12))
+    assert (create_tri_o_quad.typep(12))
 
-    assert(not tri_o_quad.typep(5))
-    assert(not create_tri_o_quad.typep(5))
-    
-    assert(not tri_o_quad.typep("hello"))
-    assert(not create_tri_o_quad.typep("hello"))
+    assert (tri_o_quad.typep(6))
+    assert (create_tri_o_quad.typep(6))
 
-    assert(SOr().unit() == SEmpty.get_epsilon())
+    assert (tri_o_quad.typep(3))
+    assert (create_tri_o_quad.typep(3))
 
-    assert(SOr().zero() == STop.get_omega())
+    assert (tri_o_quad.typep(0))
+    assert (create_tri_o_quad.typep(0))
 
-    assert(tri_o_quad.subtypep(STop.get_omega()))
-    assert(tri_o_quad.subtypep(SAtomic(type(5))) is None)
+    assert (not tri_o_quad.typep(5))
+    assert (not create_tri_o_quad.typep(5))
 
-    assert(tri_o_quad.same_combination(create_tri_o_quad))
-    assert(tri_o_quad.same_combination(createSOr([quadruple, triple])))
+    assert (not tri_o_quad.typep("hello"))
+    assert (not create_tri_o_quad.typep("hello"))
 
-    assert(not tri_o_quad.same_combination(STop))
-    assert(not tri_o_quad.same_combination(createSOr([])))
+    assert (SOr().unit() == SEmpty.get_epsilon())
+
+    assert (SOr().zero() == STop.get_omega())
+
+    assert (tri_o_quad.subtypep(STop.get_omega()))
+    assert (tri_o_quad.subtypep(SAtomic(type(5))) is None)
+
+    assert (tri_o_quad.same_combination(create_tri_o_quad))
+    assert (tri_o_quad.same_combination(createSOr([quadruple, triple])))
+
+    assert (not tri_o_quad.same_combination(STop))
+    assert (not tri_o_quad.same_combination(createSOr([])))
 
 
 def t_snot():
     pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
-    
+
     pred = True
     try:
         _b = SNot([])
@@ -210,12 +206,12 @@ def t_snot():
 
     assert SNot(SNot(pair)).canonicalize() == pair
 
-    assert(str(npair) == "[SNot pair?]")
+    assert (str(npair) == "[SNot pair?]")
 
-    assert(npair.typep(5))
-    assert(npair.typep("hello"))
-    assert(not npair.typep(4))
-    assert(not npair.typep(0))
+    assert (npair.typep(5))
+    assert (npair.typep("hello"))
+    assert (not npair.typep(4))
+    assert (not npair.typep(0))
 
 
 def t_SimpleTypeD():
@@ -309,7 +305,7 @@ def t_STop2():
         assert pred
 
     # str(a) has to be "Top"
-    assert str(STop) == "Top"
+    assert str(STop) == "STop"
 
     # a.subtypep(t) indicates whether t is a subtype of a, which is always the case by definition
     assert STop.subtypep(SAtomic(object)) is True
@@ -326,10 +322,6 @@ def t_STop2():
     # since types are sets and top is the set that contains all sets
     assert (STop.subtypep(SAtomic(object)) is not False)
     assert (STop.subtypep(STop) is True)
-
-    # my understanding is that the top type is unique so it can't be positively compared to any object
-    assert (not STop.cmp_to_same_class_obj(STop))
-    assert (not STop.cmp_to_same_class_obj(SAtomic(object)))
 
 
 # TODO: move the tests in their own files once this is packaged:
@@ -348,7 +340,7 @@ def t_SEmpty():
         assert pred
 
     # str(a) has to be "Empty"
-    assert str(SEmpty) == "Empty"
+    assert str(SEmpty) == "SEmpty"
 
     # a.typep(t) indicates whether t is a subtype of a, which is never the case
     assert SEmpty.typep(3) is False
@@ -365,14 +357,11 @@ def t_SEmpty():
     assert SEmpty.subtypep(SAtomic(object)) is True
     assert SEmpty.subtypep(SEmpty) is True
 
-    # my understanding is that the empty type is unique so it can't be positively compared to any object
-    assert (not SEmpty.cmp_to_same_class_obj(SEmpty))
-    assert (not SEmpty.cmp_to_same_class_obj(SAtomic(object)))
-
 
 def t_scustom2():
     def l_odd(n):
         return isinstance(n, int) and n % 2 == 1
+
     guinea_pig = SCustom(l_odd, "[odd numbers]")
     assert guinea_pig.f == l_odd
     assert guinea_pig.printable == "[odd numbers]"
@@ -386,31 +375,52 @@ def t_scustom2():
 
 def t_subtypep1():
     from depth_generator import random_type_designator
-    for depth in range(0,4):
+    for depth in range(0, 4):
         for _ in range(1000):
             td1 = random_type_designator(depth)
             td2 = random_type_designator(depth)
             assert td1.subtypep(td1) is True
-            assert SAnd(td1,td2).subtypep(td1) is not False
-            assert td1.subtypep(SOr(td1,td2)) is not False
-            assert SAnd(td1,td2).subtypep(SAnd(td2,td1)) is not False
-            assert SOr(td1,td2).subtypep(SOr(td2,td2)) is not False
-            assert SAnd(td1,td2).subtypep(SOr(td1,td2)) is not False
-            assert SAnd(SNot(td1),SNot(td2)).subtypep(SNot(SOr(td1,td2))) is not False
-            assert SOr(SNot(td1),SNot(td2)).subtypep(SNot(SAnd(td1,td2))) is not False
+            assert SAnd(td1, td2).subtypep(td1) is not False
+            assert td1.subtypep(SOr(td1, td2)) is not False
+            assert SAnd(td1, td2).subtypep(SAnd(td2, td1)) is not False
+            assert SOr(td1, td2).subtypep(SOr(td2, td2)) is not False
+            assert SAnd(td1, td2).subtypep(SOr(td1, td2)) is not False
+            assert SAnd(SNot(td1), SNot(td2)).subtypep(SNot(SOr(td1, td2))) is not False
+            assert SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))) is not False
             assert SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False
             assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
+
+
+def t_subtypep2():
+    from depth_generator import random_type_designator
+    from genus_types import NormalForm
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            tdc1 = td.canonicalize()
+            tdc2 = td.canonicalize(NormalForm.DNF)
+            tdc3 = td.canonicalize(NormalForm.CNF)
+
+            assert td.subtypep(tdc1) is not False
+            assert td.subtypep(tdc2) is not False
+            assert td.subtypep(tdc2) is not False
+            assert tdc1.subtypep(td) is not False, \
+                f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}"
+            assert tdc2.subtypep(td) is not False, \
+                f"expecting tdc2={tdc2} subtype of {td} got {tdc2.subtypep(td)}"
+            assert tdc3.subtypep(td) is not False, \
+                f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}"
 
 
 def t_uniquify():
     from utils import uniquify
     assert uniquify([]) == []
     assert uniquify([1]) == [1]
-    assert uniquify([5,4,3,2,1]) == [5,4,3,2,1]
-    assert uniquify([1,2,3,4,5]) == [1,2,3,4,5]
-    assert uniquify([1,1,1,1,1]) == [1]
-    assert uniquify([1,2,1,2]) == [1,2]
-    assert uniquify([1,2,1]) == [2,1]
+    assert uniquify([5, 4, 3, 2, 1]) == [5, 4, 3, 2, 1]
+    assert uniquify([1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]
+    assert uniquify([1, 1, 1, 1, 1]) == [1]
+    assert uniquify([1, 2, 1, 2]) == [1, 2]
+    assert uniquify([1, 2, 1]) == [2, 1]
 
 
 def t_lazy():
@@ -439,30 +449,306 @@ def t_discovered_cases():
     def f(_a):
         return False
 
-    assert SNot(SAtomic(int)).subtypep(SNot(SCustom(f,"f"))) is None
-    assert SAtomic(int).disjoint(SCustom(f,"f")) is None
-    assert SAtomic(int).disjoint(SNot(SCustom(f,"f"))) is None
-    assert SNot(SAtomic(int)).disjoint(SCustom(f,"f")) is None
-    assert SNot(SAtomic(int)).disjoint(SNot(SCustom(f,"f"))) is None
+    assert SNot(SAtomic(int)).subtypep(SNot(SCustom(f, "f"))) is None
+    assert SAtomic(int).disjoint(SCustom(f, "f")) is None
+    assert SAtomic(int).disjoint(SNot(SCustom(f, "f"))) is None
+    assert SNot(SAtomic(int)).disjoint(SCustom(f, "f")) is None
+    assert SNot(SAtomic(int)).disjoint(SNot(SCustom(f, "f"))) is None
 
-    assert SAtomic(int).subtypep(SCustom(f,"f")) is None
-    assert SAtomic(int).subtypep(SNot(SCustom(f,"f"))) is None
-    assert SNot(SAtomic(int)).subtypep(SCustom(f,"f")) is None
+    assert SAtomic(int).subtypep(SCustom(f, "f")) is None
+    assert SAtomic(int).subtypep(SNot(SCustom(f, "f"))) is None
+    assert SNot(SAtomic(int)).subtypep(SCustom(f, "f")) is None
+
 
 def t_or():
-    assert len(SOr(SEql(1),SEql(2)).tds) == 2
+    assert len(SOr(SEql(1), SEql(2)).tds) == 2
     assert SOr().tds == []
 
+
 def t_member():
-    assert SMember(1,2,3).arglist == [1,2,3]
+    assert SMember(1, 2, 3).arglist == [1, 2, 3]
     assert SMember().arglist == []
+
 
 def t_eql():
     assert SEql(1).a == 1
     assert SEql(1).arglist == [1], f"expecting arglist=[1], got {SEql(1).arglist}"
 
+
+def t_discovered_cases2():
+    td = SAnd(SEql(3.14), SMember("a", "b", "c"))
+    tdc = td.canonicalize()
+    assert tdc == SEmpty, f"expecting td={td} to canonicalize to SEmpty, got {tdc}"
+
+    td = SOr(SEql("a"), SAtomic(int))
+    tdc = td.canonicalize()
+    assert tdc != SAtomic(int)
+
+
+def t_membership():
+    from depth_generator import random_type_designator, test_values
+    from genus_types import NormalForm
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            tdc1 = td.canonicalize()
+            tdc2 = td.canonicalize(NormalForm.DNF)
+            tdc3 = td.canonicalize(NormalForm.CNF)
+            for v in test_values:
+                assert td.typep(v) == tdc1.typep(v), \
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
+                    f" but of type tdc1={tdc1} is {tdc1.typep(v)}"
+                assert td.typep(v) == tdc2.typep(v), \
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
+                    f" but of type tdc2={tdc2} is {tdc2.typep(v)}"
+                assert td.typep(v) == tdc3.typep(v), \
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
+                    f" but of type tdc3={tdc3} is {tdc3.typep(v)}"
+
+
+def t_combo_conversion1():
+    assert SAnd().conversion1() == STop
+    assert SOr().conversion1() == SEmpty
+    assert SAnd(SEql(1)).conversion1() == SEql(1)
+    assert SOr(SEql(1)).conversion1() == SEql(1)
+
+
+def t_combo_conversion2():
+    # (and A B SEmpty C D) -> SEmpty,  unit=STop,   zero=SEmpty
+    # (or A B STop C D) -> STop,     unit=SEmpty,   zero=STop
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    d = SEql("d")
+    assert SAnd(a, b, SEmpty, c, d).conversion2() == SEmpty
+    assert SOr(a, b, SEmpty, c, d).conversion2() == SOr(a, b, SEmpty, c, d)
+    assert SAnd(a, b, STop, c, d).conversion2() == SAnd(a, b, STop, c, d)
+    assert SOr(a, b, STop, c, d).conversion2() == STop
+
+
+def t_combo_conversion3():
+    # (and A (not A)) --> SEmpty,  unit=STop,   zero=SEmpty
+    # (or A (not A)) --> STop,     unit=SEmpty, zero=STop
+    a = SEql("a")
+    assert SAnd(a, SNot(a)).conversion3() == SEmpty
+    assert SOr(a, SNot(a)).conversion3() == STop
+
+
+def t_combo_conversion4():
+    # SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
+    # SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
+    a = SEql("a")
+    b = SEql("b")
+    assert SAnd(a, STop, b).conversion4() == SAnd(a, b)
+    assert SOr(a, STop, b).conversion4() == SOr(a, STop, b)
+    assert SAnd(a, SEmpty, b).conversion4() == SAnd(a, SEmpty, b)
+    assert SOr(a, SEmpty, b).conversion4() == SOr(a, b)
+
+
+def t_combo_conversion5():
+    # (and A B A C) -> (and A B C)
+    # (or A B A C) -> (or A B C)
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    assert SAnd(a, b, a, c).conversion5() == SAnd(b, a, c)
+    assert SOr(a, b, a, c).conversion5() == SOr(b, a, c)
+
+
+def t_combo_conversion6():
+    # (and A ( and B C) D) --> (and A B C D)
+    # (or A ( or B C) D) --> (or A B C D)
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    d = SEql("d")
+    assert SAnd(a, SAnd(b, c), d).conversion6() == SAnd(a, b, c, d)
+    assert SOr(a, SAnd(b, c), d).conversion6() == SOr(a, SAnd(b, c), d)
+    assert SOr(a, SAnd(b, c), d).conversion6() == SOr(a, SAnd(b, c), d)
+    assert SOr(a, SOr(b, c), d).conversion6() == SOr(a, b, c, d)
+
+
+def t_combo_conversion7():
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    d = SEql("d")
+    assert SAnd(b, c, a, d).conversion7(None) == SAnd(a, b, c, d), f"got {SAnd(b, c, a, d).conversion7(None)}"
+    assert SOr(b, c, a, d).conversion7(None) == SOr(a, b, c, d)
+
+
+def t_combo_conversion8():
+    # (or A ( not B)) --> STop if B is subtype of A, zero = STop
+    # (and A ( not B)) --> SEmpty if B is supertype of A, zero = SEmpty
+    a = SEql("a")
+    ab = SMember("a", "b")
+    c = SEql("c")
+    assert a.subtypep(ab) is True
+    assert ab.supertypep(a) is True
+
+    assert SAnd(a, SNot(ab), c).conversion8() == SEmpty
+    assert SAnd(SNot(a), ab, c).conversion8() == SAnd(SNot(a), ab, c)
+
+    assert SOr(a, SNot(ab), c).conversion8() == SOr(a, SNot(ab), c)
+    assert SOr(SNot(a), ab, c).conversion8() == STop
+
+
+def t_combo_conversion9():
+    # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
+    # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A + !B + C)(A + !C)
+    # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B + !C)(A +!B+C)(A)
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    x = SEql("x")
+    assert SAnd(SOr(a, b, c),
+                SOr(a, SNot(b), c),
+                x).conversion9() == SAnd(SOr(a, b, c),
+                                         SOr(a, c),
+                                         x)
+    assert SAnd(SOr(a, b, SNot(c)),
+                SOr(a, SNot(b), c),
+                SOr(a, SNot(b), SNot(c))).conversion9() == SAnd(SOr(a, b, SNot(c)),
+                                                                SOr(a, SNot(b), c),
+                                                                SOr(a, SNot(c)))
+    assert SAnd(SOr(a, b, SNot(c)),
+                SOr(a, SNot(b), c),
+                SOr(a, SNot(b), SNot(c))).conversion9() == \
+           SAnd(SOr(a, b, SNot(c)),
+                SOr(a, SNot(b), c),
+                SOr(a, SNot(c)))
+
+    assert SOr(SAnd(a, b, c), SAnd(a, SNot(b), c), x).conversion9() == SOr(SAnd(a, b, c), SAnd(a, c), x)
+    assert SOr(SAnd(a, b, SNot(c)),
+               SAnd(a, SNot(b), c),
+               SAnd(a, SNot(b), SNot(c))).conversion9() == \
+           SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c)))
+    assert SOr(SAnd(a, b, SNot(c)),
+               SAnd(a, SNot(b), c),
+               SAnd(a, SNot(b), SNot(c))).conversion9() == \
+           SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c)))
+
+
+def t_combo_conversion10():
+    # (and A B C) --> (and A C) if A is subtype of B
+    # (or A B C) -->  (or B C) if A is subtype of B
+    a = SEql("a")
+    ab = SMember("a", "b")
+    c = SEql("c")
+    assert a.subtypep(ab) is True
+    assert ab.supertypep(a) is True
+    assert SAnd(a, ab, c).conversion10() == SAnd(a, c)
+    assert SOr(a, ab, c).conversion10() == SOr(ab, c)
+
+
+def t_combo_conversion11():
+    # A + A! B -> A + B
+    # A + A! BX + Y = (A + BX + Y)
+    # A + ABX + Y = (A + Y)
+    a = SEql("a")
+    b = SEql("b")
+    x = SEql("x")
+    y = SEql("y")
+    assert SOr(a, SAnd(SNot(a), b)).conversion11() == SOr(a, b)
+    assert SOr(a, SAnd(SNot(a), b, x), y).conversion11() == SOr(a, SAnd(b, x), y)
+    assert SOr(a, SAnd(a, b, x), y).conversion11() == SOr(a, y)
+
+    assert SAnd(a, SOr(SNot(a), b)).conversion11() == SAnd(a, b)
+    assert SAnd(a, SOr(SNot(a), b, x), y).conversion11() == SAnd(a, SOr(b, x), y)
+    assert SAnd(a, SOr(a, b, x), y).conversion11() == SAnd(a, y)
+
+
+def t_combo_conversion12():
+    # AXBC + !X = ABC + !X
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    x = SEql("x")
+    assert SOr(SAnd(a, x, b, c), SNot(x)).conversion12() == SOr(SAnd(a, b, c), SNot(x))
+    assert SAnd(SOr(a, x, b, c), SNot(x)).conversion12() == SAnd(SOr(a, b, c), SNot(x))
+
+
+def t_combo_conversion13():
+    # multiple !member
+    # SOr(x,!{-1, 1},!{1, 2, 3, 4})
+    # --> SOr(x,!{1}) // intersection of non-member
+    # SAnd(x,!{-1, 1},!{1, 2, 3, 4})
+    # --> SOr(x,!{-1, 1, 2, 3, 4}) // union of non-member
+    x = SAtomic(int)
+
+    assert SOr(x,
+               SNot(SMember(-1, 1)),
+               SNot(SMember(1, 2, 3, 4))).conversion13() == SOr(x,
+                                                                SNot(SEql(1)))
+    assert SAnd(x,
+                SNot(SMember(-1, 1)),
+                SNot(SMember(1, 2, 3, 4))).conversion13() == SAnd(x,
+                                                                  SNot(SMember(-1, 1, 2, 3, 4)))
+
+
+def t_combo_conversion14():
+    # multiple member
+    # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+    # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
+    x = SAtomic(int)
+    assert SOr(x, SMember(1, 2, 3), SMember(2, 3, 4, 5)).conversion14() == SOr(x, SMember(1, 2, 3, 4, 5))
+    assert SAnd(x, SMember(1, 2, 3), SMember(2, 3, 4, 5)).conversion14() == SAnd(x, SMember(2, 3))
+
+
+def t_combo_conversion15():
+    x = SAtomic(int)
+    assert SOr(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SOr(x, SNot(SMember(4, 5)))
+    assert SAnd(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SAnd(x, SMember(0, 1))
+
+
+def t_combo_conversion16():
+    assert SAnd(SEql("a"), SAtomic(int)).conversion16() == SAnd(SEmpty, SAtomic(int))
+    assert SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int))
+
+
+def t_and_conversionA1():
+    # to SAnd(SMember(42, 43, 44), SInt)
+    # while conversionA1() converts it to
+    # SMember(42, 43, 44)
+    assert SAnd(SMember(1, 2, 3, "a", "b", "c"), SAtomic(int)).conversionA1() == SMember(1, 2, 3)
+
+
+def t_or_conversionO1():
+    # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+    # == > SNot(SMember(42, 43, 44))
+    assert SOr(SNot(SMember(1, 2, 3, "a", "b", "c")), SAtomic(int)).conversionO1() == SNot(SMember("a", "b", "c"))
+
+
+def t_and_conversionA3():
+    # find disjoint pair
+    assert SAnd(SMember(1, 2), SMember(3, 4)).conversionA3() == SEmpty
+    assert SAnd(SMember("a", "b"), SAtomic(int)).conversionA3() == SEmpty
+    assert SAnd(SMember(1, 2, "a", "b"), SAtomic(int)).conversionA3() == SAnd(SMember(1, 2, "a", "b"), SAtomic(int))
+
+
 #   calling the test functions
 
+
+t_combo_conversion1()
+t_or_conversionO1()
+t_and_conversionA1()
+t_and_conversionA3()
+t_combo_conversion2()
+t_combo_conversion3()
+t_combo_conversion4()
+t_combo_conversion5()
+t_combo_conversion6()
+t_combo_conversion7()
+t_combo_conversion8()
+t_combo_conversion9()
+t_combo_conversion10()
+t_combo_conversion11()
+t_combo_conversion12()
+t_combo_conversion13()
+t_combo_conversion14()
+t_combo_conversion15()
+t_combo_conversion16()
+t_discovered_cases2()
 t_or()
 t_member()
 t_eql()
@@ -480,4 +766,6 @@ t_STop()
 t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
+t_membership()
 t_subtypep1()
+t_subtypep2()

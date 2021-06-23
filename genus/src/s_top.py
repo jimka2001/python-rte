@@ -50,7 +50,7 @@ class STopImpl(SimpleTypeD):
             STopImpl.__instance = self
 
     def __str__(self):
-        return "Top"
+        return "STop"
 
     def __eq__(self, that):
         return type(self) is type(that)
@@ -79,7 +79,10 @@ class STopImpl(SimpleTypeD):
             return True
 
     def cmp_to_same_class_obj(self, t):
-        return False
+        if type(self) != type(t):
+            return super().cmp_to_same_class_obj(t)
+        else:
+            return False
 
 
 STop = STopImpl.get_omega()

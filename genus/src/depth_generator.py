@@ -12,6 +12,7 @@ from s_eql import SEql
 from s_atomic import SAtomic
 from genus_types import createSAnd, createSOr
 
+
 class depth_generator(object):
     """docstring for depth_generator"""
 
@@ -96,6 +97,13 @@ leaf_tds = [STop,
             SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even"),
             SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
             ]
+
+test_values = [True, False, None,
+               -2, -1, 0, 1, 2, 3,
+               "", "a", "b", "c", "d",
+               Test1(), Test2(),
+               3.14, -1.1,
+               ]
 
 
 def random_type_designator(depth):

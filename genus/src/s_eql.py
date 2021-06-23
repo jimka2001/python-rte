@@ -64,19 +64,3 @@ class SEql(SMemberImpl):
 
 	def subtypep(self, t):
 		return t.typep(self.a)
-
-	def cmp_to_same_class_obj(self, t):
-		if self == t:
-			return False
-		elif type(t) == SEql:
-			if not type(self.a) is type(t.a):
-				# if the types are different compare the type names alphabetically
-				return str(type(self.a)) <= str(type(t.a))
-			elif not str(self.a) == str(t.a):
-				# if the types are the same, then compare the objects alphabetically
-				return str(self.a) <= str(t.a)
-			else:
-				msg = f"cannot compare {self} and {t} because they have different types {type(self)} vs {type(t)}"
-				raise TypeError(msg)
-		else:
-			return super().cmp_to_same_class_obj(t)

@@ -47,7 +47,7 @@ from simple_type_d import SimpleTypeD
 
 class SAnd(SCombination):
     """An intersection type, which is the intersection of zero or more types.
-	@param tds list, zero or more types"""
+    @param tds list, zero or more types"""
 
     def __init__(self, *tds):
         super(SAnd, self).__init__(tds)
@@ -78,6 +78,9 @@ class SAnd(SCombination):
     def combinator(self, a, b):
         return [x for x in a if x in b]
 
+    def combo_filter(self, pred, xs):
+        return filter(pred, xs)  # calling filter from Python std library
+
     def create_dual(self, tds):
         from genus_types import createSOr
         return createSOr(tds)
@@ -101,8 +104,7 @@ class SAnd(SCombination):
             #   then we know self is not inhabited
             any(self.tds[a].disjointp(self.tds[b]) is True
                 for a in range(self.tds.length)
-                for b in range(a, self.tds.length)
-                if a > b)
+                for b in range(a+1, self.tds.length))
         elif dnf() != self and inhabited_dnf():
             return inhabited_dnf()
         elif cnf() != self and inhabited_cnf():
@@ -138,9 +140,37 @@ class SAnd(SCombination):
         else:
             return super()._subtypep_down(t)
 
+    def conversionA1(self):
+        # Note this isn't this consumed in SCombination:conversion16,
+        # conversion16 converts SAnd(SMember(42, 43, 44, "a", "b", "c"), SInt)
+        # to SAnd(SMember(42, 43, 44), SInt)
+        # while conversionA1() converts it to
+        # SMember(42, 43, 44)
+
+        # SAnd(SMember(42, 43, 44), A, B, C)
+        # == > SMember(42, 44)
+        from utils import find_first
+        from genus_types import memberimplp, createSMember
+
+        member = find_first(memberimplp, self.tds, None)
+        if member is None:
+            return self
+        else:
+            return createSMember([x for x in member.arglist if self.typep(x)])
+
+    def conversionA3(self):
+        # discover disjoint pair
+        for i in range(len(self.tds)):
+            for j in range(i+1, len(self.tds)):
+                if self.tds[i].disjoint(self.tds[j]) is True:
+                    return SEmpty
+        return self
+
     def canonicalize_once(self, nf=None):
         from utils import find_simplifier
-        return find_simplifier(self, [lambda: super(SAnd, self).canonicalize_once(nf)])
+        return find_simplifier(self, [lambda: self.conversionA1(),
+                                      lambda: self.conversionA3(),
+                                      lambda: super(SAnd, self).canonicalize_once(nf)])
 
     def compute_dnf(self):
         # TODO I need explanation for this one

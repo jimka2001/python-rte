@@ -130,9 +130,9 @@ def compare_sequence(xs, ys):
         elif us[0] == vs[0]:
             # TODO this is a poor approach, using tail recursion on arrays.
             # need to refactor
-            return comp(us[1:-1], vs[1:-1])
+            return comp(us[1:], vs[1:])
         else:
-            return cmp_type_designators(us[0], vs[0])
+            return cmp_type_designators(us[0], vs[0]) < 0
     return comp(xs, ys)
 
 
@@ -157,3 +157,15 @@ class CallStack:
 
     def pop(self):
         self.stack.pop()
+
+
+# compute a list of all the subclasses of a given class.
+# this code comes from
+#   https://www.studytonight.com/python-howtos/how-to-find-all-the-subclasses-of-a-class-given-its-name
+def get_all_subclasses(cls):
+    all_subclasses = []
+    for subclass in cls.__subclasses__():
+        all_subclasses.append(subclass)
+        all_subclasses.extend(get_all_subclasses(subclass))
+
+    return all_subclasses

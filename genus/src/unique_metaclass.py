@@ -1,6 +1,7 @@
 from simple_type_d import SimpleTypeD 
 
-#this should never reach master, but I like it in trial_and_error
+
+# this should never reach master, but I like it in trial_and_error
 class Unique(SimpleTypeD):
 
     def __call__(cls, *args, **kwargs):
@@ -14,5 +15,5 @@ class Unique(SimpleTypeD):
         super().__init__()
         cls._cache = {}
 
-    def typep(self, any):
+    def typep(self, _any):
         raise NotImplementedError

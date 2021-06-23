@@ -37,145 +37,156 @@ apply 1
 
 
 class SAtomic(SimpleTypeD, TerminalType):
-	"""The atoms of our type system: a simple type built from a native python type."""
-	# reminder: the types are:
-	# numerical: "int", "float", "complex"
-	# sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
-	# binary sequential: "bytes", "bytearray", "memoryview"
-	# text sequential: "str"
-	# in addition, all classes are types and all types are classes
+    """The atoms of our type system: a simple type built from a native python type."""
 
-	def __init__(self, wrapped_class):
-		import inspect
-		super(SAtomic, self).__init__()
-		assert inspect.isclass(wrapped_class)
-		self.wrapped_class = wrapped_class
+    # reminder: the types are:
+    # numerical: "int", "float", "complex"
+    # sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
+    # binary sequential: "bytes", "bytearray", "memoryview"
+    # text sequential: "str"
+    # in addition, all classes are types and all types are classes
 
-	def __str__(self):
-		return "SAtomic(" + str(self.wrapped_class) + ")"
+    def __init__(self, wrapped_class):
+        import inspect
+        super(SAtomic, self).__init__()
+        assert inspect.isclass(wrapped_class)
+        self.wrapped_class = wrapped_class
 
-	def __eq__(self, that):
-		return isinstance(that, SAtomic) \
-			and self.wrapped_class is that.wrapped_class
+    def __str__(self):
+        return "SAtomic(" + self.wrapped_class.__name__ + ")"
 
-	def __hash__(self):
-		return hash(self.wrapped_class)
-	
-	def typep(self, a):
-		# check that this does what we want (looks like it does but eh)
-		return isinstance(a, self.wrapped_class)
+    def __eq__(self, that):
+        return isinstance(that, SAtomic) \
+               and self.wrapped_class is that.wrapped_class
 
-	def _inhabited_down(self):
-		try:
-			return not issubclass(self.wrapped_class, type(None))
-		except Exception as _e:
-			# the try block may only fail if self.wrapped_class is not a class, in which case it is a value and contains nothing
-			return False 
-		
-	@staticmethod
-	def is_final():
-		"""Okay, so, python does not per say handle final classes,
-		however since python3.8, the community added a @final
-		decorator and it got added to the language. 
-		
-		At the same time, for back compatibility reasons, many
-		people still use various hacks like making a final
-		class to hijack the __new__ and raise an exception
-		on subclassing.
+    def __hash__(self):
+        return hash(self.wrapped_class)
 
-		Even Guido used a hack (through the C API) to make
-		a few classes (like the bool class) final ! 
-		To deal with everything people used, use, or will use,
-		my solution is to just make use of the duck typing magic.
+    def typep(self, a):
+        # check that this does what we want (looks like it does but eh)
+        return isinstance(a, self.wrapped_class)
 
-		If it looks like a duck and quacks like a duck,
-		it is probably a duck. Apply the same to final"""
-		try:
-			pass
-		except Exception as e:
-			raise e
-		pass
+    def _inhabited_down(self):
+        try:
+            return not issubclass(self.wrapped_class, type(None))
+        except Exception as _e:
+            # the try block may only fail if self.wrapped_class is not a class,
+            # in which case it is a value and contains nothing
+            return False
 
-	def _disjoint_down(self, t):
-		assert isinstance(t, SimpleTypeD)
-		from s_empty import SEmptyImpl
-		ct = self.wrapped_class
+    @staticmethod
+    def is_final():
+        """Okay, so, python does not per say handle final classes,
+        however since python3.8, the community added a @final
+        decorator and it got added to the language.
 
-		if isinstance(t, SEmptyImpl):
-			return True
-		elif isinstance(t, STopImpl):
-			return False
-		elif isinstance(t, SAtomic):
-			tp = t.wrapped_class
-			if self.inhabited() is False:
-				return True
-			elif tp == ct:
-				return False
-			elif issubclass(tp, ct) or issubclass(ct, tp):
-				return False
-			else:
-				return True # TODO for the moment assume two classes are disjoint
-		else:
-			return super()._disjoint_down(t)
+        At the same time, for back compatibility reasons, many
+        people still use various hacks like making a final
+        class to hijack the __new__ and raise an exception
+        on subclassing.
 
-	def _subtypep_down(self, s):
-		from s_empty import SEmptyImpl, SEmpty
-		from s_member import SMemberImpl
-		from s_not import SNot
-		from s_or import SOr
-		from s_and import SAnd
-		from s_custom import SCustom
+        Even Guido used a hack (through the C API) to make
+        a few classes (like the bool class) final !
+        To deal with everything people used, use, or will use,
+        my solution is to just make use of the duck typing magic.
 
-		if self.inhabited() is False:
-			return True
-		elif isinstance(s, SEmptyImpl):
-			# here we know self.inhabited() is either None or True
-			return None if self.inhabited() is None else True
-		elif isinstance(s, STopImpl):
-			return True
-		elif isinstance(s, SAtomic):
-			if s.inhabited() is False:
-				return self.subtypep(SEmpty)
-			elif s.inhabited() is None:
-				return None
-			elif self.inhabited() is None and s.inhabited() is True:
-				return None
-			elif self.inhabited() is True and s.inhabited() is True:
-				return issubclass(self.wrapped_class, s.wrapped_class)
-			else:
-				raise NotImplementedError
-		elif isinstance(s, SMemberImpl):
-			return False  # no finite list exhausts all elements of a class
-		elif isinstance(s, SNot):
-			return super()._subtypep_down(s)
-		elif isinstance(s, SOr):
-			if any(self.subtypep(td) is True for td in s.tds):
-				return True
-			elif all(self.disjoint(td) is True for td in s.tds):
-				return False
-			else:
-				return super()._subtypep_down(s)
-		elif isinstance(s, SAnd):
-			if all(self.subtypep(td) is True for td in s.tds):
-				return True
-			elif all(self.disjoint(td) is True for td in s.tds):
-				return False
-			else:
-				return super()._subtypep_down(s)
-		elif isinstance(s, SCustom):
-			return super()._subtypep_down(s)
-		else:
-			return super()._subtypep_down(s)
+        If it looks like a duck and quacks like a duck,
+        it is probably a duck. Apply the same to final"""
+        try:
+            pass
+        except Exception as e:
+            raise e
+        pass
 
-	def canonicalize_once(self, nf=None):
-		return SAtomic(self.wrapped_class)
+    def _disjoint_down(self, t):
+        assert isinstance(t, SimpleTypeD)
+        from s_empty import SEmptyImpl
+        ct = self.wrapped_class
 
-	def cmp_to_same_class_obj(self, td):
-		if self == td:
-			return False
-		elif isinstance(td, SAtomic):
-			return str(self.wrapped_class) < str(td.wrapped_class)
-		else:
-			super().cmp_to_same_class_obj(td)
+        if isinstance(t, SEmptyImpl):
+            return True
+        elif isinstance(t, STopImpl):
+            return False
+        elif isinstance(t, SAtomic):
+            from utils import get_all_subclasses
+            tp = t.wrapped_class
+            if self.inhabited() is False:
+                return True
+            elif tp == ct:
+                return False
+            elif issubclass(tp, ct) or issubclass(ct, tp):
+                # is either a subclass of the other
+                return False
+            else:
+                # if they have a common subclass, they are not disjoint
 
-# TODO: ask about what object SAtomic is exactly
+                # return not any(c for c in get_all_subclasses(ct)
+                # 	               if c in tp_subclasses)
+
+                # 2 linear searches should be faster than one n^2 search
+                # by iterating over both lists of subclasses and asking whether the
+                #  other is a superclass of it?
+                return not (any(issubclass(c, tp) for c in get_all_subclasses(ct))
+                            or any(issubclass(c, ct) for c in get_all_subclasses(tp)))
+        else:
+            return super()._disjoint_down(t)
+
+    def _subtypep_down(self, s):
+        from s_empty import SEmptyImpl, SEmpty
+        from s_member import SMemberImpl
+        from s_not import SNot
+        from s_or import SOr
+        from s_and import SAnd
+        from s_custom import SCustom
+
+        if self.inhabited() is False:
+            return True
+        elif isinstance(s, SEmptyImpl):
+            # here we know self.inhabited() is either None or True
+            return None if self.inhabited() is None else True
+        elif isinstance(s, STopImpl):
+            return True
+        elif isinstance(s, SAtomic):
+            if s.inhabited() is False:
+                return self.subtypep(SEmpty)
+            elif s.inhabited() is None:
+                return None
+            elif self.inhabited() is None and s.inhabited() is True:
+                return None
+            elif self.inhabited() is True and s.inhabited() is True:
+                return issubclass(self.wrapped_class, s.wrapped_class)
+            else:
+                raise NotImplementedError
+        elif isinstance(s, SMemberImpl):
+            return False  # no finite list exhausts all elements of a class
+        elif isinstance(s, SNot):
+            return super()._subtypep_down(s)
+        elif isinstance(s, SOr):
+            if any(self.subtypep(td) is True for td in s.tds):
+                return True
+            elif all(self.disjoint(td) is True for td in s.tds):
+                return False
+            else:
+                return super()._subtypep_down(s)
+        elif isinstance(s, SAnd):
+            if all(self.subtypep(td) is True for td in s.tds):
+                return True
+            elif all(self.disjoint(td) is True for td in s.tds):
+                return False
+            else:
+                return super()._subtypep_down(s)
+        elif isinstance(s, SCustom):
+            return super()._subtypep_down(s)
+        else:
+            return super()._subtypep_down(s)
+
+    def canonicalize_once(self, nf=None):
+        return SAtomic(self.wrapped_class)
+
+    def cmp_to_same_class_obj(self, td):
+        if type(self) != type(td):
+            return super().cmp_to_same_class_obj(td)
+        elif self == td:
+            return False
+        else:
+            return self.wrapped_class.__name__ < td.wrapped_class.__name__

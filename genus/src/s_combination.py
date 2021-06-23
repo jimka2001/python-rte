@@ -78,6 +78,9 @@ class SCombination(SimpleTypeD):
     def dual_combination(self, td):
         raise NotImplementedError
 
+    def combo_filter(self, pred, xs):
+        raise NotImplementedError
+
     def combinator(self, a, b):
         raise NotImplementedError
 
@@ -149,8 +152,7 @@ class SCombination(SimpleTypeD):
     def conversion7(self, nf):
         import functools
         from genus_types import cmp_type_designators
-        mapped = [td.canonicalize(nf) for td in self.tds]
-        ordered = sorted(mapped, key=functools.cmp_to_key(cmp_type_designators))
+        ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_type_designators))
         return self.create(ordered).maybe_dnf(nf).maybe_cnf(nf)
 
     def conversion8(self):
@@ -169,8 +171,8 @@ class SCombination(SimpleTypeD):
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
         from genus_types import combop, notp
         from utils import search_replace, remove_element, find_first
-        combos = filter(combop, self.tds)
-        duals = filter(lambda td: self.dual_combination(td), combos)
+        combos = list(filter(combop, self.tds))
+        duals = list(filter(lambda td: self.dual_combination(td), combos))
 
         def f(td):
             if td not in duals:
@@ -186,14 +188,14 @@ class SCombination(SimpleTypeD):
                 to_remove = find_first(pred, td.tds)
                 if to_remove is not None:
                     # if we found such a !B, then return (A+C)
-
                     return td.create(remove_element(td.tds, to_remove))
                 else:
                     return td
 
         # if the arglist contains both (A+!B+C) and (A+B+C)
         #    then replace (A+!B+C) with (A+C) in the arglist
-        return self.create([f(td) for td in self.tds])
+        newargs = [f(td) for td in self.tds]
+        return self.create(newargs)
 
     def conversion10(self):
         # (and A B C) --> (and A C) if A is subtype of B
@@ -217,17 +219,18 @@ class SCombination(SimpleTypeD):
             return self.create(keep)
 
     def conversion11(self):
-        # A + A! B -> A + B
-        # A + A! BX + Y = (A + BX + Y)
+        # A + !A B -> A + B
+        # A + !A BX + Y = (A + BX + Y)
         # A + ABX + Y = (A + Y)
         from utils import find_first, flat_map, remove_element
         from genus_types import combop
+        combos = list(filter(combop, self.tds))
+        duals = list(filter(self.dual_combination, combos))
 
         def pred(a):
-            return any(td for td in self.tds if combop(td)
-                       and self.dual_combination(td)
-                       and (a in td.tds
-                            or any(b for b in td.tds if a == SNot(b))))
+            n = SNot(a)
+            return any(td for td in duals
+                       if (a in td.tds or n in td.tds))
 
         ao = find_first(pred, self.tds)
         if ao is None:
@@ -291,8 +294,7 @@ class SCombination(SimpleTypeD):
             # flatten the list of lists into a single list, either by
             #   union or intersection depending on SOr or SAnd
             combined = functools.reduce(lambda x, y: self.dual_combinator(x, y),
-                                        items[1:-1],
-                                        items[0])
+                                        items)
             new_not_member = SNot(createSMember(combined))
 
             def f(td):
@@ -320,8 +322,7 @@ class SCombination(SimpleTypeD):
         else:
             items = [m.arglist for m in members]
             combined = functools.reduce(lambda x, y: self.combinator(x, y),
-                                        items[1:-1],
-                                        items[0])
+                                        items)
             new_member = createSMember(combined)
 
             def f(td):
@@ -385,12 +386,17 @@ class SCombination(SimpleTypeD):
 
         def f(td):
             if memberimplp(td):
-                return createSMember(list(filter(stricter.typep, td.arglist)))
+                return createSMember(list(self.combo_filter(stricter.typep, td.arglist)))
             elif notp(td) and memberimplp(td.s):
-                return SNot(createSMember(list(filter(stricter.typep, td.s.arglist))))
+                return SNot(createSMember(list(self.combo_filter(stricter.typep, td.s.arglist))))
             else:
                 return td
-        return self.create([f(td) for td in self.tds])
+
+        newargs = [f(td) for td in self.tds]
+        return self.create(newargs)
+
+    def conversion99(self, nf):
+        return self.create([td.canonicalize(nf) for td in self.tds])
 
     def canonicalize_once(self, nf=None):
         simplifiers = [lambda: self.conversion1(),  # should also work self.conversion1, self.conversion2 ...
@@ -408,15 +414,15 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion13(),
                        lambda: self.conversion14(),
                        lambda: self.conversion15(),
-                       lambda: self.conversion16()]
+                       lambda: self.conversion16(),
+                       lambda: self.conversion99(nf)]
         return find_simplifier(self, simplifiers)
 
     def cmp_to_same_class_obj(self, td):
         from utils import compare_sequence
-        if self == td:
+        if type(self) != type(td):
+            return super().cmp_to_same_class_obj(td)
+        elif self == td:
             return False
         else:
-            if isinstance(td, SCombination):
-                return compare_sequence(self.tds, td.tds)
-            else:
-                return super().cmp_to_same_class_obj(td)
+            return compare_sequence(self.tds, td.tds)

@@ -70,7 +70,9 @@ class SMemberImpl(SimpleTypeD):
 		return self
 
 	def cmp_to_same_class_obj(self, t):
-		if self == t:
+		if type(self) != type(t):
+			return super().cmp_to_same_class_obj(t)
+		elif self == t:
 			return False
 		else:
 			def comp(a, b):
