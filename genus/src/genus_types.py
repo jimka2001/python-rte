@@ -23,7 +23,6 @@ from enum import Enum
 
 
 class NormalForm(Enum):
-	NONE = 0
 	DNF = 1
 	CNF = 2
 

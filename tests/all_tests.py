@@ -386,31 +386,52 @@ def t_scustom2():
 
 def t_subtypep1():
     from depth_generator import random_type_designator
-    for depth in range(0,4):
+    for depth in range(0, 4):
         for _ in range(1000):
             td1 = random_type_designator(depth)
             td2 = random_type_designator(depth)
             assert td1.subtypep(td1) is True
-            assert SAnd(td1,td2).subtypep(td1) is not False
-            assert td1.subtypep(SOr(td1,td2)) is not False
-            assert SAnd(td1,td2).subtypep(SAnd(td2,td1)) is not False
-            assert SOr(td1,td2).subtypep(SOr(td2,td2)) is not False
-            assert SAnd(td1,td2).subtypep(SOr(td1,td2)) is not False
-            assert SAnd(SNot(td1),SNot(td2)).subtypep(SNot(SOr(td1,td2))) is not False
-            assert SOr(SNot(td1),SNot(td2)).subtypep(SNot(SAnd(td1,td2))) is not False
+            assert SAnd(td1, td2).subtypep(td1) is not False
+            assert td1.subtypep(SOr(td1, td2)) is not False
+            assert SAnd(td1, td2).subtypep(SAnd(td2, td1)) is not False
+            assert SOr(td1, td2).subtypep(SOr(td2, td2)) is not False
+            assert SAnd(td1, td2).subtypep(SOr(td1, td2)) is not False
+            assert SAnd(SNot(td1), SNot(td2)).subtypep(SNot(SOr(td1, td2))) is not False
+            assert SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))) is not False
             assert SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False
             assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
+
+
+def t_subtypep2():
+    from depth_generator import random_type_designator
+    from genus_types import NormalForm
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            tdc1 = td.canonicalize()
+            tdc2 = td.canonicalize(NormalForm.DNF)
+            tdc3 = td.canonicalize(NormalForm.CNF)
+
+            assert td.subtypep(tdc1) is not False
+            assert td.subtypep(tdc2) is not False
+            assert td.subtypep(tdc2) is not False
+            assert tdc1.subtypep(td) is not False, \
+                f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}"
+            assert tdc2.subtypep(td) is not False, \
+                f"expecting tdc2={tdc2} subtype of {td} got {tdc2.subtypep(td)}"
+            assert tdc3.subtypep(td) is not False, \
+                f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}"
 
 
 def t_uniquify():
     from utils import uniquify
     assert uniquify([]) == []
     assert uniquify([1]) == [1]
-    assert uniquify([5,4,3,2,1]) == [5,4,3,2,1]
-    assert uniquify([1,2,3,4,5]) == [1,2,3,4,5]
-    assert uniquify([1,1,1,1,1]) == [1]
-    assert uniquify([1,2,1,2]) == [1,2]
-    assert uniquify([1,2,1]) == [2,1]
+    assert uniquify([5, 4, 3, 2, 1]) == [5, 4, 3, 2, 1]
+    assert uniquify([1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]
+    assert uniquify([1, 1, 1, 1, 1]) == [1]
+    assert uniquify([1, 2, 1, 2]) == [1, 2]
+    assert uniquify([1, 2, 1]) == [2, 1]
 
 
 def t_lazy():
@@ -439,30 +460,41 @@ def t_discovered_cases():
     def f(_a):
         return False
 
-    assert SNot(SAtomic(int)).subtypep(SNot(SCustom(f,"f"))) is None
-    assert SAtomic(int).disjoint(SCustom(f,"f")) is None
-    assert SAtomic(int).disjoint(SNot(SCustom(f,"f"))) is None
-    assert SNot(SAtomic(int)).disjoint(SCustom(f,"f")) is None
-    assert SNot(SAtomic(int)).disjoint(SNot(SCustom(f,"f"))) is None
+    assert SNot(SAtomic(int)).subtypep(SNot(SCustom(f, "f"))) is None
+    assert SAtomic(int).disjoint(SCustom(f, "f")) is None
+    assert SAtomic(int).disjoint(SNot(SCustom(f, "f"))) is None
+    assert SNot(SAtomic(int)).disjoint(SCustom(f, "f")) is None
+    assert SNot(SAtomic(int)).disjoint(SNot(SCustom(f, "f"))) is None
 
-    assert SAtomic(int).subtypep(SCustom(f,"f")) is None
-    assert SAtomic(int).subtypep(SNot(SCustom(f,"f"))) is None
-    assert SNot(SAtomic(int)).subtypep(SCustom(f,"f")) is None
+    assert SAtomic(int).subtypep(SCustom(f, "f")) is None
+    assert SAtomic(int).subtypep(SNot(SCustom(f, "f"))) is None
+    assert SNot(SAtomic(int)).subtypep(SCustom(f, "f")) is None
+
 
 def t_or():
-    assert len(SOr(SEql(1),SEql(2)).tds) == 2
+    assert len(SOr(SEql(1), SEql(2)).tds) == 2
     assert SOr().tds == []
 
+
 def t_member():
-    assert SMember(1,2,3).arglist == [1,2,3]
+    assert SMember(1, 2, 3).arglist == [1, 2, 3]
     assert SMember().arglist == []
+
 
 def t_eql():
     assert SEql(1).a == 1
     assert SEql(1).arglist == [1], f"expecting arglist=[1], got {SEql(1).arglist}"
 
+
+def t_discovered_cases2():
+    td = SAnd(SEql(3.14), SMember("a", "b", "c"))
+    tdc = td.canonicalize()
+    assert tdc == SEmpty, f"expecting {td} to canonicalize to SEmpty, got {tdc}"
+
+
 #   calling the test functions
 
+t_discovered_cases2()
 t_or()
 t_member()
 t_eql()
@@ -481,3 +513,4 @@ t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
 t_subtypep1()
+t_subtypep2()
