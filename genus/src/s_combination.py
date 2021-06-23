@@ -172,8 +172,8 @@ class SCombination(SimpleTypeD):
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
         from genus_types import combop, notp
         from utils import search_replace, remove_element, find_first
-        combos = filter(combop, self.tds)
-        duals = filter(lambda td: self.dual_combination(td), combos)
+        combos = list(filter(combop, self.tds))
+        duals = list(filter(lambda td: self.dual_combination(td), combos))
 
         def f(td):
             if td not in duals:
@@ -189,14 +189,14 @@ class SCombination(SimpleTypeD):
                 to_remove = find_first(pred, td.tds)
                 if to_remove is not None:
                     # if we found such a !B, then return (A+C)
-
                     return td.create(remove_element(td.tds, to_remove))
                 else:
                     return td
 
         # if the arglist contains both (A+!B+C) and (A+B+C)
         #    then replace (A+!B+C) with (A+C) in the arglist
-        return self.create([f(td) for td in self.tds])
+        newargs = [f(td) for td in self.tds]
+        return self.create(newargs)
 
     def conversion10(self):
         # (and A B C) --> (and A C) if A is subtype of B
@@ -220,17 +220,18 @@ class SCombination(SimpleTypeD):
             return self.create(keep)
 
     def conversion11(self):
-        # A + A! B -> A + B
-        # A + A! BX + Y = (A + BX + Y)
+        # A + !A B -> A + B
+        # A + !A BX + Y = (A + BX + Y)
         # A + ABX + Y = (A + Y)
         from utils import find_first, flat_map, remove_element
         from genus_types import combop
+        combos = list(filter(combop,self.tds))
+        duals = list(filter(self.dual_combination,combos))
 
         def pred(a):
-            return any(td for td in self.tds if combop(td)
-                       and self.dual_combination(td)
-                       and (a in td.tds
-                            or any(b for b in td.tds if a == SNot(b))))
+            n = SNot(a)
+            return any(td for td in duals
+                       if (a in td.tds or n in td.tds))
 
         ao = find_first(pred, self.tds)
         if ao is None:
@@ -294,8 +295,7 @@ class SCombination(SimpleTypeD):
             # flatten the list of lists into a single list, either by
             #   union or intersection depending on SOr or SAnd
             combined = functools.reduce(lambda x, y: self.dual_combinator(x, y),
-                                        items[1:-1],
-                                        items[0])
+                                        items)
             new_not_member = SNot(createSMember(combined))
 
             def f(td):

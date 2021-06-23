@@ -50,7 +50,7 @@ class STopImpl(SimpleTypeD):
             STopImpl.__instance = self
 
     def __str__(self):
-        return "Top"
+        return "STop"
 
     def __eq__(self, that):
         return type(self) is type(that)

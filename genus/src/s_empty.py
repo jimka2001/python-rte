@@ -59,7 +59,7 @@ class SEmptyImpl(SimpleTypeD):
         return hash(0)
 
     def __str__(self):
-        return "Empty"
+        return "SEmpty"
 
     def typep(self, _any):
         return False

@@ -64,7 +64,7 @@ def t_STop():
         assert pred
 
     # str(a) has to be "Top"
-    assert(str(a) == "Top")
+    assert(str(a) == "STop")
 
     # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
     assert(a.typep(SAtomic(object)))
@@ -305,7 +305,7 @@ def t_STop2():
         assert pred
 
     # str(a) has to be "Top"
-    assert str(STop) == "Top"
+    assert str(STop) == "STop"
 
     # a.subtypep(t) indicates whether t is a subtype of a, which is always the case by definition
     assert STop.subtypep(SAtomic(object)) is True
@@ -340,7 +340,7 @@ def t_SEmpty():
         assert pred
 
     # str(a) has to be "Empty"
-    assert str(SEmpty) == "Empty"
+    assert str(SEmpty) == "SEmpty"
 
     # a.typep(t) indicates whether t is a subtype of a, which is never the case
     assert SEmpty.typep(3) is False
@@ -495,11 +495,209 @@ def t_membership():
             tdc3 = td.canonicalize(NormalForm.CNF)
             for v in test_values:
                 assert td.typep(v) == tdc1.typep(v), \
-                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n but of type tdc1={tdc1} is {tdc1.typep(v)}"
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
+                    f" but of type tdc1={tdc1} is {tdc1.typep(v)}"
                 assert td.typep(v) == tdc2.typep(v), \
-                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n but of type tdc2={tdc2} is {tdc2.typep(v)}"
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
+                    f" but of type tdc2={tdc2} is {tdc2.typep(v)}"
                 assert td.typep(v) == tdc3.typep(v), \
-                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n but of type tdc3={tdc3} is {tdc3.typep(v)}"
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
+                    f" but of type tdc3={tdc3} is {tdc3.typep(v)}"
+
+
+def t_combo_conversion1():
+    assert SAnd().conversion1() == STop
+    assert SOr().conversion1() == SEmpty
+    assert SAnd(SEql(1)).conversion1() == SEql(1)
+    assert SOr(SEql(1)).conversion1() == SEql(1)
+
+
+def t_combo_conversion2():
+    # (and A B SEmpty C D) -> SEmpty,  unit=STop,   zero=SEmpty
+    # (or A B STop C D) -> STop,     unit=SEmpty,   zero=STop
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    d = SEql("d")
+    assert SAnd(a, b, SEmpty, c, d).conversion2() == SEmpty
+    assert SOr(a, b, SEmpty, c, d).conversion2() == SOr(a, b, SEmpty, c, d)
+    assert SAnd(a, b, STop, c, d).conversion2() == SAnd(a, b, STop, c, d)
+    assert SOr(a, b, STop, c, d).conversion2() == STop
+
+
+def t_combo_conversion3():
+    # (and A (not A)) --> SEmpty,  unit=STop,   zero=SEmpty
+    # (or A (not A)) --> STop,     unit=SEmpty, zero=STop
+    a = SEql("a")
+    SAnd(a, SNot(a)).conversion3() == SEmpty
+    SOr(a, SNot(a)).conversion3() == STop
+
+
+def t_combo_conversion4():
+    # SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
+    # SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
+    a = SEql("a")
+    b = SEql("b")
+    assert SAnd(a, STop, b).conversion4() == SAnd(a, b)
+    assert SOr(a, STop, b).conversion4() == SOr(a, STop, b)
+    assert SAnd(a, SEmpty, b).conversion4() == SAnd(a, SEmpty, b)
+    assert SOr(a, SEmpty, b).conversion4() == SOr(a, b)
+
+
+def t_combo_conversion5():
+    # (and A B A C) -> (and A B C)
+    # (or A B A C) -> (or A B C)
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    assert SAnd(a, b, a, c).conversion5() == SAnd(b, a, c)
+    assert SOr(a, b, a, c).conversion5() == SOr(b, a, c)
+
+
+def t_combo_conversion6():
+    # (and A ( and B C) D) --> (and A B C D)
+    # (or A ( or B C) D) --> (or A B C D)
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    d = SEql("d")
+    assert SAnd(a, SAnd(b, c), d).conversion6() == SAnd(a, b, c, d)
+    assert SOr(a, SAnd(b, c), d).conversion6() == SOr(a, SAnd(b, c), d)
+    assert SOr(a, SAnd(b, c), d).conversion6() == SOr(a, SAnd(b, c), d)
+    assert SOr(a, SOr(b, c), d).conversion6() == SOr(a, b, c, d)
+
+
+def t_combo_conversion7():
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    d = SEql("d")
+    assert SAnd(b, c, a, d).conversion7(None) == SAnd(a, b, c, d), f"got {SAnd(b, c, a, d).conversion7(None)}"
+    assert SOr(b, c, a, d).conversion7(None) == SOr(a, b, c, d)
+
+
+def t_combo_conversion8():
+    # (or A ( not B)) --> STop if B is subtype of A, zero = STop
+    # (and A ( not B)) --> SEmpty if B is supertype of A, zero = SEmpty
+    a = SEql("a")
+    ab = SMember("a", "b")
+    c = SEql("c")
+    assert a.subtypep(ab) is True
+    assert ab.supertypep(a) is True
+
+    assert SAnd(a, SNot(ab), c).conversion8() == SEmpty
+    assert SAnd(SNot(a), ab, c).conversion8() == SAnd(SNot(a), ab, c)
+
+    assert SOr(a, SNot(ab), c).conversion8() == SOr(a, SNot(ab), c)
+    assert SOr(SNot(a), ab, c).conversion8() == STop
+
+
+def t_combo_conversion9():
+    # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
+    # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A + !B + C)(A + !C)
+    # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B + !C)(A +!B+C)(A)
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    x = SEql("x")
+    assert SAnd(SOr(a,b,c),
+                SOr(a,SNot(b),c),
+                x).conversion9() == SAnd(SOr(a,b,c),
+                                         SOr(a,c),
+                                         x)
+    assert SAnd(SOr(a,b,SNot(c)),
+                SOr(a,SNot(b),c),
+                SOr(a,SNot(b),SNot(c))).conversion9() == SAnd(SOr(a,b,SNot(c)),
+                                                              SOr(a,SNot(b),c),
+                                                              SOr(a,SNot(c)))
+    assert SAnd(SOr(a, b, SNot(c)),
+                SOr(a, SNot(b), c),
+                SOr(a, SNot(b), SNot(c))).conversion9() == \
+           SAnd(SOr(a, b, SNot(c)),
+                SOr(a, SNot(b), c),
+                SOr(a, SNot(c)))
+
+    assert SOr(SAnd(a,b,c), SAnd(a,SNot(b),c), x).conversion9() == SOr(SAnd(a,b,c),SAnd(a,c),x)
+    assert SOr(SAnd(a,b,SNot(c)),
+               SAnd(a,SNot(b),c),
+               SAnd(a,SNot(b),SNot(c))).conversion9() == \
+        SOr(SAnd(a,b,SNot(c)),SAnd(a,SNot(b),c),SAnd(a,SNot(c)))
+    assert SOr(SAnd(a,b,SNot(c)),
+               SAnd(a,SNot(b),c),
+               SAnd(a,SNot(b),SNot(c))).conversion9() == \
+        SOr(SAnd(a,b,SNot(c)),SAnd(a,SNot(b),c),SAnd(a,SNot(c)))
+
+
+def t_combo_conversion10():
+    # (and A B C) --> (and A C) if A is subtype of B
+    # (or A B C) -->  (or B C) if A is subtype of B
+    a = SEql("a")
+    ab = SMember("a", "b")
+    c = SEql("c")
+    assert a.subtypep(ab) is True
+    assert ab.supertypep(a) is True
+    assert SAnd(a, ab, c).conversion10() == SAnd(a, c)
+    assert SOr(a, ab, c).conversion10() == SOr(ab, c)
+
+
+def t_combo_conversion11():
+    # A + A! B -> A + B
+    # A + A! BX + Y = (A + BX + Y)
+    # A + ABX + Y = (A + Y)
+    a = SEql("a")
+    b = SEql("b")
+    x = SEql("x")
+    y = SEql("y")
+    assert SOr(a,SAnd(SNot(a),b)).conversion11() == SOr(a,b)
+    assert SOr(a,SAnd(SNot(a),b,x),y).conversion11() == SOr(a,SAnd(b,x),y)
+    assert SOr(a,SAnd(a,b,x),y).conversion11() == SOr(a,y)
+
+    assert SAnd(a,SOr(SNot(a),b)).conversion11() == SAnd(a,b)
+    assert SAnd(a,SOr(SNot(a),b,x),y).conversion11() == SAnd(a,SOr(b,x),y)
+    assert SAnd(a,SOr(a,b,x),y).conversion11() == SAnd(a,y)
+
+
+def t_combo_conversion12():
+    # AXBC + !X = ABC + !X
+    a = SEql("a")
+    b = SEql("b")
+    c = SEql("c")
+    x = SEql("x")
+    assert SOr(SAnd(a, x, b, c), SNot(x)).conversion12() == SOr(SAnd(a, b, c), SNot(x))
+    assert SAnd(SOr(a, x, b, c), SNot(x)).conversion12() == SAnd(SOr(a, b, c), SNot(x))
+
+
+def t_combo_conversion13():
+    # multiple !member
+    # SOr(x,!{-1, 1},!{1, 2, 3, 4})
+    # --> SOr(x,!{1}) // intersection of non-member
+    # SAnd(x,!{-1, 1},!{1, 2, 3, 4})
+    # --> SOr(x,!{-1, 1, 2, 3, 4}) // union of non-member
+    x = SAtomic(int)
+
+    assert SOr(x,
+               SNot(SMember(-1,1)),
+               SNot(SMember(1,2,3,4))).conversion13() == SOr(x,
+                                                             SNot(SEql(1)))
+    assert SAnd(x,
+                SNot(SMember(-1,1)),
+                SNot(SMember(1,2,3,4))).conversion13() == SAnd(x,
+                                                               SNot(SMember(-1,1,2,3,4)))
+
+
+def t_combo_conversion14():
+    # multiple member
+    # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+    # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
+    x = SAtomic(int)
+    assert SOr(x,SMember(1,2,3),SMember(2,3,4,5)).conversion14() == SOr(x,SMember(1,2,3,4,5))
+    assert SAnd(x,SMember(1,2,3),SMember(2,3,4,5)).conversion14() == SAnd(x,SMember(2,3))
+
+
+def t_combo_conversion15():
+    x = SAtomic(int)
+    assert SOr(x,SMember(0,1,2,3),SNot(SMember(2,3,4,5))).conversion15() == SOr(x,SNot(SMember(4,5)))
+    assert SAnd(x,SMember(0,1,2,3),SNot(SMember(2,3,4,5))).conversion15() == SAnd(x,SMember(0,1))
 
 
 def t_combo_conversion16():
@@ -508,6 +706,22 @@ def t_combo_conversion16():
 
 #   calling the test functions
 
+
+t_combo_conversion1()
+t_combo_conversion2()
+t_combo_conversion3()
+t_combo_conversion4()
+t_combo_conversion5()
+t_combo_conversion6()
+t_combo_conversion7()
+t_combo_conversion8()
+t_combo_conversion9()
+t_combo_conversion10()
+t_combo_conversion11()
+t_combo_conversion12()
+t_combo_conversion13()
+t_combo_conversion14()
+t_combo_conversion15()
 t_combo_conversion16()
 t_discovered_cases2()
 t_or()
