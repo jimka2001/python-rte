@@ -71,6 +71,8 @@ class SOr(SCombination):
 
 	def combinator(self, a, b):
 		from utils import uniquify
+		assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
+		assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
 		return uniquify(a + b)
 
 	def create_dual(self, tds):

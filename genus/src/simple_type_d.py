@@ -68,6 +68,9 @@ class SimpleTypeD(metaclass=ABCMeta):
     def __init__(self):
         self.canonicalized_hash = {}
 
+    def __repr__(self):
+        return self.__str__()
+
     # overloading operators
     def __or__(self, t):
         # implement when SOr is implemented
@@ -105,9 +108,8 @@ class SimpleTypeD(metaclass=ABCMeta):
         I put static attributes. On the first call to those functions, 
         the computations are performed and then cached in said
         static attribute, so that on later calls they are output in O(1)"""
-        
         # og_name in scala: d1
-        this_disjoint_td = self._disjoint_down(td)
+        this_disjoint_td = generate_lazy_val(lambda: self._disjoint_down(td))
         
         # og_name in scala lazy: d2
         td_disjoint_this = generate_lazy_val(lambda: td._disjoint_down(self))
@@ -127,19 +129,21 @@ class SimpleTypeD(metaclass=ABCMeta):
         if self == td and self.inhabited() is not None:
             return not self.inhabited()
         
-        elif this_disjoint_td is not None:
-            return this_disjoint_td
+        elif this_disjoint_td() is not None:
+            return this_disjoint_td()
 
-        elif not td_disjoint_this() is None:
+        elif td_disjoint_this() is not None:
             return td_disjoint_this()
-        
+        elif self_canonicalized() == self and td_canonicalized() == td:
+            return None
         elif self_canonicalized() == td_canonicalized() and self_canonicalized().inhabited() is not None:
             return not self_canonicalized().inhabited()
-        
         elif canon_self_disjoint_td() is not None:
             return canon_self_disjoint_td()
-        else:
+        elif canon_td_disjoint_self() is not None:
             return canon_td_disjoint_self()
+        else:
+            return None
 
     # for performance reasons, do not call directly, rather use the inhabited method as it stores the result
     def _inhabited_down(self):
@@ -182,11 +186,11 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def _subtypep_down(self, t):
         from genus_types import notp
-        if notp(t) and self.disjoint(t.s):
+        if notp(t) and self.disjoint(t.s) is True:
             return True
         elif self.inhabited() is False:
             return True
-        elif self.inhabited is True and t.inhabited is False:
+        elif self.inhabited() is True and t.inhabited() is False:
             return False
         else:
             return None

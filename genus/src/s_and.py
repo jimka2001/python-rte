@@ -99,7 +99,7 @@ class SAnd(SCombination):
             #   here we would like to check every 2-element subset
             #   if we find a,b such that a and b are disjoint,
             #   then we know self is not inhabited
-            any(self.tds[a].disjointp(self.tds[b])
+            any(self.tds[a].disjointp(self.tds[b]) is True
                 for a in range(self.tds.length)
                 for b in range(a, self.tds.length)
                 if a > b)
@@ -115,9 +115,9 @@ class SAnd(SCombination):
         inhabited_t = generate_lazy_val(lambda: t.inhabited())
         inhabited_self = generate_lazy_val(lambda: self.inhabited())
 
-        if any(t.disjoint(t2) for t2 in self.tds):
+        if any(t.disjoint(t2) is True for t2 in self.tds):
             return True
-        elif t in self.tds and inhabited_t() and inhabited_self():
+        elif t in self.tds and inhabited_t() is True and inhabited_self() is True:
             return False
         elif inhabited_t() \
                 and inhabited_self() \
@@ -133,7 +133,7 @@ class SAnd(SCombination):
             return STop.subtypep(t)
         elif any(t2.subtypep(t) for t2 in self.tds):
             return True
-        elif t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
+        elif t.inhabited() is True and self.inhabited() is True and all(x.disjoint(t) is True for x in self.tds):
             return False
         else:
             return super()._subtypep_down(t)

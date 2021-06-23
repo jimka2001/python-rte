@@ -30,6 +30,8 @@ from simple_type_d import SimpleTypeD
 from s_atomic import SAtomic
 from s_custom import SCustom
 from s_and import SAnd
+from s_eql import SEql
+from s_member import SMember
 
 
 def t_verboseonlyprint(s):
@@ -447,10 +449,23 @@ def t_discovered_cases():
     assert SAtomic(int).subtypep(SNot(SCustom(f,"f"))) is None
     assert SNot(SAtomic(int)).subtypep(SCustom(f,"f")) is None
 
+def t_or():
+    assert len(SOr(SEql(1),SEql(2)).tds) == 2
+    assert SOr().tds == []
+
+def t_member():
+    assert SMember(1,2,3).arglist == [1,2,3]
+    assert SMember().arglist == []
+
+def t_eql():
+    assert SEql(1).a == 1
+    assert SEql(1).arglist == [1], f"expecting arglist=[1], got {SEql(1).arglist}"
 
 #   calling the test functions
 
-
+t_or()
+t_member()
+t_eql()
 t_discovered_cases()
 t_lazy()
 t_uniquify()

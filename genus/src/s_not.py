@@ -85,7 +85,7 @@ class SNot(SimpleTypeD):
 
 	def _disjoint_down(self, t):
 		assert isinstance(t, SimpleTypeD)
-		if t.subtypep(self.s):  # if it is empty this is empty and is thus evaluated as False
+		if t.subtypep(self.s) is True:  # if it is empty this is empty and is thus evaluated as False
 			return True
 		else:
 			return super()._disjoint_down(t)
@@ -93,18 +93,20 @@ class SNot(SimpleTypeD):
 	def _subtypep_down(self, t):
 		from utils import generate_lazy_val
 		from genus_types import notp, atomicp
-
+		# SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
+		#    however b.subtypep(a) might return None
 		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
+		# SNot(SAtomic(Long)).subtype(SAtomic(Double)) ??
 		hosted = generate_lazy_val(lambda: self.s.disjoint(t) if atomicp(self.s) and atomicp(t) else None)
 
 		if self.s.inhabited() is True and self.s.subtypep(t) is True:
 			return False
-		elif not hosted() is None:
+		elif hosted() is not None:
 			return hosted()
-		elif not os() is None:
+		elif os() is not None:
 			return os()
 		else:
-			return super().supertypep(t)
+			return super()._subtypep_down(t)
 
 	def canonicalize_once(self, nf=None):
 		from genus_types import notp, topp, emptyp
@@ -115,7 +117,6 @@ class SNot(SimpleTypeD):
 		elif emptyp(self.s):
 			return STop
 		else:
-
 			return SNot(self.s.canonicalize_once(nf))
 
 	def compute_dnf(self):
