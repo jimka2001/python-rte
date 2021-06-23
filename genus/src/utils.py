@@ -120,3 +120,24 @@ def compare_sequence(xs,ys):
         else:
             return cmp_type_designators(us[0],vs[0])
     return comp(xs,ys)
+# this class can be used to monitor recursive calls to detect infinite recursion.
+#   To use the class, declare/bind an instance of CallStack("some-name").
+#   You may then use obj.push(...) and obj.(pop)
+#   If you ever push the same object twice without popping it, you'll get
+#   a run-time exception.
+class CallStack:
+    def __init__(self, name):
+        self.stack = []
+        self.name = name
+
+    def push(self, value):
+        if value in self.stack:
+            self.stack.append(value)
+            for i in range(len(self.stack)):
+                print(f"  {self.name}:{i}: {self.stack[i]}")
+            raise Exception(f"loop detected: {value}")
+        else:
+            self.stack.append(value)
+
+    def pop(self):
+        self.stack.pop()
