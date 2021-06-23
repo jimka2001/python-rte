@@ -323,8 +323,7 @@ class SCombination(SimpleTypeD):
         else:
             items = [m.arglist for m in members]
             combined = functools.reduce(lambda x, y: self.combinator(x, y),
-                                        items[1:-1],
-                                        items[0])
+                                        items)
             new_member = createSMember(combined)
 
             def f(td):
