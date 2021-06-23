@@ -41,7 +41,7 @@ class SMemberImpl(SimpleTypeD):
 	"""docstring for SMemberImpl"""
 	def __init__(self, *arglist):
 		super(SMemberImpl, self).__init__()
-		self.arglist = arglist
+		self.arglist = list(arglist)
 	
 	def __str__(self):
 		return "[Member " + ",".join([str(x) for x in self.arglist]) + "]"
@@ -51,7 +51,7 @@ class SMemberImpl(SimpleTypeD):
 			set(self.arglist) == set(that.arglist)
 
 	def __hash__(self):
-		return hash(self.arglist)
+		return hash(frozenset(self.arglist))
 
 	def typep(self, a):
 		return a in self.arglist

@@ -39,7 +39,7 @@ class SEql(SMemberImpl):
 	It has holds an "a" which is the object defining the type
 	"""
 	def __init__(self, a):
-		super(SEql, self).__init__()
+		super(SEql, self).__init__(a)
 		self.a = a
 	
 	def __str__(self):

@@ -42,7 +42,7 @@ class SCombination(SimpleTypeD):
     """SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 
     def __init__(self, tds):
-        self.tds = tds
+        self.tds = list(tds)
         assert all(isinstance(td, SimpleTypeD) for td in tds)
         super().__init__()
 
@@ -55,7 +55,7 @@ class SCombination(SimpleTypeD):
                and self.tds == that.tds
 
     def __hash__(self):
-        return hash(self.tds)
+        return hash(tuple(self.tds))
 
     @property
     @abstractmethod
@@ -269,7 +269,7 @@ class SCombination(SimpleTypeD):
                 else:
                     # td is a dual so td.create() creates a dual
                     # convert AXBC -> ABC by removing X because we found !X elsewhere
-                    return td.create(remove_element(comp.s, td.tds))
+                    return td.create(remove_element(td.tds, comp.s))
             return self.create([f(td) for td in self.tds])
 
     def conversion13(self):
@@ -417,6 +417,6 @@ class SCombination(SimpleTypeD):
             return False
         else:
             if isinstance(td, SCombination):
-                return compare_sequence(this.tds,td.tds)
+                return compare_sequence(self.tds, td.tds)
             else:
                 return super().cmp_to_same_class_obj(td)
