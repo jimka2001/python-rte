@@ -130,7 +130,7 @@ def compare_sequence(xs, ys):
         elif us[0] == vs[0]:
             # TODO this is a poor approach, using tail recursion on arrays.
             # need to refactor
-            return comp(us[1:-1], vs[1:-1])
+            return comp(us[1:], vs[1:])
         else:
             return cmp_type_designators(us[0], vs[0]) < 0
     return comp(xs, ys)
