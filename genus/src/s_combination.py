@@ -152,8 +152,7 @@ class SCombination(SimpleTypeD):
     def conversion7(self, nf):
         import functools
         from genus_types import cmp_type_designators
-        mapped = [td.canonicalize(nf) for td in self.tds]
-        ordered = sorted(mapped, key=functools.cmp_to_key(cmp_type_designators))
+        ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_type_designators))
         return self.create(ordered).maybe_dnf(nf).maybe_cnf(nf)
 
     def conversion8(self):
@@ -396,6 +395,9 @@ class SCombination(SimpleTypeD):
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
+    def conversion99(self,nf):
+        return self.create([td.canonicalize(nf) for td in self.tds])
+
     def canonicalize_once(self, nf=None):
         simplifiers = [lambda: self.conversion1(),  # should also work self.conversion1, self.conversion2 ...
                        lambda: self.conversion2(),
@@ -412,7 +414,8 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion13(),
                        lambda: self.conversion14(),
                        lambda: self.conversion15(),
-                       lambda: self.conversion16()]
+                       lambda: self.conversion16(),
+                       lambda: self.conversion99(nf)]
         return find_simplifier(self, simplifiers)
 
     def cmp_to_same_class_obj(self, td):
