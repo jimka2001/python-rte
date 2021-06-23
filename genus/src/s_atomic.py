@@ -52,7 +52,7 @@ class SAtomic(SimpleTypeD, TerminalType):
 		self.wrapped_class = wrapped_class
 
 	def __str__(self):
-		return "SAtomic(" + str(self.wrapped_class) + ")"
+		return "SAtomic(" + self.wrapped_class.__name__ + ")"
 
 	def __eq__(self, that):
 		return isinstance(that, SAtomic) \

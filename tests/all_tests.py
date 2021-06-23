@@ -507,11 +507,11 @@ def t_membership():
             tdc3 = td.canonicalize(NormalForm.CNF)
             for v in test_values:
                 assert td.typep(v) == tdc1.typep(v), \
-                    f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc1={tdc1} is {tdc1.typep(v)}"
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n but of type tdc1={tdc1} is {tdc1.typep(v)}"
                 assert td.typep(v) == tdc2.typep(v), \
-                    f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc2={tdc2} is {tdc2.typep(v)}"
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n but of type tdc2={tdc2} is {tdc2.typep(v)}"
                 assert td.typep(v) == tdc3.typep(v), \
-                    f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc3={tdc3} is {tdc3.typep(v)}"
+                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n but of type tdc3={tdc3} is {tdc3.typep(v)}"
 
 
 def t_combo_conversion16():
