@@ -489,7 +489,12 @@ def t_eql():
 def t_discovered_cases2():
     td = SAnd(SEql(3.14), SMember("a", "b", "c"))
     tdc = td.canonicalize()
-    assert tdc == SEmpty, f"expecting {td} to canonicalize to SEmpty, got {tdc}"
+    assert tdc == SEmpty, f"expecting td={td} to canonicalize to SEmpty, got {tdc}"
+
+    td = SOr(SEql("a"), SAtomic(int))
+    tdc = td.canonicalize()
+    assert tdc != SAtomic(int)
+
 
 def t_membership():
     from depth_generator import random_type_designator, test_values
@@ -509,8 +514,13 @@ def t_membership():
                     f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc3={tdc3} is {tdc3.typep(v)}"
 
 
+def t_combo_conversion16():
+    assert SAnd(SEql("a"), SAtomic(int)).conversion16() == SAnd(SEmpty, SAtomic(int))
+    assert SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int))
+
 #   calling the test functions
 
+t_combo_conversion16()
 t_discovered_cases2()
 t_or()
 t_member()
