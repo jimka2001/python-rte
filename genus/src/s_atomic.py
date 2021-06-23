@@ -67,13 +67,17 @@ class SAtomic(SimpleTypeD, TerminalType):
         return isinstance(a, self.wrapped_class)
 
     def _inhabited_down(self):
-        try:
-            return not issubclass(self.wrapped_class, type(None))
-        except Exception as _e:
-            # the try block may only fail if self.wrapped_class is not a class,
-            # in which case it is a value and contains nothing
-            return False
+        # try:
+        #     # TODO type(None) ? is this really the way to find the empty type? I think it is wrong.
+        #     return not issubclass(self.wrapped_class, type(None))
+        # except Exception as _e:
+        #     # the try block may only fail if self.wrapped_class is not a class,
+        #     # in which case it is a value and contains nothing
+        #     return False
 
+        # consider all SAtomic types as being inhabited.
+        # as far as I know Python does not support an empty type.
+        return True
     @staticmethod
     def is_final():
         """Okay, so, python does not per say handle final classes,
