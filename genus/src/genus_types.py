@@ -49,7 +49,7 @@ def createSAnd(tds):
 	elif len(tds) == 1:
 		return tds[0]
 	else:
-		return SAnd(tds)
+		return SAnd(*tds)
 
 
 def createSOr(tds):
@@ -60,7 +60,7 @@ def createSOr(tds):
 	elif len(tds) == 1:
 		return tds[0]
 	else:
-		return SOr(tds)
+		return SOr(*tds)
 
 
 def createSMember(items):
@@ -70,9 +70,9 @@ def createSMember(items):
 	if not items:
 		return SEmpty
 	elif len(items) == 1:
-		return SEql(items(0))
+		return SEql(items[0])
 	else:
-		return SMember(items)
+		return SMember(*items)
 
 
 def orp(this):
@@ -83,6 +83,11 @@ def orp(this):
 def andp(this):
 	from s_and import SAnd
 	return isinstance(this, SAnd)
+
+
+def combop(this):
+	from s_combination import SCombination
+	return isinstance(this, SCombination)
 
 
 def notp(this):
@@ -103,6 +108,11 @@ def topp(this):
 def emptyp(this):
 	from s_empty import SEmptyImpl
 	return isinstance(this, SEmptyImpl)
+
+
+def memberimplp(this):
+	from s_member import SMemberImpl
+	return isinstance(this, SMemberImpl)
 
 
 def memberp(this):

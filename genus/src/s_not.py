@@ -45,7 +45,7 @@ class SNot(SimpleTypeD):
 	@param s the type we want to get the complement"""
 	def __init__(self, s):
 		super(SNot, self).__init__()
-		assert isinstance(s,SimpleTypeD)
+		assert isinstance(s, SimpleTypeD)
 		self.s = s
 	
 	def __str__(self):
@@ -58,7 +58,7 @@ class SNot(SimpleTypeD):
 	def __hash__(self):
 		return hash(self.s)
 
-	def typep(self,a):
+	def typep(self, a):
 		return not self.s.typep(a)
 
 	def _inhabited_down(self):
@@ -68,8 +68,8 @@ class SNot(SimpleTypeD):
 		elif emptyp(self.s):
 			return True
 		# TODO is there a type Nothing in python?
-		#elif self.s == SAtomic(type(None)):
-		#	return True
+		# elif self.s == SAtomic(type(None)):
+		# 	return True
 		elif self.s == SAtomic(object):
 			return False
 		elif atomicp(self.s):
@@ -84,8 +84,8 @@ class SNot(SimpleTypeD):
 			return None
 
 	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
-		if t.subtypep(self.s) : #if it is empty this is empty and is thus evaluated as False
+		assert isinstance(t, SimpleTypeD)
+		if t.subtypep(self.s) is True:  # if it is empty this is empty and is thus evaluated as False
 			return True
 		else:
 			return super()._disjoint_down(t)
@@ -93,20 +93,22 @@ class SNot(SimpleTypeD):
 	def _subtypep_down(self, t):
 		from utils import generate_lazy_val
 		from genus_types import notp, atomicp
-
-		os = generate_lazy_val(lambda : t.s.subtypep(self.s) if notp(t) else None)
+		# SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
+		#    however b.subtypep(a) might return None
+		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
+		# SNot(SAtomic(Long)).subtype(SAtomic(Double)) ??
 		hosted = generate_lazy_val(lambda: self.s.disjoint(t) if atomicp(self.s) and atomicp(t) else None)
 
 		if self.s.inhabited() is True and self.s.subtypep(t) is True:
 			return False
-		elif not hosted() is None:
+		elif hosted() is not None:
 			return hosted()
-		elif not os() is None:
+		elif os() is not None:
 			return os()
 		else:
-			return super().supertypep(t)
+			return super()._subtypep_down(t)
 
-	def canonicalize_once(self, nf = None):
+	def canonicalize_once(self, nf=None):
 		from genus_types import notp, topp, emptyp
 		if notp(self.s):
 			return self.s.s.canonicalize_once(nf)
@@ -115,7 +117,6 @@ class SNot(SimpleTypeD):
 		elif emptyp(self.s):
 			return STop
 		else:
-
 			return SNot(self.s.canonicalize_once(nf))
 
 	def compute_dnf(self):
@@ -130,6 +131,6 @@ class SNot(SimpleTypeD):
 		if self == td:
 			return False
 		elif notp(td):
-			cmp_type_designators(self.s, td.s)
+			return cmp_type_designators(self.s, td.s)
 		else:
 			return super().cmp_to_same_class_obj(td)

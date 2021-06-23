@@ -44,7 +44,7 @@ from s_top import STop
 
 class SOr(SCombination):
 	"""docstring for SOr"""
-	def __init__(self, tds):
+	def __init__(self, *tds):
 		super(SOr, self).__init__(tds)
 
 	def __str__(self):
@@ -53,14 +53,38 @@ class SOr(SCombination):
 	def create(self, tds):
 		return createSOr(tds)
 
-	unit = SEmpty
-	zero = STop
+	def unit(self):
+		return SEmpty
+
+	def zero(self):
+		return STop
 
 	def annihilator(self, a, b):
 		return b.subtypep(a)
+
+	def dual_combination(self, td):
+		from genus_types import andp
+		return andp(td)
+
+	def dual_combinator(self, a, b):
+		return [x for x in a if x in b]
+
+	def combinator(self, a, b):
+		from utils import uniquify
+		assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
+		assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
+		return uniquify(a + b)
+
+	def create_dual(self, tds):
+		from genus_types import createSAnd
+		return createSAnd(tds)
 
 	def typep(self, a):
 		return any(td.typep(a) for td in self.tds)
 
 	def inhabited_down(self):
 		raise NotImplementedError
+
+	def canonicalize_once(self, nf=None):
+		from utils import find_simplifier
+		return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])

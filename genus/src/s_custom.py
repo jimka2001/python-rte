@@ -33,6 +33,7 @@ apply 1
 
 from simple_type_d import SimpleTypeD, TerminalType
 
+
 class SCustom(SimpleTypeD, TerminalType):
 	"""The super type, super type of all types."""
 	def __init__(self, f, printable):
@@ -46,22 +47,22 @@ class SCustom(SimpleTypeD, TerminalType):
 				and self.printable == that.printable
 
 	def __hash__(self):
-		return hash((self.f,self.printable))
+		return hash((self.f, self.printable))
 
 	def typep(self, a):
-		return (self.f(a))
+		return self.f(a)
 
 	def __str__(self):
 		return str(self.printable) + "?"
 
 	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
+		assert isinstance(t, SimpleTypeD)
 		return super()._disjoint_down(t)
 
 	def _inhabited_down(self):
 		return super()._inhabited_down()
 
-	def _subtypep_down(self,t):
+	def _subtypep_down(self, t):
 		return super()._subtypep_down(t)
 
 	def cmp_to_same_class_obj(self, t):

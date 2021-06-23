@@ -36,96 +36,112 @@ canonicalize_once 0
 compute_dnf 0
 """
 
-
 from s_top import STop
 from s_empty import SEmpty
 from s_atomic import SAtomic
 from s_combination import SCombination
 from utils import generate_lazy_val
-from genus_types import NormalForm,createSAnd
+from genus_types import NormalForm, createSAnd
+from simple_type_d import SimpleTypeD
 
 
 class SAnd(SCombination):
-	"""An intersection type, which is the intersection of zero or more types.
+    """An intersection type, which is the intersection of zero or more types.
 	@param tds list, zero or more types"""
 
-	#equivalent to the scala "create"
-	def __init__(self, tds):
-		super(SAnd, self).__init__(tds)
-	
-	def __str__(self):
-		return "[SAnd " + ",".join([str(td) for td in self.tds]) + "]"
+    def __init__(self, *tds):
+        super(SAnd, self).__init__(tds)
 
-	def create(self,tds):
-		return createSAnd(tds)
+    def __str__(self):
+        return "[SAnd " + ",".join([str(td) for td in self.tds]) + "]"
 
-	unit = STop
-	zero = SEmpty
+    def create(self, tds):
+        return createSAnd(tds)
 
-	def annihilator(self, a, b):
-		return b.supertypep(a)
+    def unit(self):
+        return STop
 
-	def typep(self,a):
-		return all(td.typep(a) for td in self.tds)
+    def zero(self):
+        return SEmpty
 
-	def inhabited_down(self, opt):
+    def annihilator(self, a, b):
+        return b.supertypep(a)
 
-		dnf = generate_lazy_val(lambda : self.canonicalize(NormalForm.DNF))
-		cnf = generate_lazy_val(lambda : self.canonicalize(NormalForm.CNF))
+    def dual_combination(self, td):
+        from genus_types import orp
+        return orp(td)
 
-		inhabited_dnf = generate_lazy_val(lambda : dnf.inhabited())
-		inhabited_cnf = generate_lazy_val(lambda : cnf.inhabited())
+    def dual_combinator(self, a, b):
+        from utils import uniquify
+        return uniquify(a + b)
 
-		if any(t.contains(False) for t in self.tds):
-			return False
-		elif all(type(t) == SAtomic for t in self.tds):
-		#   here we would like to check every 2-element subset
-		#   if we find a,b such that a and b are disjoint,
-		#   then we know self is not inhabited
-			any(self.tds[a].disjointp( self.tds[b])
-				for a in range(self.tds.length)
-				for b in range(a,self.tds.length)
-				if a > b)
-		elif dnf() != self and inhabited_dnf():
-			return inhabited_dnf()
-		elif cnf() != self and inhabited_cnf():
-			return inhabited_cnf()
-		else:
-			return super()._inhabited_down
+    def combinator(self, a, b):
+        return [x for x in a if x in b]
 
-	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
-		inhabited_t = generate_lazy_val(lambda : t.inhabited())
-		inhabited_self = generate_lazy_val(lambda: self.inhabited())
+    def create_dual(self, tds):
+        from genus_types import createSOr
+        return createSOr(tds)
 
-		if any(t.disjoint(t2) for t2 in self.tds):
-			return True
-		elif t in self.tds and inhabited_t() and inhabited_self():
-			return False
-		elif inhabited_t() \
-				and inhabited_self() \
-				and any(x.subtypep(t) is True
-						or t.subtypep(x) is True
-						for x in self.tds):
-			return False
-		else:
-			return super()._disjoint_down(t)
+    def typep(self, a):
+        return all(td.typep(a) for td in self.tds)
 
-	def _subtypep_down(self,t):
-		if not self.tds:
-			return STop.subtypep(t)
-		elif any(t2.subtypep(t) for t2 in self.tds):
-			return True
-		elif t.inhabited() and self.inhabited() and all(x.disjoint(t) for x in self.tds):
-			return False
-		else:
-			return super()._subtypep_down(t)
+    def inhabited_down(self, _opt):
 
-	def canonicalize_once(self,nf):
-		#TODO
-		return self
+        dnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.DNF))
+        cnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.CNF))
 
-	def compute_dnf(self):
-		#TODO I need explanation for this one
-		return self
+        inhabited_dnf = generate_lazy_val(lambda: dnf.inhabited())
+        inhabited_cnf = generate_lazy_val(lambda: cnf.inhabited())
 
+        if any(False in t for t in self.tds):
+            return False
+        elif all(type(t) == SAtomic for t in self.tds):
+            #   here we would like to check every 2-element subset
+            #   if we find a,b such that a and b are disjoint,
+            #   then we know self is not inhabited
+            any(self.tds[a].disjointp(self.tds[b]) is True
+                for a in range(self.tds.length)
+                for b in range(a, self.tds.length)
+                if a > b)
+        elif dnf() != self and inhabited_dnf():
+            return inhabited_dnf()
+        elif cnf() != self and inhabited_cnf():
+            return inhabited_cnf()
+        else:
+            return super()._inhabited_down
+
+    def _disjoint_down(self, t):
+        assert isinstance(t, SimpleTypeD)
+        inhabited_t = generate_lazy_val(lambda: t.inhabited())
+        inhabited_self = generate_lazy_val(lambda: self.inhabited())
+
+        if any(t.disjoint(t2) is True for t2 in self.tds):
+            return True
+        elif t in self.tds and inhabited_t() is True and inhabited_self() is True:
+            return False
+        elif inhabited_t() \
+                and inhabited_self() \
+                and any(x.subtypep(t) is True
+                        or t.subtypep(x) is True
+                        for x in self.tds):
+            return False
+        else:
+            return super()._disjoint_down(t)
+
+    def _subtypep_down(self, t):
+        if not self.tds:
+            return STop.subtypep(t)
+        elif any(t2.subtypep(t) for t2 in self.tds):
+            return True
+        elif t.inhabited() is True and self.inhabited() is True and all(x.disjoint(t) is True for x in self.tds):
+            return False
+        else:
+            return super()._subtypep_down(t)
+
+    def canonicalize_once(self, nf=None):
+        from utils import find_simplifier
+        return find_simplifier(self, [lambda: super(SAnd, self).canonicalize_once(nf)])
+
+    def compute_dnf(self):
+        # TODO I need explanation for this one
+        return self

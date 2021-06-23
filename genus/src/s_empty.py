@@ -33,6 +33,8 @@ cmp_to_same_class_obj 3
 
 TODO: move the tests on their own
 """
+
+
 class SEmptyImpl(SimpleTypeD):
     """The empty type, subtype of all types."""
     __instance = None
@@ -46,9 +48,9 @@ class SEmptyImpl(SimpleTypeD):
     def __init__(self):
         super(SEmptyImpl, self).__init__()
         if SEmptyImpl.__instance is not None:
-           raise Exception("Please use SEmptyImpl.get_epsilon() as SEmpty is unique and can't be duplicated")
+            raise Exception("Please use SEmptyImpl.get_epsilon() as SEmpty is unique and can't be duplicated")
         else:
-           SEmptyImpl.__instance = self
+            SEmptyImpl.__instance = self
 
     def __eq__(self, that):
         return type(self) is type(that)
@@ -59,14 +61,14 @@ class SEmptyImpl(SimpleTypeD):
     def __str__(self):
         return "Empty"
 
-    def typep(self, any):
+    def typep(self, _any):
         return False
 
     def _inhabited_down(self):
         return False
 
     def _disjoint_down(self, t):
-        assert isinstance(t,SimpleTypeD)
+        assert isinstance(t, SimpleTypeD)
         return True
 
     def subtypep(self, t):
@@ -75,6 +77,5 @@ class SEmptyImpl(SimpleTypeD):
     def cmp_to_same_class_obj(self, t):
         return False
 
+
 SEmpty = SEmptyImpl.get_epsilon()
-
-

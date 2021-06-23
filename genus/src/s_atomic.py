@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simple_type_d import SimpleTypeD, TerminalType
-from s_top import STop, STopImpl
+from s_top import STopImpl
 
 """
 [0-3] Advancement tracker
@@ -63,12 +63,12 @@ class SAtomic(SimpleTypeD, TerminalType):
 	
 	def typep(self, a):
 		# check that this does what we want (looks like it does but eh)
-		return isinstance(self.wrapped_class, a)
+		return isinstance(a, self.wrapped_class)
 
 	def _inhabited_down(self):
 		try:
 			return not issubclass(self.wrapped_class, type(None))
-		except Exception as e:
+		except Exception as _e:
 			# the try block may only fail if self.wrapped_class is not a class, in which case it is a value and contains nothing
 			return False 
 		
@@ -78,12 +78,12 @@ class SAtomic(SimpleTypeD, TerminalType):
 		however since python3.8, the community added a @final
 		decorator and it got added to the language. 
 		
-		At the same time, for backcompatibility reasons, many
+		At the same time, for back compatibility reasons, many
 		people still use various hacks like making a final
 		class to hijack the __new__ and raise an exception
 		on subclassing.
 
-		Even Guido used a haxx (through the C API) to make
+		Even Guido used a hack (through the C API) to make
 		a few classes (like the bool class) final ! 
 		To deal with everything people used, use, or will use,
 		my solution is to just make use of the duck typing magic.
@@ -97,41 +97,75 @@ class SAtomic(SimpleTypeD, TerminalType):
 		pass
 
 	def _disjoint_down(self, t):
-		assert isinstance(t,SimpleTypeD) 
+		assert isinstance(t, SimpleTypeD)
 		from s_empty import SEmptyImpl
-		# TODO: find a way to cmpte isfinal and isInterface if needed
+		ct = self.wrapped_class
+
 		if isinstance(t, SEmptyImpl):
 			return True
 		elif isinstance(t, STopImpl):
 			return False
 		elif isinstance(t, SAtomic):
-			if t == self.wrapped_class:
-				return False
-			elif issubclass(self.wrapped_class, t.wrapped_class) or issubclass(t.wrapped_class, self.wrapped_class):
-				return False
-			# elif is_final(self.wrapped_class) or is_final(t):
-			# 	return True
-			# elif is_interface(self.wrapped_class) or is_interface(t):
-			# 	return False # maybe ?"""
-			else:
+			tp = t.wrapped_class
+			if self.inhabited() is False:
 				return True
+			elif tp == ct:
+				return False
+			elif issubclass(tp, ct) or issubclass(ct, tp):
+				return False
+			else:
+				return True # TODO for the moment assume two classes are disjoint
 		else:
 			return super()._disjoint_down(t)
 
 	def _subtypep_down(self, s):
-		from s_empty import SEmptyImpl
-		if isinstance(s, SEmptyImpl):
-			return False
-		elif isinstance(s, STop):
+		from s_empty import SEmptyImpl, SEmpty
+		from s_member import SMemberImpl
+		from s_not import SNot
+		from s_or import SOr
+		from s_and import SAnd
+		from s_custom import SCustom
+
+		if self.inhabited() is False:
+			return True
+		elif isinstance(s, SEmptyImpl):
+			# here we know self.inhabited() is either None or True
+			return None if self.inhabited() is None else True
+		elif isinstance(s, STopImpl):
 			return True
 		elif isinstance(s, SAtomic):
-			return isinstance(s, self.wrapped_class)
-		# TODO: implement when SMember is done
-		# TODO: implement when SEql is done
-		# TODO: implement when SNot is done
-		# TODO: implement when SOr is done
-		# TODO: implement when SAnd is done
-		# TODO: implement when SCustom is done
+			if s.inhabited() is False:
+				return self.subtypep(SEmpty)
+			elif s.inhabited() is None:
+				return None
+			elif self.inhabited() is None and s.inhabited() is True:
+				return None
+			elif self.inhabited() is True and s.inhabited() is True:
+				return issubclass(self.wrapped_class, s.wrapped_class)
+			else:
+				raise NotImplementedError
+		elif isinstance(s, SMemberImpl):
+			return False  # no finite list exhausts all elements of a class
+		elif isinstance(s, SNot):
+			return super()._subtypep_down(s)
+		elif isinstance(s, SOr):
+			if any(self.subtypep(td) is True for td in s.tds):
+				return True
+			elif all(self.disjoint(td) is True for td in s.tds):
+				return False
+			else:
+				return super()._subtypep_down(s)
+		elif isinstance(s, SAnd):
+			if all(self.subtypep(td) is True for td in s.tds):
+				return True
+			elif all(self.disjoint(td) is True for td in s.tds):
+				return False
+			else:
+				return super()._subtypep_down(s)
+		elif isinstance(s, SCustom):
+			return super()._subtypep_down(s)
+		else:
+			return super()._subtypep_down(s)
 
 	def canonicalize_once(self, nf=None):
 		return SAtomic(self.wrapped_class)

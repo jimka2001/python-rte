@@ -30,6 +30,8 @@ from simple_type_d import SimpleTypeD
 from s_atomic import SAtomic
 from s_custom import SCustom
 from s_and import SAnd
+from s_eql import SEql
+from s_member import SMember
 
 
 def t_verboseonlyprint(s):
@@ -55,10 +57,10 @@ def t_STop():
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
-        b = STop()
+        _b = STop()
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _e:
         assert pred
 
     # str(a) has to be "Top"
@@ -108,7 +110,7 @@ def t_sand1():
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
     
-    tri_n_quad = SAnd([triple, quadruple])
+    tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
 
     assert(str(tri_n_quad) == "[SAnd triple?,quadruple?]")
@@ -132,7 +134,7 @@ def t_sand2():
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
 
-    tri_n_quad = SAnd([triple, quadruple])
+    tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
     assert(tri_n_quad.subtypep(STop))
     assert(tri_n_quad.subtypep(triple))
@@ -140,8 +142,8 @@ def t_sand2():
     assert(tri_n_quad.subtypep(quadruple))
     assert tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
 
-    assert(SAnd.unit == STop)
-    assert(SAnd.zero == SEmpty)
+    assert(SAnd().unit() == STop)
+    assert(SAnd().zero() == SEmpty)
 
     assert(tri_n_quad.same_combination(create_tri_n_quad))
     assert(tri_n_quad.same_combination(createSAnd([quadruple, triple])))
@@ -155,7 +157,7 @@ def t_sor():
     quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
     triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
     
-    tri_o_quad = SOr([triple, quadruple])
+    tri_o_quad = SOr(triple, quadruple)
     create_tri_o_quad = createSOr([triple, quadruple])
 
     assert(str(tri_o_quad) == "[SOr triple?,quadruple?]")
@@ -179,9 +181,9 @@ def t_sor():
     assert(not tri_o_quad.typep("hello"))
     assert(not create_tri_o_quad.typep("hello"))
 
-    assert(SOr.unit == SEmpty.get_epsilon())
+    assert(SOr().unit() == SEmpty.get_epsilon())
 
-    assert(SOr.zero == STop.get_omega())
+    assert(SOr().zero() == STop.get_omega())
 
     assert(tri_o_quad.subtypep(STop.get_omega()))
     assert(tri_o_quad.subtypep(SAtomic(type(5))) is None)
@@ -189,7 +191,7 @@ def t_sor():
     assert(tri_o_quad.same_combination(create_tri_o_quad))
     assert(tri_o_quad.same_combination(createSOr([quadruple, triple])))
 
-    assert(not tri_o_quad.same_combination(STop.get_omega()))
+    assert(not tri_o_quad.same_combination(STop))
     assert(not tri_o_quad.same_combination(createSOr([])))
 
 
@@ -198,10 +200,10 @@ def t_snot():
     
     pred = True
     try:
-        b = SNot([])
+        _b = SNot([])
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _e:
         assert pred
 
     npair = SNot(pair)
@@ -223,10 +225,10 @@ def t_SimpleTypeD():
     # ensuring SimpleTypeD is abstract
     pred = True
     try:
-        foo = SimpleTypeD()
+        _foo = SimpleTypeD()
         pred = False
         assert False
-    except:
+    except Exception:
         assert pred
 
     # ensuring typep is an abstract method
@@ -237,12 +239,12 @@ def t_SimpleTypeD():
             def __init__(self):
                 super(ChildSTDNoTypep, self).__init__()
 
-        foo = ChildSTDNoTypep()
+        _ = ChildSTDNoTypep()
         del ChildSTDNoTypep
         pred = False
-        assert (False)
-    except:
-        assert (pred)
+        assert False
+    except Exception:
+        assert pred
 
     class ChildSTD(SimpleTypeD):
         """docstring for ChildSTD"""
@@ -300,10 +302,10 @@ def t_STop2():
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
-        b = STop()
+        _ = STop()
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _:
         assert pred
 
     # str(a) has to be "Top"
@@ -339,10 +341,10 @@ def t_SEmpty():
     # SEmpty has to be unique part 2: ensure the constructor throws an error
     pred = True
     try:
-        b = SEmpty()
+        _ = SEmpty()
         pred = False
         assert False
-    except Exception as e:
+    except Exception as _e:
         assert pred
 
     # str(a) has to be "Empty"
@@ -382,8 +384,91 @@ def t_scustom2():
             assert not guinea_pig.typep(x)
 
 
+def t_subtypep1():
+    from depth_generator import random_type_designator
+    for depth in range(0,4):
+        for _ in range(1000):
+            td1 = random_type_designator(depth)
+            td2 = random_type_designator(depth)
+            assert td1.subtypep(td1) is True
+            assert SAnd(td1,td2).subtypep(td1) is not False
+            assert td1.subtypep(SOr(td1,td2)) is not False
+            assert SAnd(td1,td2).subtypep(SAnd(td2,td1)) is not False
+            assert SOr(td1,td2).subtypep(SOr(td2,td2)) is not False
+            assert SAnd(td1,td2).subtypep(SOr(td1,td2)) is not False
+            assert SAnd(SNot(td1),SNot(td2)).subtypep(SNot(SOr(td1,td2))) is not False
+            assert SOr(SNot(td1),SNot(td2)).subtypep(SNot(SAnd(td1,td2))) is not False
+            assert SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False
+            assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
+
+
+def t_uniquify():
+    from utils import uniquify
+    assert uniquify([]) == []
+    assert uniquify([1]) == [1]
+    assert uniquify([5,4,3,2,1]) == [5,4,3,2,1]
+    assert uniquify([1,2,3,4,5]) == [1,2,3,4,5]
+    assert uniquify([1,1,1,1,1]) == [1]
+    assert uniquify([1,2,1,2]) == [1,2]
+    assert uniquify([1,2,1]) == [2,1]
+
+
+def t_lazy():
+    from utils import generate_lazy_val
+
+    c = 0
+
+    def g():
+        nonlocal c
+        c = c + 1
+        return c
+
+    assert c == 0
+    assert g() == 1
+    assert c == 1
+
+    f = generate_lazy_val(lambda: g())
+    assert c == 1
+    assert f() == 2
+    assert c == 2
+    assert f() == 2
+    assert c == 2
+
+
+def t_discovered_cases():
+    def f(_a):
+        return False
+
+    assert SNot(SAtomic(int)).subtypep(SNot(SCustom(f,"f"))) is None
+    assert SAtomic(int).disjoint(SCustom(f,"f")) is None
+    assert SAtomic(int).disjoint(SNot(SCustom(f,"f"))) is None
+    assert SNot(SAtomic(int)).disjoint(SCustom(f,"f")) is None
+    assert SNot(SAtomic(int)).disjoint(SNot(SCustom(f,"f"))) is None
+
+    assert SAtomic(int).subtypep(SCustom(f,"f")) is None
+    assert SAtomic(int).subtypep(SNot(SCustom(f,"f"))) is None
+    assert SNot(SAtomic(int)).subtypep(SCustom(f,"f")) is None
+
+def t_or():
+    assert len(SOr(SEql(1),SEql(2)).tds) == 2
+    assert SOr().tds == []
+
+def t_member():
+    assert SMember(1,2,3).arglist == [1,2,3]
+    assert SMember().arglist == []
+
+def t_eql():
+    assert SEql(1).a == 1
+    assert SEql(1).arglist == [1], f"expecting arglist=[1], got {SEql(1).arglist}"
+
 #   calling the test functions
 
+t_or()
+t_member()
+t_eql()
+t_discovered_cases()
+t_lazy()
+t_uniquify()
 t_fixed_point()
 t_scustom()
 t_scustom2()
@@ -395,3 +480,4 @@ t_STop()
 t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
+t_subtypep1()
