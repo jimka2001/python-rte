@@ -530,8 +530,8 @@ def t_combo_conversion3():
     # (and A (not A)) --> SEmpty,  unit=STop,   zero=SEmpty
     # (or A (not A)) --> STop,     unit=SEmpty, zero=STop
     a = SEql("a")
-    SAnd(a, SNot(a)).conversion3() == SEmpty
-    SOr(a, SNot(a)).conversion3() == STop
+    assert SAnd(a, SNot(a)).conversion3() == SEmpty
+    assert SOr(a, SNot(a)).conversion3() == STop
 
 
 def t_combo_conversion4():
