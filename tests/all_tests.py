@@ -42,7 +42,7 @@ def t_verboseonlyprint(s):
 def t_fixed_point():
     from utils import fixed_point
     assert fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0
-    assert fixed_point(0, (lambda x: x//2), (lambda x, y: x == y)) == 0
+    assert fixed_point(0, (lambda x: x // 2), (lambda x, y: x == y)) == 0
 
 
 def t_STop():
@@ -52,7 +52,7 @@ def t_STop():
     a = STop
 
     # STop has to be unique
-    assert(id(a) == id(STopImpl.get_omega()))
+    assert (id(a) == id(STopImpl.get_omega()))
 
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
@@ -64,14 +64,14 @@ def t_STop():
         assert pred
 
     # str(a) has to be "Top"
-    assert(str(a) == "STop")
+    assert (str(a) == "STop")
 
     # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert(a.typep(SAtomic(object)))
-    assert(a.typep(a))
+    assert (a.typep(SAtomic(object)))
+    assert (a.typep(a))
 
     # obviously, a is inhabited as it contains everything by definition
-    assert(a.inhabited() is True)
+    assert (a.inhabited() is True)
 
     # a is never disjoint with anything but the empty subtype
     assert a.disjoint(SAtomic(object)) is False
@@ -79,7 +79,7 @@ def t_STop():
 
     # on the contrary, a is never a subtype of any type
     # since types are sets and top is the set that contains all sets
-    assert(a.subtypep(SAtomic(object)) is True)
+    assert (a.subtypep(SAtomic(object)) is True)
     assert a.subtypep(a) is True
 
 
@@ -96,8 +96,8 @@ def t_scustom():
             assert guinea_pig.typep(x)
         else:
             assert not guinea_pig.typep(x)
-    assert(not guinea_pig.typep("hello"))
-    assert(guinea_pig.subtypep(SAtomic(type(4))) is None)
+    assert (not guinea_pig.typep("hello"))
+    assert (guinea_pig.subtypep(SAtomic(type(4))) is None)
 
 
 def t_sand1():
@@ -105,23 +105,23 @@ def t_sand1():
     quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
-    
+
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
 
-    assert(str(tri_n_quad) == "[SAnd triple?,quadruple?]")
-    assert(str(create_tri_n_quad) == "[SAnd triple?,quadruple?]")
+    assert (str(tri_n_quad) == "[SAnd triple?,quadruple?]")
+    assert (str(create_tri_n_quad) == "[SAnd triple?,quadruple?]")
 
-    assert(tri_n_quad.typep(12))
-    assert(create_tri_n_quad.typep(12))
-    assert(not tri_n_quad.typep(6))
-    assert(not create_tri_n_quad.typep(6))
-    assert(not tri_n_quad.typep(3))
-    assert(not create_tri_n_quad.typep(3))
-    assert(tri_n_quad.typep(0))
-    assert(create_tri_n_quad.typep(0))
-    assert(not tri_n_quad.typep("hello"))
-    assert(not create_tri_n_quad.typep("hello"))
+    assert (tri_n_quad.typep(12))
+    assert (create_tri_n_quad.typep(12))
+    assert (not tri_n_quad.typep(6))
+    assert (not create_tri_n_quad.typep(6))
+    assert (not tri_n_quad.typep(3))
+    assert (not create_tri_n_quad.typep(3))
+    assert (tri_n_quad.typep(0))
+    assert (create_tri_n_quad.typep(0))
+    assert (not tri_n_quad.typep("hello"))
+    assert (not create_tri_n_quad.typep("hello"))
 
 
 def t_sand2():
@@ -132,68 +132,68 @@ def t_sand2():
 
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
-    assert(tri_n_quad.subtypep(STop))
-    assert(tri_n_quad.subtypep(triple))
+    assert (tri_n_quad.subtypep(STop))
+    assert (tri_n_quad.subtypep(triple))
 
-    assert(tri_n_quad.subtypep(quadruple))
+    assert (tri_n_quad.subtypep(quadruple))
     assert tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
 
-    assert(SAnd().unit() == STop)
-    assert(SAnd().zero() == SEmpty)
+    assert (SAnd().unit() == STop)
+    assert (SAnd().zero() == SEmpty)
 
-    assert(tri_n_quad.same_combination(create_tri_n_quad))
-    assert(tri_n_quad.same_combination(createSAnd([quadruple, triple])))
+    assert (tri_n_quad.same_combination(create_tri_n_quad))
+    assert (tri_n_quad.same_combination(createSAnd([quadruple, triple])))
 
-    assert(not tri_n_quad.same_combination(STop))
-    assert(not tri_n_quad.same_combination(createSAnd([])))
+    assert (not tri_n_quad.same_combination(STop))
+    assert (not tri_n_quad.same_combination(createSAnd([])))
 
 
 def t_sor():
     from genus_types import createSOr
     quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
     triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
-    
+
     tri_o_quad = SOr(triple, quadruple)
     create_tri_o_quad = createSOr([triple, quadruple])
 
-    assert(str(tri_o_quad) == "[SOr triple?,quadruple?]")
-    assert(str(create_tri_o_quad) == "[SOr triple?,quadruple?]")
+    assert (str(tri_o_quad) == "[SOr triple?,quadruple?]")
+    assert (str(create_tri_o_quad) == "[SOr triple?,quadruple?]")
 
-    assert(tri_o_quad.typep(12))
-    assert(create_tri_o_quad.typep(12))
-    
-    assert(tri_o_quad.typep(6))
-    assert(create_tri_o_quad.typep(6))
-    
-    assert(tri_o_quad.typep(3))
-    assert(create_tri_o_quad.typep(3))
-    
-    assert(tri_o_quad.typep(0))
-    assert(create_tri_o_quad.typep(0))
+    assert (tri_o_quad.typep(12))
+    assert (create_tri_o_quad.typep(12))
 
-    assert(not tri_o_quad.typep(5))
-    assert(not create_tri_o_quad.typep(5))
-    
-    assert(not tri_o_quad.typep("hello"))
-    assert(not create_tri_o_quad.typep("hello"))
+    assert (tri_o_quad.typep(6))
+    assert (create_tri_o_quad.typep(6))
 
-    assert(SOr().unit() == SEmpty.get_epsilon())
+    assert (tri_o_quad.typep(3))
+    assert (create_tri_o_quad.typep(3))
 
-    assert(SOr().zero() == STop.get_omega())
+    assert (tri_o_quad.typep(0))
+    assert (create_tri_o_quad.typep(0))
 
-    assert(tri_o_quad.subtypep(STop.get_omega()))
-    assert(tri_o_quad.subtypep(SAtomic(type(5))) is None)
+    assert (not tri_o_quad.typep(5))
+    assert (not create_tri_o_quad.typep(5))
 
-    assert(tri_o_quad.same_combination(create_tri_o_quad))
-    assert(tri_o_quad.same_combination(createSOr([quadruple, triple])))
+    assert (not tri_o_quad.typep("hello"))
+    assert (not create_tri_o_quad.typep("hello"))
 
-    assert(not tri_o_quad.same_combination(STop))
-    assert(not tri_o_quad.same_combination(createSOr([])))
+    assert (SOr().unit() == SEmpty.get_epsilon())
+
+    assert (SOr().zero() == STop.get_omega())
+
+    assert (tri_o_quad.subtypep(STop.get_omega()))
+    assert (tri_o_quad.subtypep(SAtomic(type(5))) is None)
+
+    assert (tri_o_quad.same_combination(create_tri_o_quad))
+    assert (tri_o_quad.same_combination(createSOr([quadruple, triple])))
+
+    assert (not tri_o_quad.same_combination(STop))
+    assert (not tri_o_quad.same_combination(createSOr([])))
 
 
 def t_snot():
     pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
-    
+
     pred = True
     try:
         _b = SNot([])
@@ -206,12 +206,12 @@ def t_snot():
 
     assert SNot(SNot(pair)).canonicalize() == pair
 
-    assert(str(npair) == "[SNot pair?]")
+    assert (str(npair) == "[SNot pair?]")
 
-    assert(npair.typep(5))
-    assert(npair.typep("hello"))
-    assert(not npair.typep(4))
-    assert(not npair.typep(0))
+    assert (npair.typep(5))
+    assert (npair.typep("hello"))
+    assert (not npair.typep(4))
+    assert (not npair.typep(0))
 
 
 def t_SimpleTypeD():
@@ -361,6 +361,7 @@ def t_SEmpty():
 def t_scustom2():
     def l_odd(n):
         return isinstance(n, int) and n % 2 == 1
+
     guinea_pig = SCustom(l_odd, "[odd numbers]")
     assert guinea_pig.f == l_odd
     assert guinea_pig.printable == "[odd numbers]"
@@ -600,16 +601,16 @@ def t_combo_conversion9():
     b = SEql("b")
     c = SEql("c")
     x = SEql("x")
-    assert SAnd(SOr(a,b,c),
-                SOr(a,SNot(b),c),
-                x).conversion9() == SAnd(SOr(a,b,c),
-                                         SOr(a,c),
+    assert SAnd(SOr(a, b, c),
+                SOr(a, SNot(b), c),
+                x).conversion9() == SAnd(SOr(a, b, c),
+                                         SOr(a, c),
                                          x)
-    assert SAnd(SOr(a,b,SNot(c)),
-                SOr(a,SNot(b),c),
-                SOr(a,SNot(b),SNot(c))).conversion9() == SAnd(SOr(a,b,SNot(c)),
-                                                              SOr(a,SNot(b),c),
-                                                              SOr(a,SNot(c)))
+    assert SAnd(SOr(a, b, SNot(c)),
+                SOr(a, SNot(b), c),
+                SOr(a, SNot(b), SNot(c))).conversion9() == SAnd(SOr(a, b, SNot(c)),
+                                                                SOr(a, SNot(b), c),
+                                                                SOr(a, SNot(c)))
     assert SAnd(SOr(a, b, SNot(c)),
                 SOr(a, SNot(b), c),
                 SOr(a, SNot(b), SNot(c))).conversion9() == \
@@ -617,15 +618,15 @@ def t_combo_conversion9():
                 SOr(a, SNot(b), c),
                 SOr(a, SNot(c)))
 
-    assert SOr(SAnd(a,b,c), SAnd(a,SNot(b),c), x).conversion9() == SOr(SAnd(a,b,c),SAnd(a,c),x)
-    assert SOr(SAnd(a,b,SNot(c)),
-               SAnd(a,SNot(b),c),
-               SAnd(a,SNot(b),SNot(c))).conversion9() == \
-        SOr(SAnd(a,b,SNot(c)),SAnd(a,SNot(b),c),SAnd(a,SNot(c)))
-    assert SOr(SAnd(a,b,SNot(c)),
-               SAnd(a,SNot(b),c),
-               SAnd(a,SNot(b),SNot(c))).conversion9() == \
-        SOr(SAnd(a,b,SNot(c)),SAnd(a,SNot(b),c),SAnd(a,SNot(c)))
+    assert SOr(SAnd(a, b, c), SAnd(a, SNot(b), c), x).conversion9() == SOr(SAnd(a, b, c), SAnd(a, c), x)
+    assert SOr(SAnd(a, b, SNot(c)),
+               SAnd(a, SNot(b), c),
+               SAnd(a, SNot(b), SNot(c))).conversion9() == \
+           SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c)))
+    assert SOr(SAnd(a, b, SNot(c)),
+               SAnd(a, SNot(b), c),
+               SAnd(a, SNot(b), SNot(c))).conversion9() == \
+           SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c)))
 
 
 def t_combo_conversion10():
@@ -648,13 +649,13 @@ def t_combo_conversion11():
     b = SEql("b")
     x = SEql("x")
     y = SEql("y")
-    assert SOr(a,SAnd(SNot(a),b)).conversion11() == SOr(a,b)
-    assert SOr(a,SAnd(SNot(a),b,x),y).conversion11() == SOr(a,SAnd(b,x),y)
-    assert SOr(a,SAnd(a,b,x),y).conversion11() == SOr(a,y)
+    assert SOr(a, SAnd(SNot(a), b)).conversion11() == SOr(a, b)
+    assert SOr(a, SAnd(SNot(a), b, x), y).conversion11() == SOr(a, SAnd(b, x), y)
+    assert SOr(a, SAnd(a, b, x), y).conversion11() == SOr(a, y)
 
-    assert SAnd(a,SOr(SNot(a),b)).conversion11() == SAnd(a,b)
-    assert SAnd(a,SOr(SNot(a),b,x),y).conversion11() == SAnd(a,SOr(b,x),y)
-    assert SAnd(a,SOr(a,b,x),y).conversion11() == SAnd(a,y)
+    assert SAnd(a, SOr(SNot(a), b)).conversion11() == SAnd(a, b)
+    assert SAnd(a, SOr(SNot(a), b, x), y).conversion11() == SAnd(a, SOr(b, x), y)
+    assert SAnd(a, SOr(a, b, x), y).conversion11() == SAnd(a, y)
 
 
 def t_combo_conversion12():
@@ -676,13 +677,13 @@ def t_combo_conversion13():
     x = SAtomic(int)
 
     assert SOr(x,
-               SNot(SMember(-1,1)),
-               SNot(SMember(1,2,3,4))).conversion13() == SOr(x,
-                                                             SNot(SEql(1)))
+               SNot(SMember(-1, 1)),
+               SNot(SMember(1, 2, 3, 4))).conversion13() == SOr(x,
+                                                                SNot(SEql(1)))
     assert SAnd(x,
-                SNot(SMember(-1,1)),
-                SNot(SMember(1,2,3,4))).conversion13() == SAnd(x,
-                                                               SNot(SMember(-1,1,2,3,4)))
+                SNot(SMember(-1, 1)),
+                SNot(SMember(1, 2, 3, 4))).conversion13() == SAnd(x,
+                                                                  SNot(SMember(-1, 1, 2, 3, 4)))
 
 
 def t_combo_conversion14():
@@ -690,19 +691,20 @@ def t_combo_conversion14():
     # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
     # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
     x = SAtomic(int)
-    assert SOr(x,SMember(1,2,3),SMember(2,3,4,5)).conversion14() == SOr(x,SMember(1,2,3,4,5))
-    assert SAnd(x,SMember(1,2,3),SMember(2,3,4,5)).conversion14() == SAnd(x,SMember(2,3))
+    assert SOr(x, SMember(1, 2, 3), SMember(2, 3, 4, 5)).conversion14() == SOr(x, SMember(1, 2, 3, 4, 5))
+    assert SAnd(x, SMember(1, 2, 3), SMember(2, 3, 4, 5)).conversion14() == SAnd(x, SMember(2, 3))
 
 
 def t_combo_conversion15():
     x = SAtomic(int)
-    assert SOr(x,SMember(0,1,2,3),SNot(SMember(2,3,4,5))).conversion15() == SOr(x,SNot(SMember(4,5)))
-    assert SAnd(x,SMember(0,1,2,3),SNot(SMember(2,3,4,5))).conversion15() == SAnd(x,SMember(0,1))
+    assert SOr(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SOr(x, SNot(SMember(4, 5)))
+    assert SAnd(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SAnd(x, SMember(0, 1))
 
 
 def t_combo_conversion16():
     assert SAnd(SEql("a"), SAtomic(int)).conversion16() == SAnd(SEmpty, SAtomic(int))
     assert SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int))
+
 
 #   calling the test functions
 
