@@ -32,12 +32,15 @@ def is_even(x):
 
 
 def cmp_type_designators(a, b):
-	if a == b:
-		return False
-	elif type(a) == b:
-		return a.cmp_to_same_class_obj(b)
-	else:
-		return str(type(a)) < str(type(b))
+	def cmp(a, b):
+		if a == b:
+			return False
+		elif type(a) == type(b):
+			return a.cmp_to_same_class_obj(b)
+		else:
+			return type(a).__name__ < type(b).__name__
+
+	return -1 if cmp(a,b) else 0
 
 
 def createSAnd(tds):
