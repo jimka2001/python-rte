@@ -96,27 +96,6 @@ class SAtomic(SimpleTypeD, TerminalType):
 			raise e
 		pass
 
-	def _disjoint_down(self, t):
-		assert isinstance(t, SimpleTypeD)
-		from s_empty import SEmptyImpl
-		ct = self.wrapped_class
-
-		if isinstance(t, SEmptyImpl):
-			return True
-		elif isinstance(t, STopImpl):
-			return False
-		elif isinstance(t, SAtomic):
-			tp = t.wrapped_class
-			if self.inhabited() is False:
-				return True
-			elif tp == ct:
-				return False
-			elif issubclass(tp, ct) or issubclass(ct, tp):
-				return False
-			else:
-				return True # TODO for the moment assume two classes are disjoint
-		else:
-			return super()._disjoint_down(t)
 
 	def _subtypep_down(self, s):
 		from s_empty import SEmptyImpl, SEmpty
@@ -177,3 +156,35 @@ class SAtomic(SimpleTypeD, TerminalType):
 			return False
 		else:
 			return self.wrapped_class.__name__ < td.wrapped_class.__name__
+    def _disjoint_down(self, t):
+        assert isinstance(t, SimpleTypeD)
+        from s_empty import SEmptyImpl
+        ct = self.wrapped_class
+
+        if isinstance(t, SEmptyImpl):
+            return True
+        elif isinstance(t, STopImpl):
+            return False
+        elif isinstance(t, SAtomic):
+            from utils import get_all_subclasses
+            tp = t.wrapped_class
+            if self.inhabited() is False:
+                return True
+            elif tp == ct:
+                return False
+            elif issubclass(tp, ct) or issubclass(ct, tp):
+                # is either a subclass of the other
+                return False
+            else:
+                # if they have a common subclass, they are not disjoint
+
+                # return not any(c for c in get_all_subclasses(ct)
+                # 	               if c in tp_subclasses)
+
+                # 2 linear searches should be faster than one n^2 search
+                # by iterating over both lists of subclasses and asking whether the
+                #  other is a superclass of it?
+                return not (any(issubclass(c, tp) for c in get_all_subclasses(ct))
+                            or any(issubclass(c, ct) for c in get_all_subclasses(tp)))
+        else:
+            return super()._disjoint_down(t)
