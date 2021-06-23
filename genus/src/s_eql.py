@@ -64,4 +64,3 @@ class SEql(SMemberImpl):
 
 	def subtypep(self, t):
 		return t.typep(self.a)
-

@@ -224,8 +224,8 @@ class SCombination(SimpleTypeD):
         # A + ABX + Y = (A + Y)
         from utils import find_first, flat_map, remove_element
         from genus_types import combop
-        combos = list(filter(combop,self.tds))
-        duals = list(filter(self.dual_combination,combos))
+        combos = list(filter(combop, self.tds))
+        duals = list(filter(self.dual_combination, combos))
 
         def pred(a):
             n = SNot(a)
@@ -395,7 +395,7 @@ class SCombination(SimpleTypeD):
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
-    def conversion99(self,nf):
+    def conversion99(self, nf):
         return self.create([td.canonicalize(nf) for td in self.tds])
 
     def canonicalize_once(self, nf=None):
@@ -426,4 +426,3 @@ class SCombination(SimpleTypeD):
             return False
         else:
             return compare_sequence(self.tds, td.tds)
-

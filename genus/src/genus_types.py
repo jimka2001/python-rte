@@ -43,7 +43,7 @@ def cmp_type_designators(a, b):
 		else:
 			return type(a).__name__ < type(b).__name__
 
-	return -1 if cmp(a,b) else 0
+	return -1 if cmp(a, b) else 0
 
 
 def createSAnd(tds):

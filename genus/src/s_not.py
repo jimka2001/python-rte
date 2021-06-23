@@ -127,11 +127,10 @@ class SNot(SimpleTypeD):
 		return self.to_dnf()
 
 	def cmp_to_same_class_obj(self, td):
-		from genus_types import notp, cmp_type_designators
+		from genus_types import cmp_type_designators
 		if type(self) != type(td):
 			return super().cmp_to_same_class_obj(td)
 		elif self == td:
 			return False
 		else:
 			return cmp_type_designators(self.s, td.s) < 0
-

@@ -47,7 +47,7 @@ from simple_type_d import SimpleTypeD
 
 class SAnd(SCombination):
     """An intersection type, which is the intersection of zero or more types.
-	@param tds list, zero or more types"""
+    @param tds list, zero or more types"""
 
     def __init__(self, *tds):
         super(SAnd, self).__init__(tds)
@@ -79,7 +79,7 @@ class SAnd(SCombination):
         return [x for x in a if x in b]
 
     def combo_filter(self, pred, xs):
-        return filter(pred,xs) # calling filter from Python std library
+        return filter(pred, xs)  # calling filter from Python std library
 
     def create_dual(self, tds):
         from genus_types import createSOr
@@ -161,7 +161,7 @@ class SAnd(SCombination):
     def conversionA3(self):
         # discover disjoint pair
         for i in range(len(self.tds)):
-            for j in range(i+1,len(self.tds)):
+            for j in range(i+1, len(self.tds)):
                 if self.tds[i].disjoint(self.tds[j]) is True:
                     return SEmpty
         return self
