@@ -706,10 +706,32 @@ def t_combo_conversion16():
     assert SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int))
 
 
+def t_and_conversionA1():
+    # to SAnd(SMember(42, 43, 44), SInt)
+    # while conversionA1() converts it to
+    # SMember(42, 43, 44)
+    assert SAnd(SMember(1,2,3,"a","b","c"),SAtomic(int)).conversionA1() == SMember(1,2,3)
+
+
+def t_or_conversionO1():
+    # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+    # == > SNot(SMember(42, 43, 44))
+    assert SOr(SNot(SMember(1,2,3,"a","b","c")), SAtomic(int)).conversionO1() == SNot(SMember("a","b","c"))
+
+
+def t_and_conversionA3():
+    # find disjoint pair
+    assert SAnd(SMember(1,2),SMember(3,4)).conversionA3() == SEmpty
+    assert SAnd(SMember("a","b"),SAtomic(int)).conversionA3() == SEmpty
+    assert SAnd(SMember(1,2,"a","b"),SAtomic(int)).conversionA3() == SAnd(SMember(1,2,"a","b"),SAtomic(int))
+
 #   calling the test functions
 
 
 t_combo_conversion1()
+t_or_conversionO1()
+t_and_conversionA1()
+t_and_conversionA3()
 t_combo_conversion2()
 t_combo_conversion3()
 t_combo_conversion4()

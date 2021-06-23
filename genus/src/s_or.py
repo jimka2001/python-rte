@@ -88,6 +88,23 @@ class SOr(SCombination):
 	def inhabited_down(self):
 		raise NotImplementedError
 
+	def conversionO1(self):
+		# Dual of conversionC1
+
+		# SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+		# == > SNot(SMember(42, 43, 44))
+		# find all x in {42, 43, 44, "a","b"} which are not self.typep(x)
+		from utils import find_first
+		from genus_types import memberimplp, createSMember, notp
+		from s_not import SNot
+
+		not_member = find_first(lambda td: notp(td) and memberimplp(td.s), self.tds, None)
+		if not_member is None:
+			return self
+		else:
+			return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
+
 	def canonicalize_once(self, nf=None):
 		from utils import find_simplifier
-		return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])
+		return find_simplifier(self, [lambda: self.conversionO1(),
+									  lambda: super(SOr, self).canonicalize_once(nf)])
