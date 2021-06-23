@@ -102,10 +102,11 @@ def remove_element(xs, search):
 def find_first(pred, xs, default=None):
     return next(filter(pred, xs), default)
 
-def compare_sequence(xs,ys):
+
+def compare_sequence(xs, ys):
     from genus_types import cmp_type_designators
 
-    def comp(us,vs):
+    def comp(us, vs):
         if not us and not vs:
             # we have reached the end of what we thought were different sequences
             raise ValueError(f"expecting different sequences {xs} vs {ys}")
@@ -118,8 +119,10 @@ def compare_sequence(xs,ys):
             # need to refactor
             return comp(us[1:-1], vs[1:-1])
         else:
-            return cmp_type_designators(us[0],vs[0])
-    return comp(xs,ys)
+            return cmp_type_designators(us[0], vs[0])
+    return comp(xs, ys)
+
+
 # this class can be used to monitor recursive calls to detect infinite recursion.
 #   To use the class, declare/bind an instance of CallStack("some-name").
 #   You may then use obj.push(...) and obj.(pop)
