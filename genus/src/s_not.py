@@ -133,4 +133,5 @@ class SNot(SimpleTypeD):
 		elif self == td:
 			return False
 		else:
-			return super().cmp_to_same_class_obj(td)
+			return cmp_type_designators(self.s, td.s) < 0
+

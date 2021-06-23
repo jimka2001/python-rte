@@ -132,7 +132,7 @@ def compare_sequence(xs, ys):
             # need to refactor
             return comp(us[1:-1], vs[1:-1])
         else:
-            return cmp_type_designators(us[0], vs[0])
+            return cmp_type_designators(us[0], vs[0]) < 0
     return comp(xs, ys)
 
 

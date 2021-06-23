@@ -31,6 +31,9 @@ def is_even(x):
 	return type(x) is int and not (x & 1)
 
 
+# return 0 if a == b
+#        -1 if a < b
+#        0 if a > b
 def cmp_type_designators(a, b):
 	def cmp(a, b):
 		if a == b:
