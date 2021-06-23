@@ -491,6 +491,23 @@ def t_discovered_cases2():
     tdc = td.canonicalize()
     assert tdc == SEmpty, f"expecting {td} to canonicalize to SEmpty, got {tdc}"
 
+def t_membership():
+    from depth_generator import random_type_designator, test_values
+    from genus_types import NormalForm
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            tdc1 = td.canonicalize()
+            tdc2 = td.canonicalize(NormalForm.DNF)
+            tdc3 = td.canonicalize(NormalForm.CNF)
+            for v in test_values:
+                assert td.typep(v) == tdc1.typep(v), \
+                    f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc1={tdc1} is {tdc1.typep(v)}"
+                assert td.typep(v) == tdc2.typep(v), \
+                    f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc2={tdc2} is {tdc2.typep(v)}"
+                assert td.typep(v) == tdc3.typep(v), \
+                    f"v={v} is membership of type td={td} is {td.typep(v)} but of type tdc3={tdc3} is {tdc3.typep(v)}"
+
 
 #   calling the test functions
 
@@ -512,5 +529,6 @@ t_STop()
 t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
+t_membership()
 t_subtypep1()
 t_subtypep2()
