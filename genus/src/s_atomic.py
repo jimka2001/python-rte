@@ -123,11 +123,15 @@ class SAtomic(SimpleTypeD, TerminalType):
                 # return not any(c for c in get_all_subclasses(ct)
                 # 	               if c in tp_subclasses)
 
-                # 2 linear searches should be faster than one n^2 search
+                # 2 n log n searches should be faster than one n^2 search
                 # by iterating over both lists of subclasses and asking whether the
                 #  other is a superclass of it?
-                return not (any(issubclass(c, tp) for c in get_all_subclasses(ct))
-                            or any(issubclass(c, ct) for c in get_all_subclasses(tp)))
+                #return not (any(issubclass(c, tp) for c in get_all_subclasses(ct))
+                #            or any(issubclass(c, ct) for c in get_all_subclasses(tp)))
+
+                # 1 n log n should find the same boolean value
+                return not any(issubclass(c,tp) for c in get_all_subclasses(ct))
+
         else:
             return super()._disjoint_down(t)
 
