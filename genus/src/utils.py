@@ -19,6 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+from collections.abc import Iterable
+
 
 def generate_lazy_val(func):
     saved_value = None
@@ -77,10 +79,15 @@ def uniquify(seq):
 
 
 def flat_map(f, xs):
+    from collections.abc import Iterable
+    assert isinstance(xs, Iterable), f"expecting Iterable not {xs}"
+
     return [y for z in xs for y in f(z)]
 
 
 def search_replace_splice(xs, search, replace):
+    assert isinstance(xs, Iterable)
+
     def select(x):
         if x == search:
             return replace
@@ -90,16 +97,22 @@ def search_replace_splice(xs, search, replace):
 
 
 def search_replace(xs, search, replace):
+    assert isinstance(xs, Iterable)
+
     return search_replace_splice(xs, search, [replace])
 
 
 def remove_element(xs, search):
+    assert isinstance(xs, Iterable)
+
     return search_replace_splice(xs, search, [])
 
 
 # find first element of list which makes the predicate true
 # if no such element is found, return the given default or None
 def find_first(pred, xs, default=None):
+    assert isinstance(xs, Iterable)
+
     return next(filter(pred, xs), default)
 
 
