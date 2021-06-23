@@ -75,6 +75,9 @@ class SOr(SCombination):
 		assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
 		return uniquify(a + b)
 
+	def combo_filter(self, pred, xs):
+		return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
+
 	def create_dual(self, tds):
 		from genus_types import createSAnd
 		return createSAnd(tds)

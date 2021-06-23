@@ -78,6 +78,9 @@ class SCombination(SimpleTypeD):
     def dual_combination(self, td):
         raise NotImplementedError
 
+    def combo_filter(self, pred, xs):
+        raise NotImplementedError
+
     def combinator(self, a, b):
         raise NotImplementedError
 
@@ -385,12 +388,14 @@ class SCombination(SimpleTypeD):
 
         def f(td):
             if memberimplp(td):
-                return createSMember(list(filter(stricter.typep, td.arglist)))
+                return createSMember(list(self.combo_filter(stricter.typep, td.arglist)))
             elif notp(td) and memberimplp(td.s):
-                return SNot(createSMember(list(filter(stricter.typep, td.s.arglist))))
+                return SNot(createSMember(list(self.combo_filter(stricter.typep, td.s.arglist))))
             else:
                 return td
-        return self.create([f(td) for td in self.tds])
+
+        newargs = [f(td) for td in self.tds]
+        return self.create(newargs)
 
     def canonicalize_once(self, nf=None):
         simplifiers = [lambda: self.conversion1(),  # should also work self.conversion1, self.conversion2 ...

@@ -78,6 +78,9 @@ class SAnd(SCombination):
     def combinator(self, a, b):
         return [x for x in a if x in b]
 
+    def combo_filter(self, pred, xs):
+        return filter(pred,xs) # calling filter from Python std library
+
     def create_dual(self, tds):
         from genus_types import createSOr
         return createSOr(tds)
