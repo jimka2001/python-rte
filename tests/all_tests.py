@@ -706,24 +706,26 @@ def t_combo_conversion16():
     assert SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int))
 
 
-def t_and_conversionA1():
+def t_combo_conversionD1():
+    # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+    # == > SNot(SMember(42, 43, 44))
+    assert SOr(SNot(SMember(1, 2, 3, "a", "b", "c")), SAtomic(int)).conversionD1() == SNot(SMember("a", "b", "c"))
+    
     # to SAnd(SMember(42, 43, 44), SInt)
     # while conversionA1() converts it to
     # SMember(42, 43, 44)
-    assert SAnd(SMember(1, 2, 3, "a", "b", "c"), SAtomic(int)).conversionA1() == SMember(1, 2, 3)
+    assert SAnd(SMember(1, 2, 3, "a", "b", "c"), SAtomic(int)).conversionD1() == SMember(1, 2, 3)
 
 
-def t_or_conversionO1():
-    # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
-    # == > SNot(SMember(42, 43, 44))
-    assert SOr(SNot(SMember(1, 2, 3, "a", "b", "c")), SAtomic(int)).conversionO1() == SNot(SMember("a", "b", "c"))
-
-
-def t_and_conversionA3():
+def t_combo_conversionD3():
     # find disjoint pair
-    assert SAnd(SMember(1, 2), SMember(3, 4)).conversionA3() == SEmpty
-    assert SAnd(SMember("a", "b"), SAtomic(int)).conversionA3() == SEmpty
-    assert SAnd(SMember(1, 2, "a", "b"), SAtomic(int)).conversionA3() == SAnd(SMember(1, 2, "a", "b"), SAtomic(int))
+    assert SAnd(SMember(1, 2), SMember(3, 4)).conversionD3() == SEmpty
+    assert SAnd(SMember("a", "b"), SAtomic(int)).conversionD3() == SEmpty
+    assert SAnd(SMember(1, 2, "a", "b"), SAtomic(int)).conversionD3() == SAnd(SMember(1, 2, "a", "b"), SAtomic(int))
+
+    assert SOr(SNot(SMember(1, 2)), SNot(SMember(3, 4))).conversionD3() == STop
+    assert SOr(SNot(SMember("a", "b")), SNot(SAtomic(int))).conversionD3() == STop
+    assert SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))).conversionD3() == SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int)))
 
 
 def t_discovered_cases3():
@@ -762,9 +764,8 @@ def t_discovered_cases4():
 
 t_depth_generator()
 t_combo_conversion1()
-t_or_conversionO1()
-t_and_conversionA1()
-t_and_conversionA3()
+t_combo_conversionD1()
+t_combo_conversionD3()
 t_combo_conversion2()
 t_combo_conversion3()
 t_combo_conversion4()

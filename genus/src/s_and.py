@@ -140,7 +140,7 @@ class SAnd(SCombination):
         else:
             return super()._subtypep_down(t)
 
-    def conversionA1(self):
+    def conversionD1(self):
         # Note this isn't this consumed in SCombination:conversion16,
         # conversion16 converts SAnd(SMember(42, 43, 44, "a", "b", "c"), SInt)
         # to SAnd(SMember(42, 43, 44), SInt)
@@ -158,7 +158,7 @@ class SAnd(SCombination):
         else:
             return createSMember([x for x in member.arglist if self.typep(x)])
 
-    def conversionA3(self):
+    def conversionD3(self):
         # discover disjoint pair
         for i in range(len(self.tds)):
             for j in range(i+1, len(self.tds)):
@@ -168,9 +168,7 @@ class SAnd(SCombination):
 
     def canonicalize_once(self, nf=None):
         from utils import find_simplifier
-        return find_simplifier(self, [lambda: self.conversionA1(),
-                                      lambda: self.conversionA3(),
-                                      lambda: super(SAnd, self).canonicalize_once(nf)])
+        return find_simplifier(self, [lambda: super(SAnd, self).canonicalize_once(nf)])
 
     def compute_dnf(self):
         # TODO I need explanation for this one

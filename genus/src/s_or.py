@@ -88,8 +88,8 @@ class SOr(SCombination):
 	def inhabited_down(self):
 		raise NotImplementedError
 
-	def conversionO1(self):
-		# Dual of conversionC1
+	def conversionD1(self):
+		# Dual of SAnd.conversionA1
 
 		# SOr(SNot(SMember(42, 43, 44, "a","b")), String)
 		# == > SNot(SMember(42, 43, 44))
@@ -104,7 +104,19 @@ class SOr(SCombination):
 		else:
 			return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
 
+	def conversionD3(self):
+		# dual of  disjoint pair
+		# SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
+		from genus_types import notp
+
+		nots = [td.s for td in self.tds if notp(td)]
+
+		for i in range(len(nots)):
+			for j in range(i + 1, len(nots)):
+				if nots[i].disjoint(nots[j]) is True:
+					return STop
+		return self
+
 	def canonicalize_once(self, nf=None):
 		from utils import find_simplifier
-		return find_simplifier(self, [lambda: self.conversionO1(),
-									  lambda: super(SOr, self).canonicalize_once(nf)])
+		return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])

@@ -395,6 +395,12 @@ class SCombination(SimpleTypeD):
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
+    def conversionD1(self):
+        raise NotImplementedError
+
+    def conversionD3(self):
+        raise NotImplementedError
+
     def conversion99(self, nf):
         return self.create([td.canonicalize(nf) for td in self.tds])
 
@@ -415,6 +421,8 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion14(),
                        lambda: self.conversion15(),
                        lambda: self.conversion16(),
+                       lambda: self.conversionD1(),
+                       lambda: self.conversionD3(),
                        lambda: self.conversion99(nf)]
         return find_simplifier(self, simplifiers)
 
