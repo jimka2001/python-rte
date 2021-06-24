@@ -49,7 +49,7 @@ class SAtomic(SimpleTypeD, TerminalType):
     def __init__(self, wrapped_class):
         import inspect
         super(SAtomic, self).__init__()
-        assert inspect.isclass(wrapped_class)
+        assert inspect.isclass(wrapped_class), f"wrapped_class={wrapped_class} is not a class, its type is {type(wrapped_class)}"
         self.wrapped_class = wrapped_class
 
     def __str__(self):
@@ -151,7 +151,8 @@ class SAtomic(SimpleTypeD, TerminalType):
             return True
         elif isinstance(s, SEmptyImpl):
             # here we know self.inhabited() is either None or True
-            return None if self.inhabited() is None else True
+            # if self is inhabited then it is _NOT_ a subtype of SEmpty, so return False
+            return None if self.inhabited() is None else False
         elif isinstance(s, STopImpl):
             return True
         elif isinstance(s, SAtomic):

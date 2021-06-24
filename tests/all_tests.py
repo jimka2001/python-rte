@@ -739,6 +739,7 @@ def t_discovered_cases3():
     assert SAnd(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SAtomic(int)
     assert SOr(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SNot(SAtomic(Test1))
 
+
 def t_depth_generator():
     from depth_generator import depth_generator
     rand_lambda = depth_generator(2).rand_lambda_str_generator()
@@ -747,7 +748,17 @@ def t_depth_generator():
     depth_generator(5).generate_tree()
 
 
+def t_discovered_cases4():
+    assert SNot(SEmpty).canonicalize() == STop
+    assert SAtomic(float).disjoint(SEmpty) is True
+    assert SAtomic(float).inhabited() is True
+    assert SNot(SEmpty).inhabited() is True
+    assert SAtomic(float).subtypep(SEmpty) is False
+    assert SAtomic(float).disjoint(SNot(SEmpty)) is not True
+    assert SAnd(SAtomic(float), SNot(SEmpty)).canonicalize() == SAtomic(float)
+
 #   calling the test functions
+
 
 t_depth_generator()
 t_combo_conversion1()
@@ -771,6 +782,7 @@ t_combo_conversion15()
 t_combo_conversion16()
 t_discovered_cases2()
 t_discovered_cases3()
+t_discovered_cases4()
 t_or()
 t_member()
 t_eql()

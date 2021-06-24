@@ -85,6 +85,9 @@ class SNot(SimpleTypeD):
 
 	def _disjoint_down(self, t):
 		assert isinstance(t, SimpleTypeD)
+		# is SNot(s) disjoint with t
+		# first we ask whether t is a subtype of s,
+		#  t <: s = > not (s) // t
 		if t.subtypep(self.s) is True:  # if it is empty this is empty and is thus evaluated as False
 			return True
 		else:
