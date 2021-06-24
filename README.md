@@ -57,10 +57,12 @@ There are several outstanding issues.
 
 ## Package dependencies overview
 
-
 ## Contributors
 
 [Jim Newton](https://www.lrde.epita.fr/wiki/User:Jnewton)
+[Mehdi Oueslati](https://www.linkedin.com/in/mehdi-oueslati/)
+
+[Release Notes](doc/release-notes.md)
 
 ## License
 ```

@@ -37,6 +37,7 @@ from simple_type_d import SimpleTypeD, TerminalType
 class SCustom(SimpleTypeD, TerminalType):
 	"""The super type, super type of all types."""
 	def __init__(self, f, printable):
+		assert callable(f)
 		self.f = f
 		self.printable = printable
 		super().__init__()

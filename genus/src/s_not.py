@@ -97,7 +97,17 @@ class SNot(SimpleTypeD):
 		#    however b.subtypep(a) might return None
 		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
 		# SNot(SAtomic(Long)).subtype(SAtomic(Double)) ??
-		hosted = generate_lazy_val(lambda: self.s.disjoint(t) if atomicp(self.s) and atomicp(t) else None)
+		def h():
+			if not atomicp(t):
+				return None
+			elif not atomicp(self.s):
+				return None
+			elif self.s.disjoint(t):
+				return False
+			else:
+				return None
+
+		hosted = generate_lazy_val(h)
 
 		if self.s.inhabited() is True and self.s.subtypep(t) is True:
 			return False

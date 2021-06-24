@@ -156,8 +156,8 @@ class SCombination(SimpleTypeD):
         return self.create(ordered).maybe_dnf(nf).maybe_cnf(nf)
 
     def conversion8(self):
-        # (or A ( not B)) --> STop if B is subtype of A, zero = STop
-        # (and A ( not B)) --> SEmpty if B is supertype of A, zero = SEmpty
+        # (or A (not B)) --> STop if B is subtype of A, zero = STop
+        # (and A (not B)) --> SEmpty if B is supertype of A, zero = SEmpty
         from genus_types import notp
         for a in self.tds:
             for n in self.tds:
@@ -203,7 +203,7 @@ class SCombination(SimpleTypeD):
         from utils import find_first
 
         def pred(sub):
-            return any(sup for sup in self.tds if sub != sup and self.annihilator(sub, sup) is True)
+            return any(sub != sup and self.annihilator(sub, sup) is True for sup in self.tds)
 
         sub = find_first(pred, self.tds)
         if sub is None:

@@ -726,6 +726,19 @@ def t_and_conversionA3():
     assert SAnd(SMember(1, 2, "a", "b"), SAtomic(int)).conversionA3() == SAnd(SMember(1, 2, "a", "b"), SAtomic(int))
 
 
+def t_discovered_cases3():
+    class Test1:
+        pass
+
+    assert SNot(SAtomic(Test1)).subtypep(SAtomic(int)) is False
+    assert SAtomic(int).subtypep(SAtomic(Test1)) is False
+    assert SAtomic(Test1).subtypep(SAtomic(int)) is False
+    assert SAtomic(int).subtypep(SNot(SAtomic(Test1))) is True
+    assert SAtomic(Test1).subtypep(SNot(SAtomic(int))) is True
+    assert SNot(SAtomic(int)).subtypep(SAtomic(Test1)) is False
+    assert SAnd(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SAtomic(int)
+    assert SOr(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SNot(SAtomic(Test1))
+
 #   calling the test functions
 
 
@@ -749,6 +762,7 @@ t_combo_conversion14()
 t_combo_conversion15()
 t_combo_conversion16()
 t_discovered_cases2()
+t_discovered_cases3()
 t_or()
 t_member()
 t_eql()

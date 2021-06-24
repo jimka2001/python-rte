@@ -83,11 +83,11 @@ class SMemberImpl(SimpleTypeD):
 				elif not b:
 					return False
 				elif a[0] == b[0]:
-					return comp(a[1:-1], b[1:-1])
+					return comp(a[1:], b[1:])
 				elif str(a[0]) != str(b[0]):
 					return str(a[0]) < str(b[0])
 				else:
-					raise Exception(f"different values which print the same {a[0]} va {b[0]}")
+					raise Exception(f"different values which print the same {a[0]} vs {b[0]}")
 			return comp(self.arglist, t.arglist)
 
 
