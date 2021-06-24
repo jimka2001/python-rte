@@ -19,9 +19,13 @@
 * Many `__init__` functions now contain assertions about the types of arguments given.  For example `SAtomic()` now asserts that its argument is a class, via `assert inspect.isclass(wrapped_class)`.   `SNot`, `SAnd`, and `SOr` assert that their arguments are instances of class `SimpleTypeD`.
 
 * The `disjoint` method on `SAtomic` has been changed to something simpler which seems to work.  Although remainign corner cases still need to be identified.  The algorithm is basically a check of the following
+
 ** are the classes equal, then, not disjoint
+
 ** is one class a subclass of the other, then not disjoint
+
 ** do the two classes have a common subclass, then not disjoint.
+
 ** otherwise they are disjoint
 
 * The utility functions `orp`, `andp`, `combop`, `notp`, `atomicp`, `topp`, `empty`, `memberimplp`, `memberp`, and `eqlp` have been provided as replacements for `isinstance(_,SOr)`, `isinstance(_,SAnd)`, `isinstance(_,SCombinationr)`, etc.  Honestly, I don't know whether this is better or worse.
