@@ -1,5 +1,6 @@
 .idea
 venv/
 genus/src/__pycache__
+.#*
 #*
 *~
