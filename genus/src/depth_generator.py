@@ -53,14 +53,6 @@ class depth_generator(object):
         return self._generate_tree(self.k)
 
 
-rand_lambda = depth_generator(2).rand_lambda_str_generator()
-for i in range(10):
-    print(rand_lambda[0](i))
-
-tree = depth_generator(5).generate_tree()
-print(tree)
-
-
 class TestA:
     pass
 
