@@ -65,7 +65,7 @@ class SAnd(SCombination):
         return SEmpty
 
     def annihilator(self, a, b):
-        return b.supertypep(a)
+        return a.subtypep(b)
 
     def dual_combination(self, td):
         from genus_types import orp
