@@ -334,10 +334,17 @@ class SCombination(SimpleTypeD):
             return self.create(uniquify([f(td) for td in self.tds]))
 
     def conversion15(self):
-        # SAnd(X, member, not-member)
-        # SOr(X, member, not-member)
+        # SAnd(X, member1, not-member) --> SAnd(X,member2)
+        # SOr(X, member, not-member1) --> SOr(X,not-member2)
+        #
         # after conversion13 and conversion14 there is a maximum of one SMember(...) and
         # a maximum of one SNot(SMember(...))
+        #
+        # In the SAnd case we can remove the SNot(SMember(...)) and filter the SMember(...)
+        #      to memberArgs andNot notMemberArgs.
+        # In the SOr  case we can remove the SMember(...) and filter the SNot(SMember(...))
+        #      to notMemberArgs andNot memberArgs.
+
         from utils import find_first, flat_map
         from genus_types import memberimplp, notp, andp, orp, createSMember
 
