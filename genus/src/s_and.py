@@ -135,7 +135,11 @@ class SAnd(SCombination):
             return STop.subtypep(t)
         elif any(t2.subtypep(t) for t2 in self.tds):
             return True
-        elif t.inhabited() is True and self.inhabited() is True and all(x.disjoint(t) is True for x in self.tds):
+        elif t.inhabited() is not True:
+            return super()._subtypep_down(t)
+        elif self.inhabited() is not True:
+            return super()._subtypep_down(t)
+        elif all(x.disjoint(t) is True for x in self.tds):
             return False
         else:
             return super()._subtypep_down(t)
