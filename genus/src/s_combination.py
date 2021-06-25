@@ -202,8 +202,8 @@ class SCombination(SimpleTypeD):
         # (or A B C) -->  (or B C) if A is subtype of B
         from utils import find_first
 
-        def pred(sub):
-            return any(sub != sup and self.annihilator(sub, sup) is True for sup in self.tds)
+        def pred(u):
+            return any(u != v and self.annihilator(u, v) is True for v in self.tds)
 
         sub = find_first(pred, self.tds)
         if sub is None:
@@ -371,7 +371,7 @@ class SCombination(SimpleTypeD):
                     return []
                 elif orp(self) and td == not_member:
                     return [SNot(createSMember(diff(not_member.s.arglist, member.arglist)))]
-                
+
                 else:
                     return [td]
             return self.create(flat_map(f, self.tds))
