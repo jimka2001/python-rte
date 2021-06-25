@@ -360,14 +360,18 @@ class SCombination(SimpleTypeD):
         # so we have a member and a not_member
         else:
             def f(td):
+                # in the SAnd case we remove the not_member and filter the member args
                 if andp(self) and td == not_member:
-                    return []
-                elif orp(self) and td == member:
                     return []
                 elif andp(self) and td == member:
                     return [createSMember(diff(member.arglist, not_member.s.arglist))]
+
+                # in the SOr case we remove the member and filter the not-member args
+                elif orp(self) and td == member:
+                    return []
                 elif orp(self) and td == not_member:
                     return [SNot(createSMember(diff(not_member.s.arglist, member.arglist)))]
+                
                 else:
                     return [td]
             return self.create(flat_map(f, self.tds))
