@@ -36,7 +36,7 @@
 
 * The files `utils.py` and `genus_types.py` contain lots of helper 
   functions, some of which were previous static methods.  For example:
-  `find_simpifier` is now located in `utils.py` and is a normal 
+  `find_simplifier` is now located in `utils.py` and is a normal 
   function, rather than a method.  Admittedly, some/many of the 
   functions in `utils.py` are not very idiomatic-Python, e.g., 
   `flat_map`, `find_first`, `search_replace`, and 
@@ -51,7 +51,7 @@
   attributes.
 
 * `SAnd.canonicalize()` and `SOr.canonicalize()` have been implemented 
-  via calls to the `find_simpifier` function.  Most of the work is done 
+  via calls to the `find_simplifier` function.  Most of the work is done 
   by the `SCombination.canonicalize()` method which performs many 
   so-called *conversions* in a generic work which work for `SOr` and 
   also for `SAnd` making use of methods such as `create`, 
@@ -65,7 +65,7 @@
   of class `SimpleTypeD`.
 
 * The `disjoint` method on `SAtomic` has been changed to something 
-  simpler which seems to work.  Although remaining corner cases still 
+  simpler which seems to work--although remaining corner cases still 
   need to be identified.  The algorithm is basically a check of the 
   following
 
@@ -77,7 +77,7 @@
 * The utility functions `orp`, `andp`, `combop`, `notp`, `atomicp`, 
   `topp`, `empty`, `memberimplp`, `memberp`, and `eqlp` have been 
   provided as replacements for `isinstance(_,SOr)`, 
-  `isinstance(_,SAnd)`, `isinstance(_,SCombinationr)`, etc.  
+  `isinstance(_,SAnd)`, `isinstance(_,SCombination)`, etc.  
   Honestly, I don't know whether this is better or worse.
 
 * All test cases have been moved into `all_tests.py` and many new 
