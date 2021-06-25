@@ -351,26 +351,18 @@ class SCombination(SimpleTypeD):
         elif not_member is None:
             return self
         # so we have a member and a not_member
-        elif andp(self):
+        else:
             def f(td):
-                if td == not_member:
+                if andp(self) and td == not_member:
                     return []
-                elif td == member:
+                elif orp(self) and td == member:
+                    return []
+                elif andp(self) and td == member:
                     return [createSMember(diff(member.arglist, not_member.s.arglist))]
-                else:
-                    return [td]
-            return self.create(flat_map(f, self.tds))
-        else:  # orp(self)
-            assert orp(self)
-
-            def f(td):
-                if td == member:
-                    return []
-                elif td == not_member:
+                elif orp(self) and td == not_member:
                     return [SNot(createSMember(diff(not_member.s.arglist, member.arglist)))]
                 else:
                     return [td]
-
             return self.create(flat_map(f, self.tds))
 
     def conversion16(self):
