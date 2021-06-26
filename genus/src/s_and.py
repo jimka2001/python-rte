@@ -103,15 +103,15 @@ class SAnd(SCombination):
             #   here we would like to check every 2-element subset
             #   if we find a,b such that a and b are disjoint,
             #   then we know self is not inhabited
-            any(self.tds[a].disjointp(self.tds[b]) is True
-                for a in range(self.tds.length)
-                for b in range(a+1, self.tds.length))
-        elif dnf() != self and inhabited_dnf():
+            any(self.tds[a].disjoint(self.tds[b]) is True
+                for a in range(len(self.tds))
+                for b in range(a+1, len(self.tds)))
+        elif dnf() != self and inhabited_dnf() is not None:
             return inhabited_dnf()
-        elif cnf() != self and inhabited_cnf():
+        elif cnf() != self and inhabited_cnf() is not None:
             return inhabited_cnf()
         else:
-            return super().inhabited_down
+            return super().inhabited_down()
 
     def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
