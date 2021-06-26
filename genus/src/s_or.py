@@ -29,8 +29,8 @@ zero 3
 annihilator 3
 same_combination 3
 typep 3
-inhabited_down 0
-disjoint_down 0
+inhabited_down 3
+disjoint_down 2
 subtypep 0
 canonicalize_once 3
 compute_cnf 3
@@ -87,7 +87,21 @@ class SOr(SCombination):
         return any(td.typep(a) for td in self.tds)
 
     def inhabited_down(self):
-        raise NotImplementedError
+        if any(td.inhabited() is True for td in self.tds):
+            return True
+        elif all(td.inhabited() is False for td in self.tds):
+            return False
+        else:
+            return super().inhabited_down()
+
+    def disjoint_down(self,t):
+        # TODO implement memoization
+        if all(td.disjoint(t) is True for td in self.tds):
+            return True
+        elif any(td.disjoint(t) is False for td in self.tds):
+            return False
+        else:
+            return super().disjoint_down(t)
 
     def conversionD1(self):
         # Dual of SAnd.conversionA1

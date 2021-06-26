@@ -88,17 +88,18 @@ class SAnd(SCombination):
     def typep(self, a):
         return all(td.typep(a) for td in self.tds)
 
-    def inhabited_down(self, _opt):
+    def inhabited_down(self):
+        from genus_types import atomicp
 
         dnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.DNF))
         cnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.CNF))
 
-        inhabited_dnf = generate_lazy_val(lambda: dnf.inhabited())
-        inhabited_cnf = generate_lazy_val(lambda: cnf.inhabited())
+        inhabited_dnf = generate_lazy_val(lambda: dnf().inhabited())
+        inhabited_cnf = generate_lazy_val(lambda: cnf().inhabited())
 
-        if any(False in t for t in self.tds):
+        if any(t.inhabited() is False for t in self.tds):
             return False
-        elif all(type(t) == SAtomic for t in self.tds):
+        elif all(atomicp(t) for t in self.tds):
             #   here we would like to check every 2-element subset
             #   if we find a,b such that a and b are disjoint,
             #   then we know self is not inhabited
