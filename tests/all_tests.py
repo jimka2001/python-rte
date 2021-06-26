@@ -404,7 +404,8 @@ def t_subtypep1():
             assert SAnd(td1, td2).subtypep(td1) is not False
             assert td1.subtypep(SOr(td1, td2)) is not False
             assert SAnd(td1, td2).subtypep(SAnd(td2, td1)) is not False
-            assert SOr(td1, td2).subtypep(SOr(td2, td2)) is not False
+            assert SOr(td1, td2).subtypep(SOr(td2, td1)) is not False, \
+                f"td1={td1}\ntd2={td2}"
             assert SAnd(td1, td2).subtypep(SOr(td1, td2)) is not False
             assert SAnd(SNot(td1), SNot(td2)).subtypep(SNot(SOr(td1, td2))) is not False
             assert SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))) is not False
@@ -861,9 +862,18 @@ def t_to_cnf():
     assert td.to_dnf() == td
     assert td.compute_dnf() == td
 
+
+def t_discovered_cases_867():
+    class Test1:
+        pass
+
+    assert SAtomic(float).subtypep(SNot(SEmpty)) is True
+    assert SNot(SAtomic(Test1)).subtypep(SAtomic(Test1)) is False
+
 #   calling the test functions
 
 
+t_discovered_cases_867()
 t_or_membership()
 t_and_membership()
 t_to_dnf()
