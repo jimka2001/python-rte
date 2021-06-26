@@ -43,83 +43,84 @@ from s_top import STop
 
 
 class SOr(SCombination):
-	"""docstring for SOr"""
-	def __init__(self, *tds):
-		super(SOr, self).__init__(tds)
+    """docstring for SOr"""
 
-	def __str__(self):
-		return "[SOr " + ",".join([str(td) for td in self.tds]) + "]"
+    def __init__(self, *tds):
+        super(SOr, self).__init__(tds)
 
-	def create(self, tds):
-		return createSOr(tds)
+    def __str__(self):
+        return "[SOr " + ",".join([str(td) for td in self.tds]) + "]"
 
-	def unit(self):
-		return SEmpty
+    def create(self, tds):
+        return createSOr(tds)
 
-	def zero(self):
-		return STop
+    def unit(self):
+        return SEmpty
 
-	def annihilator(self, a, b):
-		return b.subtypep(a)
+    def zero(self):
+        return STop
 
-	def dual_combination(self, td):
-		from genus_types import andp
-		return andp(td)
+    def annihilator(self, a, b):
+        return b.subtypep(a)
 
-	def dual_combinator(self, a, b):
-		return [x for x in a if x in b]
+    def dual_combination(self, td):
+        from genus_types import andp
+        return andp(td)
 
-	def combinator(self, a, b):
-		from utils import uniquify
-		assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
-		assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
-		return uniquify(a + b)
+    def dual_combinator(self, a, b):
+        return [x for x in a if x in b]
 
-	def combo_filter(self, pred, xs):
-		return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
+    def combinator(self, a, b):
+        from utils import uniquify
+        assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
+        assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
+        return uniquify(a + b)
 
-	def create_dual(self, tds):
-		from genus_types import createSAnd
-		return createSAnd(tds)
+    def combo_filter(self, pred, xs):
+        return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
 
-	def typep(self, a):
-		return any(td.typep(a) for td in self.tds)
+    def create_dual(self, tds):
+        from genus_types import createSAnd
+        return createSAnd(tds)
 
-	def inhabited_down(self):
-		raise NotImplementedError
+    def typep(self, a):
+        return any(td.typep(a) for td in self.tds)
 
-	def conversionD1(self):
-		# Dual of SAnd.conversionA1
+    def inhabited_down(self):
+        raise NotImplementedError
 
-		# SOr(SNot(SMember(42, 43, 44, "a","b")), String)
-		# == > SNot(SMember(42, 43, 44))
-		# find all x in {42, 43, 44, "a","b"} which are not self.typep(x)
-		from utils import find_first
-		from genus_types import memberimplp, createSMember, notp
-		from s_not import SNot
+    def conversionD1(self):
+        # Dual of SAnd.conversionA1
 
-		not_member = find_first(lambda td: notp(td) and memberimplp(td.s), self.tds, None)
-		if not_member is None:
-			return self
-		else:
-			return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
+        # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+        # == > SNot(SMember(42, 43, 44))
+        # find all x in {42, 43, 44, "a","b"} which are not self.typep(x)
+        from utils import find_first
+        from genus_types import memberimplp, createSMember, notp
+        from s_not import SNot
 
-	def conversionD3(self):
-		# dual of  disjoint pair
-		# SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
-		from genus_types import notp
+        not_member = find_first(lambda td: notp(td) and memberimplp(td.s), self.tds, None)
+        if not_member is None:
+            return self
+        else:
+            return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
 
-		nots = [td.s for td in self.tds if notp(td)]
+    def conversionD3(self):
+        # dual of  disjoint pair
+        # SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
+        from genus_types import notp
 
-		for i in range(len(nots)):
-			for j in range(i + 1, len(nots)):
-				if nots[i].disjoint(nots[j]) is True:
-					return STop
-		return self
+        nots = [td.s for td in self.tds if notp(td)]
 
-	def canonicalize_once(self, nf=None):
-		from utils import find_simplifier
-		return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])
+        for i in range(len(nots)):
+            for j in range(i + 1, len(nots)):
+                if nots[i].disjoint(nots[j]) is True:
+                    return STop
+        return self
+
+    def canonicalize_once(self, nf=None):
+        from utils import find_simplifier
+        return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])
 
     def compute_cnf(self):
         # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
