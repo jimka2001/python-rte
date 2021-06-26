@@ -240,9 +240,9 @@ class SimpleTypeD(metaclass=ABCMeta):
             
             res = fixed_point(self, processor, good_enough)
             self.canonicalized_hash |= {nf: res}
+            # tell the perhaps new object it is already canonicalized
+            self.canonicalized_hash[nf].canonicalized_hash[nf] = self.canonicalized_hash[nf]
 
-        # tell the perhaps new object it is already canonicalized (TODO: could I just put this in the if ?)
-        self.canonicalized_hash[nf].canonicalized_hash[nf] = self.canonicalized_hash[nf]
         return self.canonicalized_hash[nf]
 
     def supertypep(self, t):

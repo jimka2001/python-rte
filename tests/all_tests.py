@@ -725,7 +725,8 @@ def t_combo_conversionD3():
 
     assert SOr(SNot(SMember(1, 2)), SNot(SMember(3, 4))).conversionD3() == STop
     assert SOr(SNot(SMember("a", "b")), SNot(SAtomic(int))).conversionD3() == STop
-    assert SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))).conversionD3() == SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int)))
+    assert SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))).conversionD3() == \
+           SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int)))
 
 
 def t_discovered_cases3():
@@ -759,9 +760,28 @@ def t_discovered_cases4():
     assert SAtomic(float).disjoint(SNot(SEmpty)) is not True
     assert SAnd(SAtomic(float), SNot(SEmpty)).canonicalize() == SAtomic(float)
 
+
+def t_canonicalize_cache():
+    a = SEql("a")
+    td = SOr(a, a, a)
+    assert td.canonicalized_hash == {}
+    tdc = td.canonicalize()
+    assert td.canonicalized_hash[None] == tdc
+    assert tdc.canonicalized_hash[None] == tdc
+
+    from genus_types import NormalForm
+    tdc2 = td.canonicalize(NormalForm.DNF)
+    assert td.canonicalized_hash[NormalForm.DNF] == tdc2
+    assert tdc2.canonicalized_hash[NormalForm.DNF] == tdc2
+
+    tdc3 = td.canonicalize(NormalForm.CNF)
+    assert td.canonicalized_hash[NormalForm.CNF] == tdc3
+    assert tdc3.canonicalized_hash[NormalForm.CNF] == tdc3
+
+
 #   calling the test functions
 
-
+t_canonicalize_cache()
 t_depth_generator()
 t_combo_conversion1()
 t_combo_conversionD1()
@@ -804,3 +824,4 @@ t_SimpleTypeD()
 t_membership()
 t_subtypep1()
 t_subtypep2()
+
