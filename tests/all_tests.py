@@ -778,9 +778,58 @@ def t_canonicalize_cache():
     assert td.canonicalized_hash[NormalForm.CNF] == tdc3
     assert tdc3.canonicalized_hash[NormalForm.CNF] == tdc3
 
+def t_to_dnf():
+    # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
+    #    --> td = SOr(y1,y2,y3)
+    # --> SOr(SAnd(x1,x2,  y1,  x3,x4),
+    #          SAnd(x1,x2,  y2,  x3,x4),
+    #          SAnd(x1,x2,  y3,  x3,x4),
+    #     )
+    x1 = SEql("x1")
+    x2 = SEql("x2")
+    x3 = SEql("x3")
+    x4 = SEql("x4")
+    y1 = SEql("y1")
+    y2 = SEql("y2")
+    y3 = SEql("y3")
+    td = SAnd(x1, x2, SOr(y1, y2, y3), x3, x4)
+    dnf = SOr(SAnd(x1, x2, y1, x3, x4),
+              SAnd(x1, x2, y2, x3, x4),
+              SAnd(x1, x2, y3, x3, x4))
+    assert td.compute_dnf() == dnf
+    assert td.to_dnf() == dnf
+    assert td.to_cnf() == td
+    assert td.compute_cnf() == td
+
+
+def t_to_cnf():
+    # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
+    #    --> td = SAnd(y1,y2,y3)
+    # --> SAnd(SOr(x1,x2,  y1,  x3,x4),
+    #          SOr(x1,x2,  y2,  x3,x4),
+    #          SOr(x1,x2,  y3,  x3,x4),
+    #     )
+    x1 = SEql("x1")
+    x2 = SEql("x2")
+    x3 = SEql("x3")
+    x4 = SEql("x4")
+    y1 = SEql("y1")
+    y2 = SEql("y2")
+    y3 = SEql("y3")
+    td = SOr(x1, x2, SAnd(y1, y2, y3), x3, x4)
+    cnf = SAnd(SOr(x1, x2, y1, x3, x4),
+               SOr(x1, x2, y2, x3, x4),
+               SOr(x1, x2, y3, x3, x4))
+    assert td.compute_cnf() == cnf
+    assert td.to_cnf() == cnf
+    assert td.to_dnf() == td
+    assert td.compute_dnf() == td
 
 #   calling the test functions
 
+
+t_to_dnf()
+t_to_cnf()
 t_canonicalize_cache()
 t_depth_generator()
 t_combo_conversion1()

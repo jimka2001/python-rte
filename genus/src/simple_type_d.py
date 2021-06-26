@@ -37,9 +37,9 @@ subtypep
 fixed_point 3
 debug_find_simplifier   1
 find_simplifier     1
-_compute_dnf    3
+compute_dnf    3
 to_dnf  3
-_compute_cnf    3
+compute_cnf    3
 to_cnf  fully done
 maybe_dnf   2
 maybe_cnf   2
@@ -164,21 +164,21 @@ class SimpleTypeD(metaclass=ABCMeta):
             return None
 
     # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
-    def _compute_dnf(self):
+    def compute_dnf(self):
         return self
 
     def to_dnf(self):
         if not hasattr(self, "hold_todnf"):
-            self.hold_todnf = self._compute_dnf()
+            self.hold_todnf = self.compute_dnf()
         return self.hold_todnf
 
     # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
-    def _compute_cnf(self):
+    def compute_cnf(self):
         return self
 
     def to_cnf(self):
         if not hasattr(self, "hold_tocnf"):
-            self.hold_tocnf = self._compute_cnf()
+            self.hold_tocnf = self.compute_cnf()
         return self.hold_tocnf
 
     def maybe_dnf(self, nf):

@@ -94,5 +94,7 @@
 
 * eliminated the binary operator overloading __or__, __and__, etc.
 
+* implemented to_cnf and t_dnf
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->

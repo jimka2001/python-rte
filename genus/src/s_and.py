@@ -175,5 +175,10 @@ class SAnd(SCombination):
         return find_simplifier(self, [lambda: super(SAnd, self).canonicalize_once(nf)])
 
     def compute_dnf(self):
-        # TODO I need explanation for this one
-        return self
+        # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
+        #    --> td = SOr(y1,y2,y3)
+        # --> SOr(SAnd(x1,x2,  y1,  x3,x4),
+        #          SAnd(x1,x2,  y2,  x3,x4),
+        #          SAnd(x1,x2,  y3,  x3,x4),
+        #     )
+        return self.compute_nf()

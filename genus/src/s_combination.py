@@ -437,3 +437,16 @@ class SCombination(SimpleTypeD):
             return False
         else:
             return compare_sequence(self.tds, td.tds)
+
+    def compute_nf(self):
+        # it turns out SAnd.compute_dnf and SOr.compute_cnf contain
+        # the exact same code.  So I've factored that code here.
+        from utils import find_first
+
+        td = find_first(self.dual_combination, self.tds, None)
+        if td is None:
+            return self
+        else:
+            return self.create_dual([self.create([y if x is td else x
+                                                  for x in self.tds])
+                                     for y in td.tds])

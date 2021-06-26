@@ -120,3 +120,12 @@ class SOr(SCombination):
 	def canonicalize_once(self, nf=None):
 		from utils import find_simplifier
 		return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])
+
+    def compute_cnf(self):
+        # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
+        #    --> td = SAnd(y1,y2,y3)
+        # --> SAnd(SOr(x1,x2,  y1,  x3,x4),
+        #          SOr(x1,x2,  y2,  x3,x4),
+        #          SOr(x1,x2,  y3,  x3,x4),
+        #     )
+        return self.compute_nf()
