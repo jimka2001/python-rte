@@ -21,19 +21,19 @@
 
 """
 [0-3] Advancement tracker
-__init__ 1
-__str__ 1
-create 1
-unit 1
-zero 1
-annihilator 1
-same_combination 1
+__init__ 3
+__str__ 3
+create 3
+unit 3
+zero 3
+annihilator 3
+same_combination 3
 typep 1
 inhabited_down 0
 _disjoint_down 1
 subtypep 1
-canonicalize_once 0
-compute_dnf 0
+canonicalize_once 3
+compute_dnf 3
 """
 
 from s_top import STop

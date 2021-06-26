@@ -27,13 +27,13 @@ from utils import find_simplifier
 """
 [0-3] Advancement tracker
 
-__init__ 1
-create 1
-unit 1
-zero 1
-annihilator 1
-same_combination 1
-canonicalize_once 1
+__init__ 3
+create 3
+unit 3
+zero 3
+annihilator 3
+same_combination 3
+canonicalize_once 3
 cmp_to_same_class 0
 """
 
