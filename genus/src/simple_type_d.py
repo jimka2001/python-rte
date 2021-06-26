@@ -71,28 +71,6 @@ class SimpleTypeD(metaclass=ABCMeta):
     def __repr__(self):
         return self.__str__()
 
-    # overloading operators
-    def __or__(self, t):
-        # implement when SOr is implemented
-        raise NotImplementedError
-
-    def __and__(self, t):
-        # implement when SAnd is implemented
-        raise NotImplementedError
-
-    # unfortunately, this one can't be overloaded
-    def unary_not(self):
-        # implement when SNot is implemented
-        raise NotImplementedError
-
-    def __sub__(self, t):
-        # implement when SAnd and SNot are implemented
-        raise NotImplementedError
-
-    def __xor__(self, t):
-        # implement when SNot, SAnd and SOr are implemented
-        raise NotImplementedError
-
     @abstractmethod
     def typep(self, a):
         """Returns whether a given object belongs to this type.

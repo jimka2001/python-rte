@@ -92,7 +92,7 @@
   function eventually re-calls itself with the same argument list 
   as previous pending call.
 
-
+* eliminated the binary operator overloading __or__, __and__, etc.
 
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
