@@ -190,24 +190,27 @@ def t_sor():
     assert not tri_o_quad.same_combination(STop)
     assert not tri_o_quad.same_combination(createSOr([]))
 
+
 def t_or_membership():
     x = SEql(1)
     y = SEql(2)
 
-    assert SOr(x,y).typep(1) == True
-    assert SOr(x,y).typep(2) == True
-    assert SOr(x,y).typep(3) == False
+    assert SOr(x, y).typep(1) is True
+    assert SOr(x, y).typep(2) is True
+    assert SOr(x, y).typep(3) is False
+
 
 def t_and_membership():
-    x = SMember(1,2,3)
-    y = SMember(2,3,4)
+    x = SMember(1, 2, 3)
+    y = SMember(2, 3, 4)
 
-    assert SAnd(x, y).typep(0) == False
-    assert SAnd(x, y).typep(1) == False
-    assert SAnd(x, y).typep(2) == True
-    assert SAnd(x, y).typep(3) == True
-    assert SAnd(x, y).typep(4) == False
-    assert SAnd(x, y).typep(5) == False
+    assert SAnd(x, y).typep(0) is False
+    assert SAnd(x, y).typep(1) is False
+    assert SAnd(x, y).typep(2) is True
+    assert SAnd(x, y).typep(3) is True
+    assert SAnd(x, y).typep(4) is False
+    assert SAnd(x, y).typep(5) is False
+
 
 def t_snot():
     pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
@@ -524,6 +527,20 @@ def t_membership():
                     f" but of type tdc3={tdc3} is {tdc3.typep(v)}"
 
 
+def t_canonicalize_subtype():
+    from genus_types import NormalForm
+    from depth_generator import random_type_designator
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            tdc1 = td.canonicalize()
+            tdc2 = td.canonicalize(NormalForm.DNF)
+            tdc3 = td.canonicalize(NormalForm.CNF)
+            for t1 in [td, tdc1, tdc2, tdc3]:
+                for t2 in [td, tdc1, tdc2, tdc3]:
+                    assert t1.subtypep(t2) is not False
+
+
 def t_combo_conversion1():
     assert SAnd().conversion1() == STop
     assert SOr().conversion1() == SEmpty
@@ -796,6 +813,7 @@ def t_canonicalize_cache():
     assert td.canonicalized_hash[NormalForm.CNF] == tdc3
     assert tdc3.canonicalized_hash[NormalForm.CNF] == tdc3
 
+
 def t_to_dnf():
     # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
     #    --> td = SOr(y1,y2,y3)
@@ -845,6 +863,7 @@ def t_to_cnf():
 
 #   calling the test functions
 
+
 t_or_membership()
 t_and_membership()
 t_to_dnf()
@@ -889,7 +908,7 @@ t_STop()
 t_STop2()
 t_SEmpty()
 t_SimpleTypeD()
+t_canonicalize_subtype()
 t_membership()
 t_subtypep1()
 t_subtypep2()
-
