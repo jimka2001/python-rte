@@ -150,10 +150,7 @@ class SCombination(SimpleTypeD):
             return self.create(flat_map(f, self.tds))
 
     def conversion7(self, nf):
-        import functools
-        from genus_types import cmp_type_designators
-        ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_type_designators))
-        return self.create(ordered).maybe_dnf(nf).maybe_cnf(nf)
+        return self.maybe_dnf(nf).maybe_cnf(nf)
 
     def conversion8(self):
         # (or A (not B)) --> STop if B is subtype of A, zero = STop
@@ -404,6 +401,12 @@ class SCombination(SimpleTypeD):
     def conversionD3(self):
         raise NotImplementedError
 
+    def conversion98(self):
+        import functools
+        from genus_types import cmp_type_designators
+        ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_type_designators))
+        return self.create(ordered)
+
     def conversion99(self, nf):
         return self.create([td.canonicalize(nf) for td in self.tds])
 
@@ -426,6 +429,7 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion16(),
                        lambda: self.conversionD1(),
                        lambda: self.conversionD3(),
+                       lambda: self.conversion98(),
                        lambda: self.conversion99(nf)]
         return find_simplifier(self, simplifiers)
 

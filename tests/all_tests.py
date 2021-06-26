@@ -604,13 +604,13 @@ def t_combo_conversion6():
     assert SOr(a, SOr(b, c), d).conversion6() == SOr(a, b, c, d)
 
 
-def t_combo_conversion7():
+def t_combo_conversion98():
     a = SEql("a")
     b = SEql("b")
     c = SEql("c")
     d = SEql("d")
-    assert SAnd(b, c, a, d).conversion7(None) == SAnd(a, b, c, d), f"got {SAnd(b, c, a, d).conversion7(None)}"
-    assert SOr(b, c, a, d).conversion7(None) == SOr(a, b, c, d)
+    assert SAnd(b, c, a, d).conversion98() == SAnd(a, b, c, d), f"got {SAnd(b, c, a, d).conversion98()}"
+    assert SOr(b, c, a, d).conversion98() == SOr(a, b, c, d)
 
 
 def t_combo_conversion8():
@@ -888,7 +888,7 @@ t_combo_conversion3()
 t_combo_conversion4()
 t_combo_conversion5()
 t_combo_conversion6()
-t_combo_conversion7()
+t_combo_conversion98()
 t_combo_conversion8()
 t_combo_conversion9()
 t_combo_conversion10()
