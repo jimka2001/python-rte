@@ -30,8 +30,8 @@ from s_empty import SEmpty
 __init__ 1
 __str__ 1
 typep 1
-_inhabited_down 1
-_disjoint_down 1
+inhabited_down 1
+disjoint_down 1
 subtypep 1
 canonicalize_once 1
 compute_dnf 0
@@ -61,7 +61,7 @@ class SNot(SimpleTypeD):
 	def typep(self, a):
 		return not self.s.typep(a)
 
-	def _inhabited_down(self):
+	def inhabited_down(self):
 		from genus_types import topp, emptyp, memberp, eqlp, atomicp, notp
 		if topp(self.s):
 			return False
@@ -83,7 +83,7 @@ class SNot(SimpleTypeD):
 		else:
 			return None
 
-	def _disjoint_down(self, t):
+	def disjoint_down(self, t):
 		assert isinstance(t, SimpleTypeD)
 		# is SNot(s) disjoint with t
 		# first we ask whether t is a subtype of s,
@@ -91,9 +91,9 @@ class SNot(SimpleTypeD):
 		if t.subtypep(self.s) is True:  # if it is empty this is empty and is thus evaluated as False
 			return True
 		else:
-			return super()._disjoint_down(t)
+			return super().disjoint_down(t)
 
-	def _subtypep_down(self, t):
+	def subtypep_down(self, t):
 		from utils import generate_lazy_val
 		from genus_types import notp, atomicp
 		# SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
@@ -120,7 +120,7 @@ class SNot(SimpleTypeD):
 		elif os() is not None:
 			return os()
 		else:
-			return super()._subtypep_down(t)
+			return super().subtypep_down(t)
 
 	def canonicalize_once(self, nf=None):
 		from genus_types import notp, topp, emptyp

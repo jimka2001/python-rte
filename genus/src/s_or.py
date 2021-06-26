@@ -30,7 +30,7 @@ annihilator 3
 same_combination 3
 typep 3
 inhabited_down 0
-_disjoint_down 0
+disjoint_down 0
 subtypep 0
 canonicalize_once 3
 compute_cnf 3

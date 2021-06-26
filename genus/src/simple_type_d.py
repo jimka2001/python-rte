@@ -30,9 +30,9 @@ __sub__     0
 __xor__     0
 typep       3
 disjoint    2
-_inhabited_down     3
+inhabited_down     3
 inhabited   3
-_disjoint_down  3
+disjoint_down  3
 subtypep
 fixed_point 3
 debug_find_simplifier   1
@@ -82,12 +82,12 @@ class SimpleTypeD(metaclass=ABCMeta):
         assert isinstance(td, SimpleTypeD)
 
         # these somewhat cryptic names were chosen to match the original Scala code
-        d1 = generate_lazy_val(lambda: self._disjoint_down(td))
-        d2 = generate_lazy_val(lambda: td._disjoint_down(self))
+        d1 = generate_lazy_val(lambda: self.disjoint_down(td))
+        d2 = generate_lazy_val(lambda: td.disjoint_down(self))
         c1 = generate_lazy_val(lambda: self.canonicalize())
         c2 = generate_lazy_val(lambda: td.canonicalize())
-        dc12 = generate_lazy_val(lambda: c1()._disjoint_down(c2()))
-        dc21 = generate_lazy_val(lambda: c2()._disjoint_down(c1()))
+        dc12 = generate_lazy_val(lambda: c1().disjoint_down(c2()))
+        dc21 = generate_lazy_val(lambda: c2().disjoint_down(c1()))
 
         if self == td and self.inhabited() is not None:
             return not self.inhabited()
@@ -108,15 +108,15 @@ class SimpleTypeD(metaclass=ABCMeta):
             return None
 
     # for performance reasons, do not call directly, rather use the inhabited method as it stores the result
-    def _inhabited_down(self):
+    def inhabited_down(self):
         return None
 
     def inhabited(self):
         if not hasattr(self, "hold_inhabited"):
-            self.hold_inhabited = self._inhabited_down()
+            self.hold_inhabited = self.inhabited_down()
         return self.hold_inhabited
 
-    def _disjoint_down(self, t):
+    def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
         if self.inhabited() is False:
             return True
@@ -150,9 +150,9 @@ class SimpleTypeD(metaclass=ABCMeta):
         elif and_result() is True:
             return True
         else:
-            return self._subtypep_down(t)
+            return self.subtypep_down(t)
 
-    def _subtypep_down(self, t):
+    def subtypep_down(self, t):
         from genus_types import notp
         if notp(t) and self.disjoint(t.s) is True:
             return True

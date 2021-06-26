@@ -67,7 +67,7 @@ class SAtomic(SimpleTypeD, TerminalType):
         # check that this does what we want (looks like it does but eh)
         return isinstance(a, self.wrapped_class)
 
-    def _inhabited_down(self):
+    def inhabited_down(self):
         # try:
         #     # TODO type(None) ? is this really the way to find the empty type? I think it is wrong.
         #     return not issubclass(self.wrapped_class, type(None))
@@ -104,7 +104,7 @@ class SAtomic(SimpleTypeD, TerminalType):
             raise e
         pass
 
-    def _disjoint_down(self, t):
+    def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
         from s_empty import SEmptyImpl
         ct = self.wrapped_class
@@ -139,9 +139,9 @@ class SAtomic(SimpleTypeD, TerminalType):
                 return not any(issubclass(c, tp) for c in get_all_subclasses(ct))
 
         else:
-            return super()._disjoint_down(t)
+            return super().disjoint_down(t)
 
-    def _subtypep_down(self, s):
+    def subtypep_down(self, s):
         from s_empty import SEmptyImpl, SEmpty
         from s_member import SMemberImpl
         from s_not import SNot
@@ -171,25 +171,25 @@ class SAtomic(SimpleTypeD, TerminalType):
         elif isinstance(s, SMemberImpl):
             return False  # no finite list exhausts all elements of a class
         elif isinstance(s, SNot):
-            return super()._subtypep_down(s)
+            return super().subtypep_down(s)
         elif isinstance(s, SOr):
             if any(self.subtypep(td) is True for td in s.tds):
                 return True
             elif all(self.disjoint(td) is True for td in s.tds):
                 return False
             else:
-                return super()._subtypep_down(s)
+                return super().subtypep_down(s)
         elif isinstance(s, SAnd):
             if all(self.subtypep(td) is True for td in s.tds):
                 return True
             elif all(self.disjoint(td) is True for td in s.tds):
                 return False
             else:
-                return super()._subtypep_down(s)
+                return super().subtypep_down(s)
         elif isinstance(s, SCustom):
-            return super()._subtypep_down(s)
+            return super().subtypep_down(s)
         else:
-            return super()._subtypep_down(s)
+            return super().subtypep_down(s)
 
     def canonicalize_once(self, nf=None):
         return SAtomic(self.wrapped_class)

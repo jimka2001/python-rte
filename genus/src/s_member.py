@@ -28,7 +28,7 @@ __init__ 1
 __str__ 1
 typep 3
 inhabited_down 1
-_disjoint_down 1
+disjoint_down 1
 subtypep 1
 canonicalize_once 0
 cmp_to_same_class_obj 0
@@ -59,11 +59,11 @@ class SMemberImpl(SimpleTypeD):
 	def inhabited_down(self):
 		return [] != self.arglist
 
-	def _disjoint_down(self, t2):
+	def disjoint_down(self, t2):
 		assert isinstance(t2, SimpleTypeD)
 		return not any(t2.typep(a) for a in self.arglist)
 
-	def _subtypep_down(self, t2):
+	def subtypep_down(self, t2):
 		return all(t2.typep(a) for a in self.arglist)
 
 	def canonicalize_once(self, _nf):

@@ -25,8 +25,8 @@ from s_empty import SEmptyImpl
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
 __str__ 1
 typep   1
-_inhabited_down 1
-_disjoint_down  1
+inhabited_down 1
+disjoint_down  1
 subtypep    1
 cmp_to_same_class_obj   1
 """
@@ -61,14 +61,14 @@ class STopImpl(SimpleTypeD):
     def typep(self, _any):
         return True
 
-    def _inhabited_down(self):
+    def inhabited_down(self):
         return True
 
-    def _disjoint_down(self, t):
+    def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
         return type(t) is SEmptyImpl
 
-    def _subtypep_down(self, t):
+    def subtypep_down(self, t):
         from s_not import SNot
         inh = SNot(t).inhabited()
         if inh is None:

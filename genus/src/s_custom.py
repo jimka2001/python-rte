@@ -24,8 +24,8 @@
 __init__ 3
 typep 3
 __str__ 3
-_disjoint_down 1
-_inhabited_down 1
+disjoint_down 1
+inhabited_down 1
 subtypep 1
 cmp_to_same_class_obj 1
 apply 1
@@ -56,15 +56,15 @@ class SCustom(SimpleTypeD, TerminalType):
 	def __str__(self):
 		return str(self.printable) + "?"
 
-	def _disjoint_down(self, t):
+	def disjoint_down(self, t):
 		assert isinstance(t, SimpleTypeD)
-		return super()._disjoint_down(t)
+		return super().disjoint_down(t)
 
-	def _inhabited_down(self):
-		return super()._inhabited_down()
+	def inhabited_down(self):
+		return super().inhabited_down()
 
-	def _subtypep_down(self, t):
-		return super()._subtypep_down(t)
+	def subtypep_down(self, t):
+		return super().subtypep_down(t)
 
 	def cmp_to_same_class_obj(self, t):
 		if type(self) != type(t):

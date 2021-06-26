@@ -30,7 +30,7 @@ annihilator 3
 same_combination 3
 typep 3
 inhabited_down 0
-_disjoint_down 1
+disjoint_down 1
 subtypep 1
 canonicalize_once 3
 compute_dnf 3
@@ -110,9 +110,9 @@ class SAnd(SCombination):
         elif cnf() != self and inhabited_cnf():
             return inhabited_cnf()
         else:
-            return super()._inhabited_down
+            return super().inhabited_down
 
-    def _disjoint_down(self, t):
+    def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
         inhabited_t = generate_lazy_val(lambda: t.inhabited())
         inhabited_self = generate_lazy_val(lambda: self.inhabited())
@@ -128,21 +128,21 @@ class SAnd(SCombination):
                         for x in self.tds):
             return False
         else:
-            return super()._disjoint_down(t)
+            return super().disjoint_down(t)
 
-    def _subtypep_down(self, t):
+    def subtypep_down(self, t):
         if not self.tds:
             return STop.subtypep(t)
         elif any(t2.subtypep(t) for t2 in self.tds):
             return True
         elif t.inhabited() is not True:
-            return super()._subtypep_down(t)
+            return super().subtypep_down(t)
         elif self.inhabited() is not True:
-            return super()._subtypep_down(t)
+            return super().subtypep_down(t)
         elif all(x.disjoint(t) is True for x in self.tds):
             return False
         else:
-            return super()._subtypep_down(t)
+            return super().subtypep_down(t)
 
     def conversionD1(self):
         # Note this isn't this consumed in SCombination:conversion16,

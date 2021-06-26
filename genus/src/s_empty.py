@@ -26,8 +26,8 @@ get_epsilon 3
 __init__ 3
 __str__ 3
 typep 3
-_inhabited_down 3
-_disjoint_down 3
+inhabited_down 3
+disjoint_down 3
 subtypep 3
 cmp_to_same_class_obj 3
 
@@ -64,10 +64,10 @@ class SEmptyImpl(SimpleTypeD):
     def typep(self, _any):
         return False
 
-    def _inhabited_down(self):
+    def inhabited_down(self):
         return False
 
-    def _disjoint_down(self, t):
+    def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
         return True
 
