@@ -102,46 +102,30 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def disjoint(self, td):
         assert isinstance(td, SimpleTypeD)
-        """okay, here I am doing some weird magic so I'll explain:
-        python does NOT have a lazy keyword, so I need to emulate it
-        I thus create utility functions within disjoint and within them,
-        I put static attributes. On the first call to those functions, 
-        the computations are performed and then cached in said
-        static attribute, so that on later calls they are output in O(1)"""
-        # og_name in scala: d1
-        this_disjoint_td = generate_lazy_val(lambda: self._disjoint_down(td))
-        
-        # og_name in scala lazy: d2
-        td_disjoint_this = generate_lazy_val(lambda: td._disjoint_down(self))
 
-        # og_name in scala lazy: c1
-        self_canonicalized = generate_lazy_val(lambda: self.canonicalize())
-
-        # og_name in scala lazy: c2
-        td_canonicalized = generate_lazy_val(lambda: td.canonicalize())
-
-        # og_name in scala lazy: dc12
-        canon_self_disjoint_td = generate_lazy_val(lambda: self_canonicalized()._disjoint_down(td_canonicalized()))
-
-        # og_name in scala lazy: dc21
-        canon_td_disjoint_self = generate_lazy_val(lambda: td_canonicalized()._disjoint_down(self_canonicalized()))
+        # these somewhat cryptic names were chosen to match the original Scala code
+        d1 = generate_lazy_val(lambda: self._disjoint_down(td))
+        d2 = generate_lazy_val(lambda: td._disjoint_down(self))
+        c1 = generate_lazy_val(lambda: self.canonicalize())
+        c2 = generate_lazy_val(lambda: td.canonicalize())
+        dc12 = generate_lazy_val(lambda: c1()._disjoint_down(c2()))
+        dc21 = generate_lazy_val(lambda: c2()._disjoint_down(c1()))
 
         if self == td and self.inhabited() is not None:
             return not self.inhabited()
-        
-        elif this_disjoint_td() is not None:
-            return this_disjoint_td()
-
-        elif td_disjoint_this() is not None:
-            return td_disjoint_this()
-        elif self_canonicalized() == self and td_canonicalized() == td:
+        elif d1() is not None:
+            return d1()
+        elif d2() is not None:
+            return d2()
+        elif c1() == self and c2() == td:
+            # no need to continue searching if canonicalization failed to produce simpler forms
             return None
-        elif self_canonicalized() == td_canonicalized() and self_canonicalized().inhabited() is not None:
-            return not self_canonicalized().inhabited()
-        elif canon_self_disjoint_td() is not None:
-            return canon_self_disjoint_td()
-        elif canon_td_disjoint_self() is not None:
-            return canon_td_disjoint_self()
+        elif c1() == c2() and c1().inhabited() is not None:
+            return not c1().inhabited()
+        elif dc12() is not None:
+            return dc12()
+        elif dc21() is not None:
+            return dc21()
         else:
             return None
 
