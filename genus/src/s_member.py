@@ -66,7 +66,7 @@ class SMemberImpl(SimpleTypeD):
 	def _subtypep_down(self, t2):
 		return all(t2.typep(a) for a in self.arglist)
 
-	def canonicalizeOnce(self, _nf):
+	def canonicalize_once(self, _nf):
 		return self
 
 	def cmp_to_same_class_obj(self, t):

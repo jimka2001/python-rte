@@ -49,7 +49,8 @@ class SAtomic(SimpleTypeD, TerminalType):
     def __init__(self, wrapped_class):
         import inspect
         super(SAtomic, self).__init__()
-        assert inspect.isclass(wrapped_class), f"wrapped_class={wrapped_class} is not a class, its type is {type(wrapped_class)}"
+        assert inspect.isclass(wrapped_class), \
+            f"wrapped_class={wrapped_class} is not a class, its type is {type(wrapped_class)}"
         self.wrapped_class = wrapped_class
 
     def __str__(self):
@@ -78,6 +79,7 @@ class SAtomic(SimpleTypeD, TerminalType):
         # consider all SAtomic types as being inhabited.
         # as far as I know Python does not support an empty type.
         return True
+
     @staticmethod
     def is_final():
         """Okay, so, python does not per say handle final classes,
@@ -130,11 +132,11 @@ class SAtomic(SimpleTypeD, TerminalType):
                 # 2 n log n searches should be faster than one n^2 search
                 # by iterating over both lists of subclasses and asking whether the
                 #  other is a superclass of it?
-                #return not (any(issubclass(c, tp) for c in get_all_subclasses(ct))
+                # return not (any(issubclass(c, tp) for c in get_all_subclasses(ct))
                 #            or any(issubclass(c, ct) for c in get_all_subclasses(tp)))
 
                 # 1 n log n should find the same boolean value
-                return not any(issubclass(c,tp) for c in get_all_subclasses(ct))
+                return not any(issubclass(c, tp) for c in get_all_subclasses(ct))
 
         else:
             return super()._disjoint_down(t)

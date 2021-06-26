@@ -100,6 +100,7 @@ class SNot(SimpleTypeD):
 		#    however b.subtypep(a) might return None
 		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
 		# SNot(SAtomic(Long)).subtype(SAtomic(Double)) ??
+
 		def h():
 			if not atomicp(t):
 				return None
