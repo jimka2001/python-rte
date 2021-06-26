@@ -156,40 +156,58 @@ def t_sor():
     tri_o_quad = SOr(triple, quadruple)
     create_tri_o_quad = createSOr([triple, quadruple])
 
-    assert (str(tri_o_quad) == "[SOr triple?,quadruple?]")
-    assert (str(create_tri_o_quad) == "[SOr triple?,quadruple?]")
+    assert str(tri_o_quad) == "[SOr triple?,quadruple?]"
+    assert str(create_tri_o_quad) == "[SOr triple?,quadruple?]"
 
-    assert (tri_o_quad.typep(12))
-    assert (create_tri_o_quad.typep(12))
+    assert tri_o_quad.typep(12)
+    assert create_tri_o_quad.typep(12)
 
-    assert (tri_o_quad.typep(6))
-    assert (create_tri_o_quad.typep(6))
+    assert tri_o_quad.typep(6)
+    assert create_tri_o_quad.typep(6)
 
-    assert (tri_o_quad.typep(3))
-    assert (create_tri_o_quad.typep(3))
+    assert tri_o_quad.typep(3)
+    assert create_tri_o_quad.typep(3)
 
-    assert (tri_o_quad.typep(0))
-    assert (create_tri_o_quad.typep(0))
+    assert tri_o_quad.typep(0)
+    assert create_tri_o_quad.typep(0)
 
-    assert (not tri_o_quad.typep(5))
-    assert (not create_tri_o_quad.typep(5))
+    assert not tri_o_quad.typep(5)
+    assert not create_tri_o_quad.typep(5)
 
-    assert (not tri_o_quad.typep("hello"))
-    assert (not create_tri_o_quad.typep("hello"))
+    assert not tri_o_quad.typep("hello")
+    assert not create_tri_o_quad.typep("hello")
 
-    assert (SOr().unit() == SEmpty.get_epsilon())
+    assert SOr().unit() == SEmpty.get_epsilon()
 
-    assert (SOr().zero() == STop.get_omega())
+    assert SOr().zero() == STop.get_omega()
 
-    assert (tri_o_quad.subtypep(STop.get_omega()))
-    assert (tri_o_quad.subtypep(SAtomic(type(5))) is None)
+    assert tri_o_quad.subtypep(STop.get_omega())
+    assert tri_o_quad.subtypep(SAtomic(type(5))) is None
 
-    assert (tri_o_quad.same_combination(create_tri_o_quad))
-    assert (tri_o_quad.same_combination(createSOr([quadruple, triple])))
+    assert tri_o_quad.same_combination(create_tri_o_quad)
+    assert tri_o_quad.same_combination(createSOr([quadruple, triple]))
 
-    assert (not tri_o_quad.same_combination(STop))
-    assert (not tri_o_quad.same_combination(createSOr([])))
+    assert not tri_o_quad.same_combination(STop)
+    assert not tri_o_quad.same_combination(createSOr([]))
 
+def t_or_membership():
+    x = SEql(1)
+    y = SEql(2)
+
+    assert SOr(x,y).typep(1) == True
+    assert SOr(x,y).typep(2) == True
+    assert SOr(x,y).typep(3) == False
+
+def t_and_membership():
+    x = SMember(1,2,3)
+    y = SMember(2,3,4)
+
+    assert SAnd(x, y).typep(0) == False
+    assert SAnd(x, y).typep(1) == False
+    assert SAnd(x, y).typep(2) == True
+    assert SAnd(x, y).typep(3) == True
+    assert SAnd(x, y).typep(4) == False
+    assert SAnd(x, y).typep(5) == False
 
 def t_snot():
     pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
@@ -827,7 +845,8 @@ def t_to_cnf():
 
 #   calling the test functions
 
-
+t_or_membership()
+t_and_membership()
 t_to_dnf()
 t_to_cnf()
 t_canonicalize_cache()

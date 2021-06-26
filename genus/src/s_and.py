@@ -28,7 +28,7 @@ unit 3
 zero 3
 annihilator 3
 same_combination 3
-typep 1
+typep 3
 inhabited_down 0
 _disjoint_down 1
 subtypep 1

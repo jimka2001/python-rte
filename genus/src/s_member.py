@@ -26,7 +26,7 @@ from simple_type_d import SimpleTypeD, TerminalType
 [0-3] Advancement tracker
 __init__ 1
 __str__ 1
-typep 1
+typep 3
 inhabited_down 1
 _disjoint_down 1
 subtypep 1
