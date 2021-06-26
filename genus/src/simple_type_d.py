@@ -145,6 +145,12 @@ class SimpleTypeD(metaclass=ABCMeta):
         else:
             return None
 
+    # Returns whether this type is a recognizable subtype of another given type. It is a subset test.
+    # This might be undecidable.
+    # Params:
+    #   t – the type we want to check whether this type is included in
+    # Returns:
+    #   an optional Boolean (True/False/None) which is true if self is a subtype of t
     def subtypep(self, t):
         assert isinstance(t, SimpleTypeD)
         from genus_types import orp, andp, topp
