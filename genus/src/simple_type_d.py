@@ -54,7 +54,7 @@ from abc import ABCMeta, abstractmethod
 from utils import generate_lazy_val
 
 # from utils import CallStack
-# subtypep_callstack = CallStack("subtypep")
+# subtypep_callstack = CallStack("subtypep",trace=True)
 # canonicalize_callstack = CallStack("canonicalize")
 # inhabited_callstack = CallStack("inhabited")
 
