@@ -131,7 +131,7 @@ class SNot(SimpleTypeD):
 		elif emptyp(self.s):
 			return STop
 		else:
-			return SNot(self.s.canonicalize_once(nf))
+			return SNot(self.s.canonicalize_once(nf)).maybe_dnf(nf).maybe_cnf(nf)
 
 	def compute_dnf(self):
 		# SNot(SAnd(x1, x2, x3))
