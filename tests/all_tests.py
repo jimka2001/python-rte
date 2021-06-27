@@ -840,6 +840,64 @@ def t_canonicalize_cache():
     assert td.canonicalized_hash[NormalForm.CNF] == tdc3
     assert tdc3.canonicalized_hash[NormalForm.CNF] == tdc3
 
+def t_to_dnf2():
+    from depth_generator import random_type_designator, test_values
+    from genus_types import NormalForm, orp, andp, notp
+    from simple_type_d import TerminalType
+    def termp(td):
+        if isinstance(td, TerminalType):
+            return True
+        elif notp(td) and isinstance(td.s, TerminalType):
+            return True
+        else:
+            return False
+    def andTermp(td):
+        return andp(td) and all(termp(td2) for td2 in td.tds)
+    def dnfp(td):
+        if termp(td):
+            return True
+        elif andp(td):
+            return andTermp(td)
+        elif orp(td):
+            return all( termp(td2) or andTermp(td2) for td2 in td.tds)
+        else:
+            return False
+
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            dnf = td.canonicalize(NormalForm.DNF)
+            assert dnfp(dnf), f"expecting DNF, got {dnf}"
+
+
+def t_to_cnf2():
+    from depth_generator import random_type_designator, test_values
+    from genus_types import NormalForm, orp, andp, notp
+    from simple_type_d import TerminalType
+    def termp(td):
+        if isinstance(td, TerminalType):
+            return True
+        elif notp(td) and isinstance(td.s, TerminalType):
+            return True
+        else:
+            return False
+    def orTermp(td):
+        return orp(td) and all(termp(td2) for td2 in td.tds)
+    def cnfp(td):
+        if termp(td):
+            return True
+        elif orp(td):
+            return orTermp(td)
+        elif andp(td):
+            return all( termp(td2) or orTermp(td2) for td2 in td.tds)
+        else:
+            return False
+
+    for depth in range(0, 4):
+        for _ in range(1000):
+            td = random_type_designator(depth)
+            cnf = td.canonicalize(NormalForm.CNF)
+            assert cnfp(cnf), f"expecting DNF, got {cnf}"
 
 def t_to_dnf():
     # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
@@ -903,7 +961,9 @@ t_discovered_cases_867()
 t_or_membership()
 t_and_membership()
 t_to_dnf()
+t_to_dnf2()
 t_to_cnf()
+t_to_cnf2()
 t_canonicalize_cache()
 t_depth_generator()
 t_combo_conversion1()
