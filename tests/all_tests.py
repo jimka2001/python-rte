@@ -400,27 +400,25 @@ def t_discovered_case_297():
     even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
     b = SAtomic(TestB)
     a = SAtomic(TestA)
-    # [SAnd[SNot SAtomic(TestB)], [SNot[SOr[SAnd SAtomic(TestA), SAtomic(TestB)], [SAnd SAtomic(TestB), even?], [SAnd SAtomic( int), even?]]]]
+    # [SAnd[SNot SAtomic(TestB)], [SNot[SOr[SAnd SAtomic(TestA), SAtomic(TestB)],
+    #      [SAnd SAtomic(TestB), even?], [SAnd SAtomic( int), even?]]]]
 
     # this was an infinite loop.   calling .inhabited() here asserts that this is no longer an infinite loop
 
     # [SAnd[SNot[SAnd even?, [SOr SAtomic(TestB), SAtomic(int)]]], [SNot SAtomic(TestB)]]
-    SAnd(SNot( SAnd( even,
-                     SOr( b, SAtomic(int)))),
-         SNot( b)).inhabited()
+    SAnd(SNot(SAnd(even,
+                   SOr(b, SAtomic(int)))),
+         SNot(b)).inhabited()
 
     # [SAnd[SNot SAtomic(TestB)], [SNot[SOr[SAnd SAtomic(TestB), even?], [SAnd SAtomic(int), even?]]]]
-    SAnd(SNot( b), SNot(SOr(SAnd( b, even), SAnd( SAtomic(int), even)))).inhabited()
+    SAnd(SNot(b), SNot(SOr(SAnd(b, even), SAnd(SAtomic(int), even)))).inhabited()
 
-    SAnd( SNot(b),
-          SNot( SOr( SAnd(a,b), SAnd(b,even),
-                     SAnd(SAtomic(int),even)))).inhabited()
-
+    SAnd(SNot(b),
+         SNot(SOr(SAnd(a, b), SAnd(b, even),
+                  SAnd(SAtomic(int), even)))).inhabited()
 
 
 def t_subtypep1():
-
-
     from depth_generator import random_type_designator
     for depth in range(0, 3):
         for _ in range(1000):
@@ -435,7 +433,8 @@ def t_subtypep1():
             assert SAnd(td1, td2).subtypep(SOr(td1, td2)) is not False
             assert SAnd(SNot(td1), SNot(td2)).subtypep(SNot(SOr(td1, td2))) is not False
             assert SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))) is not False
-            assert SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False
+            assert SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False,\
+                f"td1={td1}\ntd2={td2}"
             assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
 
 
@@ -840,10 +839,12 @@ def t_canonicalize_cache():
     assert td.canonicalized_hash[NormalForm.CNF] == tdc3
     assert tdc3.canonicalized_hash[NormalForm.CNF] == tdc3
 
+
 def t_to_dnf2():
     from depth_generator import random_type_designator, test_values
     from genus_types import NormalForm, orp, andp, notp
     from simple_type_d import TerminalType
+
     def termp(td):
         if isinstance(td, TerminalType):
             return True
@@ -851,15 +852,17 @@ def t_to_dnf2():
             return True
         else:
             return False
+
     def andTermp(td):
         return andp(td) and all(termp(td2) for td2 in td.tds)
+
     def dnfp(td):
         if termp(td):
             return True
         elif andp(td):
             return andTermp(td)
         elif orp(td):
-            return all( termp(td2) or andTermp(td2) for td2 in td.tds)
+            return all(termp(td2) or andTermp(td2) for td2 in td.tds)
         else:
             return False
 
@@ -874,6 +877,7 @@ def t_to_cnf2():
     from depth_generator import random_type_designator, test_values
     from genus_types import NormalForm, orp, andp, notp
     from simple_type_d import TerminalType
+
     def termp(td):
         if isinstance(td, TerminalType):
             return True
@@ -881,15 +885,17 @@ def t_to_cnf2():
             return True
         else:
             return False
+
     def orTermp(td):
         return orp(td) and all(termp(td2) for td2 in td.tds)
+
     def cnfp(td):
         if termp(td):
             return True
         elif orp(td):
             return orTermp(td)
         elif andp(td):
-            return all( termp(td2) or orTermp(td2) for td2 in td.tds)
+            return all(termp(td2) or orTermp(td2) for td2 in td.tds)
         else:
             return False
 
@@ -898,6 +904,7 @@ def t_to_cnf2():
             td = random_type_designator(depth)
             cnf = td.canonicalize(NormalForm.CNF)
             assert cnfp(cnf), f"expecting DNF, got {cnf}"
+
 
 def t_to_dnf():
     # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
@@ -957,6 +964,9 @@ def t_discovered_cases_867():
 #   calling the test functions
 
 
+t_discovered_case_297()
+t_subtypep1()
+t_subtypep2()
 t_discovered_cases_867()
 t_or_membership()
 t_and_membership()
@@ -1006,6 +1016,3 @@ t_SEmpty()
 t_SimpleTypeD()
 t_canonicalize_subtype()
 t_membership()
-t_subtypep1()
-t_subtypep2()
-t_discovered_case_297()
