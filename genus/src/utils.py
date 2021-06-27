@@ -142,9 +142,10 @@ def compare_sequence(xs, ys):
 #   If you ever push the same object twice without popping it, you'll get
 #   a run-time exception.
 class CallStack:
-    def __init__(self, name):
+    def __init__(self, name, trace):
         self.stack = []
         self.name = name
+        self.trace = trace
 
     def push(self, value):
         if value in self.stack:
@@ -154,8 +155,13 @@ class CallStack:
             raise Exception(f"loop detected: {value}")
         else:
             self.stack.append(value)
+            if self.trace:
+                print(f"[ {len(self.stack)} {self.name} {value}")
 
-    def pop(self):
+    def pop(self,comment=None):
+        if self.trace:
+            c2 = "" if comment is None else comment
+            print(f"] {len(self.stack)} {self.name} {c2}")
         self.stack.pop()
 
 
