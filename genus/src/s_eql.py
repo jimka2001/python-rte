@@ -31,10 +31,10 @@ cmp_to_same_class_obj 1
 """
 
 from s_member import SMemberImpl
-from simple_type_d import SimpleTypeD
+from simple_type_d import SimpleTypeD, TerminalType
 
 
-class SEql(SMemberImpl):
+class SEql(SMemberImpl, TerminalType):
 	"""The equal type, a type that is equal to a given object.
 	It has holds an "a" which is the object defining the type
 	"""

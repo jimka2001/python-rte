@@ -19,7 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from simple_type_d import SimpleTypeD 
+from simple_type_d import SimpleTypeD, TerminalType
+
 """
 [0-3] Advancement tracker
 get_epsilon 3
@@ -35,7 +36,7 @@ TODO: move the tests on their own
 """
 
 
-class SEmptyImpl(SimpleTypeD):
+class SEmptyImpl(SimpleTypeD, TerminalType):
     """The empty type, subtype of all types."""
     __instance = None
 

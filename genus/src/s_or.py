@@ -94,7 +94,7 @@ class SOr(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self,t):
+    def disjoint_down(self, t):
         # TODO implement memoization
         if all(td.disjoint(t) is True for td in self.tds):
             return True
