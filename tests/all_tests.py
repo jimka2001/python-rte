@@ -394,9 +394,35 @@ def t_scustom2():
             assert not guinea_pig.typep(x)
 
 
+def t_discovered_case_297():
+    from depth_generator import TestA, TestB
+
+    even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+    b = SAtomic(TestB)
+    a = SAtomic(TestA)
+    # [SAnd[SNot SAtomic(TestB)], [SNot[SOr[SAnd SAtomic(TestA), SAtomic(TestB)], [SAnd SAtomic(TestB), even?], [SAnd SAtomic( int), even?]]]]
+
+    # this was an infinite loop.   calling .inhabited() here asserts that this is no longer an infinite loop
+
+    # [SAnd[SNot[SAnd even?, [SOr SAtomic(TestB), SAtomic(int)]]], [SNot SAtomic(TestB)]]
+    SAnd(SNot( SAnd( even,
+                     SOr( b, SAtomic(int)))),
+         SNot( b)).inhabited()
+
+    # [SAnd[SNot SAtomic(TestB)], [SNot[SOr[SAnd SAtomic(TestB), even?], [SAnd SAtomic(int), even?]]]]
+    SAnd(SNot( b), SNot(SOr(SAnd( b, even), SAnd( SAtomic(int), even)))).inhabited()
+
+    SAnd( SNot(b),
+          SNot( SOr( SAnd(a,b), SAnd(b,even),
+                     SAnd(SAtomic(int),even)))).inhabited()
+
+
+
 def t_subtypep1():
+
+
     from depth_generator import random_type_designator
-    for depth in range(0, 4):
+    for depth in range(0, 3):
         for _ in range(1000):
             td1 = random_type_designator(depth)
             td2 = random_type_designator(depth)
@@ -922,3 +948,4 @@ t_canonicalize_subtype()
 t_membership()
 t_subtypep1()
 t_subtypep2()
+t_discovered_case_297()
