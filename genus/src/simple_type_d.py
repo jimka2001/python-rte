@@ -53,6 +53,11 @@ from genus_types import NormalForm
 from abc import ABCMeta, abstractmethod
 from utils import generate_lazy_val
 
+# from utils import CallStack
+# subtypep_callstack = CallStack("subtypep")
+# canonicalize_callstack = CallStack("canonicalize")
+# inhabited_callstack = CallStack("inhabited")
+
 
 # is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
@@ -66,6 +71,8 @@ class SimpleTypeD(metaclass=ABCMeta):
     """SimpleTypeD is the abstract class that mothers all of the 
     representations of type in Genus"""
     def __init__(self):
+        self.subtypep_cache = {}
+        self.disjoint_cache = {}
         self.canonicalized_hash = {}
 
     def __repr__(self):
@@ -80,6 +87,8 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def disjoint(self, td):
         assert isinstance(td, SimpleTypeD)
+        if td in self.disjoint_cache:
+            return self.disjoint_cache[td]
 
         # these somewhat cryptic names were chosen to match the original Scala code
         d1 = generate_lazy_val(lambda: self.disjoint_down(td))
@@ -90,22 +99,24 @@ class SimpleTypeD(metaclass=ABCMeta):
         dc21 = generate_lazy_val(lambda: c2().disjoint_down(c1()))
 
         if self == td and self.inhabited() is not None:
-            return not self.inhabited()
+            self.disjoint_cache[td] = not self.inhabited()
         elif d1() is not None:
-            return d1()
+            self.disjoint_cache[td] = d1()
         elif d2() is not None:
-            return d2()
+            self.disjoint_cache[td] = d2()
         elif c1() == self and c2() == td:
             # no need to continue searching if canonicalization failed to produce simpler forms
-            return None
+            self.disjoint_cache[td] = None
         elif c1() == c2() and c1().inhabited() is not None:
-            return not c1().inhabited()
+            self.disjoint_cache[td] = not c1().inhabited()
         elif dc12() is not None:
-            return dc12()
+            self.disjoint_cache[td] = dc12()
         elif dc21() is not None:
-            return dc21()
+            self.disjoint_cache[td] = dc21()
         else:
-            return None
+            self.disjoint_cache[td] = None
+
+        return self.disjoint_cache[td]
 
     # for performance reasons, do not call directly, rather use the inhabited method as it stores the result
     def inhabited_down(self):
@@ -132,6 +143,8 @@ class SimpleTypeD(metaclass=ABCMeta):
     def subtypep(self, t):
         assert isinstance(t, SimpleTypeD)
         from genus_types import orp, andp, topp
+        if t in self.subtypep_cache:
+            return self.subtypep_cache[t]
 
         def or_result():
             return True if orp(t) and any(self.subtypep(a) is True for a in t.tds) \
@@ -142,15 +155,17 @@ class SimpleTypeD(metaclass=ABCMeta):
                 else None
 
         if type(self) == type(t) and self == t:
-            return True
+            self.subtypep_cache[t] = True
         elif topp(t.canonicalize()):
-            return True
+            self.subtypep_cache[t] = True
         elif or_result() is True:
-            return True
+            self.subtypep_cache[t] = True
         elif and_result() is True:
-            return True
+            self.subtypep_cache[t] = True
         else:
-            return self.subtypep_down(t)
+            self.subtypep_cache[t] = self.subtypep_down(t)
+
+        return self.subtypep_cache[t]
 
     def subtypep_down(self, t):
         from genus_types import notp
@@ -198,7 +213,6 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     def canonicalize(self, nf=None):
         from utils import fixed_point
-
         if nf not in self.canonicalized_hash:
             def processor(td):
                 return td.canonicalize_once(nf)
