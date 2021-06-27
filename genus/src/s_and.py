@@ -38,11 +38,14 @@ compute_dnf 3
 
 from s_top import STop
 from s_empty import SEmpty
-from s_atomic import SAtomic
 from s_combination import SCombination
 from utils import generate_lazy_val
 from genus_types import NormalForm, createSAnd
 from simple_type_d import SimpleTypeD
+
+# from utils import CallStack
+# subtypep_and_callstack = CallStack("subtypep.SAnd")
+# inhabited_down_and = CallStack("inhabited_down.SAnd")
 
 
 class SAnd(SCombination):
@@ -104,8 +107,8 @@ class SAnd(SCombination):
             #   if we find a,b such that a and b are disjoint,
             #   then we know self is not inhabited
             s = any(self.tds[a].disjoint(self.tds[b]) is True
-                for a in range(len(self.tds))
-                for b in range(a+1, len(self.tds)))
+                    for a in range(len(self.tds))
+                    for b in range(a+1, len(self.tds)))
             return s
         elif dnf() != self and inhabited_dnf() is not None:
             return inhabited_dnf()
