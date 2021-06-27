@@ -418,6 +418,22 @@ def t_discovered_case_297():
                   SAnd(SAtomic(int), even)))).inhabited()
 
 
+def t_discovered_case_240():
+    from depth_generator import Test2, TestA
+
+    td1 = SAnd(SAtomic(Test2),SAtomic(TestA))
+    td2 = SAnd(SAtomic(int),SAtomic(float))
+    td3 = SAnd(SNot(td1), SNot(td2))
+    td4 = SOr(td1, td2)
+    td5 = SNot(td4)
+    assert td2.inhabited() is False, f"{td2}.inhabited = {td2.inhabited()}"
+    assert td3.subtypep(td4) is not True
+    assert td4.subtypep(td3) is not True
+    s = td5.subtypep(td3)
+    assert s is not False,\
+         f"td1={td1}\ntd2={td2} returned {s}"
+
+
 def t_subtypep1():
     from depth_generator import random_type_designator
     for depth in range(0, 3):
@@ -964,6 +980,7 @@ def t_discovered_cases_867():
 #   calling the test functions
 
 
+t_discovered_case_240()
 t_discovered_case_297()
 t_subtypep1()
 t_subtypep2()

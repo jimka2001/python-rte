@@ -105,11 +105,11 @@ class SAnd(SCombination):
         elif all(atomicp(t) for t in self.tds):
             #   here we would like to check every 2-element subset
             #   if we find a,b such that a and b are disjoint,
-            #   then we know self is not inhabited
+            #   then we know self is NOT inhabited
             s = any(self.tds[a].disjoint(self.tds[b]) is True
                     for a in range(len(self.tds))
                     for b in range(a+1, len(self.tds)))
-            return s
+            return not s
         elif dnf() != self and inhabited_dnf() is not None:
             return inhabited_dnf()
         elif cnf() != self and inhabited_cnf() is not None:
