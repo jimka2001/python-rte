@@ -134,11 +134,22 @@ class SNot(SimpleTypeD):
 			return SNot(self.s.canonicalize_once(nf))
 
 	def compute_dnf(self):
-		raise NotImplementedError
+		# SNot(SAnd(x1, x2, x3))
+		# --> SOr(SNot(x1), SNot(x2), SNot(x3)
+		#
+		# SNot(SOr(x1, x2, x3))
+		# --> SAnd(SNot(x1), SNot(x2), SNot(x3))
+		from genus_types import orp, andp, createSOr, createSAnd
+		if andp(self.s):
+			return createSOr([SNot(td) for td in self.s.tds])
+		elif orp(self.s):
+			return createSAnd([SNot(td) for td in self.s.tds])
+		else:
+			return self
 
 	def compute_cnf(self):
 		# we convert a not to DNF or CNF the same way
-		return self.to_dnf()
+		return self.compute_dnf()
 
 	def cmp_to_same_class_obj(self, td):
 		from genus_types import cmp_type_designators
