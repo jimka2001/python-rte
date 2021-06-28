@@ -28,7 +28,7 @@ class NormalForm(Enum):
 
 
 def is_even(x):
-	return type(x) is int and not (x & 1)
+	return isinstance(x, int) and not (x & 1)
 
 
 # return 0 if a == b
