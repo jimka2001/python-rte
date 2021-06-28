@@ -36,27 +36,13 @@ class STopImpl(SimpleTypeD, TerminalType):
     """The super type, super type of all types."""
     __instance = None
 
-    @staticmethod
-    def get_omega():
+    def __new__(cls, *a, **kw):
         if STopImpl.__instance is None:
-            STopImpl()
+            STopImpl.__instance = super(STopImpl, cls).__new__(cls, *a, **kw)
         return STopImpl.__instance
-
-    def __init__(self):
-        super(STopImpl, self).__init__()
-        if STopImpl.__instance is not None:
-            raise Exception("Please use STop.get_omega() as STop is unique and can't be duplicated")
-        else:
-            STopImpl.__instance = self
 
     def __str__(self):
         return "STop"
-
-    def __eq__(self, that):
-        return type(self) is type(that)
-
-    def __hash__(self):
-        return hash(1)
 
     def typep(self, _any):
         return True
@@ -85,4 +71,4 @@ class STopImpl(SimpleTypeD, TerminalType):
             return False
 
 
-STop = STopImpl.get_omega()
+STop = STopImpl()

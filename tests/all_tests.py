@@ -49,38 +49,28 @@ def t_STop():
     from s_empty import SEmptyImpl
     from s_top import STopImpl
 
-    a = STop
-
     # STop has to be unique
-    assert (id(a) == id(STopImpl.get_omega()))
+    assert id(STop) == id(STopImpl())
+    assert STop is STopImpl()
 
-    # STop has to be unique part 2: ensure the constructor throws an error
-    pred = True
-    try:
-        _b = STop()
-        pred = False
-        assert False
-    except Exception as _e:
-        assert pred
+    # str(a) has to be "STop"
+    assert (str(STop) == "STop")
 
-    # str(a) has to be "Top"
-    assert (str(a) == "STop")
-
-    # a.typep(t) indicates whether t is a subtype of a, which is always the case by definition
-    assert (a.typep(SAtomic(object)))
-    assert (a.typep(a))
+    from depth_generator import test_values
+    for x in  test_values:
+        assert (STop.typep(x))
 
     # obviously, a is inhabited as it contains everything by definition
-    assert (a.inhabited() is True)
+    assert (STop.inhabited() is True)
 
     # a is never disjoint with anything but the empty subtype
-    assert a.disjoint(SAtomic(object)) is False
-    assert a.disjoint(SEmptyImpl.get_epsilon()) is True
+    assert STop.disjoint(SAtomic(object)) is False
+    assert STop.disjoint(SEmpty) is True
 
     # on the contrary, a is never a subtype of any type
     # since types are sets and top is the set that contains all sets
-    assert (a.subtypep(SAtomic(object)) is True)
-    assert a.subtypep(a) is True
+    assert (STop.subtypep(SAtomic(object)) is True)
+    assert STop.subtypep(STop) is True
 
 
 def t_scustom():
@@ -177,11 +167,11 @@ def t_sor():
     assert not tri_o_quad.typep("hello")
     assert not create_tri_o_quad.typep("hello")
 
-    assert SOr().unit() == SEmpty.get_epsilon()
+    assert SOr().unit() == SEmpty
 
-    assert SOr().zero() == STop.get_omega()
+    assert SOr().zero() == STop
 
-    assert tri_o_quad.subtypep(STop.get_omega())
+    assert tri_o_quad.subtypep(STop)
     assert tri_o_quad.subtypep(SAtomic(type(5))) is None
 
     assert tri_o_quad.same_combination(create_tri_o_quad)
@@ -314,7 +304,8 @@ def t_SimpleTypeD():
 def t_STop2():
     from s_top import STopImpl
     # STop has to be unique
-    assert id(STop) == id(STopImpl.get_omega())
+    assert id(STop) == id(STopImpl())
+    assert STop is STopImpl()
 
     # STop has to be unique part 2: ensure the constructor throws an error
     pred = True
@@ -348,17 +339,12 @@ def t_STop2():
 # TODO: move the tests in their own files once this is packaged:
 def t_SEmpty():
     from s_empty import SEmptyImpl
-    # SEmpty has to be unique
-    assert (id(SEmpty) == id(SEmptyImpl.get_epsilon()))
+    from depth_generator import test_values
 
-    # SEmpty has to be unique part 2: ensure the constructor throws an error
-    pred = True
-    try:
-        _ = SEmpty()
-        pred = False
-        assert False
-    except Exception as _e:
-        assert pred
+    # SEmpty has to be unique
+    assert (id(SEmpty) == id(SEmptyImpl()))
+    assert SEmpty is SEmptyImpl()
+
 
     # str(a) has to be "Empty"
     assert str(SEmpty) == "SEmpty"
@@ -366,6 +352,8 @@ def t_SEmpty():
     # a.typep(t) indicates whether t is a subtype of a, which is never the case
     assert SEmpty.typep(3) is False
     assert SEmpty.subtypep(SEmpty) is True
+    for x in test_values:
+        assert SEmpty.typep(x) is False
 
     # obviously, a is not inhabited as it is by definition empty
     assert SEmpty.inhabited() is False

@@ -40,24 +40,10 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
     """The empty type, subtype of all types."""
     __instance = None
 
-    @staticmethod
-    def get_epsilon():
+    def __new__(cls, *a, **kw):
         if SEmptyImpl.__instance is None:
-            SEmptyImpl()
+            SEmptyImpl.__instance = super(SEmptyImpl, cls).__new__(cls, *a, **kw)
         return SEmptyImpl.__instance
-
-    def __init__(self):
-        super(SEmptyImpl, self).__init__()
-        if SEmptyImpl.__instance is not None:
-            raise Exception("Please use SEmptyImpl.get_epsilon() as SEmpty is unique and can't be duplicated")
-        else:
-            SEmptyImpl.__instance = self
-
-    def __eq__(self, that):
-        return type(self) is type(that)
-
-    def __hash__(self):
-        return hash(0)
 
     def __str__(self):
         return "SEmpty"
@@ -82,4 +68,4 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
             return False
 
 
-SEmpty = SEmptyImpl.get_epsilon()
+SEmpty = SEmptyImpl()

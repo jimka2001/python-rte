@@ -37,9 +37,9 @@ class depth_generator(object):
                 oracle, printable = self.rand_lambda_str_generator()
                 return SCustom(oracle, printable)
             elif rand_choice == "STop":
-                return STop.get_omega()
+                return STop
             else:
-                return SEmpty.get_epsilon()
+                return SEmpty
         else:
             rand_choice = random.choice(self.depth_adders)
             if rand_choice == "SNot":
