@@ -29,7 +29,7 @@ __str__ 1
 typep 3
 inhabited_down 1
 disjoint_down 1
-subtypep 1
+subtypep 3
 canonicalize_once 0
 cmp_to_same_class_obj 3
 

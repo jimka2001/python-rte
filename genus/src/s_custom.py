@@ -56,16 +56,6 @@ class SCustom(SimpleTypeD, TerminalType):
 	def __str__(self):
 		return str(self.printable) + "?"
 
-	def disjoint_down(self, t):
-		assert isinstance(t, SimpleTypeD)
-		return super().disjoint_down(t)
-
-	def inhabited_down(self):
-		return super().inhabited_down()
-
-	def subtypep_down(self, t):
-		return super().subtypep_down(t)
-
 	def cmp_to_same_class_obj(self, t):
 		if type(self) != type(t):
 			return super().cmp_to_same_class_obj(t)

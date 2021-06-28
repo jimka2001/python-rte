@@ -33,7 +33,7 @@ from s_and import SAnd
 from s_eql import SEql
 from s_member import SMember
 
-# default value of num_random_tests is 1000, but you can temporarily edit thie file
+# default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
 num_random_tests = 1000
 
@@ -66,7 +66,6 @@ def t_fixed_point():
 
 
 def t_STop():
-    from s_empty import SEmptyImpl
     from s_top import STopImpl
 
     # STop has to be unique
@@ -77,7 +76,7 @@ def t_STop():
     assert (str(STop) == "STop")
 
     from depth_generator import test_values
-    for x in  test_values:
+    for x in test_values:
         assert (STop.typep(x))
 
     # obviously, a is inhabited as it contains everything by definition
@@ -108,6 +107,13 @@ def t_scustom():
             assert not guinea_pig.typep(x)
     assert (not guinea_pig.typep("hello"))
     assert (guinea_pig.subtypep(SAtomic(type(4))) is None)
+
+
+def t_scustom2():
+    def l_odd(n):
+        return isinstance(n, int) and n % 2 == 1
+
+    assert SCustom(l_odd, "odd").disjoint(SMember(1, 2, 3)) is False
 
 
 def t_sand1():
@@ -364,7 +370,6 @@ def t_SEmpty():
     assert (id(SEmpty) == id(SEmptyImpl()))
     assert SEmpty is SEmptyImpl()
 
-
     # str(a) has to be "Empty"
     assert str(SEmpty) == "SEmpty"
 
@@ -384,21 +389,6 @@ def t_SEmpty():
     # since types are sets and the empty set is a subset of all sets
     assert SEmpty.subtypep(SAtomic(object)) is True
     assert SEmpty.subtypep(SEmpty) is True
-
-
-def t_scustom2():
-    def l_odd(n):
-        return isinstance(n, int) and n % 2 == 1
-
-    guinea_pig = SCustom(l_odd, "[odd numbers]")
-    assert guinea_pig.f == l_odd
-    assert guinea_pig.printable == "[odd numbers]"
-    assert str(guinea_pig) == "[odd numbers]?"
-    for x in range(-100, 100):
-        if x % 2 == 1:
-            assert guinea_pig.typep(x)
-        else:
-            assert not guinea_pig.typep(x)
 
 
 def t_discovered_case_297():
@@ -428,8 +418,8 @@ def t_discovered_case_297():
 def t_discovered_case_240():
     from depth_generator import Test2, TestA
 
-    td1 = SAnd(SAtomic(Test2),SAtomic(TestA))
-    td2 = SAnd(SAtomic(int),SAtomic(float))
+    td1 = SAnd(SAtomic(Test2), SAtomic(TestA))
+    td2 = SAnd(SAtomic(int), SAtomic(float))
     td3 = SAnd(SNot(td1), SNot(td2))
     td4 = SOr(td1, td2)
     td5 = SNot(td4)
@@ -438,7 +428,7 @@ def t_discovered_case_240():
     assert td4.subtypep(td3) is not True
     s = td5.subtypep(td3)
     assert s is not False,\
-         f"td1={td1}\ntd2={td2} returned {s}"
+        f"td1={td1}\ntd2={td2} returned {s}"
 
 
 def t_subtypep1():
@@ -538,6 +528,13 @@ def t_or():
 def t_member():
     assert SMember(1, 2, 3).arglist == [1, 2, 3]
     assert SMember().arglist == []
+    assert SMember(1, 2, 3).subtypep(SMember(1, 2, 3, 4, 5)) is True
+    assert SMember(1, 2, 3).subtypep(SMember(1, 2)) is False
+    assert SMember(1, 2, 3).subtypep(SOr(SAtomic(str), SMember(1, 2, 3, 4, 5))) is True
+    assert SMember(1, 2, 3).subtypep(SAtomic(int)) is True
+
+    assert SMember(1, 1, 2, 3, 2).canonicalize() == SMember(1, 3, 2)
+    assert SMember(3, 2, 1).canonicalize() == SMember(1, 2, 3)
 
 
 def t_eql():
@@ -864,7 +861,7 @@ def t_canonicalize_cache():
 
 
 def t_to_dnf2():
-    from depth_generator import random_type_designator, test_values
+    from depth_generator import random_type_designator
     from genus_types import NormalForm, orp, andp, notp
     from simple_type_d import TerminalType
 
@@ -897,7 +894,7 @@ def t_to_dnf2():
 
 
 def t_to_cnf2():
-    from depth_generator import random_type_designator, test_values
+    from depth_generator import random_type_designator
     from genus_types import NormalForm, orp, andp, notp
     from simple_type_d import TerminalType
 
@@ -987,50 +984,51 @@ def t_discovered_cases_867():
 
 def t_compare_sequence():
     from utils import compare_sequence
-    assert compare_sequence([SEql(1)],[SEql(2)]) < 0
+    assert compare_sequence([SEql(1)], [SEql(2)]) < 0
     assert compare_sequence([], []) == 0
     assert compare_sequence([SEql(1)], [SEql(1)]) == 0
     assert compare_sequence([SEql(2)], [SEql(1)]) > 0
-    assert compare_sequence([SEql(1),SEql(1)], [SEql(1),SEql(1)]) == 0
-    assert compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)]) > 0, f"returned {compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)])}"
-    assert compare_sequence([SEql(1),SEql(1)], [SEql(1),SEql(2)]) < 0
+    assert compare_sequence([SEql(1), SEql(1)], [SEql(1), SEql(1)]) == 0
+    assert compare_sequence([SEql(1), SEql(2)], [SEql(1), SEql(1)]) > 0, \
+        f"returned {compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)])}"
+    assert compare_sequence([SEql(1), SEql(1)], [SEql(1), SEql(2)]) < 0
 
     assert compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0  # short list < long list
     assert compare_sequence([SEql(1)], [SEql(1), SEql(1)]) < 0
 
-    from genus_types import  cmp_type_designators
-    assert cmp_type_designators(SEql(1),SEql(2)) < 0
+    from genus_types import cmp_type_designators
+    assert cmp_type_designators(SEql(1), SEql(2)) < 0
     assert cmp_type_designators(SEql(1), SEql(1)) == 0
     assert cmp_type_designators(SEql(2), SEql(1)) > 0
 
-    assert cmp_type_designators(SMember(1),SMember(1)) == 0
+    assert cmp_type_designators(SMember(1), SMember(1)) == 0
     assert cmp_type_designators(SMember(1), SMember(2)) < 0
     assert cmp_type_designators(SMember(2), SMember(1)) > 0
-    assert cmp_type_designators(SMember(1), SMember(1,2)) < 0 # short list < long list
-    assert cmp_type_designators(SMember(1,2), SMember(1)) > 0
-    assert cmp_type_designators(SMember(1, 2), SMember(1,2)) == 0
+    assert cmp_type_designators(SMember(1), SMember(1, 2)) < 0  # short list < long list
+    assert cmp_type_designators(SMember(1, 2), SMember(1)) > 0
+    assert cmp_type_designators(SMember(1, 2), SMember(1, 2)) == 0
     assert cmp_type_designators(SMember(1, 2), SMember(1, 3)) < 0
     assert cmp_type_designators(SMember(1, 2), SMember(1, 1)) > 0
 
-    assert cmp_type_designators(SEql(1), SMember(1,1)) < 0 # compare alphabetically
-    assert cmp_type_designators(SMember(1,2), SEql(1)) > 0
+    assert cmp_type_designators(SEql(1), SMember(1, 1)) < 0  # compare alphabetically
+    assert cmp_type_designators(SMember(1, 2), SEql(1)) > 0
 
     assert cmp_type_designators(SAnd(SEql(1), SEql(2)), SAnd(SEql(1), SEql(2))) == 0
-    assert cmp_type_designators(SAnd(SEql(1),SEql(2)), SAnd(SEql(2),SEql(1))) < 0
+    assert cmp_type_designators(SAnd(SEql(1), SEql(2)), SAnd(SEql(2), SEql(1))) < 0
     assert cmp_type_designators(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(1))) > 0
 
     assert cmp_type_designators(SOr(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0
     assert cmp_type_designators(SOr(SEql(2), SEql(3)), SOr(SEql(2), SEql(2))) > 0
     assert cmp_type_designators(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(2))) == 0
 
-    assert cmp_type_designators(SOr(SEql(2), SEql(1)), SAnd(SEql(2), SEql(2))) > 0 # alphabetical
+    assert cmp_type_designators(SOr(SEql(2), SEql(1)), SAnd(SEql(2), SEql(2))) > 0  # alphabetical
     assert cmp_type_designators(SAnd(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0
 
     assert cmp_type_designators(SNot(SEql(1)), SNot(SEql(2))) < 0
     assert cmp_type_designators(SNot(SEql(1)), SNot(SEql(1))) == 0
     assert cmp_type_designators(SNot(SEql(2)), SNot(SEql(1))) > 0
 
-    assert cmp_type_designators(STop ,STop) == 0
+    assert cmp_type_designators(STop, STop) == 0
     assert cmp_type_designators(SEmpty, SEmpty) == 0
     assert cmp_type_designators(SEmpty, STop) < 0
     assert cmp_type_designators(STop, SEmpty) > 0
@@ -1041,11 +1039,12 @@ def t_compare_sequence():
 
     even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
     odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
-    assert cmp_type_designators(even,even) == 0
+    assert cmp_type_designators(even, even) == 0
     assert cmp_type_designators(even, odd) < 0, f"expecting {even} < {odd}"  # alphabetical by printable
     assert cmp_type_designators(odd, even) > 0
 
 #   calling the test functions
+
 
 t_compare_sequence()
 t_discovered_case_240()
@@ -1089,6 +1088,7 @@ t_discovered_cases()
 t_lazy()
 t_uniquify()
 t_fixed_point()
+t_atomic()
 t_scustom()
 t_scustom2()
 t_sand1()
