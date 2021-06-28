@@ -36,6 +36,9 @@ class STopImpl(SimpleTypeD, TerminalType):
     """The super type, super type of all types."""
     __instance = None
 
+    # overriding the __new__ method enables us to implement a singleton
+    #   class.  I.e., a class, STopImpl, for which the call STopImpl()
+    #   always return the exact same object.  STopImpl() is STopImpl().
     def __new__(cls, *a, **kw):
         if STopImpl.__instance is None:
             STopImpl.__instance = super(STopImpl, cls).__new__(cls, *a, **kw)
