@@ -49,7 +49,7 @@ class SOr(SCombination):
         super(SOr, self).__init__(tds)
 
     def __str__(self):
-        return "[SOr " + ",".join([str(td) for td in self.tds]) + "]"
+        return "SOr(" + ", ".join([str(td) for td in self.tds]) + ")"
 
     def create(self, tds):
         return createSOr(tds)

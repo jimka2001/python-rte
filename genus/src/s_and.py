@@ -56,7 +56,7 @@ class SAnd(SCombination):
         super(SAnd, self).__init__(tds)
 
     def __str__(self):
-        return "[SAnd " + ",".join([str(td) for td in self.tds]) + "]"
+        return "SAnd(" + ", ".join([str(td) for td in self.tds]) + ")"
 
     def create(self, tds):
         return createSAnd(tds)

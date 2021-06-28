@@ -44,7 +44,7 @@ class SMemberImpl(SimpleTypeD):
 		self.arglist = list(arglist)
 	
 	def __str__(self):
-		return "[Member " + ",".join([str(x) for x in self.arglist]) + "]"
+		return "SMember(" + ", ".join([str(x) for x in self.arglist]) + ")"
 
 	def __eq__(self, that):
 		return type(self) is type(that) and \

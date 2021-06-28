@@ -103,8 +103,8 @@ def t_sand1():
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
 
-    assert (str(tri_n_quad) == "[SAnd triple?,quadruple?]")
-    assert (str(create_tri_n_quad) == "[SAnd triple?,quadruple?]")
+    assert (str(tri_n_quad) == "SAnd(triple?, quadruple?)")
+    assert (str(create_tri_n_quad) == "SAnd(triple?, quadruple?)")
 
     assert (tri_n_quad.typep(12))
     assert (create_tri_n_quad.typep(12))
@@ -150,8 +150,8 @@ def t_sor():
     tri_o_quad = SOr(triple, quadruple)
     create_tri_o_quad = createSOr([triple, quadruple])
 
-    assert str(tri_o_quad) == "[SOr triple?,quadruple?]"
-    assert str(create_tri_o_quad) == "[SOr triple?,quadruple?]"
+    assert str(tri_o_quad) == "SOr(triple?, quadruple?)"
+    assert str(create_tri_o_quad) == "SOr(triple?, quadruple?)"
 
     assert tri_o_quad.typep(12)
     assert create_tri_o_quad.typep(12)
@@ -221,7 +221,7 @@ def t_snot():
 
     assert SNot(SNot(pair)).canonicalize() == pair
 
-    assert (str(npair) == "[SNot pair?]")
+    assert (str(npair) == "SNot(pair?)")
 
     assert (npair.typep(5))
     assert (npair.typep("hello"))

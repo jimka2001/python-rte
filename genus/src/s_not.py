@@ -49,7 +49,7 @@ class SNot(SimpleTypeD):
 		self.s = s
 	
 	def __str__(self):
-		return "[SNot " + str(self.s) + "]"
+		return "SNot(" + str(self.s) + ")"
 
 	def __eq__(self, that):
 		return type(self) is type(that) and \
