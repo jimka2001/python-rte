@@ -31,7 +31,7 @@ inhabited_down 1
 disjoint_down 0
 subtypep 0 
 canonicalize_once 1 
-cmp_to_same_class_obj 1
+cmp_to_same_class_obj 3
 """
 
 
@@ -173,6 +173,8 @@ class SAtomic(SimpleTypeD, TerminalType):
         if type(self) != type(td):
             return super().cmp_to_same_class_obj(td)
         elif self == td:
-            return False
+            return 0
+        elif self.wrapped_class.__name__ < td.wrapped_class.__name__:
+            return -1
         else:
-            return self.wrapped_class.__name__ < td.wrapped_class.__name__
+            return 1

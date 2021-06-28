@@ -31,7 +31,7 @@ inhabited_down 1
 disjoint_down 1
 subtypep 1
 canonicalize_once 0
-cmp_to_same_class_obj 0
+cmp_to_same_class_obj 3
 
 <???> case class SMember </???>
 """
@@ -73,19 +73,21 @@ class SMemberImpl(SimpleTypeD):
 		if type(self) != type(t):
 			return super().cmp_to_same_class_obj(t)
 		elif self == t:
-			return False
+			return 0
 		else:
 			def comp(a, b):
 				if not a and not b:
 					raise Exception(f"not expecting equal sequences {self.arglist}, {t.arglist}")
 				elif not a:
-					return True
+					return -1 # short list < long list 
 				elif not b:
-					return False
+					return 1
 				elif a[0] == b[0]:
 					return comp(a[1:], b[1:])
-				elif str(a[0]) != str(b[0]):
-					return str(a[0]) < str(b[0])
+				elif str(a[0]) < str(b[0]):
+					return -1
+				elif str(a[0]) > str(b[0]):
+					return 1
 				else:
 					raise Exception(f"different values which print the same {a[0]} vs {b[0]}")
 			return comp(self.arglist, t.arglist)

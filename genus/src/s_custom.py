@@ -27,7 +27,7 @@ __str__ 3
 disjoint_down 1
 inhabited_down 1
 subtypep 1
-cmp_to_same_class_obj 1
+cmp_to_same_class_obj 3
 apply 1
 """
 
@@ -69,5 +69,7 @@ class SCustom(SimpleTypeD, TerminalType):
 	def cmp_to_same_class_obj(self, t):
 		if type(self) != type(t):
 			return super().cmp_to_same_class_obj(t)
+		elif str(self) < str(t):
+			return -1
 		else:
-			return str(self) < str(t)
+			return 1

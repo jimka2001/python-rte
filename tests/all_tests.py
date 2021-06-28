@@ -300,8 +300,7 @@ def t_SimpleTypeD():
     # the second time is to make sure it isn't adding the same twice
     assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
 
-    # ensuring cmp_to_same_class_obj() throws no error
-    assert child.cmp_to_same_class_obj(child) is False
+    assert child.cmp_to_same_class_obj(child) == 0
 
 
 # TODO: move the tests in their own files once this is packaged:
@@ -969,9 +968,70 @@ def t_discovered_cases_867():
     assert SAtomic(float).subtypep(SNot(SEmpty)) is True
     assert SNot(SAtomic(Test1)).subtypep(SAtomic(Test1)) is False
 
+
+def t_compare_sequence():
+    from utils import compare_sequence
+    assert compare_sequence([SEql(1)],[SEql(2)]) < 0
+    assert compare_sequence([], []) == 0
+    assert compare_sequence([SEql(1)], [SEql(1)]) == 0
+    assert compare_sequence([SEql(2)], [SEql(1)]) > 0
+    assert compare_sequence([SEql(1),SEql(1)], [SEql(1),SEql(1)]) == 0
+    assert compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)]) > 0
+    assert compare_sequence([SEql(1),SEql(1)], [SEql(1),SEql(2)]) < 0
+
+    assert compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0  # short list < long list
+    assert compare_sequence([SEql(1)], [SEql(1), SEql(1)]) < 0
+
+    from genus_types import  cmp_type_designators
+    assert cmp_type_designators(SEql(1),SEql(2)) < 0
+    assert cmp_type_designators(SEql(1), SEql(1)) == 0
+    assert cmp_type_designators(SEql(2), SEql(1)) > 0
+
+    assert cmp_type_designators(SMember(1),SMember(1)) == 0
+    assert cmp_type_designators(SMember(1), SMember(2)) < 0
+    assert cmp_type_designators(SMember(2), SMember(1)) > 0
+    assert cmp_type_designators(SMember(1), SMember(1,2)) < 0 # short list < long list
+    assert cmp_type_designators(SMember(1,2), SMember(1)) > 0
+    assert cmp_type_designators(SMember(1, 2), SMember(1,2)) == 0
+    assert cmp_type_designators(SMember(1, 2), SMember(1, 3)) < 0
+    assert cmp_type_designators(SMember(1, 2), SMember(1, 1)) > 0
+
+    assert cmp_type_designators(SEql(1), SMember(1,1)) < 0 # compare alphabetically
+    assert cmp_type_designators(SMember(1,2), SEql(1)) > 0
+
+    assert cmp_type_designators(SAnd(SEql(1), SEql(2)), SAnd(SEql(1), SEql(2))) == 0
+    assert cmp_type_designators(SAnd(SEql(1),SEql(2)), SAnd(SEql(2),SEql(1))) < 0
+    assert cmp_type_designators(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(1))) > 0
+
+    assert cmp_type_designators(SOr(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0
+    assert cmp_type_designators(SOr(SEql(2), SEql(3)), SOr(SEql(2), SEql(2))) > 0
+    assert cmp_type_designators(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(2))) == 0
+
+    assert cmp_type_designators(SOr(SEql(2), SEql(1)), SAnd(SEql(2), SEql(2))) > 0 # alphabetical
+    assert cmp_type_designators(SAnd(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0
+
+    assert cmp_type_designators(SNot(SEql(1)), SNot(SEql(2))) < 0
+    assert cmp_type_designators(SNot(SEql(1)), SNot(SEql(1))) == 0
+    assert cmp_type_designators(SNot(SEql(2)), SNot(SEql(1))) > 0
+
+    assert cmp_type_designators(STop ,STop) == 0
+    assert cmp_type_designators(SEmpty, SEmpty) == 0
+    assert cmp_type_designators(SEmpty, STop) < 0
+    assert cmp_type_designators(STop, SEmpty) > 0
+
+    assert cmp_type_designators(SAtomic(int), SAtomic(int)) == 0
+    assert cmp_type_designators(SAtomic(int), SAtomic(str)) < 0
+    assert cmp_type_designators(SAtomic(str), SAtomic(int)) > 0
+
+    even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+    odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+    assert cmp_type_designators(even,even) == 0
+    assert cmp_type_designators(even, odd) < 0, f"expecting {even} < {odd}"  # alphabetical by printable
+    assert cmp_type_designators(odd, even) > 0
+
 #   calling the test functions
 
-
+t_compare_sequence()
 t_discovered_case_240()
 t_discovered_case_297()
 t_subtypep1()

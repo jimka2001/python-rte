@@ -124,16 +124,20 @@ def compare_sequence(xs, ys):
             # we have reached the end of what we thought were different sequences
             raise ValueError(f"expecting different sequences {xs} vs {ys}")
         elif not us:
-            return True
+            return -1
         elif not vs:
-            return False
+            return 1
         elif us[0] == vs[0]:
             # TODO this is a poor approach, using tail recursion on arrays.
             # need to refactor
             return comp(us[1:], vs[1:])
         else:
-            return cmp_type_designators(us[0], vs[0]) < 0
-    return comp(xs, ys)
+            return cmp_type_designators(us[0], vs[0])
+
+    if xs == ys:
+        return 0
+    else:
+        return comp(xs, ys)
 
 
 # this class can be used to monitor recursive calls to detect infinite recursion.

@@ -34,7 +34,7 @@ zero 3
 annihilator 3
 same_combination 3
 canonicalize_once 3
-cmp_to_same_class 0
+cmp_to_same_class 3
 """
 
 
@@ -438,7 +438,7 @@ class SCombination(SimpleTypeD):
         if type(self) != type(td):
             return super().cmp_to_same_class_obj(td)
         elif self == td:
-            return False
+            return 0
         else:
             return compare_sequence(self.tds, td.tds)
 

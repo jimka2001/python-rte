@@ -36,7 +36,7 @@ subtypep 1
 canonicalize_once 1
 compute_dnf 0
 compute_cnf 1
-cmp_to_same_class_obj 0
+cmp_to_same_class_obj 3
 """
 
 
@@ -157,6 +157,6 @@ class SNot(SimpleTypeD):
 		if type(self) != type(td):
 			return super().cmp_to_same_class_obj(td)
 		elif self == td:
-			return False
+			return 0
 		else:
-			return cmp_type_designators(self.s, td.s) < 0
+			return cmp_type_designators(self.s, td.s)

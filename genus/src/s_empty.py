@@ -64,7 +64,7 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         else:
-            return False
+            return 0
 
 
 SEmpty = SEmptyImpl()
