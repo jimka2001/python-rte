@@ -32,7 +32,6 @@ disjoint_down 0
 subtypep 0 
 canonicalize_once 1 
 cmp_to_same_class_obj 1
-apply 1
 """
 
 
@@ -79,30 +78,6 @@ class SAtomic(SimpleTypeD, TerminalType):
         # consider all SAtomic types as being inhabited.
         # as far as I know Python does not support an empty type.
         return True
-
-    @staticmethod
-    def is_final():
-        """Okay, so, python does not per say handle final classes,
-        however since python3.8, the community added a @final
-        decorator and it got added to the language.
-
-        At the same time, for back compatibility reasons, many
-        people still use various hacks like making a final
-        class to hijack the __new__ and raise an exception
-        on subclassing.
-
-        Even Guido used a hack (through the C API) to make
-        a few classes (like the bool class) final !
-        To deal with everything people used, use, or will use,
-        my solution is to just make use of the duck typing magic.
-
-        If it looks like a duck and quacks like a duck,
-        it is probably a duck. Apply the same to final"""
-        try:
-            pass
-        except Exception as e:
-            raise e
-        pass
 
     def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
