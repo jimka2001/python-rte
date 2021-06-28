@@ -103,5 +103,11 @@
   functions to use the Python protocol. `compare_to_same_class_obj`,
   `compare_sequence`, and `compare_type_designators`.
 
+* Some methods have changed name.  `_subtypep_down` changed to `subtypep_down`
+  and `_inhabited_down` changed to `inhabited_down`.  This change is
+  an artifact of using PyCharm which thinks that method names beginning
+  with `_` are in some sense *private* and it flags many of the calls
+  to the method in the current code base.
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
