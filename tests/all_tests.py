@@ -33,6 +33,10 @@ from s_and import SAnd
 from s_eql import SEql
 from s_member import SMember
 
+# default value of num_random_tests is 1000, but you can temporarily edit thie file
+#   and set it to a smaller number for a quicker run of the tests.
+num_random_tests = 1000
+
 
 def t_verboseonlyprint(s):
     if 'genusverbose' in os.environ and os.environ['genusverbose'] == str(True):
@@ -425,7 +429,7 @@ def t_discovered_case_240():
 def t_subtypep1():
     from depth_generator import random_type_designator
     for depth in range(0, 3):
-        for _ in range(1000):
+        for _ in range(num_random_tests):
             td1 = random_type_designator(depth)
             td2 = random_type_designator(depth)
             assert td1.subtypep(td1) is True
@@ -446,7 +450,7 @@ def t_subtypep2():
     from depth_generator import random_type_designator
     from genus_types import NormalForm
     for depth in range(0, 4):
-        for _ in range(1000):
+        for _ in range(num_random_tests):
             td = random_type_designator(depth)
             tdc1 = td.canonicalize()
             tdc2 = td.canonicalize(NormalForm.DNF)
@@ -540,7 +544,7 @@ def t_membership():
     from depth_generator import random_type_designator, test_values
     from genus_types import NormalForm
     for depth in range(0, 4):
-        for _ in range(1000):
+        for _ in range(num_random_tests):
             td = random_type_designator(depth)
             tdc1 = td.canonicalize()
             tdc2 = td.canonicalize(NormalForm.DNF)
@@ -561,7 +565,7 @@ def t_canonicalize_subtype():
     from genus_types import NormalForm
     from depth_generator import random_type_designator
     for depth in range(0, 4):
-        for _ in range(1000):
+        for _ in range(num_random_tests):
             td = random_type_designator(depth)
             tdc1 = td.canonicalize()
             tdc2 = td.canonicalize(NormalForm.DNF)
@@ -871,7 +875,7 @@ def t_to_dnf2():
             return False
 
     for depth in range(0, 4):
-        for _ in range(1000):
+        for _ in range(num_random_tests):
             td = random_type_designator(depth)
             dnf = td.canonicalize(NormalForm.DNF)
             assert dnfp(dnf), f"expecting DNF, got {dnf}"
@@ -904,7 +908,7 @@ def t_to_cnf2():
             return False
 
     for depth in range(0, 4):
-        for _ in range(1000):
+        for _ in range(num_random_tests):
             td = random_type_designator(depth)
             cnf = td.canonicalize(NormalForm.CNF)
             assert cnfp(cnf), f"expecting DNF, got {cnf}"
