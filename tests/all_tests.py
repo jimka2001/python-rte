@@ -43,6 +43,22 @@ def t_verboseonlyprint(s):
         print(s)
 
 
+def t_atomic():
+    def x():
+        from depth_generator import TestA
+        return TestA
+
+    def y():
+        class TestA:
+            pass
+        return TestA
+
+    assert SAtomic(int) is SAtomic(int)
+    assert SAtomic(int) is not SAtomic(str)
+    assert SAtomic(x()) is SAtomic(x())
+    assert SAtomic(x()) is not SAtomic(y())
+
+
 def t_fixed_point():
     from utils import fixed_point
     assert fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0

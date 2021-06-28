@@ -37,13 +37,18 @@ cmp_to_same_class_obj 3
 
 class SAtomic(SimpleTypeD, TerminalType):
     """The atoms of our type system: a simple type built from a native python type."""
-
+    __instances = {}
     # reminder: the types are:
     # numerical: "int", "float", "complex"
     # sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
     # binary sequential: "bytes", "bytearray", "memoryview"
     # text sequential: "str"
     # in addition, all classes are types and all types are classes
+
+    def __new__(cls, wrapped_class, *a, **kw):
+        if wrapped_class not in SAtomic.__instances:
+            SAtomic.__instances[wrapped_class] = super(SAtomic, cls).__new__(cls, *a, **kw)
+        return SAtomic.__instances[wrapped_class]
 
     def __init__(self, wrapped_class):
         import inspect
@@ -67,14 +72,6 @@ class SAtomic(SimpleTypeD, TerminalType):
         return isinstance(a, self.wrapped_class)
 
     def inhabited_down(self):
-        # try:
-        #     # TODO type(None) ? is this really the way to find the empty type? I think it is wrong.
-        #     return not issubclass(self.wrapped_class, type(None))
-        # except Exception as _e:
-        #     # the try block may only fail if self.wrapped_class is not a class,
-        #     # in which case it is a value and contains nothing
-        #     return False
-
         # consider all SAtomic types as being inhabited.
         # as far as I know Python does not support an empty type.
         return True

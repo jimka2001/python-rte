@@ -109,5 +109,7 @@
   with `_` are in some sense *private* and it flags many of the calls
   to the method in the current code base.
 
+* Enhanced SAtomic to assure that `SAtomic(int) is SAtomic(int)`
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
