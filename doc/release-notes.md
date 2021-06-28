@@ -111,5 +111,11 @@
 
 * Enhanced SAtomic to assure that `SAtomic(int) is SAtomic(int)`
 
+* Simplified the dnf/cnf functions.
+  - `maybe_dnf` and `maybe_cnf` have been combined into `to_nf`
+  - `to_dnf` and `to_cnf` have been eliminated.  These were previously 
+    caching versions of `compute_dnf` and `compute_cnf`.  The caching
+    facility has been moved into `to_nf`.
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
