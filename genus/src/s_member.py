@@ -72,25 +72,26 @@ class SMemberImpl(SimpleTypeD):
 	def cmp_to_same_class_obj(self, t):
 		if type(self) != type(t):
 			return super().cmp_to_same_class_obj(t)
-		elif self == t:
-			return 0
 		else:
-			def comp(a, b):
-				if not a and not b:
-					raise Exception(f"not expecting equal sequences {self.arglist}, {t.arglist}")
-				elif not a:
+			a = self.arglist
+			b = t.arglist
+
+			def comp(i):
+				if i >= len(a) and i >= len(b):
+					return 0
+				elif i >= len(a):
 					return -1 # short list < long list 
-				elif not b:
+				elif i >= len(b):
 					return 1
-				elif a[0] == b[0]:
-					return comp(a[1:], b[1:])
-				elif str(a[0]) < str(b[0]):
+				elif a[i] == b[i]:
+					return comp(i+1)
+				elif str(a[i]) < str(b[i]):
 					return -1
-				elif str(a[0]) > str(b[0]):
+				elif str(a[i]) > str(b[i]):
 					return 1
 				else:
-					raise Exception(f"different values which print the same {a[0]} vs {b[0]}")
-			return comp(self.arglist, t.arglist)
+					raise Exception(f"{self} and {t} contain different values which print the same {a[i]} vs {b[i]}")
+			return comp(0)
 
 
 class SMember(SMemberImpl, TerminalType):

@@ -976,7 +976,7 @@ def t_compare_sequence():
     assert compare_sequence([SEql(1)], [SEql(1)]) == 0
     assert compare_sequence([SEql(2)], [SEql(1)]) > 0
     assert compare_sequence([SEql(1),SEql(1)], [SEql(1),SEql(1)]) == 0
-    assert compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)]) > 0
+    assert compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)]) > 0, f"returned {compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)])}"
     assert compare_sequence([SEql(1),SEql(1)], [SEql(1),SEql(2)]) < 0
 
     assert compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0  # short list < long list

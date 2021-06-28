@@ -119,25 +119,19 @@ def find_first(pred, xs, default=None):
 def compare_sequence(xs, ys):
     from genus_types import cmp_type_designators
 
-    def comp(us, vs):
-        if not us and not vs:
-            # we have reached the end of what we thought were different sequences
-            raise ValueError(f"expecting different sequences {xs} vs {ys}")
-        elif not us:
+    def comp(i):
+        if i >= len(xs) and i >= len(ys):
+            return 0
+        elif i >= len(xs):
             return -1
-        elif not vs:
+        elif i >= len(ys):
             return 1
-        elif us[0] == vs[0]:
-            # TODO this is a poor approach, using tail recursion on arrays.
-            # need to refactor
-            return comp(us[1:], vs[1:])
+        elif xs[i] == ys[i]:
+            return comp(i+1)
         else:
-            return cmp_type_designators(us[0], vs[0])
+            return cmp_type_designators(xs[i], ys[i])
 
-    if xs == ys:
-        return 0
-    else:
-        return comp(xs, ys)
+    return comp(0)
 
 
 # this class can be used to monitor recursive calls to detect infinite recursion.
@@ -162,7 +156,7 @@ class CallStack:
             if self.trace:
                 print(f"[ {len(self.stack)} {self.name} {value}")
 
-    def pop(self,comment=None):
+    def pop(self, comment=None):
         if self.trace:
             c2 = "" if comment is None else comment
             print(f"] {len(self.stack)} {self.name} {c2}")
