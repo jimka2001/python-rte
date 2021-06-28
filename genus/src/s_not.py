@@ -67,9 +67,6 @@ class SNot(SimpleTypeD):
 			return False
 		elif emptyp(self.s):
 			return True
-		# TODO is there a type Nothing in python?
-		# elif self.s == SAtomic(type(None)):
-		# 	return True
 		elif self.s == SAtomic(object):
 			return False
 		elif atomicp(self.s):
