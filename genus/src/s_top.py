@@ -50,7 +50,7 @@ class STopImpl(SimpleTypeD, TerminalType):
     def typep(self, _any):
         return True
 
-    def inhabited_down(self):
+    def inhabited(self):
         return True
 
     def disjoint_down(self, t):

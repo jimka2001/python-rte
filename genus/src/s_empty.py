@@ -50,7 +50,7 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
     def typep(self, _any):
         return False
 
-    def inhabited_down(self):
+    def inhabited(self):
         return False
 
     def disjoint_down(self, t):
