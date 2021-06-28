@@ -172,10 +172,6 @@ class SAnd(SCombination):
                     return SEmpty
         return self
 
-    # def canonicalize_once(self, nf=None):
-    #     from utils import find_simplifier
-    #     return find_simplifier(self, [lambda: super(SAnd, self).canonicalize_once(nf)])
-
     def compute_dnf(self):
         # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
         #    --> td = SOr(y1,y2,y3)

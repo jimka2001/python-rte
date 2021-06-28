@@ -129,10 +129,6 @@ class SOr(SCombination):
                     return STop
         return self
 
-    # def canonicalize_once(self, nf=None):
-    #     from utils import find_simplifier
-    #     return find_simplifier(self, [lambda: super(SOr, self).canonicalize_once(nf)])
-
     def compute_cnf(self):
         # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
         #    --> td = SAnd(y1,y2,y3)

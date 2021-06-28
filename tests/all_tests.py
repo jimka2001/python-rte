@@ -299,13 +299,6 @@ def t_SimpleTypeD():
     # as a reminder: True means yes, False means no, None means maybe
     assert (child.disjoint(child) is False)
 
-    assert (child == child.to_dnf())
-    assert (child == child.to_cnf())
-
-    nf = [NormalForm.DNF, NormalForm.CNF]
-    assert (child == child.maybe_dnf(nf))
-    assert (child == child.maybe_cnf(nf))
-
     # fixed_point is just a way to incrementally apply a function on a value
     # until another function deem the delta between two consecutive values to be negligible
     def increment(x):
@@ -325,7 +318,6 @@ def t_SimpleTypeD():
     assert child.cmp_to_same_class_obj(child) == 0
 
 
-# TODO: move the tests in their own files once this is packaged:
 def t_STop2():
     from s_top import STopImpl
     # STop has to be unique
@@ -361,7 +353,6 @@ def t_STop2():
     assert (STop.subtypep(STop) is True)
 
 
-# TODO: move the tests in their own files once this is packaged:
 def t_SEmpty():
     from s_empty import SEmptyImpl
     from depth_generator import test_values
@@ -933,6 +924,8 @@ def t_to_dnf():
     #          SAnd(x1,x2,  y2,  x3,x4),
     #          SAnd(x1,x2,  y3,  x3,x4),
     #     )
+    from genus_types import NormalForm
+
     x1 = SEql("x1")
     x2 = SEql("x2")
     x3 = SEql("x3")
@@ -945,8 +938,8 @@ def t_to_dnf():
               SAnd(x1, x2, y2, x3, x4),
               SAnd(x1, x2, y3, x3, x4))
     assert td.compute_dnf() == dnf
-    assert td.to_dnf() == dnf
-    assert td.to_cnf() == td
+    assert td.to_nf(NormalForm.DNF) == dnf
+    assert td.to_nf(NormalForm.CNF) == td
     assert td.compute_cnf() == td
 
 
@@ -957,6 +950,7 @@ def t_to_cnf():
     #          SOr(x1,x2,  y2,  x3,x4),
     #          SOr(x1,x2,  y3,  x3,x4),
     #     )
+    from genus_types import NormalForm
     x1 = SEql("x1")
     x2 = SEql("x2")
     x3 = SEql("x3")
@@ -969,8 +963,8 @@ def t_to_cnf():
                SOr(x1, x2, y2, x3, x4),
                SOr(x1, x2, y3, x3, x4))
     assert td.compute_cnf() == cnf
-    assert td.to_cnf() == cnf
-    assert td.to_dnf() == td
+    assert td.to_nf(NormalForm.CNF) == cnf
+    assert td.to_nf(NormalForm.DNF) == td
     assert td.compute_dnf() == td
 
 

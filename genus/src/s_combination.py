@@ -150,7 +150,7 @@ class SCombination(SimpleTypeD):
             return self.create(flat_map(f, self.tds))
 
     def conversion7(self, nf):
-        return self.maybe_dnf(nf).maybe_cnf(nf)
+        return self.to_nf(nf)
 
     def conversion8(self):
         # (or A (not B)) --> STop if B is subtype of A, zero = STop
@@ -446,7 +446,18 @@ class SCombination(SimpleTypeD):
         # it turns out SAnd.compute_dnf and SOr.compute_cnf contain
         # the exact same code.  So I've factored that code here.
         from utils import find_first
-
+        # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
+        #    --> td = SAnd(y1,y2,y3)
+        # --> SAnd(SOr(x1,x2,  y1,  x3,x4),
+        #          SOr(x1,x2,  y2,  x3,x4),
+        #          SOr(x1,x2,  y3,  x3,x4),
+        #     )
+        # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
+        #    --> td = SOr(y1,y2,y3)
+        # --> SOr(SAnd(x1,x2,  y1,  x3,x4),
+        #          SAnd(x1,x2,  y2,  x3,x4),
+        #          SAnd(x1,x2,  y3,  x3,x4),
+        #     )
         td = find_first(self.dual_combination, self.tds, None)
         if td is None:
             return self

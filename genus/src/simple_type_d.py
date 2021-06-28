@@ -23,11 +23,6 @@
 #   maybe rewrite the static variable using methods as properties ?
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
-__or__  0
-__and__     0
-__unary_not__ 0
-__sub__     0
-__xor__     0
 typep       3
 disjoint    2
 inhabited_down     3
@@ -35,7 +30,6 @@ inhabited   3
 disjoint_down  3
 subtypep
 fixed_point 3
-debug_find_simplifier   1
 find_simplifier     1
 compute_dnf    3
 to_dnf  3
@@ -74,6 +68,7 @@ class SimpleTypeD(metaclass=ABCMeta):
         self.subtypep_cache = {}
         self.disjoint_cache = {}
         self.canonicalized_hash = {}
+        self.nf_cache = {}
 
     def __repr__(self):
         return self.__str__()
@@ -182,29 +177,19 @@ class SimpleTypeD(metaclass=ABCMeta):
     def compute_dnf(self):
         return self
 
-    def to_dnf(self):
-        if not hasattr(self, "hold_todnf"):
-            self.hold_todnf = self.compute_dnf()
-        return self.hold_todnf
-
     # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
     def compute_cnf(self):
         return self
 
-    def to_cnf(self):
-        if not hasattr(self, "hold_tocnf"):
-            self.hold_tocnf = self.compute_cnf()
-        return self.hold_tocnf
-
-    def maybe_dnf(self, nf):
-        if NormalForm.DNF is nf:
-            return self.to_dnf()
-        else:
-            return self
-
-    def maybe_cnf(self, nf):
-        if NormalForm.CNF is nf:
-            return self.to_cnf()
+    def to_nf(self, nf):
+        if nf in self.nf_cache:
+            return self.nf_cache[nf]
+        elif NormalForm.CNF is nf:
+            self.nf_cache[nf] = self.compute_cnf()
+            return self.nf_cache[nf]
+        elif NormalForm.DNF is nf:
+            self.nf_cache[nf] = self.compute_dnf()
+            return self.nf_cache[nf]
         else:
             return self
 
