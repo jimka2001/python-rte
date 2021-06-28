@@ -41,7 +41,7 @@ cmp_to_same_class 3
 class SCombination(SimpleTypeD):
     """SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 
-    def __init__(self, tds):
+    def __init__(self, *tds):
         self.tds = list(tds)
         assert all(isinstance(td, SimpleTypeD) for td in tds)
         super().__init__()

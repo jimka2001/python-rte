@@ -50,10 +50,7 @@ from simple_type_d import SimpleTypeD
 
 class SAnd(SCombination):
     """An intersection type, which is the intersection of zero or more types.
-    @param tds list, zero or more types"""
-
-    def __init__(self, *tds):
-        super(SAnd, self).__init__(tds)
+    @param tds list, zero or more type designators"""
 
     def __str__(self):
         return "SAnd(" + ", ".join([str(td) for td in self.tds]) + ")"

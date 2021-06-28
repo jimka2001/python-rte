@@ -43,10 +43,8 @@ from s_top import STop
 
 
 class SOr(SCombination):
-    """docstring for SOr"""
-
-    def __init__(self, *tds):
-        super(SOr, self).__init__(tds)
+    """Union type designator.  The operands are themselves type designators.
+    @param tds list, zero or more type designators"""
 
     def __str__(self):
         return "SOr(" + ", ".join([str(td) for td in self.tds]) + ")"
@@ -95,7 +93,6 @@ class SOr(SCombination):
             return super().inhabited_down()
 
     def disjoint_down(self, t):
-        # TODO implement memoization
         if all(td.disjoint(t) is True for td in self.tds):
             return True
         elif any(td.disjoint(t) is False for td in self.tds):
