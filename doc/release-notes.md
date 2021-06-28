@@ -16,12 +16,10 @@
 
 * `STop` and `SEmpty` are now global variables which are intended 
   to be single instances of the respective classes `STopImpl` and
-  `SEmptyImpl`.  `__init__` and `__hash__` methods have been defined 
+  `SEmptyImpl`.  `__new__`  methods have been defined 
   to enforce that two instances of `STop` or of `SEmpty` are equal 
-  to each other; However, there is also code in the `__init__` 
-  function to ensure that only one such object of each class can be 
-  instantiated.  Subsequent calls to `STopImpl.get_omega()` or 
-  `SEmptyImpl.get_epsilon()` return the same cached object.
+  to each other. Subsequent calls to `STopImpl()` or 
+  `SEmptyImpl()` return the same cached object.
 
 * `SAnd` and `SOr` are now called with varargs.  e.g., `SAnd(a,b,c)` 
   or `SOr(a,b,c)` whereas in the past they were called with a single 
