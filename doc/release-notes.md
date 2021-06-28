@@ -94,5 +94,11 @@
 
 * implemented to_cnf and t_dnf
 
+* The Python sorting functions use a compare function which is expected
+  to return -1, 0, or 1 whereas in Scala the corresponding function 
+  expects a return value of True or False.  I have updated several
+  functions to use the Python protocol. `compare_to_same_class_obj`,
+  `compare_sequence`, and `compare_type_designators`.
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
