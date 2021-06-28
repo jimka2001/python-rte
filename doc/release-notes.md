@@ -41,9 +41,12 @@
   `remove_element`.  Nevertheless, I have added these functions to 
   aid with the translation from Scala to Python.
 
-* Refactored `generate_lazy_val`.  It now takes a 0-ary function 
+* Refactored `generate_lazy_val`.  It now takes a 0-ary client function 
   (a thunk) and returns a 0-ary function.  The refactoring using 
-  Python's closures to greatly simplify the code.
+  Python's closures to greatly simplify the code.  The function 
+  returned by `generate_lazy_val` promises to call the client function
+  at most 1 time, memoizing its return value, and thereafter if called,
+  will return that same return value.
 
 * `zero` and `unit` are now methods on `SAnd` and `SOr` rather than 
   attributes.
