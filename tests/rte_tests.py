@@ -21,6 +21,8 @@
 
 import unittest
 from rte.r_sigma import Sigma, SigmaImpl
+from rte.r_epsilon import Epsilon, EpsilonImpl
+from rte.r_emptyset import EmptySet, EmptySetImpl
 
 
 class RteCase(unittest.TestCase):
@@ -28,6 +30,16 @@ class RteCase(unittest.TestCase):
         self.assertTrue( Sigma is Sigma)
         self.assertIs(Sigma, SigmaImpl())
         self.assertIs(SigmaImpl(),SigmaImpl())
+
+    def test_epsilon(self):
+        self.assertIs(Epsilon, Epsilon)
+        self.assertIs(Epsilon, EpsilonImpl())
+        self.assertIs(EpsilonImpl(),EpsilonImpl())
+
+    def test_emptyset(self):
+        self.assertTrue(EmptySet is EmptySet)
+        self.assertIs(EmptySet, EmptySetImpl())
+        self.assertIs(EmptySetImpl(), EmptySetImpl())
 
 
 if __name__ == '__main__':
