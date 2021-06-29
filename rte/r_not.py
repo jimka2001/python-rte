@@ -23,6 +23,10 @@ from rte.r_rte import Rte
 
 
 class Not (Rte):
-    pass
+    def __init__(self, operand):
+        super(Not, self).__init__()
+        assert isinstance(operand, Rte)
+        self.operand = operand
+
     def __str__(self):
         return "Not(" + str(self.operand) + ")"

@@ -23,7 +23,10 @@ from rte.r_rte import Rte
 
 
 class Star (Rte):
-    pass
+    def __init__(self, operand):
+        super(Star, self).__init__()
+        assert isinstance(operand, Rte)
+        self.operand = operand
 
     def __str__(self):
         return "Star(" + str(self.operand) + ")"
