@@ -23,4 +23,5 @@ from rte.r_combination import Combination
 
 
 class And (Combination):
-    pass
+    def __str__(self):
+        return "And(" + ", ".join([str(td) for td in self.operands]) + ")"

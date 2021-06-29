@@ -33,5 +33,7 @@ class EmptySetImpl (Rte):
             EmptySetImpl.__instance = super(EmptySetImpl, cls).__new__(cls, *a, **kw)
         return EmptySetImpl.__instance
 
+    def __str__(self):
+        return "EmptySet"
 
 EmptySet = EmptySetImpl()
