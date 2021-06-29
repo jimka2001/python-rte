@@ -23,4 +23,6 @@ from rte.r_combination import Combination
 
 
 class Or (Combination):
-    pass
+    def __str__(self):
+        return "Or(" + ", ".join([str(td) for td in self.operands]) + ")"
+

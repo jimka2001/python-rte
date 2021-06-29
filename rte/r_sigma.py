@@ -33,5 +33,7 @@ class SigmaImpl (Rte):
             SigmaImpl.__instance = super(SigmaImpl, cls).__new__(cls, *a, **kw)
         return SigmaImpl.__instance
 
+    def __str__(self):
+        return "Sigma"
 
 Sigma = SigmaImpl()

@@ -28,3 +28,5 @@ class Cat (Rte):
         assert all(isinstance(operand, Rte) for operand in operands)
         super().__init__()
 
+    def __str__(self):
+        return "Cat(" + ", ".join([str(td) for td in self.operands]) + ")"

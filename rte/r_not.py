@@ -24,3 +24,5 @@ from rte.r_rte import Rte
 
 class Not (Rte):
     pass
+    def __str__(self):
+        return "Not(" + str(self.operand) + ")"

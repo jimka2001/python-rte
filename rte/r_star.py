@@ -24,3 +24,6 @@ from rte.r_rte import Rte
 
 class Star (Rte):
     pass
+
+    def __str__(self):
+        return "Star(" + str(self.operand) + ")"

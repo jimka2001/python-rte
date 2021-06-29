@@ -33,5 +33,7 @@ class EpsilonImpl (Rte):
             EpsilonImpl.__instance = super(EpsilonImpl, cls).__new__(cls, *a, **kw)
         return EpsilonImpl.__instance
 
+    def __str__(self):
+        return "Epsilon"
 
 Epsilon = EpsilonImpl()
