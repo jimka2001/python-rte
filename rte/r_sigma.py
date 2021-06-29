@@ -19,11 +19,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from r_rte import Rte
+from rte.r_rte import Rte
 
 
 class SigmaImpl (Rte):
-    pass
+    __instance = None
+
+    # overriding the __new__ method enables us to implement a singleton
+    #   class.  I.e., a class, STopImpl, for which the call STopImpl()
+    #   always return the exact same object.  STopImpl() is STopImpl().
+    def __new__(cls, *a, **kw):
+        if SigmaImpl.__instance is None:
+            SigmaImpl.__instance = super(SigmaImpl, cls).__new__(cls, *a, **kw)
+        return SigmaImpl.__instance
 
 
 Sigma = SigmaImpl()

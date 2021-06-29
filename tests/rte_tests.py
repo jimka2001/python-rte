@@ -19,8 +19,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from rte.r_combination import Combination
+import unittest
+from rte.r_sigma import Sigma, SigmaImpl
 
 
-class And (Combination):
-    pass
+class RteCase(unittest.TestCase):
+    def test_sigma(self):
+        self.assertTrue( Sigma is Sigma)
+        self.assertIs(Sigma, SigmaImpl())
+        self.assertIs(SigmaImpl(),SigmaImpl())
+
+
+if __name__ == '__main__':
+    unittest.main()
+
