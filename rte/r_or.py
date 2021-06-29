@@ -26,3 +26,13 @@ class Or (Combination):
     def __str__(self):
         return "Or(" + ", ".join([str(td) for td in self.operands]) + ")"
 
+
+def createOr(operands):
+    from rte.r_emptyset import EmptySet
+
+    if not operands:
+        return EmptySet
+    elif len(operands) == 1:
+        return operands[0]
+    else:
+        return Or(*operands)

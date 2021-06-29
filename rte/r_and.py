@@ -25,3 +25,15 @@ from rte.r_combination import Combination
 class And (Combination):
     def __str__(self):
         return "And(" + ", ".join([str(td) for td in self.operands]) + ")"
+
+
+def createAnd(operands):
+    from rte.r_star import Star
+    from rte.r_sigma import Sigma
+
+    if not operands:
+        return Star(Sigma)
+    elif len(operands) == 1:
+        return operands[0]
+    else:
+        return And(*operands)

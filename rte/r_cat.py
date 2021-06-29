@@ -30,3 +30,14 @@ class Cat (Rte):
 
     def __str__(self):
         return "Cat(" + ", ".join([str(td) for td in self.operands]) + ")"
+
+
+def createCat(operands):
+    from rte.r_epsilon import Epsilon
+
+    if not operands:
+        return Epsilon
+    elif len(operands) == 1:
+        return operands[0]
+    else:
+        return Cat(*operands)
