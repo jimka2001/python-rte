@@ -146,7 +146,7 @@ class SNot(SimpleTypeD):
 
 	def compute_cnf(self):
 		# we convert a not to DNF or CNF the same way, i.e., by pushing down the SNot
-		#   and converting and to Or
+		#   and converting SAnd to SOr
 		return self.compute_dnf()
 
 	def cmp_to_same_class_obj(self, td):
