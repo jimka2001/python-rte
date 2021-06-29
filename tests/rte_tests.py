@@ -23,6 +23,9 @@ import unittest
 from rte.r_sigma import Sigma, SigmaImpl
 from rte.r_epsilon import Epsilon, EpsilonImpl
 from rte.r_emptyset import EmptySet, EmptySetImpl
+from rte.r_or import Or
+from rte.r_and import And
+from rte.r_cat import Cat
 
 
 class RteCase(unittest.TestCase):
@@ -40,6 +43,15 @@ class RteCase(unittest.TestCase):
         self.assertTrue(EmptySet is EmptySet)
         self.assertIs(EmptySet, EmptySetImpl())
         self.assertIs(EmptySetImpl(), EmptySetImpl())
+
+    def test_or(self):
+        self.assertEqual(Or(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
+
+    def test_and(self):
+        self.assertEqual(And(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
+
+    def test_cat(self):
+        self.assertEqual(Cat(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
 
 
 if __name__ == '__main__':

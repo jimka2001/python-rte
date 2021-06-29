@@ -23,5 +23,7 @@ from rte.r_rte import Rte
 
 
 class Combination (Rte):
-    pass
-
+    def __init__(self, *operands):
+        self.operands = list(operands)
+        assert all(isinstance(operand, Rte) for operand in operands)
+        super().__init__()
