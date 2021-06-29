@@ -52,6 +52,8 @@ class RteCase(unittest.TestCase):
 
     def test_cat(self):
         self.assertEqual(Cat(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
+    def test_singleton(self):
+        self.assertEqual(Singleton(SEql(1)).operand, SEql(1))
 
 
 if __name__ == '__main__':
