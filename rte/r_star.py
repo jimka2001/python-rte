@@ -20,9 +20,24 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from rte.r_rte import Rte
+from rte.r_sigma import Sigma
+from rte.r_epsilon import Epsilon
+from rte.r_emptyset import EmptySet
 
 
-class Star (Rte):
+class Star(Rte):
+    __instances = {}
+
+    def __new__(cls, operand, *a, **kw):
+        if operand in Star.__instances:
+            return Star.__instances[operand]
+        elif operand in [EmptySet, Epsilon, Sigma]:
+            s = super(Star, cls).__new__(cls, *a, **kw)
+            Star.__instances[operand] = s
+            return s
+        else:
+            return super(Star, cls).__new__(cls, *a, **kw)
+
     def __init__(self, operand):
         super(Star, self).__init__()
         assert isinstance(operand, Rte)

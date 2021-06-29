@@ -31,6 +31,13 @@ class Cat (Rte):
     def __str__(self):
         return "Cat(" + ", ".join([str(td) for td in self.operands]) + ")"
 
+    def __eq__(self, that):
+        return type(self) is type(that) and \
+               self.operands == that.operands
+
+    def __hash__(self):
+        return hash(self.operands)
+
 
 def createCat(operands):
     from rte.r_epsilon import Epsilon

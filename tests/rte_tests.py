@@ -23,9 +23,13 @@ import unittest
 from rte.r_sigma import Sigma, SigmaImpl
 from rte.r_epsilon import Epsilon, EpsilonImpl
 from rte.r_emptyset import EmptySet, EmptySetImpl
-from rte.r_or import Or
-from rte.r_and import And
-from rte.r_cat import Cat
+from rte.r_or import Or, createOr
+from rte.r_and import And, createAnd
+from rte.r_cat import Cat, createCat
+from rte.r_star import Star
+from rte.r_singleton import Singleton
+from genus.s_eql import SEql
+from rte.r_random import random_rte
 
 
 class RteCase(unittest.TestCase):
@@ -44,14 +48,29 @@ class RteCase(unittest.TestCase):
         self.assertIs(EmptySet, EmptySetImpl())
         self.assertIs(EmptySetImpl(), EmptySetImpl())
 
+    def test_star(self):
+        self.assertIs(Star(Sigma), Star(Sigma))
+        self.assertIs(Star(Epsilon), Star(Epsilon))
+        self.assertIs(Star(EmptySet), Star(EmptySet))
+
     def test_or(self):
         self.assertEqual(Or(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
+        self.assertIs(createOr([]),EmptySet)
+        self.assertEqual(createOr([Singleton(SEql(1))]), Singleton(SEql(1)))
+        self.assertEqual(createOr([Sigma,Sigma]), Or(Sigma,Sigma))
 
     def test_and(self):
         self.assertEqual(And(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
+        self.assertIs(createAnd([]),Star(Sigma))
+        self.assertEqual(createAnd([Singleton(SEql(1))]), Singleton(SEql(1)))
+        self.assertEqual(createAnd([Sigma,Sigma]), And(Sigma,Sigma))
 
     def test_cat(self):
         self.assertEqual(Cat(Sigma,Sigma,Sigma).operands, [Sigma,Sigma,Sigma])
+        self.assertIs(createCat([]),Epsilon)
+        self.assertEqual(createCat([Singleton(SEql(1))]), Singleton(SEql(1)))
+        self.assertEqual(createCat([Sigma,Sigma]), Cat(Sigma,Sigma))
+
     def test_singleton(self):
         self.assertEqual(Singleton(SEql(1)).operand, SEql(1))
 
