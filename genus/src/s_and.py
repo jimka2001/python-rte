@@ -37,11 +37,17 @@ compute_dnf 3
 """
 
 from genus_types import NormalForm, createSAnd
+from genus_types import atomicp
+from genus_types import createSOr
+from genus_types import memberimplp, createSMember
+from genus_types import orp
 from s_combination import SCombination
 from s_empty import SEmpty
 from s_top import STop
 from simple_type_d import SimpleTypeD
+from utils import find_first
 from utils import generate_lazy_val
+from utils import uniquify
 
 
 # from utils import CallStack
@@ -69,11 +75,9 @@ class SAnd(SCombination):
         return a.subtypep(b)
 
     def dual_combination(self, td):
-        from genus_types import orp
         return orp(td)
 
     def dual_combinator(self, a, b):
-        from utils import uniquify
         return uniquify(a + b)
 
     def combinator(self, a, b):
@@ -83,15 +87,12 @@ class SAnd(SCombination):
         return filter(pred, xs)  # calling filter from Python std library
 
     def create_dual(self, tds):
-        from genus_types import createSOr
         return createSOr(tds)
 
     def typep(self, a):
         return all(td.typep(a) for td in self.tds)
 
     def inhabited_down(self):
-        from genus_types import atomicp
-
         dnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.DNF))
         cnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.CNF))
 
@@ -156,9 +157,6 @@ class SAnd(SCombination):
 
         # SAnd(SMember(42, 43, 44), A, B, C)
         # == > SMember(42, 44)
-        from utils import find_first
-        from genus_types import memberimplp, createSMember
-
         member = find_first(memberimplp, self.tds, None)
         if member is None:
             return self

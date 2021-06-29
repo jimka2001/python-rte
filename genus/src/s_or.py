@@ -36,10 +36,16 @@ canonicalize_once 3
 compute_cnf 3
 """
 
+from genus_types import andp
+from genus_types import createSAnd
 from genus_types import createSOr
+from genus_types import memberimplp, createSMember
+from genus_types import notp
 from s_combination import SCombination
 from s_empty import SEmpty
 from s_top import STop
+from utils import find_first
+from utils import uniquify
 
 
 class SOr(SCombination):
@@ -62,14 +68,12 @@ class SOr(SCombination):
         return b.subtypep(a)
 
     def dual_combination(self, td):
-        from genus_types import andp
         return andp(td)
 
     def dual_combinator(self, a, b):
         return [x for x in a if x in b]
 
     def combinator(self, a, b):
-        from utils import uniquify
         assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
         assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
         return uniquify(a + b)
@@ -78,7 +82,6 @@ class SOr(SCombination):
         return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
 
     def create_dual(self, tds):
-        from genus_types import createSAnd
         return createSAnd(tds)
 
     def typep(self, a):
@@ -101,15 +104,12 @@ class SOr(SCombination):
             return super().disjoint_down(t)
 
     def conversionD1(self):
+        from s_not import SNot
         # Dual of SAnd.conversionA1
 
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
         # == > SNot(SMember(42, 43, 44))
         # find all x in {42, 43, 44, "a","b"} which are not self.typep(x)
-        from utils import find_first
-        from genus_types import memberimplp, createSMember, notp
-        from s_not import SNot
-
         not_member = find_first(lambda td: notp(td) and memberimplp(td.s), self.tds, None)
         if not_member is None:
             return self
@@ -119,7 +119,6 @@ class SOr(SCombination):
     def conversionD3(self):
         # dual of  disjoint pair
         # SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
-        from genus_types import notp
 
         nots = [td.s for td in self.tds if notp(td)]
 

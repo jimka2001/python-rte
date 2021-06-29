@@ -19,7 +19,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+from collections import OrderedDict
 from collections.abc import Iterable
+
+from genus_types import cmp_type_designators
 
 
 def generate_lazy_val(func):
@@ -73,13 +76,11 @@ def uniquify(seq):
     If duplicates occur in the given list, then left-most occurrences
     are removed, so that the right-most occurrence remains.
     E.g., uniquify([1,2,3,2]) --> [1,3,2]"""
-    from collections import OrderedDict
 
     return list(reversed(list(OrderedDict.fromkeys(reversed(seq)))))
 
 
 def flat_map(f, xs):
-    from collections.abc import Iterable
     assert isinstance(xs, Iterable), f"expecting Iterable not {xs}"
 
     return [y for z in xs for y in f(z)]
@@ -117,8 +118,6 @@ def find_first(pred, xs, default=None):
 
 
 def compare_sequence(xs, ys):
-    from genus_types import cmp_type_designators
-
     def comp(i):
         if i >= len(xs) and i >= len(ys):
             return 0
