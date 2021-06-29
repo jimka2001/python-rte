@@ -30,8 +30,8 @@ subtypep 1
 cmp_to_same_class_obj 3
 """
 
-from s_member import SMemberImpl
-from simple_type_d import SimpleTypeD, TerminalType
+from genus.s_member import SMemberImpl
+from genus.simple_type_d import SimpleTypeD, TerminalType
 
 
 class SEql(SMemberImpl, TerminalType):

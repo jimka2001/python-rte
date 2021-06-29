@@ -36,16 +36,16 @@ canonicalize_once 3
 compute_cnf 3
 """
 
-from genus_types import andp
-from genus_types import createSAnd
-from genus_types import createSOr
-from genus_types import memberimplp, createSMember
-from genus_types import notp
-from s_combination import SCombination
-from s_empty import SEmpty
-from s_top import STop
-from utils import find_first
-from utils import uniquify
+from genus.genus_types import andp
+from genus.genus_types import createSAnd
+from genus.genus_types import createSOr
+from genus.genus_types import memberimplp, createSMember
+from genus.genus_types import notp
+from genus.s_combination import SCombination
+from genus.s_empty import SEmpty
+from genus.s_top import STop
+from genus.utils import find_first
+from genus.utils import uniquify
 
 
 class SOr(SCombination):
@@ -104,7 +104,7 @@ class SOr(SCombination):
             return super().disjoint_down(t)
 
     def conversionD1(self):
-        from s_not import SNot
+        from genus.s_not import SNot
         # Dual of SAnd.conversionA1
 
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)

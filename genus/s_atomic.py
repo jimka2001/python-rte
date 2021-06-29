@@ -19,14 +19,14 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from s_and import SAnd
-from s_custom import SCustom
-from s_empty import SEmptyImpl, SEmpty
-from s_member import SMemberImpl
-from s_or import SOr
-from s_top import STopImpl
-from simple_type_d import SimpleTypeD, TerminalType
-from utils import get_all_subclasses
+from genus.s_and import SAnd
+from genus.s_custom import SCustom
+from genus.s_empty import SEmptyImpl, SEmpty
+from genus.s_member import SMemberImpl
+from genus.s_or import SOr
+from genus.s_top import STopImpl
+from genus.simple_type_d import SimpleTypeD, TerminalType
+from genus.utils import get_all_subclasses
 
 """
 [0-3] Advancement tracker
@@ -118,7 +118,7 @@ class SAtomic(SimpleTypeD, TerminalType):
             return super().disjoint_down(t)
 
     def subtypep_down(self, s):
-        from s_not import SNot
+        from genus.s_not import SNot
         if self.inhabited() is False:
             return True
         elif isinstance(s, SEmptyImpl):

@@ -36,18 +36,18 @@ canonicalize_once 3
 compute_dnf 3
 """
 
-from genus_types import NormalForm, createSAnd
-from genus_types import atomicp
-from genus_types import createSOr
-from genus_types import memberimplp, createSMember
-from genus_types import orp
-from s_combination import SCombination
-from s_empty import SEmpty
-from s_top import STop
-from simple_type_d import SimpleTypeD
-from utils import find_first
-from utils import generate_lazy_val
-from utils import uniquify
+from genus.genus_types import NormalForm, createSAnd
+from genus.genus_types import atomicp
+from genus.genus_types import createSOr
+from genus.genus_types import memberimplp, createSMember
+from genus.genus_types import orp
+from genus.s_combination import SCombination
+from genus.s_empty import SEmpty
+from genus.s_top import STop
+from genus.simple_type_d import SimpleTypeD
+from genus.utils import find_first
+from genus.utils import generate_lazy_val
+from genus.utils import uniquify
 
 
 # from utils import CallStack

@@ -19,10 +19,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from s_atomic import SAtomic
-from s_empty import SEmpty
-from s_top import STop
-from simple_type_d import SimpleTypeD
+from genus.s_atomic import SAtomic
+from genus.s_empty import SEmpty
+from genus.s_top import STop
+from genus.simple_type_d import SimpleTypeD
 
 """
 [0-3] Advancement tracker
@@ -61,7 +61,7 @@ class SNot(SimpleTypeD):
 		return not self.s.typep(a)
 
 	def inhabited_down(self):
-		from genus_types import topp, emptyp, memberp, eqlp, atomicp, notp
+		from genus.genus_types import topp, emptyp, memberp, eqlp, atomicp, notp
 		if topp(self.s):
 			return False
 		elif emptyp(self.s):
@@ -90,8 +90,8 @@ class SNot(SimpleTypeD):
 			return super().disjoint_down(t)
 
 	def subtypep_down(self, t):
-		from utils import generate_lazy_val
-		from genus_types import notp, atomicp
+		from genus.utils import generate_lazy_val
+		from genus.genus_types import notp, atomicp
 		# SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
 		#    however b.subtypep(a) might return None
 		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
@@ -119,7 +119,7 @@ class SNot(SimpleTypeD):
 			return super().subtypep_down(t)
 
 	def canonicalize_once(self, nf=None):
-		from genus_types import notp, topp, emptyp
+		from genus.genus_types import notp, topp, emptyp
 		if notp(self.s):
 			return self.s.s.canonicalize_once(nf)
 		elif topp(self.s):
@@ -135,7 +135,7 @@ class SNot(SimpleTypeD):
 		#
 		# SNot(SOr(x1, x2, x3))
 		# --> SAnd(SNot(x1), SNot(x2), SNot(x3))
-		from genus_types import orp, andp, createSOr, createSAnd
+		from genus.genus_types import orp, andp, createSOr, createSAnd
 		if andp(self.s):
 			return createSOr([SNot(td) for td in self.s.tds])
 		elif orp(self.s):
@@ -149,7 +149,7 @@ class SNot(SimpleTypeD):
 		return self.compute_dnf()
 
 	def cmp_to_same_class_obj(self, td):
-		from genus_types import cmp_type_designators
+		from genus.genus_types import cmp_type_designators
 		if type(self) != type(td):
 			return super().cmp_to_same_class_obj(td)
 		elif self == td:

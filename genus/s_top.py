@@ -19,8 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from s_empty import SEmptyImpl
-from simple_type_d import SimpleTypeD, TerminalType
+from genus.s_empty import SEmptyImpl
+from genus.simple_type_d import SimpleTypeD, TerminalType
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
 __str__ 1
@@ -58,7 +58,7 @@ class STopImpl(SimpleTypeD, TerminalType):
         return type(t) is SEmptyImpl
 
     def subtypep_down(self, t):
-        from s_not import SNot
+        from genus.s_not import SNot
         inh = SNot(t).inhabited()
         if inh is None:
             return None

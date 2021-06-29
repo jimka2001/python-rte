@@ -22,16 +22,16 @@
 
 import os
 
-from s_not import SNot
-from s_or import SOr
-from s_top import STop
-from s_empty import SEmpty
-from simple_type_d import SimpleTypeD
-from s_atomic import SAtomic
-from s_custom import SCustom
-from s_and import SAnd
-from s_eql import SEql
-from s_member import SMember
+from genus.s_not import SNot
+from genus.s_or import SOr
+from genus.s_top import STop
+from genus.s_empty import SEmpty
+from genus.simple_type_d import SimpleTypeD
+from genus.s_atomic import SAtomic
+from genus.s_custom import SCustom
+from genus.s_and import SAnd
+from genus.s_eql import SEql
+from genus.s_member import SMember
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -45,7 +45,7 @@ def t_verboseonlyprint(s):
 
 def t_atomic():
     def x():
-        from depth_generator import TestA
+        from genus.depth_generator import TestA
         return TestA
 
     def y():
@@ -60,13 +60,13 @@ def t_atomic():
 
 
 def t_fixed_point():
-    from utils import fixed_point
+    from genus.utils import fixed_point
     assert fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0
     assert fixed_point(0, (lambda x: x // 2), (lambda x, y: x == y)) == 0
 
 
 def t_STop():
-    from s_top import STopImpl
+    from genus.s_top import STopImpl
 
     # STop has to be unique
     assert id(STop) == id(STopImpl())
@@ -75,7 +75,7 @@ def t_STop():
     # str(a) has to be "STop"
     assert (str(STop) == "STop")
 
-    from depth_generator import test_values
+    from genus.depth_generator import test_values
     for x in test_values:
         assert (STop.typep(x))
 
@@ -117,7 +117,7 @@ def t_scustom2():
 
 
 def t_sand1():
-    from genus_types import createSAnd
+    from genus.genus_types import createSAnd
     quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
@@ -141,7 +141,7 @@ def t_sand1():
 
 
 def t_sand2():
-    from genus_types import createSAnd
+    from genus.genus_types import createSAnd
     quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
     triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
@@ -165,7 +165,7 @@ def t_sand2():
 
 
 def t_sor():
-    from genus_types import createSOr
+    from genus.genus_types import createSOr
     quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
     triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
 
@@ -252,7 +252,7 @@ def t_snot():
 
 
 def t_SimpleTypeD():
-    from utils import fixed_point
+    from genus.utils import fixed_point
 
     # ensuring SimpleTypeD is abstract
     pred = True
@@ -318,7 +318,7 @@ def t_SimpleTypeD():
 
 
 def t_STop2():
-    from s_top import STopImpl
+    from genus.s_top import STopImpl
     # STop has to be unique
     assert id(STop) == id(STopImpl())
     assert STop is STopImpl()
@@ -353,8 +353,8 @@ def t_STop2():
 
 
 def t_SEmpty():
-    from s_empty import SEmptyImpl
-    from depth_generator import test_values
+    from genus.s_empty import SEmptyImpl
+    from genus.depth_generator import test_values
 
     # SEmpty has to be unique
     assert id(SEmpty) == id(SEmptyImpl())
@@ -382,7 +382,7 @@ def t_SEmpty():
 
 
 def t_discovered_case_297():
-    from depth_generator import TestA, TestB
+    from genus.depth_generator import TestA, TestB
 
     even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
     b = SAtomic(TestB)
@@ -406,7 +406,7 @@ def t_discovered_case_297():
 
 
 def t_discovered_case_240():
-    from depth_generator import Test2, TestA
+    from genus.depth_generator import Test2, TestA
 
     td1 = SAnd(SAtomic(Test2), SAtomic(TestA))
     td2 = SAnd(SAtomic(int), SAtomic(float))
@@ -422,7 +422,7 @@ def t_discovered_case_240():
 
 
 def t_subtypep1():
-    from depth_generator import random_type_designator
+    from genus.depth_generator import random_type_designator
     for depth in range(0, 3):
         for _ in range(num_random_tests):
             td1 = random_type_designator(depth)
@@ -442,8 +442,8 @@ def t_subtypep1():
 
 
 def t_subtypep2():
-    from depth_generator import random_type_designator
-    from genus_types import NormalForm
+    from genus.depth_generator import random_type_designator
+    from genus.genus_types import NormalForm
     for depth in range(0, 4):
         for _ in range(num_random_tests):
             td = random_type_designator(depth)
@@ -463,7 +463,7 @@ def t_subtypep2():
 
 
 def t_uniquify():
-    from utils import uniquify
+    from genus.utils import uniquify
     assert uniquify([]) == []
     assert uniquify([1]) == [1]
     assert uniquify([5, 4, 3, 2, 1]) == [5, 4, 3, 2, 1]
@@ -474,7 +474,7 @@ def t_uniquify():
 
 
 def t_lazy():
-    from utils import generate_lazy_val
+    from genus.utils import generate_lazy_val
 
     c = 0
 
@@ -543,8 +543,8 @@ def t_discovered_cases2():
 
 
 def t_membership():
-    from depth_generator import random_type_designator, test_values
-    from genus_types import NormalForm
+    from genus.depth_generator import random_type_designator, test_values
+    from genus.genus_types import NormalForm
     for depth in range(0, 4):
         for _ in range(num_random_tests):
             td = random_type_designator(depth)
@@ -564,8 +564,8 @@ def t_membership():
 
 
 def t_canonicalize_subtype():
-    from genus_types import NormalForm
-    from depth_generator import random_type_designator
+    from genus.genus_types import NormalForm
+    from genus.depth_generator import random_type_designator
     for depth in range(0, 4):
         for _ in range(num_random_tests):
             td = random_type_designator(depth)
@@ -815,7 +815,7 @@ def t_discovered_cases3():
 
 
 def t_depth_generator():
-    from depth_generator import depth_generator
+    from genus.depth_generator import depth_generator
     rand_lambda = depth_generator(2).rand_lambda_str_generator()
     for i in range(10):
         rand_lambda[0](i)
@@ -840,7 +840,7 @@ def t_canonicalize_cache():
     assert td.canonicalized_hash[None] == tdc
     assert tdc.canonicalized_hash[None] == tdc
 
-    from genus_types import NormalForm
+    from genus.genus_types import NormalForm
     tdc2 = td.canonicalize(NormalForm.DNF)
     assert td.canonicalized_hash[NormalForm.DNF] == tdc2
     assert tdc2.canonicalized_hash[NormalForm.DNF] == tdc2
@@ -851,9 +851,9 @@ def t_canonicalize_cache():
 
 
 def t_to_dnf2():
-    from depth_generator import random_type_designator
-    from genus_types import NormalForm, orp, andp, notp
-    from simple_type_d import TerminalType
+    from genus.depth_generator import random_type_designator
+    from genus.genus_types import NormalForm, orp, andp, notp
+    from genus.simple_type_d import TerminalType
 
     def termp(td):
         if isinstance(td, TerminalType):
@@ -884,9 +884,9 @@ def t_to_dnf2():
 
 
 def t_to_cnf2():
-    from depth_generator import random_type_designator
-    from genus_types import NormalForm, orp, andp, notp
-    from simple_type_d import TerminalType
+    from genus.depth_generator import random_type_designator
+    from genus.genus_types import NormalForm, orp, andp, notp
+    from genus.simple_type_d import TerminalType
 
     def termp(td):
         if isinstance(td, TerminalType):
@@ -923,7 +923,7 @@ def t_to_dnf():
     #          SAnd(x1,x2,  y2,  x3,x4),
     #          SAnd(x1,x2,  y3,  x3,x4),
     #     )
-    from genus_types import NormalForm
+    from genus.genus_types import NormalForm
 
     x1 = SEql("x1")
     x2 = SEql("x2")
@@ -949,7 +949,7 @@ def t_to_cnf():
     #          SOr(x1,x2,  y2,  x3,x4),
     #          SOr(x1,x2,  y3,  x3,x4),
     #     )
-    from genus_types import NormalForm
+    from genus.genus_types import NormalForm
     x1 = SEql("x1")
     x2 = SEql("x2")
     x3 = SEql("x3")
@@ -976,7 +976,7 @@ def t_discovered_cases_867():
 
 
 def t_compare_sequence():
-    from utils import compare_sequence
+    from genus.utils import compare_sequence
     assert compare_sequence([SEql(1)], [SEql(2)]) < 0
     assert compare_sequence([], []) == 0
     assert compare_sequence([SEql(1)], [SEql(1)]) == 0
@@ -989,7 +989,7 @@ def t_compare_sequence():
     assert compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0  # short list < long list
     assert compare_sequence([SEql(1)], [SEql(1), SEql(1)]) < 0
 
-    from genus_types import cmp_type_designators
+    from genus.genus_types import cmp_type_designators
     assert cmp_type_designators(SEql(1), SEql(2)) < 0
     assert cmp_type_designators(SEql(1), SEql(1)) == 0
     assert cmp_type_designators(SEql(2), SEql(1)) > 0

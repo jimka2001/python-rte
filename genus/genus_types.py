@@ -46,8 +46,8 @@ def cmp_type_designators(a, b):
 
 
 def createSAnd(tds):
-	from s_top import STop
-	from s_and import SAnd
+	from genus.s_top import STop
+	from genus.s_and import SAnd
 	if not tds:
 		return STop
 	elif len(tds) == 1:
@@ -57,8 +57,8 @@ def createSAnd(tds):
 
 
 def createSOr(tds):
-	from s_empty import SEmpty
-	from s_or import SOr
+	from genus.s_empty import SEmpty
+	from genus.s_or import SOr
 	if not tds:
 		return SEmpty
 	elif len(tds) == 1:
@@ -68,9 +68,9 @@ def createSOr(tds):
 
 
 def createSMember(items):
-	from s_empty import SEmpty
-	from s_member import SMember
-	from s_eql import SEql
+	from genus.s_empty import SEmpty
+	from genus.s_member import SMember
+	from genus.s_eql import SEql
 	if not items:
 		return SEmpty
 	elif len(items) == 1:
@@ -80,50 +80,50 @@ def createSMember(items):
 
 
 def orp(this):
-	from s_or import SOr
+	from genus.s_or import SOr
 	return isinstance(this, SOr)
 
 
 def andp(this):
-	from s_and import SAnd
+	from genus.s_and import SAnd
 	return isinstance(this, SAnd)
 
 
 def combop(this):
-	from s_combination import SCombination
+	from genus.s_combination import SCombination
 	return isinstance(this, SCombination)
 
 
 def notp(this):
-	from s_not import SNot
+	from genus.s_not import SNot
 	return isinstance(this, SNot)
 
 
 def atomicp(this):
-	from s_atomic import SAtomic
+	from genus.s_atomic import SAtomic
 	return isinstance(this, SAtomic)
 
 
 def topp(this):
-	from s_top import STopImpl
+	from genus.s_top import STopImpl
 	return isinstance(this, STopImpl)
 
 
 def emptyp(this):
-	from s_empty import SEmptyImpl
+	from genus.s_empty import SEmptyImpl
 	return isinstance(this, SEmptyImpl)
 
 
 def memberimplp(this):
-	from s_member import SMemberImpl
+	from genus.s_member import SMemberImpl
 	return isinstance(this, SMemberImpl)
 
 
 def memberp(this):
-	from s_member import SMember
+	from genus.s_member import SMember
 	return isinstance(this, SMember)
 
 
 def eqlp(this):
-	from s_eql import SEql
+	from genus.s_eql import SEql
 	return isinstance(this, SEql)

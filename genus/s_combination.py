@@ -22,18 +22,18 @@
 import functools
 from abc import abstractmethod
 
-from genus_types import andp, orp
-from genus_types import cmp_type_designators
-from genus_types import combop
-from genus_types import memberimplp, notp, createSMember
-from simple_type_d import SimpleTypeD
-from utils import compare_sequence
-from utils import find_first
-from utils import find_simplifier
-from utils import flat_map
-from utils import remove_element
-from utils import search_replace
-from utils import uniquify
+from genus.genus_types import andp, orp
+from genus.genus_types import cmp_type_designators
+from genus.genus_types import combop
+from genus.genus_types import memberimplp, notp, createSMember
+from genus.simple_type_d import SimpleTypeD
+from genus.utils import compare_sequence
+from genus.utils import find_first
+from genus.utils import find_simplifier
+from genus.utils import flat_map
+from genus.utils import remove_element
+from genus.utils import search_replace
+from genus.utils import uniquify
 
 """
 [0-3] Advancement tracker
@@ -120,7 +120,7 @@ class SCombination(SimpleTypeD):
             return self
 
     def conversion3(self):
-        from s_not import SNot
+        from genus.s_not import SNot
 
         # (and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
         # (or A ( not A)) --> STop, unit = SEmpty, zero = STop
@@ -220,7 +220,7 @@ class SCombination(SimpleTypeD):
             return self.create(keep)
 
     def conversion11(self):
-        from s_not import SNot
+        from genus.s_not import SNot
         # A + !A B -> A + B
         # A + !A BX + Y = (A + BX + Y)
         # A + ABX + Y = (A + Y)
@@ -274,7 +274,7 @@ class SCombination(SimpleTypeD):
             return self.create([f(td) for td in self.tds])
 
     def conversion13(self):
-        from s_not import SNot
+        from genus.s_not import SNot
         # multiple !member
         # SOr(x,!{-1, 1},!{1, 2, 3, 4})
         # --> SOr(x,!{1}) // intersection of non-member
@@ -327,7 +327,7 @@ class SCombination(SimpleTypeD):
             return self.create(uniquify([f(td) for td in self.tds]))
 
     def conversion15(self):
-        from s_not import SNot
+        from genus.s_not import SNot
         # SAnd(X, member1, not-member) --> SAnd(X,member2)
         # SOr(X, member, not-member1) --> SOr(X,not-member2)
         #
@@ -367,7 +367,7 @@ class SCombination(SimpleTypeD):
             return self.create(flat_map(f, self.tds))
 
     def conversion16(self):
-        from s_not import SNot
+        from genus.s_not import SNot
         # Now(after conversions 13, 14, and 15, there is at most one SMember(...) and
         # at most one SNot(SMember(...))
 
