@@ -55,6 +55,11 @@ class RteCase(unittest.TestCase):
     def test_singleton(self):
         self.assertEqual(Singleton(SEql(1)).operand, SEql(1))
 
+    def test_random(self):
+        for depth in range(5):
+            for r in range(1000):
+                random_rte(depth).__str__()
+
 
 if __name__ == '__main__':
     unittest.main()
