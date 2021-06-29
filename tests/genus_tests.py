@@ -125,19 +125,19 @@ def t_sand1():
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
 
-    assert (str(tri_n_quad) == "SAnd(triple?, quadruple?)")
-    assert (str(create_tri_n_quad) == "SAnd(triple?, quadruple?)")
+    assert str(tri_n_quad) == "SAnd(triple?, quadruple?)"
+    assert str(create_tri_n_quad) == "SAnd(triple?, quadruple?)"
 
-    assert (tri_n_quad.typep(12))
-    assert (create_tri_n_quad.typep(12))
-    assert (not tri_n_quad.typep(6))
-    assert (not create_tri_n_quad.typep(6))
-    assert (not tri_n_quad.typep(3))
-    assert (not create_tri_n_quad.typep(3))
-    assert (tri_n_quad.typep(0))
-    assert (create_tri_n_quad.typep(0))
-    assert (not tri_n_quad.typep("hello"))
-    assert (not create_tri_n_quad.typep("hello"))
+    assert tri_n_quad.typep(12)
+    assert create_tri_n_quad.typep(12)
+    assert not tri_n_quad.typep(6)
+    assert not create_tri_n_quad.typep(6)
+    assert not tri_n_quad.typep(3)
+    assert not create_tri_n_quad.typep(3)
+    assert tri_n_quad.typep(0)
+    assert create_tri_n_quad.typep(0)
+    assert not tri_n_quad.typep("hello")
+    assert not create_tri_n_quad.typep("hello")
 
 
 def t_sand2():
@@ -148,20 +148,20 @@ def t_sand2():
 
     tri_n_quad = SAnd(triple, quadruple)
     create_tri_n_quad = createSAnd([triple, quadruple])
-    assert (tri_n_quad.subtypep(STop))
-    assert (tri_n_quad.subtypep(triple))
+    assert tri_n_quad.subtypep(STop)
+    assert tri_n_quad.subtypep(triple)
 
-    assert (tri_n_quad.subtypep(quadruple))
+    assert tri_n_quad.subtypep(quadruple)
     assert tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5)))
 
-    assert (SAnd().unit() == STop)
-    assert (SAnd().zero() == SEmpty)
+    assert SAnd().unit() == STop
+    assert SAnd().zero() == SEmpty
 
-    assert (tri_n_quad.same_combination(create_tri_n_quad))
-    assert (tri_n_quad.same_combination(createSAnd([quadruple, triple])))
+    assert tri_n_quad.same_combination(create_tri_n_quad)
+    assert tri_n_quad.same_combination(createSAnd([quadruple, triple]))
 
-    assert (not tri_n_quad.same_combination(STop))
-    assert (not tri_n_quad.same_combination(createSAnd([])))
+    assert not tri_n_quad.same_combination(STop)
+    assert not tri_n_quad.same_combination(createSAnd([]))
 
 
 def t_sor():
@@ -243,12 +243,12 @@ def t_snot():
 
     assert SNot(SNot(pair)).canonicalize() == pair
 
-    assert (str(npair) == "SNot(pair?)")
+    assert str(npair) == "SNot(pair?)"
 
-    assert (npair.typep(5))
-    assert (npair.typep("hello"))
-    assert (not npair.typep(4))
-    assert (not npair.typep(0))
+    assert npair.typep(5)
+    assert npair.typep("hello")
+    assert not npair.typep(4)
+    assert not npair.typep(0)
 
 
 def t_SimpleTypeD():
@@ -291,12 +291,12 @@ def t_SimpleTypeD():
 
     # _inhabited_down is None to indicate that we actually don't know
     # whether it is as this is the generic version
-    assert (child.inhabited() is True)
+    assert child.inhabited() is True
 
     # this one is weird. How come we can't detect that it is the same set?
     # anyway, this is how the scala code seems to behave
     # as a reminder: True means yes, False means no, None means maybe
-    assert (child.disjoint(child) is False)
+    assert child.disjoint(child) is False
 
     # fixed_point is just a way to incrementally apply a function on a value
     # until another function deem the delta between two consecutive values to be negligible
@@ -306,13 +306,13 @@ def t_SimpleTypeD():
     def evaluator(x, y):
         return x == y
 
-    assert (fixed_point(5, increment, evaluator) == 5)
-    assert (fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
+    assert fixed_point(5, increment, evaluator) == 5
+    assert fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6
 
-    assert (child == child.canonicalize_once())
-    assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
+    assert child == child.canonicalize_once()
+    assert child == child.canonicalize() and child.canonicalized_hash == {None: child}
     # the second time is to make sure it isn't adding the same twice
-    assert (child == child.canonicalize() and child.canonicalized_hash == {None: child})
+    assert child == child.canonicalize() and child.canonicalized_hash == {None: child}
 
     assert child.cmp_to_same_class_obj(child) == 0
 
@@ -348,8 +348,8 @@ def t_STop2():
 
     # on the contrary, a is never a subtype of any type
     # since types are sets and top is the set that contains all sets
-    assert (STop.subtypep(SAtomic(object)) is not False)
-    assert (STop.subtypep(STop) is True)
+    assert STop.subtypep(SAtomic(object)) is not False
+    assert STop.subtypep(STop) is True
 
 
 def t_SEmpty():
@@ -357,7 +357,7 @@ def t_SEmpty():
     from depth_generator import test_values
 
     # SEmpty has to be unique
-    assert (id(SEmpty) == id(SEmptyImpl()))
+    assert id(SEmpty) == id(SEmptyImpl())
     assert SEmpty is SEmptyImpl()
 
     # str(a) has to be "Empty"
