@@ -27,3 +27,10 @@ class Combination (Rte):
         self.operands = list(operands)
         assert all(isinstance(operand, Rte) for operand in operands)
         super().__init__()
+
+    def __eq__(self, that):
+        return type(self) is type(that) and \
+               self.operands == that.operands
+
+    def __hash__(self):
+        return hash(self.operands)

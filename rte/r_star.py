@@ -30,3 +30,10 @@ class Star (Rte):
 
     def __str__(self):
         return "Star(" + str(self.operand) + ")"
+
+    def __eq__(self, that):
+        return type(self) is type(that) and \
+               self.operand == that.operand
+
+    def __hash__(self):
+        return hash(self.operand)
