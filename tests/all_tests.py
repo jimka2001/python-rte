@@ -252,7 +252,6 @@ def t_snot():
 
 
 def t_SimpleTypeD():
-    from simple_type_d import NormalForm
     from utils import fixed_point
 
     # ensuring SimpleTypeD is abstract
