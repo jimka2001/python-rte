@@ -20,19 +20,19 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import random
 import math
+import random
 
-from s_top import STop
-from s_empty import SEmpty
-from s_custom import SCustom
-from s_and import SAnd
-from s_or import SOr
-from s_not import SNot
-from s_member import SMember
-from s_eql import SEql
-from s_atomic import SAtomic
 from genus_types import createSAnd, createSOr
+from s_and import SAnd
+from s_atomic import SAtomic
+from s_custom import SCustom
+from s_empty import SEmpty
+from s_eql import SEql
+from s_member import SMember
+from s_not import SNot
+from s_or import SOr
+from s_top import STop
 
 
 class depth_generator(object):

@@ -19,8 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from simple_type_d import SimpleTypeD, TerminalType
 from s_top import STopImpl
+from simple_type_d import SimpleTypeD, TerminalType
 
 """
 [0-3] Advancement tracker

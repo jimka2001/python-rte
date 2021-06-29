@@ -20,8 +20,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from abc import abstractmethod
-from simple_type_d import SimpleTypeD
+
 from s_not import SNot
+from simple_type_d import SimpleTypeD
 from utils import find_simplifier
 
 """

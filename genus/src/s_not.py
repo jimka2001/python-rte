@@ -19,11 +19,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from simple_type_d import SimpleTypeD
 from s_atomic import SAtomic
-from s_top import STop
 from s_empty import SEmpty
-
+from s_top import STop
+from simple_type_d import SimpleTypeD
 
 """
 [0-3] Advancement tracker

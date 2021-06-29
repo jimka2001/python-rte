@@ -36,8 +36,8 @@ canonicalize_once 3
 compute_cnf 3
 """
 
-from s_combination import SCombination
 from genus_types import createSOr
+from s_combination import SCombination
 from s_empty import SEmpty
 from s_top import STop
 

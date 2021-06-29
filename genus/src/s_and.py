@@ -36,12 +36,13 @@ canonicalize_once 3
 compute_dnf 3
 """
 
-from s_top import STop
-from s_empty import SEmpty
-from s_combination import SCombination
-from utils import generate_lazy_val
 from genus_types import NormalForm, createSAnd
+from s_combination import SCombination
+from s_empty import SEmpty
+from s_top import STop
 from simple_type_d import SimpleTypeD
+from utils import generate_lazy_val
+
 
 # from utils import CallStack
 # subtypep_and_callstack = CallStack("subtypep.SAnd")

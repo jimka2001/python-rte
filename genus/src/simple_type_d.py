@@ -43,9 +43,11 @@ supertypep  1
 cmp_to_same_class_obj   3
 """
 
-from genus_types import NormalForm
 from abc import ABCMeta, abstractmethod
+
+from genus_types import NormalForm
 from utils import generate_lazy_val
+
 
 # from utils import CallStack
 # subtypep_callstack = CallStack("subtypep",trace=True)
