@@ -119,5 +119,7 @@
 
 * Converted tests to unit tests using unittest module
 
+* Implemented Maximal Disjoint Type Decomposition, mdtd
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
