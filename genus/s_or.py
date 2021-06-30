@@ -35,16 +35,8 @@ subtypep 0
 canonicalize_once 3
 compute_cnf 3
 """
-from genus.genus_types import andp
-from genus.genus_types import createSAnd
-from genus.genus_types import createSOr
-from genus.genus_types import memberimplp, createSMember
-from genus.genus_types import notp
-from genus.s_combination import SCombination
-from genus.s_empty import SEmpty
-from genus.s_top import STop
-from genus.utils import find_first
-from genus.utils import uniquify
+from genus import *
+
 
 
 class SOr(SCombination):

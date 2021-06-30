@@ -22,18 +22,7 @@
 
 import math
 import random
-
-from genus.genus_types import createSAnd, createSOr
-from genus.s_and import SAnd
-from genus.s_atomic import SAtomic
-from genus.s_custom import SCustom
-from genus.s_empty import SEmpty
-from genus.s_eql import SEql
-from genus.s_member import SMember
-from genus.s_not import SNot
-from genus.s_or import SOr
-from genus.s_top import STop
-
+from genus import *
 
 class depth_generator(object):
     """docstring for depth_generator"""

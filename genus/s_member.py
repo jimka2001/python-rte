@@ -19,7 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from genus.simple_type_d import SimpleTypeD, TerminalType
 
 """
 [0-3] Advancement tracker
@@ -34,6 +33,8 @@ cmp_to_same_class_obj 3
 
 <???> case class SMember </???>
 """
+
+from genus import *
 
 
 class SMemberImpl(SimpleTypeD):

@@ -19,10 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from genus.s_atomic import SAtomic
-from genus.s_empty import SEmpty
-from genus.s_top import STop
-from genus.simple_type_d import SimpleTypeD
+
 
 """
 [0-3] Advancement tracker
@@ -37,6 +34,7 @@ compute_dnf 0
 compute_cnf 1
 cmp_to_same_class_obj 3
 """
+from genus import *
 
 
 class SNot(SimpleTypeD):

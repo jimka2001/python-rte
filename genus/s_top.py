@@ -19,8 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from genus.s_empty import SEmptyImpl
-from genus.simple_type_d import SimpleTypeD, TerminalType
 
 """ test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
 __str__ 1
@@ -30,6 +28,7 @@ disjoint_down  1
 subtypep    1
 cmp_to_same_class_obj   3
 """
+from genus import *
 
 
 class STopImpl(SimpleTypeD, TerminalType):

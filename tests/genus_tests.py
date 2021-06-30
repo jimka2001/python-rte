@@ -23,19 +23,7 @@
 import os
 import unittest
 
-from genus.s_not import SNot
-from genus.s_or import SOr
-from genus.s_top import STop
-from genus.s_empty import SEmpty
-from genus.simple_type_d import SimpleTypeD
-from genus.s_atomic import SAtomic
-from genus.s_custom import SCustom
-from genus.s_and import SAnd
-from genus.s_eql import SEql
-from genus.s_member import SMember
-from genus.mdtd import mdtd
-from genus.depth_generator import random_type_designator, test_values
-from genus.genus_types import NormalForm
+from genus import *
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.

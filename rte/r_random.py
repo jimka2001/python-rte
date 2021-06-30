@@ -20,16 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import random
-
-from rte.r_sigma import Sigma
-from rte.r_epsilon import Epsilon
-from rte.r_emptyset import EmptySet
-from rte.r_cat import Cat
-from rte.r_and import And
-from rte.r_or import Or
-from rte.r_singleton import Singleton
-from rte.r_not import Not
-from genus.depth_generator import random_type_designator
+from rte import *
 
 
 leaf_rtes = [EmptySet,

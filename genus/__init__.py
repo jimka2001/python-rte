@@ -19,47 +19,30 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 1
-inhabited_down 1
-disjoint_down 1
-subtypep 1
-cmp_to_same_class_obj 3
-"""
-from genus import *
-
-
-
-class SEql(SMemberImpl, TerminalType):
-	"""The equal type, a type that is equal to a given object.
-	It has holds an "a" which is the object defining the type
-	"""
-	def __init__(self, a):
-		super(SEql, self).__init__(a)
-		self.a = a
-	
-	def __str__(self):
-		return "[= " + str(self.a) + "]"
-
-	def __eq__(self, that):
-		return type(self) is type(that) and \
-			self.a == that.a
-
-	def __hash__(self):
-		return hash(self.a)
-
-	def typep(self, b):
-		return self.a == b
-
-	def inhabited_down(self):
-		return True
-
-	def disjoint_down(self, t):
-		assert isinstance(t, SimpleTypeD)
-		return not t.typep(self.a)
-
-	def subtypep(self, t):
-		return t.typep(self.a)
+from .genus_types import NormalForm, createSAnd
+from .genus_types import NormalForm, orp, andp, topp, notp
+from .genus_types import cmp_type_designators
+from .genus_types import combop
+from .genus_types import createSAnd, createSOr
+from .genus_types import memberimplp, notp, createSMember, notp, orp, andp, atomicp
+from .s_and import SAnd
+from .s_atomic import SAtomic
+from .s_combination import SCombination
+from .s_custom import SCustom
+from .s_empty import SEmptyImpl, SEmpty
+from .s_eql import SEql
+from .s_member import SMemberImpl, SMember
+from .s_not import SNot
+from .s_or import SOr
+from .s_top import STopImpl, STop
+from .simple_type_d import SimpleTypeD, TerminalType
+from .utils import compare_sequence
+from .utils import find_simplifier, find_first
+from .utils import fixed_point, generate_lazy_val
+from .utils import flat_map
+from .utils import flat_map, generate_lazy_val
+from .utils import generate_lazy_val
+from .utils import get_all_subclasses
+from .utils import remove_element
+from .utils import search_replace
+from .utils import uniquify

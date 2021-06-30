@@ -22,18 +22,7 @@
 import functools
 from abc import abstractmethod
 
-from genus.genus_types import andp, orp
-from genus.genus_types import cmp_type_designators
-from genus.genus_types import combop
-from genus.genus_types import memberimplp, notp, createSMember
-from genus.simple_type_d import SimpleTypeD
-from genus.utils import compare_sequence
-from genus.utils import find_first
-from genus.utils import find_simplifier
-from genus.utils import flat_map
-from genus.utils import remove_element
-from genus.utils import search_replace
-from genus.utils import uniquify
+
 
 """
 [0-3] Advancement tracker
@@ -47,6 +36,8 @@ same_combination 3
 canonicalize_once 3
 cmp_to_same_class 3
 """
+
+from genus import *
 
 
 class SCombination(SimpleTypeD):

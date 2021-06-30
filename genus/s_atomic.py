@@ -19,15 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from genus.s_and import SAnd
-from genus.s_custom import SCustom
-from genus.s_empty import SEmptyImpl, SEmpty
-from genus.s_member import SMemberImpl
-from genus.s_or import SOr
-from genus.s_top import STopImpl
-from genus.simple_type_d import SimpleTypeD, TerminalType
-from genus.utils import get_all_subclasses
-
 """
 [0-3] Advancement tracker
 __init__ 1
@@ -39,6 +30,8 @@ subtypep 0
 canonicalize_once 1 
 cmp_to_same_class_obj 3
 """
+
+from genus import *
 
 
 class SAtomic(SimpleTypeD, TerminalType):

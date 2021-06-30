@@ -19,47 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 1
-inhabited_down 1
-disjoint_down 1
-subtypep 1
-cmp_to_same_class_obj 3
-"""
-from genus import *
-
-
-
-class SEql(SMemberImpl, TerminalType):
-	"""The equal type, a type that is equal to a given object.
-	It has holds an "a" which is the object defining the type
-	"""
-	def __init__(self, a):
-		super(SEql, self).__init__(a)
-		self.a = a
-	
-	def __str__(self):
-		return "[= " + str(self.a) + "]"
-
-	def __eq__(self, that):
-		return type(self) is type(that) and \
-			self.a == that.a
-
-	def __hash__(self):
-		return hash(self.a)
-
-	def typep(self, b):
-		return self.a == b
-
-	def inhabited_down(self):
-		return True
-
-	def disjoint_down(self, t):
-		assert isinstance(t, SimpleTypeD)
-		return not t.typep(self.a)
-
-	def subtypep(self, t):
-		return t.typep(self.a)
+from .r_and import And, createAnd
+from .r_cat import Cat, createCat
+from .r_combination import Combination
+from .r_emptyset import EmptySet, EmptySetImpl
+from .r_epsilon import Epsilon, EpsilonImpl
+from .r_not import Not
+from .r_or import Or, createOr
+from .r_rte import Rte
+from .r_random import leaf_rtes, random_rte
+from .r_sigma import Sigma, SigmaImpl
+from .r_singleton import Singleton
+from .r_star import Star

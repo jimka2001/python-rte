@@ -44,9 +44,8 @@ cmp_to_same_class_obj   3
 """
 
 from abc import ABCMeta, abstractmethod
+from genus import *
 
-from genus.genus_types import NormalForm, orp, andp, topp, notp
-from genus.utils import fixed_point, generate_lazy_val
 
 
 # from utils import CallStack

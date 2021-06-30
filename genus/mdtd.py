@@ -19,10 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from genus.utils import flat_map, generate_lazy_val
-from genus.s_and import SAnd
-from genus.s_not import SNot
-from genus.s_top import STop
+from genus import *
 
 
 def mdtd(tds):

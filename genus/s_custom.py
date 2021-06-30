@@ -31,7 +31,7 @@ cmp_to_same_class_obj 3
 apply 1
 """
 
-from genus.simple_type_d import SimpleTypeD, TerminalType
+from genus import *
 
 
 class SCustom(SimpleTypeD, TerminalType):

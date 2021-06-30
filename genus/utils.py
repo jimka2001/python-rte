@@ -21,8 +21,7 @@
 
 from collections import OrderedDict
 from collections.abc import Iterable
-
-from genus.genus_types import cmp_type_designators
+from genus import *
 
 
 def generate_lazy_val(func):
