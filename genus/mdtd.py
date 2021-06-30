@@ -22,29 +22,30 @@
 from genus.utils import flat_map, generate_lazy_val
 from genus.s_and import SAnd
 from genus.s_not import SNot
-from genus.s_empty import SEmpty
+from genus.s_top import STop
 
 
 def mdtd(tds):
-    assert tds, "mdtd does not support empty list as input"
-    decomposition = [tds[0]]
-    for td in tds[1:]:
+    # This algorithm doesn't exactly compute the maximal disjoint type decomposition
+    # of its input rather it computes the mdtd of tds unioned with STop, which is
+    # what is actually needed at the client side.
+    tds = [td for td in tds if td.inhabited() is not False]
+    decomposition = [STop]
+    for td in tds:
+        n = SNot(td).canonicalize()
+
         def f(td1):
-            n = SNot(td).canonicalize()
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
             b = generate_lazy_val(lambda: SAnd(n, td1).canonicalize())
             if td.disjoint(td1) is True:
                 return [td1]
             elif n.disjoint(td1) is True:
                 return [td1]
-            elif a().inhabited is False:
+            elif a().inhabited() is False:
                 return [td1]
-            elif b().inhabited is False:
+            elif b().inhabited() is False:
                 return [td1]
             else:
                 return [a(), b()]
         decomposition = flat_map(f, decomposition)
-    if decomposition:
-        return decomposition
-    else:
-        return [SEmpty]
+    return decomposition

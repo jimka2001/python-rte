@@ -35,8 +35,7 @@ from genus.s_eql import SEql
 from genus.s_member import SMember
 from genus.mdtd import mdtd
 from genus.depth_generator import random_type_designator, test_values
-from genus.genus_types import createSOr
-
+from genus.genus_types import NormalForm
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -373,6 +372,18 @@ class GenusCase(unittest.TestCase):
         assert SEmpty.subtypep(SAtomic(object)) is True
         assert SEmpty.subtypep(SEmpty) is True
 
+    def test_discovered_case_375(self):
+        from genus.depth_generator import TestB, Test1
+        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        td1 = SAnd(SNot(SAtomic(TestB)),
+                   SNot(SAtomic(int)),
+                   SOr(SAtomic(Test1), even))
+        td2 = SAnd(SNot(SAnd(SNot(SAtomic(TestB)),
+                             SOr(SAtomic(Test1), even))),
+                   SNot(SAtomic(int)))
+        self.assertIs(SAnd(td1,td2).canonicalize(NormalForm.DNF), SEmpty)
+        self.assertIsNot(td1.disjoint(td2), False, f"td1.disjoint(td2) = {td1.disjoint(td2)}")
+
     def test_discovered_case_297(self):
         from genus.depth_generator import TestA, TestB
 
@@ -432,7 +443,6 @@ class GenusCase(unittest.TestCase):
 
     def test_subtypep2(self):
         from genus.depth_generator import random_type_designator
-        from genus.genus_types import NormalForm
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -996,12 +1006,17 @@ class GenusCase(unittest.TestCase):
                     computed = mdtd(tds)
                     for i in range(len(computed)):
                         for j in range(i+1, len(computed)):
-                            self.assertTrue(computed[i].disjoint(computed[j]) is not True)
-                    td1 = createSOr(tds)
-                    td2 = createSOr(computed)
-                    for v in test_values:
-                        self.assertEqual(td1.typep(v),td2.typep(v),f"\n v={v}\n td1={td1}\n td2={td2}\n lhs={td1.typep(v)}\n rhs={td2.typep(v)}")
+                            self.assertTrue(computed[i].disjoint(computed[j]) is not False,
+                                            f"\n tds={tds}" +
+                                            f"\n mdtd={computed}" +
+                                            f"\n {computed[i]}.disjoint({computed[j]}) = {computed[i].disjoint(computed[j])}" +
+                                            f"\n intersection = {SAnd(computed[i],computed[j]).canonicalize(NormalForm.DNF)}")
 
+                    for v in test_values:
+                        containing = [td for td in computed if td.typep(v)]
+                        self.assertEqual(len(containing),1,
+                                         f"expecting exactly one partition to contain v={v}" +
+                                         f"\n tds={tds}\n mdtd={computed}\n containing={containing}")
 
 if __name__ == '__main__':
     unittest.main()
