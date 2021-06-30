@@ -118,18 +118,17 @@ class SAnd(SCombination):
 
     def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
-        inhabited_t = generate_lazy_val(lambda: t.inhabited())
-        inhabited_self = generate_lazy_val(lambda: self.inhabited())
 
         if any(t.disjoint(t2) is True for t2 in self.tds):
             return True
-        elif t in self.tds and inhabited_t() is True and inhabited_self() is True:
+        elif t in self.tds and t.inhabited() is True and self.inhabited() is True:
             return False
-        elif inhabited_t() \
-                and inhabited_self() \
-                and any(x.subtypep(t) is True
-                        or t.subtypep(x) is True
-                        for x in self.tds):
+        elif t.inhabited() is True \
+                and self.inhabited() is True \
+                 and   ( all(x.subtypep(t) is True for x in self.tds)
+                        or
+                        all(t.subtypep(x) is True for x in self.tds)):
+
             return False
         else:
             return super().disjoint_down(t)
