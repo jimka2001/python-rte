@@ -117,5 +117,7 @@
     caching versions of `compute_dnf` and `compute_cnf`.
   - The caching facility has been moved into `to_nf`.
 
+* Converted tests to unit tests using unittest module
+
 <!--  LocalWords:  PyCharm varargs Scala Refactored ary IDE
  -->
