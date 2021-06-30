@@ -19,14 +19,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from utils import flat_map, generate_lazy_val
-from s_and import SAnd
-from s_not import SNot
+from genus.utils import flat_map, generate_lazy_val
+from genus.s_and import SAnd
+from genus.s_not import SNot
+from genus.s_empty import SEmpty
 
 
 def mdtd(tds):
-    decomposition = []
-    for td in tds:
+    assert tds, "mdtd does not support empty list as input"
+    decomposition = [tds[0]]
+    for td in tds[1:]:
         def f(td1):
             n = SNot(td).canonicalize()
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
@@ -42,4 +44,7 @@ def mdtd(tds):
             else:
                 return [a(), b()]
         decomposition = flat_map(f, decomposition)
-    return decomposition
+    if decomposition:
+        return decomposition
+    else:
+        return [SEmpty]

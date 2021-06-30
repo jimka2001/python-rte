@@ -33,6 +33,10 @@ from genus.s_custom import SCustom
 from genus.s_and import SAnd
 from genus.s_eql import SEql
 from genus.s_member import SMember
+from genus.mdtd import mdtd
+from genus.depth_generator import random_type_designator, test_values
+from genus.genus_types import createSOr
+
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -1042,6 +1046,20 @@ class GenusCase(unittest.TestCase):
 # t_SimpleTypeD()
 # t_canonicalize_subtype()
 # t_membership()
+    def test_mdtd(self):
+        for depth in range(0, 4):
+            for length in range(1,5):
+                for _ in range(num_random_tests):
+                    tds = [random_type_designator(depth) for _ in range(length)]
+                    computed = mdtd(tds)
+                    for i in range(len(computed)):
+                        for j in range(i+1, len(computed)):
+                            self.assertTrue(computed[i].disjoint(computed[j]) is not True)
+                    td1 = createSOr(tds)
+                    td2 = createSOr(computed)
+                    for v in test_values:
+                        self.assertEqual(td1.typep(v),td2.typep(v),f"\n v={v}\n td1={td1}\n td2={td2}\n lhs={td1.typep(v)}\n rhs={td2.typep(v)}")
+
 
 if __name__ == '__main__':
     unittest.main()
