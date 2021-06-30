@@ -35,7 +35,6 @@ subtypep 0
 canonicalize_once 3
 compute_cnf 3
 """
-
 from genus.genus_types import andp
 from genus.genus_types import createSAnd
 from genus.genus_types import createSOr
