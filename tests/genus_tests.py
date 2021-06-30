@@ -226,13 +226,8 @@ class GenusCase(unittest.TestCase):
     def test_snot(self):
         pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
 
-        pred = True
-        try:
-            _b = SNot([])
-            pred = False
-            assert False
-        except Exception as _e:
-            assert pred
+        with self.assertRaises(Exception):
+            SNot([])
 
         npair = SNot(pair)
 
@@ -312,6 +307,24 @@ class GenusCase(unittest.TestCase):
         assert SEmpty.subtypep(SAtomic(object)) is True
         assert SEmpty.subtypep(SEmpty) is True
 
+    def test_disjoint_375(self):
+        for depth in range(0, 4):
+            for _ in range(num_random_tests):
+                td1 = random_type_designator(depth)
+                td2 = random_type_designator(depth)
+                if SAnd(td1,td2).canonicalize(NormalForm.DNF) is SEmpty:
+                    self.assertTrue(td1.disjoint(td2) is not False,
+                                    "found types with empty intersection but not disjoint" +
+                                    f"\ntd1={td1}" +
+                                    f"\ntd2={td2}")
+
+    def test_discovered_case_385(self):
+        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        td1 = STop
+        td2 = SAnd(SEmpty, even)
+        self.assertIs(SAnd(td1, td2).canonicalize(NormalForm.DNF), SEmpty)
+        self.assertIsNot(td1.disjoint(td2), False, f"td1.disjoint(td2) = {td1.disjoint(td2)}")
+
     def test_discovered_case_375(self):
         from genus.depth_generator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
@@ -321,8 +334,50 @@ class GenusCase(unittest.TestCase):
         td2 = SAnd(SNot(SAnd(SNot(SAtomic(TestB)),
                              SOr(SAtomic(Test1), even))),
                    SNot(SAtomic(int)))
+        # self.assertIs(SAnd(td1,td2).canonicalize(NormalForm.DNF), SEmpty)
+        self.assertIsNot(td1.disjoint_down(td2),False)
+        self.assertIsNot(td1.disjoint(td2), False,
+                         f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
+
+    def test_discovered_case_375b(self):
+        from genus.depth_generator import TestB, Test1
+        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        td1 = SAnd(SNot(SAtomic(TestB)),
+                   SNot(SAtomic(int)),
+                   SOr(SAtomic(Test1), even)).canonicalize()
+        td2 = SAnd(SNot(SAnd(SNot(SAtomic(TestB)),
+                             SOr(SAtomic(Test1), even))),
+                   SNot(SAtomic(int))).canonicalize()
         self.assertIs(SAnd(td1,td2).canonicalize(NormalForm.DNF), SEmpty)
-        self.assertIsNot(td1.disjoint(td2), False, f"td1.disjoint(td2) = {td1.disjoint(td2)}")
+        self.assertIsNot(td1.disjoint(td2), False,
+                         f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
+
+    def test_discovered_case_375c(self):
+        from genus.depth_generator import TestB, Test1
+        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        td1 = SAnd(SNot(SAtomic(TestB)),
+                   SNot(SAtomic(int)),
+                   SOr(SAtomic(Test1), even)).canonicalize(NormalForm.DNF)
+        td2 = SAnd(SNot(SAnd(SNot(SAtomic(TestB)),
+                             SOr(SAtomic(Test1), even))),
+                   SNot(SAtomic(int))).canonicalize(NormalForm.DNF)
+        self.assertIs(SAnd(td1,td2).canonicalize(NormalForm.DNF), SEmpty)
+        self.assertIsNot(td1.disjoint(td2), False,
+                         f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
+
+    def test_discovered_case_375d(self):
+        from genus.depth_generator import TestB, Test1
+        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        td1 = SAnd(SNot(SAtomic(TestB)),
+                   SNot(SAtomic(int)),
+                   SOr(SAtomic(Test1), even)).canonicalize(NormalForm.CNF)
+        td2 = SAnd(SNot(SAnd(SNot(SAtomic(TestB)),
+                             SOr(SAtomic(Test1), even))),
+                   SNot(SAtomic(int))).canonicalize(NormalForm.CNF)
+        # self.assertIs(SAnd(td1, td2).canonicalize(NormalForm.DNF), SEmpty)
+        print("-----------------------")
+        self.assertIsNot(td1.disjoint(td2), False,
+                         f"\n td1={td1}\n td2={td2}\n td1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_297(self):
         from genus.depth_generator import TestA, TestB
