@@ -58,13 +58,10 @@ from genus.utils import fixed_point, generate_lazy_val
 # is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
     """This class is just here to emulate the TerminalType trait in Scala"""
-    @abstractmethod
-    def __init__(self):
-        super().__init__()
+    pass
 
-
-class SimpleTypeD(metaclass=ABCMeta):
-    """SimpleTypeD is the abstract class that mothers all of the 
+class SimpleTypeD():
+    """SimpleTypeD is the super class of all of the
     representations of type in Genus"""
     def __init__(self):
         self.subtypep_cache = {}
@@ -77,7 +74,7 @@ class SimpleTypeD(metaclass=ABCMeta):
 
     @abstractmethod
     def typep(self, a):
-        """Returns whether a given object belongs to this type.
+        """Returns whether a given object belongs to this designated type.
         It is a set membership test.
             @param a the object we want to check the type
             @return a Boolean which is true is a is of this type"""
@@ -86,7 +83,6 @@ class SimpleTypeD(metaclass=ABCMeta):
         assert isinstance(td, SimpleTypeD)
         if td in self.disjoint_cache:
             return self.disjoint_cache[td]
-
         # these somewhat cryptic names were chosen to match the original Scala code
         d1 = generate_lazy_val(lambda: self.disjoint_down(td))
         d2 = generate_lazy_val(lambda: td.disjoint_down(self))

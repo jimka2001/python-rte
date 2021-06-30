@@ -55,7 +55,10 @@ class STopImpl(SimpleTypeD, TerminalType):
 
     def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
-        return type(t) is SEmptyImpl
+        if t.inhabited() is None:
+            return None
+        else:
+            return not t.inhabited()
 
     def subtypep_down(self, t):
         from genus.s_not import SNot
