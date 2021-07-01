@@ -24,7 +24,8 @@ import math
 import random
 from pyrte.genus import *
 
-class depth_generator(object):
+
+class depth_generator():
     """docstring for depth_generator"""
 
     depth_adders = ["SNot", "SAnd", "SOr"]
