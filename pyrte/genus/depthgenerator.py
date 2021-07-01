@@ -25,7 +25,7 @@ import random
 from pyrte.genus import *
 
 
-class depth_generator():
+class DepthGenerator:
     """docstring for depth_generator"""
 
     depth_adders = ["SNot", "SAnd", "SOr"]
@@ -34,7 +34,7 @@ class depth_generator():
     def __init__(self, k):
         if k < 1:
             raise ValueError("Depth has to be of at least 1")
-        super(depth_generator, self).__init__()
+        super(DepthGenerator, self).__init__()
         self.k = k
 
     def rand_lambda_str_generator(self):

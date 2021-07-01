@@ -38,7 +38,7 @@ def t_verboseonlyprint(s):
 class GenusCase(unittest.TestCase):
     def test_atomic(self):
         def x():
-            from pyrte.genus.depth_generator import TestA
+            from pyrte.genus.depthgenerator import TestA
             return TestA
 
         def y():
@@ -66,7 +66,7 @@ class GenusCase(unittest.TestCase):
         # str(a) has to be "STop"
         assert (str(STop) == "STop")
 
-        from pyrte.genus.depth_generator import test_values
+        from pyrte.genus.depthgenerator import test_values
         for x in test_values:
             assert (STop.typep(x))
 
@@ -269,7 +269,7 @@ class GenusCase(unittest.TestCase):
 
     def test_SEmpty(self):
         from pyrte.genus import SEmptyImpl
-        from pyrte.genus.depth_generator import test_values
+        from pyrte.genus.depthgenerator import test_values
 
         # SEmpty has to be unique
         assert id(SEmpty) == id(SEmptyImpl())
@@ -314,7 +314,7 @@ class GenusCase(unittest.TestCase):
         self.assertIsNot(td1.disjoint(td2), False, f"td1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375(self):
-        from pyrte.genus.depth_generator import TestB, Test1
+        from pyrte.genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -328,7 +328,7 @@ class GenusCase(unittest.TestCase):
                          f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375b(self):
-        from pyrte.genus.depth_generator import TestB, Test1
+        from pyrte.genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -341,7 +341,7 @@ class GenusCase(unittest.TestCase):
                          f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375c(self):
-        from pyrte.genus.depth_generator import TestB, Test1
+        from pyrte.genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -354,7 +354,7 @@ class GenusCase(unittest.TestCase):
                          f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375d(self):
-        from pyrte.genus.depth_generator import TestB, Test1
+        from pyrte.genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -368,7 +368,7 @@ class GenusCase(unittest.TestCase):
                          f"\n td1={td1}\n td2={td2}\n td1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_297(self):
-        from pyrte.genus.depth_generator import TestA, TestB
+        from pyrte.genus.depthgenerator import TestA, TestB
 
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         b = SAtomic(TestB)
@@ -391,7 +391,7 @@ class GenusCase(unittest.TestCase):
                       SAnd(SAtomic(int), even)))).inhabited()
 
     def test_discovered_case_240(self):
-        from pyrte.genus.depth_generator import Test2, TestA
+        from pyrte.genus.depthgenerator import Test2, TestA
 
         td1 = SAnd(SAtomic(Test2), SAtomic(TestA))
         td2 = SAnd(SAtomic(int), SAtomic(float))
@@ -406,7 +406,7 @@ class GenusCase(unittest.TestCase):
             f"td1={td1}\ntd2={td2} returned {s}"
 
     def test_subtypep1(self):
-        from pyrte.genus.depth_generator import random_type_designator
+        from pyrte.genus.depthgenerator import random_type_designator
         for depth in range(0, 3):
             for _ in range(num_random_tests):
                 td1 = random_type_designator(depth)
@@ -425,7 +425,7 @@ class GenusCase(unittest.TestCase):
                 assert SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False
 
     def test_subtypep2(self):
-        from pyrte.genus.depth_generator import random_type_designator
+        from pyrte.genus.depthgenerator import random_type_designator
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -517,7 +517,7 @@ class GenusCase(unittest.TestCase):
         assert tdc != SAtomic(int)
 
     def test_membership(self):
-        from pyrte.genus.depth_generator import random_type_designator, test_values
+        from pyrte.genus.depthgenerator import random_type_designator, test_values
         from pyrte.genus import NormalForm
         for depth in range(0, 4):
             for _ in range(num_random_tests):
@@ -538,7 +538,7 @@ class GenusCase(unittest.TestCase):
 
     def test_canonicalize_subtype(self):
         from pyrte.genus import NormalForm
-        from pyrte.genus.depth_generator import random_type_designator
+        from pyrte.genus.depthgenerator import random_type_designator
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -768,11 +768,11 @@ class GenusCase(unittest.TestCase):
         assert SOr(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SNot(SAtomic(Test1))
 
     def test_depth_generator(self):
-        from pyrte.genus.depth_generator import depth_generator
-        rand_lambda = depth_generator(2).rand_lambda_str_generator()
+        from pyrte.genus.depthgenerator import DepthGenerator
+        rand_lambda = DepthGenerator(2).rand_lambda_str_generator()
         for i in range(10):
             rand_lambda[0](i)
-        depth_generator(5).generate_tree()
+        DepthGenerator(5).generate_tree()
 
     def test_discovered_cases4(self):
         assert SNot(SEmpty).canonicalize() == STop
@@ -801,7 +801,7 @@ class GenusCase(unittest.TestCase):
         assert tdc3.canonicalized_hash[NormalForm.CNF] == tdc3
 
     def test_to_dnf2(self):
-        from pyrte.genus.depth_generator import random_type_designator
+        from pyrte.genus.depthgenerator import random_type_designator
         from pyrte.genus import NormalForm, orp, andp, notp
         from pyrte.genus import TerminalType
 
@@ -833,7 +833,7 @@ class GenusCase(unittest.TestCase):
                 assert dnfp(dnf), f"expecting DNF, got {dnf}"
 
     def test_to_cnf2(self):
-        from pyrte.genus.depth_generator import random_type_designator
+        from pyrte.genus.depthgenerator import random_type_designator
         from pyrte.genus import NormalForm, orp, andp, notp
         from pyrte.genus import TerminalType
 
