@@ -137,7 +137,6 @@ class SimpleTypeD():
         from genus.s_or import orp
         from genus.s_and import andp
         from genus.s_top import topp
-        from genus.s_not import notp
 
         assert isinstance(t, SimpleTypeD)
         if t in self.subtypep_cache:
