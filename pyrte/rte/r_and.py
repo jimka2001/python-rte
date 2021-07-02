@@ -27,6 +27,9 @@ class And (Combination):
     def __str__(self):
         return "And(" + ", ".join([str(td) for td in self.operands]) + ")"
 
+    def nullable(self):
+        return all(r.nullable() for r in self.operands)
+
 
 def createAnd(operands):
     from rte.r_star import Star

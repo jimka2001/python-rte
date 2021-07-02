@@ -37,5 +37,8 @@ class EmptySetImpl (Rte):
     def first_types(self):
         return {}
 
+    def nullable(self):
+        return False
+
 
 EmptySet = EmptySetImpl()

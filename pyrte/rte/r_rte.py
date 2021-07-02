@@ -26,3 +26,7 @@ class Rte:
     def first_types(self):
         {}
 
+    def nullable(self):
+        raise Exception(f"nullable not implemented for {self} of type {type(self)}")
+
+

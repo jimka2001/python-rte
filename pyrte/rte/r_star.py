@@ -56,3 +56,6 @@ class Star(Rte):
 
     def first_types(self):
         return self.operand.first_types()
+
+    def nullable(self):
+        return True

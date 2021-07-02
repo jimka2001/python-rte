@@ -42,3 +42,6 @@ class Singleton (Rte):
 
     def first_types(self):
         return {self.operand}
+
+    def nullable(self):
+        return False

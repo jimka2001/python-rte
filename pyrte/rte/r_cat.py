@@ -50,6 +50,9 @@ class Cat (Rte):
         else:
             return self.operands[0].first_types()
 
+    def nullable(self):
+        return all(r.nullable() for r in self.operands)
+
 
 
 

@@ -27,6 +27,8 @@ class Or (Combination):
     def __str__(self):
         return "Or(" + ", ".join([str(td) for td in self.operands]) + ")"
 
+    def nullable(self):
+        return any(r.nullable() for r in self.operands)
 
 def createOr(operands):
     from rte.r_emptyset import EmptySet

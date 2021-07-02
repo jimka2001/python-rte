@@ -38,5 +38,8 @@ class SigmaImpl (Rte):
         from genus.s_top import STop
         return {STop}
 
-    
+    def nullable(self):
+        return False
+
+
 Sigma = SigmaImpl()
