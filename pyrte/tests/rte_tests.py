@@ -85,6 +85,7 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertIs(rt.nullable(), rt.canonicalize().nullable())
 
+
 if __name__ == '__main__':
     unittest.main()
 
