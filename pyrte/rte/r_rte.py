@@ -29,4 +29,15 @@ class Rte:
     def nullable(self):
         raise Exception(f"nullable not implemented for {self} of type {type(self)}")
 
+    def canonicalize(self):
+        from genus.utils import fixed_point
+
+        def good_enough(a, b):
+            return type(a) == type(b) and a == b
+
+        return fixed_point(self, lambda r: r.canonicalize_once(), good_enough)
+
+    def canonicalize_once(self):
+        return self
+
 

@@ -79,6 +79,11 @@ class RteCase(unittest.TestCase):
             for r in range(1000):
                 random_rte(depth).__str__()
 
+    def test_nullable(self):
+        for depth in range(5):
+            for r in range(1000):
+                rt = random_rte(depth)
+                self.assertIs(rt.nullable(), rt.canonicalize().nullable())
 
 if __name__ == '__main__':
     unittest.main()
