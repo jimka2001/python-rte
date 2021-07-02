@@ -20,13 +20,10 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from genus.s_and import SAnd
-from genus.s_not import SNot
-from genus.s_top import STop
-from genus.utils import flat_map, generate_lazy_val
-
-
 def mdtd(tds):
+    from genus.s_not import SNot
+    from genus.s_top import STop
+    from genus.utils import flat_map, generate_lazy_val    
     # This algorithm doesn't exactly compute the maximal disjoint type decomposition
     # of its input rather it computes the mdtd of tds unioned with STop, which is
     # what is actually needed at the client side.
@@ -36,6 +33,8 @@ def mdtd(tds):
         n = SNot(td).canonicalize()
 
         def f(td1):
+            from genus.s_and import SAnd
+
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
             b = generate_lazy_val(lambda: SAnd(n, td1).canonicalize())
             if td.disjoint(td1) is True:

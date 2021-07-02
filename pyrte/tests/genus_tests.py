@@ -26,15 +26,15 @@ import unittest
 from genus.depthgenerator import random_type_designator, test_values, DepthGenerator
 from genus.genus_types import NormalForm, cmp_type_designators
 from genus.mdtd import mdtd
-from genus.s_and import SAnd
+from genus.s_and import SAnd, createSAnd, andp
 from genus.s_atomic import SAtomic
 from genus.s_combination import SCombination
 from genus.s_custom import SCustom
 from genus.s_empty import SEmptyImpl, SEmpty
 from genus.s_eql import SEql
 from genus.s_member import SMemberImpl, SMember
-from genus.s_not import SNot
-from genus.s_or import SOr
+from genus.s_not import SNot, notp
+from genus.s_or import SOr, createSOr, orp
 from genus.s_top import STopImpl, STop
 from genus.simple_type_d import SimpleTypeD, TerminalType
 from genus.utils import compare_sequence, get_all_subclasses
@@ -157,6 +157,7 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(not create_tri_n_quad.typep("hello"))
 
     def test_sand2(self):
+
         quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
         triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
@@ -838,7 +839,6 @@ class GenusCase(unittest.TestCase):
                 self.assertTrue(dnfp(dnf), f"expecting DNF, got {dnf}")
 
     def test_to_cnf2(self):
-
         def termp(td):
             if isinstance(td, TerminalType):
                 return True
@@ -987,11 +987,13 @@ class GenusCase(unittest.TestCase):
                     computed = mdtd(tds)
                     for i in range(len(computed)):
                         for j in range(i + 1, len(computed)):
-                            self.assertTrue(computed[i].disjoint(computed[j]) is not False,
+                            cc = computed[i].disjoint(computed[j])
+                            intersection = SAnd(computed[i], computed[j]).canonicalize(NormalForm.DNF)
+                            self.assertTrue(cc is not False,
                                             f"\n tds={tds}" +
                                             f"\n mdtd={computed}" +
-                                            f"\n {computed[i]}.disjoint({computed[j]}) = {computed[i].disjoint(computed[j])}" +
-                                            f"\n intersection = {SAnd(computed[i], computed[j]).canonicalize(NormalForm.DNF)}")
+                                            f"\n {computed[i]}.disjoint({cc})" +
+                                            f"\n intersection = {intersection}")
 
                     for v in test_values:
                         containing = [td for td in computed if td.typep(v)]

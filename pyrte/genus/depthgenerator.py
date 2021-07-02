@@ -24,14 +24,14 @@ import math
 import random
 
 
-from genus.s_and import SAnd
+from genus.s_and import SAnd, createSAnd
 from genus.s_atomic import SAtomic
 from genus.s_custom import SCustom
 from genus.s_empty import SEmpty
 from genus.s_eql import SEql
 from genus.s_member import SMember
 from genus.s_not import SNot
-from genus.s_or import SOr
+from genus.s_or import SOr, createSOr
 from genus.s_top import STop
 
 
@@ -67,9 +67,6 @@ class DepthGenerator:
             if rand_choice == "SNot":
                 return SNot(self._generate_tree(curr_depth))
             else:
-                from genus.s_and import createSAnd
-                from genus.s_or import createSOr
-
                 rand_k = random.randint(0, 3)
                 tds = [self._generate_tree(curr_depth) for _i in range(rand_k)]
                 return createSAnd(tds) if rand_choice == "SAnd" else createSOr(tds)
