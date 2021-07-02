@@ -35,3 +35,10 @@ class Combination (Rte):
 
     def __hash__(self):
         return hash(tuple(self.operands))
+
+    def first_types(self):
+        import functools
+        functools.reduce(lambda acc,tds: acc.union(tds),
+                         [td.first_types() for td in self.operands],
+                         super().first_types())
+

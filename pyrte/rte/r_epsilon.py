@@ -34,5 +34,8 @@ class EpsilonImpl (Rte):
     def __str__(self):
         return "ε"
 
+    def first_types(self):
+        return {}
+
 
 Epsilon = EpsilonImpl()

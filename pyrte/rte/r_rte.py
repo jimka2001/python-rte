@@ -23,4 +23,6 @@ class Rte:
     def __repr__(self):
         return self.__str__()
 
+    def first_types(self):
+        {}
 

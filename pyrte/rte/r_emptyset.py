@@ -34,5 +34,8 @@ class EmptySetImpl (Rte):
     def __str__(self):
         return "∅"
 
+    def first_types(self):
+        return {}
+
 
 EmptySet = EmptySetImpl()

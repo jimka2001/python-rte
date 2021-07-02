@@ -39,6 +39,21 @@ class Cat (Rte):
     def __hash__(self):
         return hash(tuple(self.operands))
 
+    def first_types(self):
+        from rte.r_epsilon import Epsilon
+        if not self.operands:
+            return Epsilon.first_types()
+        elif 1 == len(self.operands):
+            return self.operands[0].first_types()
+        elif self.operands[0].nullable():
+            return self.operands[0].first_types().union(createCat(self.operands[1:]))
+        else:
+            return self.operands[0].first_types()
+
+
+
+
+
 
 def createCat(operands):
     from rte.r_epsilon import Epsilon

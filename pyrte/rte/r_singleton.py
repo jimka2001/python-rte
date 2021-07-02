@@ -39,3 +39,6 @@ class Singleton (Rte):
 
     def __hash__(self):
         return hash(self.operand)
+
+    def first_types(self):
+        return {self.operand}

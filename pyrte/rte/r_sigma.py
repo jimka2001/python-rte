@@ -34,5 +34,9 @@ class SigmaImpl (Rte):
     def __str__(self):
         return "Σ"
 
+    def first_types(self):
+        from genus.s_top import STop
+        return {STop}
 
+    
 Sigma = SigmaImpl()
