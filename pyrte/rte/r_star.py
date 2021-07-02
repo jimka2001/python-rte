@@ -31,10 +31,8 @@ class Star(Rte):
 
     def __new__(cls, operand, *a, **kw):
         if operand in Star.__instances:
-            print(f"returning cached object {Star.__instances[operand]}")
             return Star.__instances[operand]
         elif operand in [EmptySet, Epsilon, Sigma]:
-            print(f"putting new object into cache {operand} {id(operand)}")
             s = super(Star, cls).__new__(cls, *a, **kw)
             Star.__instances[operand] = s
             return s

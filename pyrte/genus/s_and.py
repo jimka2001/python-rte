@@ -104,7 +104,7 @@ class SAnd(SCombination):
             #   then we know self is NOT inhabited
             s = any(self.tds[a].disjoint(self.tds[b]) is True
                     for a in range(len(self.tds))
-                    for b in range(a+1, len(self.tds)))
+                    for b in range(a + 1, len(self.tds)))
             return not s
         elif dnf() != self and inhabited_dnf() is not None:
             return inhabited_dnf()
@@ -122,9 +122,9 @@ class SAnd(SCombination):
             return False
         elif t.inhabited() is True \
                 and self.inhabited() is True \
-                 and   ( all(x.subtypep(t) is True for x in self.tds)
-                        or
-                        all(t.subtypep(x) is True for x in self.tds)):
+                and (all(x.subtypep(t) is True for x in self.tds)
+                     or
+                     all(t.subtypep(x) is True for x in self.tds)):
 
             return False
         else:
@@ -164,7 +164,7 @@ class SAnd(SCombination):
     def conversionD3(self):
         # discover disjoint pair
         for i in range(len(self.tds)):
-            for j in range(i+1, len(self.tds)):
+            for j in range(i + 1, len(self.tds)):
                 if self.tds[i].disjoint(self.tds[j]) is True:
                     return SEmpty
         return self
@@ -178,15 +178,15 @@ class SAnd(SCombination):
         #     )
         return self.compute_nf()
 
+
 def createSAnd(tds):
-	if not tds:
-		return STop
-	elif len(tds) == 1:
-		return tds[0]
-	else:
-		return SAnd(*tds)
+    if not tds:
+        return STop
+    elif len(tds) == 1:
+        return tds[0]
+    else:
+        return SAnd(*tds)
 
 
 def andp(this):
-	return isinstance(this, SAnd)
-
+    return isinstance(this, SAnd)
