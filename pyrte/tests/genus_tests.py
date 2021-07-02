@@ -73,12 +73,10 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAtomic(x()) is not SAtomic(y()))
 
     def test_fixed_point(self):
-        from pyrte.genus import fixed_point
         self.assertTrue(fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0)
         self.assertTrue(fixed_point(0, (lambda x: x // 2), (lambda x, y: x == y)) == 0)
 
     def test_fixed_point2(self):
-        from pyrte.genus import fixed_point
 
         # fixed_point is just a way to incrementally apply a function on a value
         # until another function deem the delta between two consecutive values to be negligible
@@ -92,7 +90,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
     def test_STop(self):
-        from pyrte.genus import STopImpl
 
         # STop has to be unique
         self.assertTrue(id(STop) == id(STopImpl()))
@@ -140,7 +137,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SCustom(l_odd, "odd").disjoint(SMember(1, 2, 3)) is False)
 
     def test_sand1(self):
-        from pyrte.genus import createSAnd
         quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
         triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
@@ -163,7 +159,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(not create_tri_n_quad.typep("hello"))
 
     def test_sand2(self):
-        from pyrte.genus import createSAnd
         quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
 
         triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
@@ -187,7 +182,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(not tri_n_quad.same_combination(createSAnd([])))
 
     def test_sor(self):
-        from pyrte.genus import createSOr
         quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
         triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
 
@@ -265,7 +259,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(not npair.typep(0))
 
     def test_STop2(self):
-        from pyrte.genus import STopImpl
         # STop has to be unique
         self.assertTrue(id(STop) == id(STopImpl()))
         self.assertTrue(STop is STopImpl())
@@ -290,8 +283,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(STop.subtypep(STop) is True)
 
     def test_SEmpty(self):
-        from pyrte.genus import SEmptyImpl
-        from pyrte.genus.depthgenerator import test_values
 
         # SEmpty has to be unique
         self.assertTrue(id(SEmpty) == id(SEmptyImpl()))
@@ -466,7 +457,6 @@ class GenusCase(unittest.TestCase):
                                 f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}")
 
     def test_uniquify(self):
-        from pyrte.genus import uniquify
         self.assertTrue(uniquify([]) == [])
         self.assertTrue(uniquify([1]) == [1])
         self.assertTrue(uniquify([5, 4, 3, 2, 1]) == [5, 4, 3, 2, 1])
@@ -476,8 +466,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(uniquify([1, 2, 1]) == [2, 1])
 
     def test_lazy(self):
-        from pyrte.genus import generate_lazy_val
-
         c = 0
 
         def g():
@@ -540,7 +528,6 @@ class GenusCase(unittest.TestCase):
 
     def test_membership(self):
         from pyrte.genus.depthgenerator import random_type_designator, test_values
-        from pyrte.genus import NormalForm
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -559,8 +546,6 @@ class GenusCase(unittest.TestCase):
                                     f" but of type tdc3={tdc3} is {tdc3.typep(v)}")
 
     def test_canonicalize_subtype(self):
-        from pyrte.genus import NormalForm
-        from pyrte.genus.depthgenerator import random_type_designator
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -817,7 +802,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(td.canonicalized_hash[None] == tdc)
         self.assertTrue(tdc.canonicalized_hash[None] == tdc)
 
-        from pyrte.genus import NormalForm
         tdc2 = td.canonicalize(NormalForm.DNF)
         self.assertTrue(td.canonicalized_hash[NormalForm.DNF] == tdc2)
         self.assertTrue(tdc2.canonicalized_hash[NormalForm.DNF] == tdc2)
@@ -827,9 +811,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(tdc3.canonicalized_hash[NormalForm.CNF] == tdc3)
 
     def test_to_dnf2(self):
-        from pyrte.genus.depthgenerator import random_type_designator
-        from pyrte.genus import NormalForm, orp, andp, notp
-        from pyrte.genus import TerminalType
 
         def termp(td):
             if isinstance(td, TerminalType):
@@ -859,9 +840,6 @@ class GenusCase(unittest.TestCase):
                 self.assertTrue(dnfp(dnf), f"expecting DNF, got {dnf}")
 
     def test_to_cnf2(self):
-        from pyrte.genus.depthgenerator import random_type_designator
-        from pyrte.genus import NormalForm, orp, andp, notp
-        from pyrte.genus import TerminalType
 
         def termp(td):
             if isinstance(td, TerminalType):
@@ -897,7 +875,6 @@ class GenusCase(unittest.TestCase):
         #          SAnd(x1,x2,  y2,  x3,x4),
         #          SAnd(x1,x2,  y3,  x3,x4),
         #     )
-        from pyrte.genus import NormalForm
 
         x1 = SEql("x1")
         x2 = SEql("x2")
@@ -922,7 +899,6 @@ class GenusCase(unittest.TestCase):
         #          SOr(x1,x2,  y2,  x3,x4),
         #          SOr(x1,x2,  y3,  x3,x4),
         #     )
-        from pyrte.genus import NormalForm
         x1 = SEql("x1")
         x2 = SEql("x2")
         x3 = SEql("x3")
@@ -947,7 +923,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SNot(SAtomic(Test1)).subtypep(SAtomic(Test1)) is False)
 
     def test_compare_sequence(self):
-        from pyrte.genus import compare_sequence
         self.assertTrue(compare_sequence([SEql(1)], [SEql(2)]) < 0)
         self.assertTrue(compare_sequence([], []) == 0)
         self.assertTrue(compare_sequence([SEql(1)], [SEql(1)]) == 0)
@@ -960,7 +935,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0)  # short list < long list
         self.assertTrue(compare_sequence([SEql(1)], [SEql(1), SEql(1)]) < 0)
 
-        from pyrte.genus import cmp_type_designators
         self.assertTrue(cmp_type_designators(SEql(1), SEql(2)) < 0)
         self.assertTrue(cmp_type_designators(SEql(1), SEql(1)) == 0)
         self.assertTrue(cmp_type_designators(SEql(2), SEql(1)) > 0)
