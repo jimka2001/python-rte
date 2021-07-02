@@ -1,6 +1,6 @@
 .idea
 venv/
-genus/src/__pycache__
+pyrte/genus/src/__pycache__
 .#*
 #*
 *~
