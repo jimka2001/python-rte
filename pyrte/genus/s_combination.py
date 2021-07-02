@@ -52,7 +52,11 @@ class SCombination(SimpleTypeD):
 
     def __init__(self, *tds):
         self.tds = list(tds)
-        assert all(isinstance(td, SimpleTypeD) for td in self.tds), f"{self.tds} types = {[type(td) for td in self.tds]}"
+        assert all(isinstance(td, SimpleTypeD) for td in self.tds), \
+            f"\n{self.tds}\n " + \
+            f"\n some arguments not an instance of {SimpleTypeD}" + \
+            f"\n types = {[type(td) for td in self.tds]}" + \
+            f"\n supers = {[type(td).mro() for td in self.tds]}"
         super().__init__()
 
     @abstractmethod
