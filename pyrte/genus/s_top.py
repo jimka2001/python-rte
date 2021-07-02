@@ -29,7 +29,7 @@ subtypep    1
 cmp_to_same_class_obj   3
 """
 
-from .simple_type_d import SimpleTypeD, TerminalType
+from genus.simple_type_d import SimpleTypeD, TerminalType
 
 
 class STopImpl(SimpleTypeD, TerminalType):
@@ -61,7 +61,7 @@ class STopImpl(SimpleTypeD, TerminalType):
             return not t.inhabited()
 
     def subtypep_down(self, t):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot
         inh = SNot(t).inhabited()
         if inh is None:
             return None
@@ -78,3 +78,7 @@ class STopImpl(SimpleTypeD, TerminalType):
 
 
 STop = STopImpl()
+
+def topp(this):
+	return isinstance(this, STopImpl)
+

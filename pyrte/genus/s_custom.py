@@ -32,7 +32,7 @@ apply 1
 """
 
 
-from .simple_type_d import SimpleTypeD, TerminalType
+from genus.simple_type_d import SimpleTypeD, TerminalType
 
 
 class SCustom(SimpleTypeD, TerminalType):

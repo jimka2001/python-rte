@@ -37,13 +37,11 @@ cmp_to_same_class 3
 """
 
 
-from .genus_types import combop, memberimplp, notp, orp, andp
-from .genus_types import createSMember, cmp_type_designators
-from .simple_type_d import SimpleTypeD
-from .utils import compare_sequence
-from .utils import find_simplifier, find_first
-from .utils import flat_map
-from .utils import remove_element, search_replace, uniquify
+from genus.utils import compare_sequence
+from genus.utils import find_simplifier, find_first
+from genus.utils import flat_map
+from genus.utils import remove_element, search_replace, uniquify
+from genus.simple_type_d import SimpleTypeD
 
 
 class SCombination(SimpleTypeD):
@@ -121,7 +119,7 @@ class SCombination(SimpleTypeD):
             return self
 
     def conversion3(self):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot
 
         # (and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
         # (or A ( not A)) --> STop, unit = SEmpty, zero = STop
@@ -146,6 +144,7 @@ class SCombination(SimpleTypeD):
     def conversion6(self):
         # (and A ( and B C) D) --> (and A B C D)
         # (or A ( or B C) D) --> (or A B C D)
+
         if not any(self.same_combination(td) for td in self.tds):
             return self
         else:
@@ -163,6 +162,7 @@ class SCombination(SimpleTypeD):
         return self.to_nf(nf)
 
     def conversion8(self):
+        from genus.s_not import notp
         # (or A (not B)) --> STop if B is subtype of A, zero = STop
         # (and A (not B)) --> SEmpty if B is supertype of A, zero = SEmpty
         for a in self.tds:
@@ -172,6 +172,7 @@ class SCombination(SimpleTypeD):
         return self
 
     def conversion9(self):
+
         # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
@@ -179,6 +180,7 @@ class SCombination(SimpleTypeD):
         duals = list(filter(lambda td: self.dual_combination(td), combos))
 
         def f(td):
+            from genus.s_not import notp
             if td not in duals:
                 return td
             else:
@@ -221,7 +223,8 @@ class SCombination(SimpleTypeD):
             return self.create(keep)
 
     def conversion11(self):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot
+
         # A + !A B -> A + B
         # A + !A BX + Y = (A + BX + Y)
         # A + ABX + Y = (A + Y)
@@ -254,6 +257,7 @@ class SCombination(SimpleTypeD):
             return self.create(flat_map(consume, self.tds))
 
     def conversion12(self):
+        from genus.s_not import notp
         # AXBC + !X = ABC + !X
         # find !X
         combos = filter(combop, self.tds)
@@ -275,7 +279,9 @@ class SCombination(SimpleTypeD):
             return self.create([f(td) for td in self.tds])
 
     def conversion13(self):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot, notp
+        from genus.s_member import memberimplp, createSMember
+
         # multiple !member
         # SOr(x,!{-1, 1},!{1, 2, 3, 4})
         # --> SOr(x,!{1}) // intersection of non-member
@@ -310,6 +316,8 @@ class SCombination(SimpleTypeD):
         # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
         # (or String (member 1 2 "3") (member 2 3 4 "5")) --> (or String (member 1 2 4))
         # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
+        from genus.s_member import memberimplp, createSMember
+
         members = [td for td in self.tds if memberimplp(td)]
         if len(members) <= 1:
             return self
@@ -328,7 +336,11 @@ class SCombination(SimpleTypeD):
             return self.create(uniquify([f(td) for td in self.tds]))
 
     def conversion15(self):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot, notp
+        from genus.s_member import memberimplp, createSMember
+        from genus.s_and import andp
+        from genus.s_or import orp
+
         # SAnd(X, member1, not-member) --> SAnd(X,member2)
         # SOr(X, member, not-member1) --> SOr(X,not-member2)
         #
@@ -369,7 +381,9 @@ class SCombination(SimpleTypeD):
             return self.create(flat_map(f, self.tds))
 
     def conversion16(self):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot, notp
+        from genus.s_member import memberimplp, createSMember
+
         # Now(after conversions 13, 14, and 15, there is at most one SMember(...) and
         # at most one SNot(SMember(...))
 
@@ -397,6 +411,8 @@ class SCombination(SimpleTypeD):
         raise NotImplementedError
 
     def conversion98(self):
+        from genus.genus_types import cmp_type_designators
+
         ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_type_designators))
         return self.create(ordered)
 
@@ -456,3 +472,7 @@ class SCombination(SimpleTypeD):
             return self.create_dual([self.create([y if x is td else x
                                                   for x in self.tds])
                                      for y in td.tds])
+
+
+def combop(this):
+	return isinstance(this, SCombination)

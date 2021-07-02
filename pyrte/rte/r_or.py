@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .r_combination import Combination
+from rte.r_combination import Combination
 
 
 class Or (Combination):
@@ -29,7 +29,7 @@ class Or (Combination):
 
 
 def createOr(operands):
-    from pyrte.rte.r_emptyset import EmptySet
+    from rte.r_emptyset import EmptySet
 
     if not operands:
         return EmptySet

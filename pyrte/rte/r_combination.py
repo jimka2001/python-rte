@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .r_rte import Rte
+from rte.r_rte import Rte
 
 
 class Combination (Rte):
@@ -34,4 +34,4 @@ class Combination (Rte):
                self.operands == that.operands
 
     def __hash__(self):
-        return hash(self.operands)
+        return hash(tuple(self.operands))

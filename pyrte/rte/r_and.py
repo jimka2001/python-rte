@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .r_combination import Combination
+from rte.r_combination import Combination
 
 
 class And (Combination):
@@ -29,9 +29,9 @@ class And (Combination):
 
 
 def createAnd(operands):
-    from pyrte.rte.r_star import Star
-    from pyrte.rte.r_sigma import Sigma
-
+    from rte.r_star import Star
+    from rte.r_sigma import Sigma
+    
     if not operands:
         return Star(Sigma)
     elif len(operands) == 1:

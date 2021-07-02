@@ -51,9 +51,8 @@ from abc import ABCMeta, abstractmethod
 # canonicalize_callstack = CallStack("canonicalize")
 # inhabited_callstack = CallStack("inhabited")
 
-from .genus_types import NormalForm
-from .genus_types import notp, orp, andp, topp
-from .utils import generate_lazy_val, fixed_point
+from genus.genus_types import NormalForm
+from genus.utils import generate_lazy_val, fixed_point
 
 # is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
@@ -135,6 +134,11 @@ class SimpleTypeD():
     # Returns:
     #   an optional Boolean (True/False/None) which is true if self is a subtype of t
     def subtypep(self, t):
+        from genus.s_or import orp
+        from genus.s_and import andp
+        from genus.s_top import topp
+        from genus.s_not import notp
+
         assert isinstance(t, SimpleTypeD)
         if t in self.subtypep_cache:
             return self.subtypep_cache[t]
@@ -161,6 +165,7 @@ class SimpleTypeD():
         return self.subtypep_cache[t]
 
     def subtypep_down(self, t):
+        from genus.s_not import notp
         if notp(t) and self.disjoint(t.s) is True:
             return True
         elif self.inhabited() is False:

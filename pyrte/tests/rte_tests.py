@@ -31,6 +31,7 @@ from genus.s_eql import SEql
 from rte.r_cat import Cat, createCat
 from rte.r_random import random_rte
 
+
 class RteCase(unittest.TestCase):
     def test_sigma(self):
         self.assertTrue( Sigma is Sigma)

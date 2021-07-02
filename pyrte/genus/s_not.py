@@ -35,10 +35,7 @@ compute_cnf 1
 cmp_to_same_class_obj 3
 """
 
-from .s_atomic import SAtomic
-from .s_empty import SEmpty
-from .s_top import STop
-from .simple_type_d import SimpleTypeD
+from genus.simple_type_d import SimpleTypeD
 
 
 class SNot(SimpleTypeD):
@@ -63,7 +60,12 @@ class SNot(SimpleTypeD):
 		return not self.s.typep(a)
 
 	def inhabited_down(self):
-		from pyrte.genus.genus_types import topp, emptyp, memberp, eqlp, atomicp, notp
+		from genus.s_top import topp
+		from genus.s_empty import emptyp
+		from genus.s_atomic import atomicp
+		from genus.s_member import memberimplp
+		from genus.s_atomic import SAtomic
+
 		if topp(self.s):
 			return False
 		elif emptyp(self.s):
@@ -72,9 +74,7 @@ class SNot(SimpleTypeD):
 			return False
 		elif atomicp(self.s):
 			return True
-		elif memberp(self.s):
-			return True
-		elif eqlp(self.s):
+		elif memberimplp(self.s):
 			return True
 		elif notp(self.s):
 			return self.s.s.inhabited()
@@ -92,8 +92,8 @@ class SNot(SimpleTypeD):
 			return super().disjoint_down(t)
 
 	def subtypep_down(self, t):
-		from pyrte.genus.utils import generate_lazy_val
-		from pyrte.genus.genus_types import notp, atomicp
+		from genus.utils import generate_lazy_val
+		from genus.s_atomic import atomicp
 		# SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
 		#    however b.subtypep(a) might return None
 		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
@@ -121,7 +121,8 @@ class SNot(SimpleTypeD):
 			return super().subtypep_down(t)
 
 	def canonicalize_once(self, nf=None):
-		from pyrte.genus.genus_types import notp, topp, emptyp
+		from genus.s_top import topp, STop
+		from genus.s_empty import SEmpty, emptyp
 		if notp(self.s):
 			return self.s.s.canonicalize_once(nf)
 		elif topp(self.s):
@@ -132,12 +133,13 @@ class SNot(SimpleTypeD):
 			return SNot(self.s.canonicalize_once(nf)).to_nf(nf)
 
 	def compute_dnf(self):
+		from genus.s_and import andp, createSAnd
+		from genus.s_or import orp, createSOr
 		# SNot(SAnd(x1, x2, x3))
 		# --> SOr(SNot(x1), SNot(x2), SNot(x3)
 		#
 		# SNot(SOr(x1, x2, x3))
 		# --> SAnd(SNot(x1), SNot(x2), SNot(x3))
-		from pyrte.genus.genus_types import orp, andp, createSOr, createSAnd
 		if andp(self.s):
 			return createSOr([SNot(td) for td in self.s.tds])
 		elif orp(self.s):
@@ -151,10 +153,14 @@ class SNot(SimpleTypeD):
 		return self.compute_dnf()
 
 	def cmp_to_same_class_obj(self, td):
-		from pyrte.genus.genus_types import cmp_type_designators
+		from genus.genus_types import cmp_type_designators
 		if type(self) != type(td):
 			return super().cmp_to_same_class_obj(td)
 		elif self == td:
 			return 0
 		else:
 			return cmp_type_designators(self.s, td.s)
+
+def notp(this):
+	return isinstance(this, SNot)
+

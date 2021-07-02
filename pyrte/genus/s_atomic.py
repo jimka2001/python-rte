@@ -32,15 +32,14 @@ cmp_to_same_class_obj 3
 """
 
 
-from .s_and import SAnd
-from .s_custom import SCustom
-from .s_empty import SEmptyImpl, SEmpty
-from .s_member import SMemberImpl
-from .s_or import SOr
-from .s_top import STopImpl
-from .simple_type_d import SimpleTypeD, TerminalType
-from .utils import get_all_subclasses
-
+from genus.s_and import SAnd
+from genus.s_custom import SCustom
+from genus.s_empty import SEmptyImpl, SEmpty
+from genus.s_member import SMemberImpl
+from genus.s_or import SOr
+from genus.s_top import STopImpl
+from genus.simple_type_d import SimpleTypeD, TerminalType
+from genus.utils import get_all_subclasses
 
 
 class SAtomic(SimpleTypeD, TerminalType):
@@ -120,7 +119,7 @@ class SAtomic(SimpleTypeD, TerminalType):
             return super().disjoint_down(t)
 
     def subtypep_down(self, s):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot
         if self.inhabited() is False:
             return True
         elif isinstance(s, SEmptyImpl):
@@ -175,3 +174,7 @@ class SAtomic(SimpleTypeD, TerminalType):
             return -1
         else:
             return 1
+
+def atomicp(this):
+	return isinstance(this, SAtomic)
+

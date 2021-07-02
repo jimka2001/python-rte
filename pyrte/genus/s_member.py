@@ -35,7 +35,7 @@ cmp_to_same_class_obj 3
 """
 
 
-from .simple_type_d import SimpleTypeD, TerminalType
+from genus.simple_type_d import SimpleTypeD, TerminalType
 
 
 class SMemberImpl(SimpleTypeD):
@@ -97,3 +97,22 @@ class SMemberImpl(SimpleTypeD):
 
 class SMember(SMemberImpl, TerminalType):
 	pass
+
+
+def createSMember(items):
+	from genus.s_empty import SEmpty
+	from genus.s_eql import SEql
+
+	if not items:
+		return SEmpty
+	elif len(items) == 1:
+		return SEql(items[0])
+	else:
+		return SMember(*items)
+
+def memberimplp(this):
+	return isinstance(this, SMemberImpl)
+
+def memberp(this):
+	return isinstance(this, SMember)
+

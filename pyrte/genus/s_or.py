@@ -36,14 +36,11 @@ canonicalize_once 3
 compute_cnf 3
 """
 
-from .genus_types import combop, memberimplp, notp, notp, orp, andp, atomicp, topp
-from .genus_types import createSAnd, createSOr, createSMember, cmp_type_designators
-
-from .s_combination import SCombination
-from .s_empty import SEmpty
-from .s_top import STop
-from .utils import find_first
-from .utils import uniquify
+from genus.s_combination import SCombination
+from genus.s_empty import SEmpty
+from genus.s_top import STop
+from genus.utils import find_first
+from genus.utils import uniquify
 
 
 
@@ -67,6 +64,7 @@ class SOr(SCombination):
         return b.subtypep(a)
 
     def dual_combination(self, td):
+        from genus.s_and import andp
         return andp(td)
 
     def dual_combinator(self, a, b):
@@ -81,6 +79,7 @@ class SOr(SCombination):
         return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
 
     def create_dual(self, tds):
+        from genus.s_and import createSAnd
         return createSAnd(tds)
 
     def typep(self, a):
@@ -103,7 +102,8 @@ class SOr(SCombination):
             return super().disjoint_down(t)
 
     def conversionD1(self):
-        from pyrte.genus.s_not import SNot
+        from genus.s_not import SNot, notp
+        from genus.s_member import memberimplp, createSMember
         # Dual of SAnd.conversionA1
 
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
@@ -116,6 +116,7 @@ class SOr(SCombination):
             return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
 
     def conversionD3(self):
+        from genus.s_not import notp
         # dual of  disjoint pair
         # SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
 
@@ -135,3 +136,17 @@ class SOr(SCombination):
         #          SOr(x1,x2,  y3,  x3,x4),
         #     )
         return self.compute_nf()
+
+
+def createSOr(tds):
+	if not tds:
+		return SEmpty
+	elif len(tds) == 1:
+		return tds[0]
+	else:
+		return SOr(*tds)
+
+
+def orp(this):
+	return isinstance(this, SOr)
+

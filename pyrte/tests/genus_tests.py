@@ -24,9 +24,7 @@ import os
 import unittest
 
 from genus.depthgenerator import random_type_designator, test_values, DepthGenerator
-from genus.genus_types import NormalForm
-from genus.genus_types import combop, memberimplp, notp, notp, orp, andp, atomicp, topp
-from genus.genus_types import createSAnd, createSOr, createSMember, cmp_type_designators
+from genus.genus_types import NormalForm, cmp_type_designators
 from genus.mdtd import mdtd
 from genus.s_and import SAnd
 from genus.s_atomic import SAtomic
@@ -58,7 +56,7 @@ class GenusCase(unittest.TestCase):
 
     def test_atomic(self):
         def x():
-            from pyrte.genus.depthgenerator import TestA
+            from genus.depthgenerator import TestA
             return TestA
 
         def y():
@@ -98,7 +96,7 @@ class GenusCase(unittest.TestCase):
         # str(a) has to be "STop"
         self.assertTrue((str(STop) == "STop"))
 
-        from pyrte.genus.depthgenerator import test_values
+        from genus.depthgenerator import test_values
         for x in test_values:
             self.assertTrue((STop.typep(x)))
 
@@ -327,7 +325,7 @@ class GenusCase(unittest.TestCase):
         self.assertIsNot(td1.disjoint(td2), False, f"td1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375(self):
-        from pyrte.genus.depthgenerator import TestB, Test1
+        from genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -341,7 +339,7 @@ class GenusCase(unittest.TestCase):
                          f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375b(self):
-        from pyrte.genus.depthgenerator import TestB, Test1
+        from genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -354,7 +352,7 @@ class GenusCase(unittest.TestCase):
                          f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375c(self):
-        from pyrte.genus.depthgenerator import TestB, Test1
+        from genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -367,7 +365,7 @@ class GenusCase(unittest.TestCase):
                          f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_375d(self):
-        from pyrte.genus.depthgenerator import TestB, Test1
+        from genus.depthgenerator import TestB, Test1
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
@@ -381,7 +379,7 @@ class GenusCase(unittest.TestCase):
                          f"\n td1={td1}\n td2={td2}\n td1.disjoint(td2) = {td1.disjoint(td2)}")
 
     def test_discovered_case_297(self):
-        from pyrte.genus.depthgenerator import TestA, TestB
+        from genus.depthgenerator import TestA, TestB
 
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         b = SAtomic(TestB)
@@ -404,7 +402,7 @@ class GenusCase(unittest.TestCase):
                       SAnd(SAtomic(int), even)))).inhabited()
 
     def test_discovered_case_240(self):
-        from pyrte.genus.depthgenerator import Test2, TestA
+        from genus.depthgenerator import Test2, TestA
 
         td1 = SAnd(SAtomic(Test2), SAtomic(TestA))
         td2 = SAnd(SAtomic(int), SAtomic(float))
@@ -419,7 +417,7 @@ class GenusCase(unittest.TestCase):
                         f"td1={td1}\ntd2={td2} returned {s}")
 
     def test_subtypep1(self):
-        from pyrte.genus.depthgenerator import random_type_designator
+        from genus.depthgenerator import random_type_designator
         for depth in range(0, 3):
             for _ in range(num_random_tests):
                 td1 = random_type_designator(depth)
@@ -438,7 +436,7 @@ class GenusCase(unittest.TestCase):
                 self.assertTrue(SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False)
 
     def test_subtypep2(self):
-        from pyrte.genus.depthgenerator import random_type_designator
+        from genus.depthgenerator import random_type_designator
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -527,7 +525,7 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(tdc != SAtomic(int))
 
     def test_membership(self):
-        from pyrte.genus.depthgenerator import random_type_designator, test_values
+        from genus.depthgenerator import random_type_designator, test_values
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td = random_type_designator(depth)
@@ -779,7 +777,7 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SOr(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SNot(SAtomic(Test1)))
 
     def test_depth_generator(self):
-        from pyrte.genus.depthgenerator import DepthGenerator
+        from genus.depthgenerator import DepthGenerator
         rand_lambda = DepthGenerator(2).rand_lambda_str_generator()
         for i in range(10):
             rand_lambda[0](i)

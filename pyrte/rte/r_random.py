@@ -20,15 +20,15 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import random
-from .r_and import And
-from .r_cat import Cat
-from .r_emptyset import EmptySet
-from .r_epsilon import Epsilon
-from .r_not import Not
-from .r_or import Or
-from .r_sigma import Sigma
-from .r_singleton import Singleton
-from .r_star import Star
+from rte.r_and import And
+from rte.r_cat import Cat
+from rte.r_emptyset import EmptySet
+from rte.r_epsilon import Epsilon
+from rte.r_not import Not
+from rte.r_or import Or
+from rte.r_sigma import Sigma
+from rte.r_singleton import Singleton
+from rte.r_star import Star
 from genus.depthgenerator import random_type_designator
 
 leaf_rtes = [EmptySet,

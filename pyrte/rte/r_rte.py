@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.r_rte.py
 
 class Rte:
-    def __repr__(self):
-        return self.__str__()
-
+    #def __repr__(self):
+    #    return self.__str__()
+    pass
 

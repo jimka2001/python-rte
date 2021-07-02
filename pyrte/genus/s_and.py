@@ -36,19 +36,16 @@ canonicalize_once 3
 compute_dnf 3
 """
 
-from .genus_types import NormalForm
-from .genus_types import memberimplp, orp, atomicp
-from .genus_types import createSAnd, createSOr, createSMember
-from .s_empty import SEmpty
-from .s_top import STop
-from .simple_type_d import SimpleTypeD
-from .utils import find_first, generate_lazy_val, uniquify
+from genus.s_combination import SCombination
+from genus.s_empty import SEmpty
+from genus.s_top import STop
+from genus.simple_type_d import SimpleTypeD
+from genus.utils import find_first, generate_lazy_val, uniquify
+
 
 # from utils import CallStack
 # subtypep_and_callstack = CallStack("subtypep.SAnd")
 # inhabited_down_and = CallStack("inhabited_down.SAnd")
-
-from .s_combination import SCombination
 
 
 class SAnd(SCombination):
@@ -71,6 +68,7 @@ class SAnd(SCombination):
         return a.subtypep(b)
 
     def dual_combination(self, td):
+        from genus.s_or import orp
         return orp(td)
 
     def dual_combinator(self, a, b):
@@ -83,12 +81,15 @@ class SAnd(SCombination):
         return filter(pred, xs)  # calling filter from Python std library
 
     def create_dual(self, tds):
+        from genus.s_or import createSOr
         return createSOr(tds)
 
     def typep(self, a):
         return all(td.typep(a) for td in self.tds)
 
     def inhabited_down(self):
+        from genus.genus_types import NormalForm
+        from genus.s_atomic import atomicp
         dnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.DNF))
         cnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.CNF))
 
@@ -152,6 +153,8 @@ class SAnd(SCombination):
 
         # SAnd(SMember(42, 43, 44), A, B, C)
         # == > SMember(42, 44)
+        from genus.s_member import memberimplp, createSMember
+
         member = find_first(memberimplp, self.tds, None)
         if member is None:
             return self
@@ -174,3 +177,16 @@ class SAnd(SCombination):
         #          SAnd(x1,x2,  y3,  x3,x4),
         #     )
         return self.compute_nf()
+
+def createSAnd(tds):
+	if not tds:
+		return STop
+	elif len(tds) == 1:
+		return tds[0]
+	else:
+		return SAnd(*tds)
+
+
+def andp(this):
+	return isinstance(this, SAnd)
+

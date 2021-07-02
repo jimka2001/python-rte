@@ -20,10 +20,10 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .s_and import SAnd
-from .s_not import SNot
-from .s_top import STop
-from .utils import flat_map, generate_lazy_val
+from genus.s_and import SAnd
+from genus.s_not import SNot
+from genus.s_top import STop
+from genus.utils import flat_map, generate_lazy_val
 
 
 def mdtd(tds):

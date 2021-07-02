@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .r_rte import Rte
+from rte.r_rte import Rte
 
 
 class Cat (Rte):
@@ -37,11 +37,11 @@ class Cat (Rte):
                self.operands == that.operands
 
     def __hash__(self):
-        return hash(self.operands)
+        return hash(tuple(self.operands))
 
 
 def createCat(operands):
-    from pyrte.rte.r_epsilon import Epsilon
+    from rte.r_epsilon import Epsilon
 
     if not operands:
         return Epsilon

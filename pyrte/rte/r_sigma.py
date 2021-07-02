@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .r_rte import Rte
+from rte.r_rte import Rte
 
 
 class SigmaImpl (Rte):
@@ -31,7 +31,7 @@ class SigmaImpl (Rte):
             SigmaImpl.__instance = super(SigmaImpl, cls).__new__(cls, *a, **kw)
         return SigmaImpl.__instance
 
-    def __str__(self):
-        return "Σ"
+    # def __str__(self):
+    #     return "Σ"
 
 Sigma = SigmaImpl()

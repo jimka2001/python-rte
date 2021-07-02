@@ -22,8 +22,6 @@
 from collections import OrderedDict
 from collections.abc import Iterable
 
-from .genus_types import cmp_type_designators
-
 
 
 def generate_lazy_val(func):
@@ -119,6 +117,8 @@ def find_first(pred, xs, default=None):
 
 
 def compare_sequence(xs, ys):
+    from genus.genus_types import cmp_type_designators
+
     def comp(i):
         if i >= len(xs) and i >= len(ys):
             return 0
