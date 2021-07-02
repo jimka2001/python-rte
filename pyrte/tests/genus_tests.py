@@ -55,7 +55,7 @@ def t_verboseonlyprint(s):
 
 
 class GenusCase(unittest.TestCase):
-    
+
     def test_atomic(self):
         def x():
             from pyrte.genus.depthgenerator import TestA
@@ -64,6 +64,7 @@ class GenusCase(unittest.TestCase):
         def y():
             class TestA:
                 pass
+
             return TestA
 
         self.assertTrue(SAtomic(int) is SAtomic(int))
@@ -71,12 +72,10 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAtomic(x()) is SAtomic(x()))
         self.assertTrue(SAtomic(x()) is not SAtomic(y()))
 
-
     def test_fixed_point(self):
         from pyrte.genus import fixed_point
         self.assertTrue(fixed_point(0, (lambda x: x), (lambda x, y: x == y)) == 0)
         self.assertTrue(fixed_point(0, (lambda x: x // 2), (lambda x, y: x == y)) == 0)
-
 
     def test_fixed_point2(self):
         from pyrte.genus import fixed_point
@@ -91,7 +90,6 @@ class GenusCase(unittest.TestCase):
 
         self.assertTrue(fixed_point(5, increment, evaluator) == 5)
         self.assertTrue(fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
-
 
     def test_STop(self):
         from pyrte.genus import STopImpl
@@ -139,7 +137,7 @@ class GenusCase(unittest.TestCase):
         def l_odd(n):
             return isinstance(n, int) and n % 2 == 1
 
-        self.assertTrue( SCustom(l_odd, "odd").disjoint(SMember(1, 2, 3)) is False)
+        self.assertTrue(SCustom(l_odd, "odd").disjoint(SMember(1, 2, 3)) is False)
 
     def test_sand1(self):
         from pyrte.genus import createSAnd
@@ -176,7 +174,8 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(tri_n_quad.subtypep(triple))
 
         self.assertTrue(tri_n_quad.subtypep(quadruple))
-        self.assertTrue(tri_n_quad.subtypep(SAtomic(type(5))) is None, "%s != None" % tri_n_quad.subtypep(SAtomic(type(5))))
+        self.assertTrue(tri_n_quad.subtypep(SAtomic(type(5))) is None,
+                        "%s != None" % tri_n_quad.subtypep(SAtomic(type(5))))
 
         self.assertTrue(SAnd().unit() == STop)
         self.assertTrue(SAnd().zero() == SEmpty)
@@ -425,8 +424,8 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(td3.subtypep(td4) is not True)
         self.assertTrue(td4.subtypep(td3) is not True)
         s = td5.subtypep(td3)
-        self.assertTrue(s is not False,\
-            f"td1={td1}\ntd2={td2} returned {s}")
+        self.assertTrue(s is not False,
+                        f"td1={td1}\ntd2={td2} returned {s}")
 
     def test_subtypep1(self):
         from pyrte.genus.depthgenerator import random_type_designator
@@ -438,13 +437,13 @@ class GenusCase(unittest.TestCase):
                 self.assertTrue(SAnd(td1, td2).subtypep(td1) is not False)
                 self.assertTrue(td1.subtypep(SOr(td1, td2)) is not False)
                 self.assertTrue(SAnd(td1, td2).subtypep(SAnd(td2, td1)) is not False)
-                self.assertTrue(SOr(td1, td2).subtypep(SOr(td2, td1)) is not False, \
-                    f"td1={td1}\ntd2={td2}")
+                self.assertTrue(SOr(td1, td2).subtypep(SOr(td2, td1)) is not False,
+                                f"td1={td1}\ntd2={td2}")
                 self.assertTrue(SAnd(td1, td2).subtypep(SOr(td1, td2)) is not False)
                 self.assertTrue(SAnd(SNot(td1), SNot(td2)).subtypep(SNot(SOr(td1, td2))) is not False)
                 self.assertTrue(SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))) is not False)
-                self.assertTrue(SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False,\
-                    f"td1={td1}\ntd2={td2}")
+                self.assertTrue(SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))) is not False,
+                                f"td1={td1}\ntd2={td2}")
                 self.assertTrue(SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))) is not False)
 
     def test_subtypep2(self):
@@ -459,12 +458,12 @@ class GenusCase(unittest.TestCase):
                 self.assertTrue(td.subtypep(tdc1) is not False)
                 self.assertTrue(td.subtypep(tdc2) is not False)
                 self.assertTrue(td.subtypep(tdc2) is not False)
-                self.assertTrue(tdc1.subtypep(td) is not False, \
-                    f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}")
-                self.assertTrue(tdc2.subtypep(td) is not False, \
-                    f"expecting tdc2={tdc2} subtype of {td} got {tdc2.subtypep(td)}")
-                self.assertTrue(tdc3.subtypep(td) is not False, \
-                    f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}")
+                self.assertTrue(tdc1.subtypep(td) is not False,
+                                f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}")
+                self.assertTrue(tdc2.subtypep(td) is not False,
+                                f"expecting tdc2={tdc2} subtype of {td} got {tdc2.subtypep(td)}")
+                self.assertTrue(tdc3.subtypep(td) is not False,
+                                f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}")
 
     def test_uniquify(self):
         from pyrte.genus import uniquify
@@ -549,15 +548,15 @@ class GenusCase(unittest.TestCase):
                 tdc2 = td.canonicalize(NormalForm.DNF)
                 tdc3 = td.canonicalize(NormalForm.CNF)
                 for v in test_values:
-                    self.assertTrue(td.typep(v) == tdc1.typep(v), \
-                        f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
-                        f" but of type tdc1={tdc1} is {tdc1.typep(v)}")
-                    self.assertTrue(td.typep(v) == tdc2.typep(v), \
-                        f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
-                        f" but of type tdc2={tdc2} is {tdc2.typep(v)}")
-                    self.assertTrue(td.typep(v) == tdc3.typep(v), \
-                        f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" + \
-                        f" but of type tdc3={tdc3} is {tdc3.typep(v)}")
+                    self.assertTrue(td.typep(v) == tdc1.typep(v),
+                                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" +
+                                    f" but of type tdc1={tdc1} is {tdc1.typep(v)}")
+                    self.assertTrue(td.typep(v) == tdc2.typep(v),
+                                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" +
+                                    f" but of type tdc2={tdc2} is {tdc2.typep(v)}")
+                    self.assertTrue(td.typep(v) == tdc3.typep(v),
+                                    f"v={v} membership\n     of type   td={td} is {td.typep(v)}\n" +
+                                    f" but of type tdc3={tdc3} is {tdc3.typep(v)}")
 
     def test_canonicalize_subtype(self):
         from pyrte.genus import NormalForm
@@ -597,7 +596,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(a, SNot(a)).conversion3() == SEmpty)
         self.assertTrue(SOr(a, SNot(a)).conversion3() == STop)
 
-    
     def test_combo_conversion4(self):
         # SAnd(A,STop,B) ==> SAnd(A,B),  unit=STop,   zero=SEmpty
         # SOr(A,SEmpty,B) ==> SOr(A,B),  unit=SEmpty, zero=STop
@@ -608,7 +606,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(a, SEmpty, b).conversion4() == SAnd(a, SEmpty, b))
         self.assertTrue(SOr(a, SEmpty, b).conversion4() == SOr(a, b))
 
-    
     def test_combo_conversion5(self):
         # (and A B A C) -> (and A B C)
         # (or A B A C) -> (or A B C)
@@ -618,7 +615,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(a, b, a, c).conversion5() == SAnd(b, a, c))
         self.assertTrue(SOr(a, b, a, c).conversion5() == SOr(b, a, c))
 
-    
     def test_combo_conversion6(self):
         # (and A ( and B C) D) --> (and A B C D)
         # (or A ( or B C) D) --> (or A B C D)
@@ -631,7 +627,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SOr(a, SAnd(b, c), d).conversion6() == SOr(a, SAnd(b, c), d))
         self.assertTrue(SOr(a, SOr(b, c), d).conversion6() == SOr(a, b, c, d))
 
-    
     def test_combo_conversion98(self):
         a = SEql("a")
         b = SEql("b")
@@ -640,7 +635,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(b, c, a, d).conversion98() == SAnd(a, b, c, d), f"got {SAnd(b, c, a, d).conversion98()}")
         self.assertTrue(SOr(b, c, a, d).conversion98() == SOr(a, b, c, d))
 
-    
     def test_combo_conversion8(self):
         # (or A ( not B)) --> STop if B is subtype of A, zero = STop
         # (and A ( not B)) --> SEmpty if B is supertype of A, zero = SEmpty
@@ -656,7 +650,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SOr(a, SNot(ab), c).conversion8() == SOr(a, SNot(ab), c))
         self.assertTrue(SOr(SNot(a), ab, c).conversion8() == STop)
 
-    
     def test_combo_conversion9(self):
         # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A + !B + C)(A + !C)
@@ -666,33 +659,32 @@ class GenusCase(unittest.TestCase):
         c = SEql("c")
         x = SEql("x")
         self.assertTrue(SAnd(SOr(a, b, c),
-                    SOr(a, SNot(b), c),
-                    x).conversion9() == SAnd(SOr(a, b, c),
-                                             SOr(a, c),
-                                             x))
+                             SOr(a, SNot(b), c),
+                             x).conversion9() == SAnd(SOr(a, b, c),
+                                                      SOr(a, c),
+                                                      x))
         self.assertTrue(SAnd(SOr(a, b, SNot(c)),
-                    SOr(a, SNot(b), c),
-                    SOr(a, SNot(b), SNot(c))).conversion9() == SAnd(SOr(a, b, SNot(c)),
-                                                                    SOr(a, SNot(b), c),
-                                                                    SOr(a, SNot(c))))
+                             SOr(a, SNot(b), c),
+                             SOr(a, SNot(b), SNot(c))).conversion9() == SAnd(SOr(a, b, SNot(c)),
+                                                                             SOr(a, SNot(b), c),
+                                                                             SOr(a, SNot(c))))
         self.assertTrue(SAnd(SOr(a, b, SNot(c)),
-                    SOr(a, SNot(b), c),
-                    SOr(a, SNot(b), SNot(c))).conversion9() == \
-               SAnd(SOr(a, b, SNot(c)),
-                    SOr(a, SNot(b), c),
-                    SOr(a, SNot(c))))
+                             SOr(a, SNot(b), c),
+                             SOr(a, SNot(b), SNot(c))).conversion9() ==
+                        SAnd(SOr(a, b, SNot(c)),
+                             SOr(a, SNot(b), c),
+                             SOr(a, SNot(c))))
 
         self.assertTrue(SOr(SAnd(a, b, c), SAnd(a, SNot(b), c), x).conversion9() == SOr(SAnd(a, b, c), SAnd(a, c), x))
         self.assertTrue(SOr(SAnd(a, b, SNot(c)),
-                   SAnd(a, SNot(b), c),
-                   SAnd(a, SNot(b), SNot(c))).conversion9() == \
-               SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c))))
+                            SAnd(a, SNot(b), c),
+                            SAnd(a, SNot(b), SNot(c))).conversion9() ==
+                        SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c))))
         self.assertTrue(SOr(SAnd(a, b, SNot(c)),
-                   SAnd(a, SNot(b), c),
-                   SAnd(a, SNot(b), SNot(c))).conversion9() == \
-               SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c))))
+                            SAnd(a, SNot(b), c),
+                            SAnd(a, SNot(b), SNot(c))).conversion9() ==
+                        SOr(SAnd(a, b, SNot(c)), SAnd(a, SNot(b), c), SAnd(a, SNot(c))))
 
-    
     def test_combo_conversion10(self):
         # (and A B C) --> (and A C) if A is subtype of B
         # (or A B C) -->  (or B C) if A is subtype of B
@@ -704,7 +696,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(a, ab, c).conversion10() == SAnd(a, c))
         self.assertTrue(SOr(a, ab, c).conversion10() == SOr(ab, c))
 
-    
     def test_combo_conversion11(self):
         # A + A! B -> A + B
         # A + A! BX + Y = (A + BX + Y)
@@ -721,7 +712,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(a, SOr(SNot(a), b, x), y).conversion11() == SAnd(a, SOr(b, x), y))
         self.assertTrue(SAnd(a, SOr(a, b, x), y).conversion11() == SAnd(a, y))
 
-    
     def test_combo_conversion12(self):
         # AXBC + !X = ABC + !X
         a = SEql("a")
@@ -731,7 +721,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SOr(SAnd(a, x, b, c), SNot(x)).conversion12() == SOr(SAnd(a, b, c), SNot(x)))
         self.assertTrue(SAnd(SOr(a, x, b, c), SNot(x)).conversion12() == SAnd(SOr(a, b, c), SNot(x)))
 
-    
     def test_combo_conversion13(self):
         # multiple !member
         # SOr(x,!{-1, 1},!{1, 2, 3, 4})
@@ -741,15 +730,14 @@ class GenusCase(unittest.TestCase):
         x = SAtomic(int)
 
         self.assertTrue(SOr(x,
-                   SNot(SMember(-1, 1)),
-                   SNot(SMember(1, 2, 3, 4))).conversion13() == SOr(x,
-                                                                    SNot(SEql(1))))
+                            SNot(SMember(-1, 1)),
+                            SNot(SMember(1, 2, 3, 4))).conversion13() == SOr(x,
+                                                                             SNot(SEql(1))))
         self.assertTrue(SAnd(x,
-                    SNot(SMember(-1, 1)),
-                    SNot(SMember(1, 2, 3, 4))).conversion13() == SAnd(x,
-                                                                      SNot(SMember(-1, 1, 2, 3, 4))))
+                             SNot(SMember(-1, 1)),
+                             SNot(SMember(1, 2, 3, 4))).conversion13() == SAnd(x,
+                                                                               SNot(SMember(-1, 1, 2, 3, 4))))
 
-    
     def test_combo_conversion14(self):
         # multiple member
         # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
@@ -758,41 +746,40 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SOr(x, SMember(1, 2, 3), SMember(2, 3, 4, 5)).conversion14() == SOr(x, SMember(1, 2, 3, 4, 5)))
         self.assertTrue(SAnd(x, SMember(1, 2, 3), SMember(2, 3, 4, 5)).conversion14() == SAnd(x, SMember(2, 3)))
 
-    
     def test_combo_conversion15(self):
         x = SAtomic(int)
-        self.assertTrue(SOr(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SOr(x, SNot(SMember(4, 5))))
-        self.assertTrue(SAnd(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SAnd(x, SMember(0, 1)))
+        self.assertTrue(
+            SOr(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SOr(x, SNot(SMember(4, 5))))
+        self.assertTrue(
+            SAnd(x, SMember(0, 1, 2, 3), SNot(SMember(2, 3, 4, 5))).conversion15() == SAnd(x, SMember(0, 1)))
 
-    
     def test_combo_conversion16(self):
         self.assertTrue(SAnd(SEql("a"), SAtomic(int)).conversion16() == SAnd(SEmpty, SAtomic(int)))
         self.assertTrue(SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int)))
 
-    
     def test_combo_conversionD1(self):
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
         # == > SNot(SMember(42, 43, 44))
-        self.assertTrue(SOr(SNot(SMember(1, 2, 3, "a", "b", "c")), SAtomic(int)).conversionD1() == SNot(SMember("a", "b", "c")))
+        self.assertTrue(
+            SOr(SNot(SMember(1, 2, 3, "a", "b", "c")), SAtomic(int)).conversionD1() == SNot(SMember("a", "b", "c")))
 
         # to SAnd(SMember(42, 43, 44), SInt)
         # while conversionA1() converts it to
         # SMember(42, 43, 44)
         self.assertTrue(SAnd(SMember(1, 2, 3, "a", "b", "c"), SAtomic(int)).conversionD1() == SMember(1, 2, 3))
 
-    
     def test_combo_conversionD3(self):
         # find disjoint pair
         self.assertTrue(SAnd(SMember(1, 2), SMember(3, 4)).conversionD3() == SEmpty)
         self.assertTrue(SAnd(SMember("a", "b"), SAtomic(int)).conversionD3() == SEmpty)
-        self.assertTrue(SAnd(SMember(1, 2, "a", "b"), SAtomic(int)).conversionD3() == SAnd(SMember(1, 2, "a", "b"), SAtomic(int)))
+        self.assertTrue(
+            SAnd(SMember(1, 2, "a", "b"), SAtomic(int)).conversionD3() == SAnd(SMember(1, 2, "a", "b"), SAtomic(int)))
 
         self.assertTrue(SOr(SNot(SMember(1, 2)), SNot(SMember(3, 4))).conversionD3() == STop)
         self.assertTrue(SOr(SNot(SMember("a", "b")), SNot(SAtomic(int))).conversionD3() == STop)
-        self.assertTrue(SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))).conversionD3() == \
-               SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))))
+        self.assertTrue(SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))).conversionD3() ==
+                        SOr(SNot(SMember(1, 2, "a", "b")), SNot(SAtomic(int))))
 
-    
     def test_discovered_cases3(self):
         class Test1:
             pass
@@ -806,7 +793,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SAtomic(int))
         self.assertTrue(SOr(SAtomic(int), SNot(SAtomic(Test1))).canonicalize() == SNot(SAtomic(Test1)))
 
-    
     def test_depth_generator(self):
         from pyrte.genus.depthgenerator import DepthGenerator
         rand_lambda = DepthGenerator(2).rand_lambda_str_generator()
@@ -814,7 +800,6 @@ class GenusCase(unittest.TestCase):
             rand_lambda[0](i)
         DepthGenerator(5).generate_tree()
 
-    
     def test_discovered_cases4(self):
         self.assertTrue(SNot(SEmpty).canonicalize() == STop)
         self.assertTrue(SAtomic(float).disjoint(SEmpty) is True)
@@ -824,7 +809,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAtomic(float).disjoint(SNot(SEmpty)) is not True)
         self.assertTrue(SAnd(SAtomic(float), SNot(SEmpty)).canonicalize() == SAtomic(float))
 
-    
     def test_canonicalize_cache(self):
         a = SEql("a")
         td = SOr(a, a, a)
@@ -842,7 +826,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(td.canonicalized_hash[NormalForm.CNF] == tdc3)
         self.assertTrue(tdc3.canonicalized_hash[NormalForm.CNF] == tdc3)
 
-    
     def test_to_dnf2(self):
         from pyrte.genus.depthgenerator import random_type_designator
         from pyrte.genus import NormalForm, orp, andp, notp
@@ -875,7 +858,6 @@ class GenusCase(unittest.TestCase):
                 dnf = td.canonicalize(NormalForm.DNF)
                 self.assertTrue(dnfp(dnf), f"expecting DNF, got {dnf}")
 
-    
     def test_to_cnf2(self):
         from pyrte.genus.depthgenerator import random_type_designator
         from pyrte.genus import NormalForm, orp, andp, notp
@@ -908,7 +890,6 @@ class GenusCase(unittest.TestCase):
                 cnf = td.canonicalize(NormalForm.CNF)
                 self.assertTrue(cnfp(cnf), f"expecting DNF, got {cnf}")
 
-    
     def test_to_dnf(self):
         # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
         #    --> td = SOr(y1,y2,y3)
@@ -934,7 +915,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(td.to_nf(NormalForm.CNF) == td)
         self.assertTrue(td.compute_cnf() == td)
 
-    
     def test_to_cnf(self):
         # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
         #    --> td = SAnd(y1,y2,y3)
@@ -959,7 +939,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(td.to_nf(NormalForm.DNF) == td)
         self.assertTrue(td.compute_dnf() == td)
 
-    
     def test_discovered_cases_867(self):
         class Test1:
             pass
@@ -967,7 +946,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAtomic(float).subtypep(SNot(SEmpty)) is True)
         self.assertTrue(SNot(SAtomic(Test1)).subtypep(SAtomic(Test1)) is False)
 
-    
     def test_compare_sequence(self):
         from pyrte.genus import compare_sequence
         self.assertTrue(compare_sequence([SEql(1)], [SEql(2)]) < 0)
@@ -975,8 +953,8 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(compare_sequence([SEql(1)], [SEql(1)]) == 0)
         self.assertTrue(compare_sequence([SEql(2)], [SEql(1)]) > 0)
         self.assertTrue(compare_sequence([SEql(1), SEql(1)], [SEql(1), SEql(1)]) == 0)
-        self.assertTrue(compare_sequence([SEql(1), SEql(2)], [SEql(1), SEql(1)]) > 0, \
-            f"returned {compare_sequence([SEql(1),SEql(2)], [SEql(1),SEql(1)])}")
+        self.assertTrue(compare_sequence([SEql(1), SEql(2)], [SEql(1), SEql(1)]) > 0,
+                        f"returned {compare_sequence([SEql(1), SEql(2)], [SEql(1), SEql(1)])}")
         self.assertTrue(compare_sequence([SEql(1), SEql(1)], [SEql(1), SEql(2)]) < 0)
 
         self.assertTrue(compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0)  # short list < long list
@@ -1029,7 +1007,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(cmp_type_designators(even, odd) < 0, f"expecting {even} < {odd}")  # alphabetical by printable
         self.assertTrue(cmp_type_designators(odd, even) > 0)
 
-    
     def test_mdtd(self):
         for depth in range(0, 4):
             for length in range(1, 5):
@@ -1037,12 +1014,12 @@ class GenusCase(unittest.TestCase):
                     tds = [random_type_designator(depth) for _ in range(length)]
                     computed = mdtd(tds)
                     for i in range(len(computed)):
-                        for j in range(i+1, len(computed)):
+                        for j in range(i + 1, len(computed)):
                             self.assertTrue(computed[i].disjoint(computed[j]) is not False,
                                             f"\n tds={tds}" +
                                             f"\n mdtd={computed}" +
                                             f"\n {computed[i]}.disjoint({computed[j]}) = {computed[i].disjoint(computed[j])}" +
-                                            f"\n intersection = {SAnd(computed[i],computed[j]).canonicalize(NormalForm.DNF)}")
+                                            f"\n intersection = {SAnd(computed[i], computed[j]).canonicalize(NormalForm.DNF)}")
 
                     for v in test_values:
                         containing = [td for td in computed if td.typep(v)]
