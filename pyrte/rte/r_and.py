@@ -31,7 +31,7 @@ class And (Combination):
 def createAnd(operands):
     from rte.r_star import Star
     from rte.r_sigma import Sigma
-    
+
     if not operands:
         return Star(Sigma)
     elif len(operands) == 1:
