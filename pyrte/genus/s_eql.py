@@ -29,8 +29,9 @@ disjoint_down 1
 subtypep 1
 cmp_to_same_class_obj 3
 """
-from pyrte.genus import *
 
+from .s_member import SMemberImpl
+from .simple_type_d import SimpleTypeD, TerminalType
 
 
 class SEql(SMemberImpl, TerminalType):

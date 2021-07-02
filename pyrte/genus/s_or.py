@@ -35,7 +35,15 @@ subtypep 0
 canonicalize_once 3
 compute_cnf 3
 """
-from pyrte.genus import *
+
+from .genus_types import combop, memberimplp, notp, notp, orp, andp, atomicp, topp
+from .genus_types import createSAnd, createSOr, createSMember, cmp_type_designators
+
+from .s_combination import SCombination
+from .s_empty import SEmpty
+from .s_top import STop
+from .utils import find_first
+from .utils import uniquify
 
 
 

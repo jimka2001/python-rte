@@ -34,7 +34,11 @@ compute_dnf 0
 compute_cnf 1
 cmp_to_same_class_obj 3
 """
-from pyrte.genus import *
+
+from .s_atomic import SAtomic
+from .s_empty import SEmpty
+from .s_top import STop
+from .simple_type_d import SimpleTypeD
 
 
 class SNot(SimpleTypeD):

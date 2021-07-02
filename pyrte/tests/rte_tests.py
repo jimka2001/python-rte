@@ -20,9 +20,16 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import unittest
-from pyrte.rte import *
-from pyrte.genus import *
-
+from rte.r_sigma import Sigma, SigmaImpl
+from rte.r_epsilon import Epsilon, EpsilonImpl
+from rte.r_emptyset import EmptySet, EmptySetImpl
+from rte.r_star import Star
+from rte.r_and import And, createAnd
+from rte.r_or import Or, createOr
+from rte.r_singleton import Singleton
+from genus.s_eql import SEql
+from rte.r_cat import Cat, createCat
+from rte.r_random import random_rte
 
 class RteCase(unittest.TestCase):
     def test_sigma(self):

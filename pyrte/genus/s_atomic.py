@@ -31,7 +31,16 @@ canonicalize_once 1
 cmp_to_same_class_obj 3
 """
 
-from pyrte.genus import *
+
+from .s_and import SAnd
+from .s_custom import SCustom
+from .s_empty import SEmptyImpl, SEmpty
+from .s_member import SMemberImpl
+from .s_or import SOr
+from .s_top import STopImpl
+from .simple_type_d import SimpleTypeD, TerminalType
+from .utils import get_all_subclasses
+
 
 
 class SAtomic(SimpleTypeD, TerminalType):

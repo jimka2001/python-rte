@@ -21,7 +21,9 @@
 
 from collections import OrderedDict
 from collections.abc import Iterable
-from pyrte.genus import *
+
+from .genus_types import cmp_type_designators
+
 
 
 def generate_lazy_val(func):

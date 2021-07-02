@@ -31,7 +31,8 @@ cmp_to_same_class_obj 3
 apply 1
 """
 
-from pyrte.genus import *
+
+from .simple_type_d import SimpleTypeD, TerminalType
 
 
 class SCustom(SimpleTypeD, TerminalType):

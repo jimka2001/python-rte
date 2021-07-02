@@ -19,12 +19,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from .genus_types import NormalForm, createSAnd
-from .genus_types import NormalForm, orp, andp, topp, notp
-from .genus_types import cmp_type_designators
-from .genus_types import combop
-from .genus_types import createSAnd, createSOr
-from .genus_types import memberimplp, notp, createSMember, notp, orp, andp, atomicp
+from .depthgenerator import random_type_designator, test_values, DepthGenerator
+from .genus_types import NormalForm
+from .genus_types import combop, memberimplp, notp, notp, orp, andp, atomicp, topp
+from .genus_types import createSAnd, createSOr, createSMember, cmp_type_designators
+from .mdtd import mdtd
 from .s_and import SAnd
 from .s_atomic import SAtomic
 from .s_combination import SCombination
@@ -36,15 +35,7 @@ from .s_not import SNot
 from .s_or import SOr
 from .s_top import STopImpl, STop
 from .simple_type_d import SimpleTypeD, TerminalType
-from .utils import compare_sequence
+from .utils import compare_sequence, get_all_subclasses
 from .utils import find_simplifier, find_first
-from .utils import fixed_point, generate_lazy_val
-from .utils import flat_map
-from .utils import flat_map, generate_lazy_val
-from .utils import generate_lazy_val
-from .utils import get_all_subclasses
-from .utils import remove_element
-from .utils import search_replace
-from .utils import uniquify
-from .depthgenerator import random_type_designator, test_values, DepthGenerator
-from .mdtd import mdtd
+from .utils import flat_map, generate_lazy_val, fixed_point
+from .utils import remove_element, search_replace, uniquify

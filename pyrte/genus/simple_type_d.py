@@ -44,8 +44,6 @@ cmp_to_same_class_obj   3
 """
 
 from abc import ABCMeta, abstractmethod
-from pyrte.genus import *
-
 
 
 # from utils import CallStack
@@ -53,11 +51,15 @@ from pyrte.genus import *
 # canonicalize_callstack = CallStack("canonicalize")
 # inhabited_callstack = CallStack("inhabited")
 
+from .genus_types import NormalForm
+from .genus_types import notp, orp, andp, topp
+from .utils import generate_lazy_val, fixed_point
 
 # is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
     """This class is just here to emulate the TerminalType trait in Scala"""
     pass
+
 
 class SimpleTypeD():
     """SimpleTypeD is the super class of all of the

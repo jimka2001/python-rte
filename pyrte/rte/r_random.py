@@ -20,8 +20,16 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import random
-from pyrte.rte import *
-
+from .r_and import And
+from .r_cat import Cat
+from .r_emptyset import EmptySet
+from .r_epsilon import Epsilon
+from .r_not import Not
+from .r_or import Or
+from .r_sigma import Sigma
+from .r_singleton import Singleton
+from .r_star import Star
+from genus.depthgenerator import random_type_designator
 
 leaf_rtes = [EmptySet,
              Epsilon,
@@ -44,6 +52,9 @@ def random_rte(depth):
     def random_not():
         return Not(random_rte(depth - 1))
 
+    def random_star():
+        return Star(random_rte(depth - 1))
+
     def random_singleton():
         return Singleton(random_type_designator(depth - 1))
 
@@ -54,5 +65,6 @@ def random_rte(depth):
         return random_fixed()
     else:
         randomizer = random.choice([random_and, random_or, random_not,
+                                    random_star,
                                     random_cat, random_singleton, random_fixed])
         return randomizer()

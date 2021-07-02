@@ -29,7 +29,8 @@ disjoint_down 3
 subtypep 3
 cmp_to_same_class_obj 3
 """
-from pyrte.genus import *
+
+from .simple_type_d import SimpleTypeD, TerminalType
 
 
 class SEmptyImpl(SimpleTypeD, TerminalType):

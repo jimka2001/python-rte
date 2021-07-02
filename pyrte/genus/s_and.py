@@ -36,12 +36,19 @@ canonicalize_once 3
 compute_dnf 3
 """
 
-from pyrte.genus import *
-
+from .genus_types import NormalForm
+from .genus_types import memberimplp, orp, atomicp
+from .genus_types import createSAnd, createSOr, createSMember
+from .s_empty import SEmpty
+from .s_top import STop
+from .simple_type_d import SimpleTypeD
+from .utils import find_first, generate_lazy_val, uniquify
 
 # from utils import CallStack
 # subtypep_and_callstack = CallStack("subtypep.SAnd")
 # inhabited_down_and = CallStack("inhabited_down.SAnd")
+
+from .s_combination import SCombination
 
 
 class SAnd(SCombination):

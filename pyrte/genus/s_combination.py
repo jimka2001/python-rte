@@ -37,7 +37,14 @@ canonicalize_once 3
 cmp_to_same_class 3
 """
 
-from pyrte.genus import *
+
+from .genus_types import combop, memberimplp, notp, orp, andp
+from .genus_types import createSMember, cmp_type_designators
+from .simple_type_d import SimpleTypeD
+from .utils import compare_sequence
+from .utils import find_simplifier, find_first
+from .utils import flat_map
+from .utils import remove_element, search_replace, uniquify
 
 
 class SCombination(SimpleTypeD):

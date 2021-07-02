@@ -34,7 +34,8 @@ cmp_to_same_class_obj 3
 <???> case class SMember </???>
 """
 
-from pyrte.genus import *
+
+from .simple_type_d import SimpleTypeD, TerminalType
 
 
 class SMemberImpl(SimpleTypeD):

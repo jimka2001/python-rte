@@ -22,7 +22,18 @@
 
 import math
 import random
-from pyrte.genus import *
+
+
+from .genus_types import createSAnd, createSOr
+from .s_and import SAnd
+from .s_atomic import SAtomic
+from .s_custom import SCustom
+from .s_empty import SEmpty
+from .s_eql import SEql
+from .s_member import SMember
+from .s_not import SNot
+from .s_or import SOr
+from .s_top import STop
 
 
 class DepthGenerator:
