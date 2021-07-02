@@ -23,7 +23,6 @@ import functools
 from abc import abstractmethod
 
 
-
 """
 [0-3] Advancement tracker
 
@@ -340,6 +339,7 @@ class SCombination(SimpleTypeD):
         #      to memberArgs andNot notMemberArgs.
         # In the SOr  case we can remove the SMember(...) and filter the SNot(SMember(...))
         #      to notMemberArgs andNot memberArgs.
+
         def diff(xs, ys):
             return [x for x in xs if x not in ys]
 
