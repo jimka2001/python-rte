@@ -1,8 +1,8 @@
 import setuptools
 
-setuptools.setup(name='genus',
+setuptools.setup(name='pyrte',
 version='0.1',
-description='rational type expressions (RTEs) for the Python programming language.',
+description='Rational type expressions (RTEs) for the Python programming language.',
 url='https://gitlab.lrde.epita.fr/jnewton/python-rte',
 author='J.E.Newton & M.Oueslati',
 install_requires=[],
