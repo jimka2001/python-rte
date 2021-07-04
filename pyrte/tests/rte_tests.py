@@ -71,6 +71,9 @@ class RteCase(unittest.TestCase):
         self.assertEqual(createCat([Singleton(SEql(1))]), Singleton(SEql(1)))
         self.assertEqual(createCat([Sigma,Sigma]), Cat(Sigma,Sigma))
 
+        self.assertEqual(Cat(Singleton(SEql(1)),Singleton(SEql(2)),Singleton(SEql(3))),
+                         Cat(Singleton(SEql(1)),Singleton(SEql(2)),Singleton(SEql(3))))
+
     def test_singleton(self):
         self.assertEqual(Singleton(SEql(1)).operand, SEql(1))
 
@@ -83,7 +86,50 @@ class RteCase(unittest.TestCase):
         for depth in range(5):
             for r in range(1000):
                 rt = random_rte(depth)
-                self.assertIs(rt.nullable(), rt.canonicalize().nullable())
+                self.assertIs(rt.nullable(), rt.canonicalize().nullable(),
+                              f"\nlhs = {rt.nullable()}\nrhs = {rt.canonicalize().nullable()}" +
+                              f"\nrt={rt}" +
+                              f"\nrt.canonicalize() = {rt.canonicalize()}")
+
+    def test_star_conversion1(self):
+        self.assertIs(Star(Epsilon).conversion1(), Epsilon)
+        self.assertIs(Star(EmptySet).conversion1(), Epsilon)
+        rt = Star(Singleton(SEql(1)))
+        self.assertIs(Star(rt).conversion1(), rt)
+
+    def test_star_conversion2(self):
+        x = Singleton(SEql(1))
+        sx = Star(x)
+
+        # Star(Cat(x,Star(x))) -> Star(x)
+        self.assertIs(Star(Cat(x, sx)).conversion2(), sx)
+
+        # Star(Cat(Star(x),x)) -> Star(x)
+        self.assertIs(Star(Cat(sx, x)).conversion2(), sx)
+
+        # Star(Cat(Star(x),x,Star(x))) -> Star(x)
+        self.assertIs(Star(Cat(sx, x, sx)).conversion2(), sx)
+
+        self.assertEqual(Star(Cat(Star(x), x)).conversion2(), Star(x))
+        self.assertEqual(Star(Cat(x, Star(x))).conversion2(), Star(x))
+        self.assertEqual(Star(Cat(Star(x), x, Star(x))).conversion2(), Star(x))
+
+    def test_star_conversion3(self):
+        x = Singleton(SEql(1))
+        y = Singleton(SEql(2))
+        z = Singleton(SEql(3))
+        # Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
+        #    -->    Star(Cat(X, Y, Z))
+        self.assertEqual(Star(Cat(x,y,z,Star(Cat(x,y,z)))).conversion3(),
+                         Star(Cat(x,y,z)))
+        # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
+        #    -->    Star(Cat(X, Y, Z))
+        self.assertEqual(Star(Cat(Star(Cat(x,y,z)),x,y,z)).conversion3(),
+                         Star(Cat(x,y,z)))
+        # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
+        #    -->    Star(Cat(X, Y, Z))
+        self.assertEqual(Star(Cat(Star(Cat(x,y,z)),x,y,z,Star(Cat(x,y,z)))).conversion3(),
+                         Star(Cat(x,y,z)))
 
 
 if __name__ == '__main__':

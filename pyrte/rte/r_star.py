@@ -41,7 +41,7 @@ class Star(Rte):
 
     def __init__(self, operand):
         super(Star, self).__init__()
-        assert isinstance(operand, Rte)
+        assert isinstance(operand, Rte), f"expecting Rte: got {operand} of type {type(operand)}"
         self.operand = operand
 
     def __str__(self):
@@ -59,3 +59,79 @@ class Star(Rte):
 
     def nullable(self):
         return True
+
+    def conversion1(self):
+        from rte.r_epsilon import Epsilon
+        if self.operand is Epsilon:
+            return Epsilon
+        elif self.operand is EmptySet:
+            return Epsilon
+        elif starp(self.operand):
+            return self.operand
+        else:
+            return self
+
+    def conversion2(self):
+        from rte.r_cat import catp
+        if not catp(self.operand):
+            return self
+        c = self.operand
+        if len(c.operands) != 2 and len(c.operands) != 3:
+            return self
+        # Star(Cat(x,Star(x))) -> Star(x)
+        elif len(c.operands) == 2 and Star(c.operands[0]) == c.operands[1]:
+            return c.operands[1]
+        # Star(Cat(Star(x),x)) -> Star(x)
+        elif len(c.operands) == 2 and c.operands[0] == Star(c.operands[1]):
+            return c.operands[0]
+        # Star(Cat(Star(x),x,Star(x))) -> Star(x)
+        elif len(c.operands) == 3 and c.operands[0] == c.operands[2] and c.operands[0] == Star(c.operands[1]):
+            return c.operands[0]
+        else:
+            return self
+
+    def conversion3(self):
+        from rte.r_cat import catp, Cat
+        if not catp(self.operand):
+            return self
+        c = self.operand
+        # Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
+        #    -->    Star(Cat(X, Y, Z))
+        right = c.operands[-1]
+        left = c.operands[0:-1]
+        if c.operands == left + [Star(Cat(*left))]:
+            return right
+
+        # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
+        #    -->    Star(Cat(X, Y, Z))
+        left = c.operands[0]
+        right = c.operands[1:]
+        if c.operands == [Star(Cat(*right))] + right:
+            return left
+
+        # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
+        #    -->    Star(Cat(X, Y, Z))
+        if len(c.operands) < 3:
+            return self
+        else:
+            left = c.operands[0]
+            middle = c.operands[1:-1]
+            sc = [Star(Cat(*middle))]
+            if c.operands == sc + middle + sc:
+                return left
+            else:
+                return self
+
+    def conversion99(self):
+        return Star(self.operand.canonicalize_once())
+
+    def canonicalize_once(self):
+        from genus.utils import find_simplifier
+        return find_simplifier(self, [lambda: self.conversion1(),
+                                      lambda: self.conversion2(),
+                                      lambda: self.conversion3(),
+                                      lambda: self.conversion99()])
+
+
+def starp(rte):
+    return isinstance(rte, Star)

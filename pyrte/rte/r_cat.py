@@ -54,8 +54,8 @@ class Cat (Rte):
         return all(r.nullable() for r in self.operands)
 
 
-
-
+def catp(op):
+    return isinstance(op, Cat)
 
 
 def createCat(operands):
