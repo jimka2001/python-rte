@@ -82,6 +82,7 @@ class RteCase(unittest.TestCase):
         self.assertEqual(Singleton(SEql(1)).operand, SEql(1))
 
     def test_random(self):
+        self.assertTrue(self)
         for depth in range(5):
             for r in range(1000):
                 random_rte(depth).__str__()
@@ -160,6 +161,60 @@ class RteCase(unittest.TestCase):
                          And(Not(x), Not(y), Not(z)))
         self.assertEqual(Not(And(x, y, z)).conversion3(),
                          Or(Not(x), Not(y), Not(z)))
+
+    def test_cat_conversion6(self):
+        # Cat(A, B, X *, X, C, D) --> Cat(A, B, X, X *, C, D)
+        x = Singleton(SEql("x"))
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        d = Singleton(SEql("d"))
+        self.assertEqual(Cat(a, b, Star(x), x, c, d).conversion6(),
+                         Cat(a, b, x, Star(x), c, d))
+
+    def test_cat_conversion1(self):
+        x = Singleton(SEql("x"))
+        self.assertIs(Cat().conversion1(), Epsilon)
+        self.assertIs(Cat(x).conversion1(), x)
+        self.assertEqual(Cat(x, x).conversion1(), Cat(x, x))
+
+    def test_cat_conversion5(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+
+        # Cat(..., x*, x, x* ...) --> Cat(..., x*, x, ...)
+        self.assertEqual(Cat(Star(x), x, Star(x)).conversion5(),
+                         Cat(Star(x), x))
+        self.assertEqual(Cat(y, Star(x), x, Star(x)).conversion5(),
+                         Cat(y, Star(x), x))
+        self.assertEqual(Cat(y, Star(x), x, Star(x), y).conversion5(),
+                         Cat(y, Star(x), x, y))
+
+        # and Cat(..., x*, x* ...) --> Cat(..., x*, ...)
+        self.assertEqual(Cat(Star(x), Star(x)).conversion5(),
+                         Star(x))
+        self.assertEqual(Cat(y, Star(x), Star(x), y).conversion5(),
+                         Cat(y, Star(x), y))
+        self.assertEqual(Cat(Star(x), Star(x), y).conversion5(),
+                         Cat(Star(x), y))
+        self.assertEqual(Cat(y, Star(x), Star(x)).conversion5(),
+                         Cat(y, Star(x)))
+
+    def test_cat_conversion4(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        self.assertEqual(Cat(x, Epsilon, y).conversion4(),
+                         Cat(x, y))
+        self.assertIs(Cat(x, Epsilon).conversion4(),
+                      x)
+        self.assertEqual(Cat(Cat(x, y), x, Cat(y, x)).conversion4(),
+                         Cat(x, y, x, y, x))
+
+    def test_cat_conversion3(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        self.assertIs(Cat(x, EmptySet, y).conversion3(),
+                      EmptySet)
 
 
 if __name__ == '__main__':

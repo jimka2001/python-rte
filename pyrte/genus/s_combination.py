@@ -22,7 +22,6 @@
 import functools
 from abc import abstractmethod
 
-
 """
 [0-3] Advancement tracker
 
@@ -35,7 +34,6 @@ same_combination 3
 canonicalize_once 3
 cmp_to_same_class 3
 """
-
 
 from genus.utils import compare_sequence
 from genus.utils import find_simplifier, find_first
@@ -276,6 +274,7 @@ class SCombination(SimpleTypeD):
                     # td is a dual so td.create() creates a dual
                     # convert AXBC -> ABC by removing X because we found !X elsewhere
                     return td.create(remove_element(td.tds, comp.s))
+
             return self.create([f(td) for td in self.tds])
 
     def conversion13(self):
@@ -306,6 +305,7 @@ class SCombination(SimpleTypeD):
                     return new_not_member
                 else:
                     return td
+
             # we replace all SNot(SMember(...)) with the newly computed
             #  SNot(SMember(...)), the remove duplicates.  This effectively
             #  replaces the right-most one, and removes all others.
@@ -378,6 +378,7 @@ class SCombination(SimpleTypeD):
 
                 else:
                     return [td]
+
             return self.create(flat_map(f, self.tds))
 
     def conversion16(self):
@@ -475,4 +476,4 @@ class SCombination(SimpleTypeD):
 
 
 def combop(this):
-	return isinstance(this, SCombination)
+    return isinstance(this, SCombination)
