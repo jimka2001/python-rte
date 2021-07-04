@@ -44,3 +44,56 @@ class Not (Rte):
 
     def nullable(self):
         return not self.operand.nullable()
+
+    def conversion1(self):
+        from rte.r_sigma import Sigma
+        from rte.r_emptyset import EmptySet
+        from rte.r_epsilon import Epsilon
+        from rte.r_constants import notSigma, singletonSTop, sigmaStar, notEpsilon, singletonSEmpty
+        if self.operand == Sigma:
+            return notSigma
+        elif self.operand == singletonSTop:
+            return notSigma
+        elif self.operand == sigmaStar:
+            return EmptySet
+        elif self.operand == Epsilon:
+            return notEpsilon
+        elif self.operand == EmptySet:
+            return sigmaStar
+        elif self.operand == singletonSEmpty:
+            return sigmaStar
+        else:
+            return self
+
+    def conversion2(self):
+        if notp(self.operand):
+            # Not(Not(op)) --> op
+            return self.operand.operand
+        else:
+            return self
+
+    def conversion3(self):
+        from rte.r_and import andp, createAnd
+        from rte.r_or import createOr, orp
+        if andp(self.operand):
+            # Not(And(a, b)) -> Or(Not(a), Not(b))
+            return createOr([Not(x) for x in self.operand.operands])
+        elif orp(self.operand):
+            # Not(And(a, b)) -> Or(Not(a), Not(b))
+            return createAnd([Not(x) for x in self.operand.operands])
+        else:
+            return self
+
+    def conversion99(self):
+        return Not(self.operand.canonicalize_once())
+
+    def canonicalize_once(self):
+        from genus.utils import find_simplifier
+        return find_simplifier(self, [lambda: self.conversion1(),
+                                      lambda: self.conversion2(),
+                                      lambda: self.conversion3(),
+                                      lambda: self.conversion99()])
+
+
+def notp(op):
+    return isinstance(op, Not)

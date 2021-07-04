@@ -20,28 +20,56 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from rte.r_combination import Combination
-
-
-class And (Combination):
-    def __str__(self):
-        return "And(" + ", ".join([str(td) for td in self.operands]) + ")"
-
-    def nullable(self):
-        return all(r.nullable() for r in self.operands)
-
-
-def createAnd(operands):
-    from rte.r_star import Star
+def genSigmaStar():
     from rte.r_sigma import Sigma
-
-    if not operands:
-        return Star(Sigma)
-    elif len(operands) == 1:
-        return operands[0]
-    else:
-        return And(*operands)
+    from rte.r_star import Star
+    return Star(Sigma)
 
 
-def andp(op):
-    return isinstance(op, And)
+sigmaStar = genSigmaStar()
+
+
+def genSigmaSigmaStarSigma():
+    from rte.r_sigma import Sigma
+    from rte.r_cat import Cat
+    return Cat(Sigma, Sigma, sigmaStar)
+
+
+sigmaSigmaStarSigma = genSigmaSigmaStarSigma()
+
+
+def genNotSigma():
+    from rte.r_epsilon import Epsilon
+    from rte.r_or import Or
+    return Or(sigmaSigmaStarSigma, Epsilon)
+
+
+notSigma = genNotSigma()
+
+
+def genNotEpsilon():
+    from rte.r_cat import Cat
+    from rte.r_sigma import Sigma
+    return Cat(Sigma, sigmaStar)
+
+
+notEpsilon = genNotEpsilon()
+sigmaSigmaStar = notEpsilon
+
+
+def genSingletonSTop():
+    from rte.r_singleton import Singleton
+    from genus.s_top import STop
+    return Singleton(STop)
+
+
+singletonSTop = genSingletonSTop()
+
+
+def genSingletonSEmpty():
+    from rte.r_singleton import Singleton
+    from genus.s_empty import SEmpty
+    return Singleton(SEmpty)
+
+
+singletonSEmpty = genSingletonSEmpty()

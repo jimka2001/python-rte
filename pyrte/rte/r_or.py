@@ -30,6 +30,7 @@ class Or (Combination):
     def nullable(self):
         return any(r.nullable() for r in self.operands)
 
+
 def createOr(operands):
     from rte.r_emptyset import EmptySet
 
@@ -39,3 +40,7 @@ def createOr(operands):
         return operands[0]
     else:
         return Or(*operands)
+
+
+def orp(op):
+    return isinstance(op, Or)
