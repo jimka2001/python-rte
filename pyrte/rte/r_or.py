@@ -71,19 +71,34 @@ class Or (Combination):
         return not x
 
     def conversionO8(self):
-        pass
+        return self
 
     def conversionO9(self):
-        pass
+        return self
 
     def conversionO10(self):
-        pass
+        return self
 
     def conversionO11b(self):
-        pass
+        return self
 
     def conversionO15(self):
-        pass
+        return self
+
+    def conversionD16b(self):
+        # Or(A, x, Not(y)) --> And(A, Not(x)) if x, y disjoint
+        from rte.r_singleton import singletonp
+        from rte.r_not import notp
+        from genus.utils import flat_map
+        # collect all td for each Not(Singleton(td))
+        nss = [r.operand.operand for r in self.operands if notp(r) and singletonp(r.operand)]
+
+        def f(r):
+            if singletonp(r) and any(r.operand.disjoint(d) for d in nss):
+                return []
+            else:
+                return [r]
+        return self.create(flat_map(f, self.operands))
 
     def canonicalize_once(self):
         from genus.utils import find_simplifier
@@ -99,7 +114,7 @@ class Or (Combination):
                                       lambda: self.conversionC14(),
                                       lambda: self.conversionO11b(),
                                       lambda: self.conversionC16(),
-                                      lambda: self.conversionC16b(),
+                                      lambda: self.conversionD16b(),
                                       lambda: self.conversionC12(),
                                       lambda: self.conversionO15(),
                                       lambda: self.conversionC21(),

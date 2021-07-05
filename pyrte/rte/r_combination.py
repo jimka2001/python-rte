@@ -273,7 +273,7 @@ class Combination (Rte):
 
         return self.create(filtered)
 
-    def conversionC16b(self):
+    def conversionD16b(self):
         raise Exception(f"conversionC16b not implemented for {type(self)}")
 
     def conversionC17(self):

@@ -33,6 +33,7 @@ from genus.s_top import STop
 from genus.s_empty import SEmpty
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
+from genus.s_and import SAnd
 from rte.r_cat import Cat, createCat
 from rte.r_random import random_rte
 from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
@@ -373,6 +374,120 @@ class RteCase(unittest.TestCase):
         ab = Singleton(SMember("a", "b"))
         self.assertIs(And(a, b, ab).conversionC21(), EmptySet)
         self.assertIs(Or(Not(a), Not(b), ab).conversionC21(), sigmaStar)
+
+    def test_and_conversionA8(self):
+        # if operands contains EmptyWord, then the intersection is either EmptyWord or EmptySet
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        self.assertIs(And(Star(a), Epsilon, Star(b)).conversionA8(), Epsilon)
+        self.assertIs(And(Star(a), Epsilon, b).conversionA8(), EmptySet)
+        self.assertEqual(And(a, b).conversionA8(), And(a, b))
+
+    def test_and_conversionA9(self):
+        # if x matches only singleton then And(x, y * ) -> And(x, y)
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        self.assertEqual(And(a, Star(b)).conversionA9(), And(a, b))
+
+    def test_and_conversionA10(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        d = Singleton(SEql("d"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        # And(A,B,Or(X,Y,Z),C,D)
+        # --> Or(And(A,B,   X,   C, D)),
+        #        And(A,B,   Y,   C, D)),
+        #        And(A,B,   Z,   C, D)))
+        self.assertEqual(And(a, b, Or(x, y, z), c, d).conversionA10(),
+                         Or(And(a, b, x, c, d),
+                            And(a, b, y, c, d),
+                            And(a, b, z, c, d)))
+
+    def test_and_conversionA13(self):
+        # if there is an explicit Sigma and also a singleton which is inhabited, then
+        #  we can simply remove the sigma.
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        self.assertEqual(And(a, b, Sigma).conversionA13(), And(a, b))
+
+    def test_and_conversionA18(self):
+        # if there is a singleton which is not inhabited
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        self.assertEqual(And(a, Singleton(SAnd(SEql(1), SEql(2))), b).conversionA18(), EmptySet)
+
+    def test_combo_conversionD16b(self):
+        # And(A, x, Not(y)) --> And(A, x) if x, y disjoint
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        a = Singleton(SMember("x", "y"))
+        self.assertIs(x.operand.disjoint(y.operand), True)
+        self.assertEqual(And(a, x, Not(y)).conversionD16b(), And(a, x))
+        self.assertEqual(Or(a, x, Not(y)).conversionD16b(), Or(a, Not(y)))
+
+    def test_and_conversionA17(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        self.assertIs(And(x, Cat(Star(x), y, Star(x), y)).conversionA17(), EmptySet)
+        self.assertEqual(And(Star(x), Cat(Star(x), y, Star(x), y)).conversionA17(),
+                         And(Star(x), Cat(Star(x), y, Star(x), y)))
+
+    def test_and_conversionA17a(self):
+        #    And(Cat(a,b,c),Cat(x,y,z) ...)
+        #    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        d = Singleton(SEql("d"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        self.assertIs(And(Cat(a, b, c, d), Cat(x, y, z)).conversionA17a(), EmptySet)
+        self.assertEqual(And(Cat(a, b, c, Star(d)), Cat(x, y, z)).conversionA17a(),
+                         And(Cat(a, b, c, Star(d)), Cat(x, y, z)))
+        self.assertEqual(And(Cat(a, b, c), x).conversionA17a(),
+                         And(Cat(a, b, c), x))
+        self.assertEqual(And(Cat(a, b, c), d, Cat(x, y, z)).conversionA17a(),
+                         And(d, Cat(And(a, x), And(b, y), And(c, z))))
+
+    def test_and_conversionA17b(self):
+        # after 17a we know that if there are multiple Cats(...) without a nullable,
+        #   then all such Cats(...) without a nullable have same number of operands
+        #   have been merged into one Cat(...)
+        #   So assure that all other Cats have no more non-nullable operands.
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        d = Singleton(SEql("d"))
+        self.assertIs(And(Cat(a, b, c), Cat(a, b, c, d, Star(c))).conversionA17b(), EmptySet)
+        self.assertEqual(And(Cat(a, b, c), Cat(a, b, c, Star(c))).conversionA17b(),
+                         And(Cat(a, b, c), Cat(a, b, c, Star(c))))
+        self.assertEqual(And(Cat(a, b, c), Cat(a, b, Star(c))).conversionA17b(),
+                         And(Cat(a, b, c), Cat(a, b, Star(c))))
+
+    def test_and_conversionA17c(self):
+        # if And(...) contains a Cat with no nullables, (or explicit Sigma or Singleton)
+        #  then remove the nullables from ever other Cat with that many non-nullables,
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        d = Singleton(SEql("d"))
+        self.assertEqual(And(Cat(a, b, c), Star(d), Cat(a, b, Star(c))).conversionA17c(),
+                         And(Cat(a, b, c), Star(d), Cat(a, b, Star(c))))
+        self.assertEqual(And(Cat(a, b, c), Star(d), Cat(a, b, c, Star(c))).conversionA17c(),
+                         And(Cat(a, b, c), Star(d), Cat(a, b, c)))
+        self.assertEqual(And(Cat(a, b, c), Star(d), Cat(Star(a), b, c, d, Star(c))).conversionA17c(),
+                         And(Cat(a, b, c), Star(d), Cat(b, c, d)))
+
+    def test_and_conversionA19(self):
+        ab = Singleton(SMember("a", "b"))
+        bc = Singleton(SMember("b", "c"))
+        ac = Singleton(SMember("a", "c"))
+        self.assertIs(And(ab, bc, ac).conversionA19(), EmptySet)
+        self.assertIs(And(ab, Not(Singleton(SAtomic(str)))).conversionA19(), EmptySet)
 
 
 if __name__ == '__main__':

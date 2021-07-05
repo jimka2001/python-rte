@@ -23,7 +23,7 @@
 from rte.r_combination import Combination
 
 
-class And (Combination):
+class And(Combination):
     def __str__(self):
         return "And(" + ", ".join([str(td) for td in self.operands]) + ")"
 
@@ -84,37 +84,209 @@ class And (Combination):
         return Sigma in self.operands or any(singletonp(r) for r in self.operands)
 
     def conversionA8(self):
-        pass
+        # if operands contains EmptyWord, then the intersection is either EmptyWord or EmptySet
+        from rte.r_epsilon import Epsilon
+        from rte.r_emptyset import EmptySet
+        if Epsilon not in self.operands:
+            return self
+        elif all(r.nullable() for r in self.operands):
+            return Epsilon
+        else:
+            return EmptySet
 
     def conversionA9(self):
-        pass
+        # if x matches only singleton then And(x,y*) -> And(x,y)
+        from rte.r_star import starp
+        if self.matches_only_singletons() and any(starp(r) for r in self.operands):
+            return self.create([rt.operand if starp(rt) else rt for rt in self.operands])
+        else:
+            return self
 
     def conversionA10(self):
-        pass
-
-    def conversionA12(self):
-        pass
+        # And(A,B,Or(X,Y,Z),C,D)
+        # --> Or(And(A,B,   X,   C, D)),
+        #        And(A,B,   Y,   C, D)),
+        #        And(A,B,   Z,   C, D)))
+        from genus.utils import find_first, search_replace
+        from rte.r_or import createOr, orp
+        ror = find_first(orp, self.operands)
+        if ror is None:
+            return self
+        else:
+            return createOr([createAnd(search_replace(self.operands, ror, r)) for r in ror.operands])
 
     def conversionA13(self):
-        pass
+        # if there is an explicit Sigma and also a singleton which is inhabited, then
+        #  we can simply remove the sigma.
+        from rte.r_sigma import Sigma
+        from rte.r_singleton import singletonp
+        from genus.utils import remove_element
+        if Sigma in self.operands \
+                and any(r.operand.inhabited() is True for r in self.operands if singletonp(r)):
+            return self.create(remove_element(self.operands, Sigma))
+        else:
+            return self
+
+    def conversionD16b(self):
+        from rte.r_singleton import singletonp
+        from rte.r_not import notp
+        from genus.utils import flat_map
+        ss = [r.operand for r in self.operands if singletonp(r)]
+
+        def f(r):
+            # And(A, x, Not(y)) --> And(A, x) if x, y disjoint
+            if notp(r) and singletonp(r.operand) and any(r.operand.operand.disjoint(d) for d in ss):
+                return []
+            else:
+                return [r]
+
+        return self.create(flat_map(f, self.operands))
 
     def conversionA17(self):
-        pass
+        # if And(...) contains a Cat(...) with at least 2 non-nullable components,
+        #    this Cat matches only sequences of length 2 or more.
+        # If And(...) contains a singleton, then it matches only sequences
+        #    of length 1, perhaps an empty set of such sequences if the singleton type
+        #    is empty.
+        # If both are true, then the And() matches EmptySet
+        from genus.utils import generate_lazy_val, find_first
+        from rte.r_singleton import singletonp
+        from rte.r_cat import catp
+        from rte.r_sigma import Sigma
+        from rte.r_emptyset import EmptySet
+
+        tds = generate_lazy_val(lambda: [r.operand for r in self.operands if singletonp(r)])
+
+        def count_non_nullable(c):
+            return sum(1 for r in c.operands if not r.nullable())
+
+        long_cat = generate_lazy_val(lambda: find_first((lambda c: catp(c) and count_non_nullable(c) > 1),
+                                                        self.operands,
+                                                        False))
+
+        if (Sigma in self.operands or tds()) and long_cat():
+            return EmptySet
+        else:
+            return self
 
     def conversionA17a(self):
-        pass
+        # if And(...) has more than one Cat(...) which has no nullable operand,
+        #    then the number of non-nullables must be the same, else EmptySet.
+        #    We also replace the several Cat(...) (having no nullables)
+        #    with a single Cat(...) with intersections of operands.
+        #    And(Cat(a,b,c),Cat(x,y,z) ...)
+        #    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
+        from rte.r_cat import catp, createCat
+        from rte.r_emptyset import EmptySet
+        from genus.utils import uniquify
+        # build a list of cat operands which contain no nullables
+        cats = [c.operands
+                for c in self.operands
+                if catp(c)
+                and all(not td.nullable() for td in c.operands)]
+        if not cats:
+            return self
+        elif 1 == len(cats):
+            return self
+        elif any(len(cats[0]) != len(cats[i]) for i in range(1, len(cats))):
+            # we found two Cat(...) of necessarily different lengths
+            return EmptySet
+        else:
+            invert = [[c[i] for c in cats] for i in range(0, len(cats[0]))]
+            cat = createCat([self.create(r) for r in invert])
+            return self.create(uniquify([cat if catp(r) and r.operands in cats else r for r in self.operands]))
 
     def conversionA17b(self):
-        pass
+        # after 17a we know that if there are multiple Cats(...) without a nullable,
+        #   then all such Cats(...) without a nullable have same number of operands
+        #   have been merged into one Cat(...)
+        #   So assure that all other Cats have no more non-nullable operands.
+        from rte.r_cat import catp
+        from rte.r_emptyset import EmptySet
+        from genus.utils import find_first
+        cats = [r for r in self.operands if catp(r)]
+        non_nullable_cat = find_first(lambda c: all(not o.nullable() for o in c.operands),
+                                      cats,
+                                      None)
+        if non_nullable_cat is None:
+            return self
+        else:
+            num_non_nullable = len(non_nullable_cat.operands)
+
+            def count_non_nullable(c):
+                return sum(1 for o in c.operands if not o.nullable())
+
+            for c in cats:
+                if count_non_nullable(c) > num_non_nullable:
+                    return EmptySet
+            return self
 
     def conversionA17c(self):
-        pass
+        # if And(...) contains a Cat with no nullables, (or explicit Sigma or Singleton)
+        #  then remove the nullables from ever other Cat with that many non-nullables,
+
+        # find a Cat(...) with no nullables, there should be at most one because
+        #    conversion17a as run.
+        from rte.r_cat import catp, createCat
+        from rte.r_sigma import Sigma
+        from rte.r_singleton import singletonp
+        from genus.utils import generate_lazy_val, find_first
+
+        def count_non_nullable(c):
+            return sum(1 for r in c.operands if not r.nullable())
+
+        cat_non_nullable = generate_lazy_val(lambda: next((c for c in self.operands
+                                                           if catp(c)
+                                                           and all(not o.nullable() for o in c.operands)),
+                                                          None))
+        if find_first(catp, self.operands, None) is None:
+            return self
+        if Sigma in self.operands:
+            num_non_nullables = 1
+        elif any(singletonp(r) for r in self.operands):
+            num_non_nullables = 1
+        elif cat_non_nullable() is not None:
+            num_non_nullables = len(cat_non_nullable().operands)
+        else:
+            return self
+
+        def f(c):
+            if not catp(c):
+                return c
+            elif count_non_nullable(c) == num_non_nullables:
+                # remove nullables.
+                return createCat([o for o in c.operands if not o.nullable()])
+            else:
+                return c
+
+        return self.create([f(r) for r in self.operands])
 
     def conversionA18(self):
-        pass
+        # if there is a singleton which is not inhabited
+        from rte.r_singleton import singletonp
+        from rte.r_emptyset import EmptySet
+        if any(r.operand.inhabited() is False for r in self.operands if singletonp(r)):
+            return EmptySet
+        else:
+            return self
 
     def conversionA19(self):
-        pass
+        from genus.s_and import createSAnd
+        from genus.s_not import SNot
+        from genus.genus_types import NormalForm
+        from rte.r_singleton import singletonp
+        from rte.r_not import notp
+        from rte.r_emptyset import EmptySet
+        singletons = [r.operand for r in self.operands if singletonp(r)]
+        if not singletons:
+            return self
+        else:
+            not_singletons = [SNot(r.operand.operand) for r in self.operands if notp(r) and singletonp(r.operand)]
+            canonicalized_singletons = createSAnd(singletons + not_singletons).canonicalize(NormalForm.DNF)
+            if canonicalized_singletons.inhabited() is False:
+                return EmptySet
+            else:
+                return self
 
     def canonicalize_once(self):
         from genus.utils import find_simplifier
@@ -136,7 +308,7 @@ class And (Combination):
                                       lambda: self.conversionC21(),
                                       lambda: self.conversionC15(),
                                       lambda: self.conversionC16(),
-                                      lambda: self.conversionC16b(),
+                                      lambda: self.conversionD16b(),
                                       lambda: self.conversionA17(),
                                       lambda: self.conversionA17a(),
                                       lambda: self.conversionA17b(),
