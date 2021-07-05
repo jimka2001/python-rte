@@ -153,13 +153,14 @@ class SNot(SimpleTypeD):
 		return self.compute_dnf()
 
 	def cmp_to_same_class_obj(self, td):
-		from genus.genus_types import cmp_type_designators
+		from genus.utils import cmp_objects
 		if type(self) != type(td):
 			return super().cmp_to_same_class_obj(td)
 		elif self == td:
 			return 0
 		else:
-			return cmp_type_designators(self.s, td.s)
+			return cmp_objects(self.s, td.s)
+
 
 def notp(this):
 	return isinstance(this, SNot)

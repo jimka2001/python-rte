@@ -24,7 +24,7 @@ import os
 import unittest
 
 from genus.depthgenerator import random_type_designator, test_values, DepthGenerator
-from genus.genus_types import NormalForm, cmp_type_designators
+from genus.genus_types import NormalForm
 from genus.mdtd import mdtd
 from genus.s_and import SAnd, createSAnd, andp
 from genus.s_atomic import SAtomic
@@ -37,7 +37,7 @@ from genus.s_not import SNot, notp
 from genus.s_or import SOr, createSOr, orp
 from genus.s_top import STopImpl, STop
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from genus.utils import compare_sequence, get_all_subclasses
+from genus.utils import compare_sequence, get_all_subclasses, cmp_objects
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map, generate_lazy_val, fixed_point
 from genus.utils import remove_element, search_replace, uniquify
@@ -933,51 +933,51 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(compare_sequence([SEql(1), SEql(1)], [SEql(1)]) > 0)  # short list < long list
         self.assertTrue(compare_sequence([SEql(1)], [SEql(1), SEql(1)]) < 0)
 
-        self.assertTrue(cmp_type_designators(SEql(1), SEql(2)) < 0)
-        self.assertTrue(cmp_type_designators(SEql(1), SEql(1)) == 0)
-        self.assertTrue(cmp_type_designators(SEql(2), SEql(1)) > 0)
+        self.assertTrue(cmp_objects(SEql(1), SEql(2)) < 0)
+        self.assertTrue(cmp_objects(SEql(1), SEql(1)) == 0)
+        self.assertTrue(cmp_objects(SEql(2), SEql(1)) > 0)
 
-        self.assertTrue(cmp_type_designators(SMember(1), SMember(1)) == 0)
-        self.assertTrue(cmp_type_designators(SMember(1), SMember(2)) < 0)
-        self.assertTrue(cmp_type_designators(SMember(2), SMember(1)) > 0)
-        self.assertTrue(cmp_type_designators(SMember(1), SMember(1, 2)) < 0)  # short list < long list
-        self.assertTrue(cmp_type_designators(SMember(1, 2), SMember(1)) > 0)
-        self.assertTrue(cmp_type_designators(SMember(1, 2), SMember(1, 2)) == 0)
-        self.assertTrue(cmp_type_designators(SMember(1, 2), SMember(1, 3)) < 0)
-        self.assertTrue(cmp_type_designators(SMember(1, 2), SMember(1, 1)) > 0)
+        self.assertTrue(cmp_objects(SMember(1), SMember(1)) == 0)
+        self.assertTrue(cmp_objects(SMember(1), SMember(2)) < 0)
+        self.assertTrue(cmp_objects(SMember(2), SMember(1)) > 0)
+        self.assertTrue(cmp_objects(SMember(1), SMember(1, 2)) < 0)  # short list < long list
+        self.assertTrue(cmp_objects(SMember(1, 2), SMember(1)) > 0)
+        self.assertTrue(cmp_objects(SMember(1, 2), SMember(1, 2)) == 0)
+        self.assertTrue(cmp_objects(SMember(1, 2), SMember(1, 3)) < 0)
+        self.assertTrue(cmp_objects(SMember(1, 2), SMember(1, 1)) > 0)
 
-        self.assertTrue(cmp_type_designators(SEql(1), SMember(1, 1)) < 0)  # compare alphabetically
-        self.assertTrue(cmp_type_designators(SMember(1, 2), SEql(1)) > 0)
+        self.assertTrue(cmp_objects(SEql(1), SMember(1, 1)) < 0)  # compare alphabetically
+        self.assertTrue(cmp_objects(SMember(1, 2), SEql(1)) > 0)
 
-        self.assertTrue(cmp_type_designators(SAnd(SEql(1), SEql(2)), SAnd(SEql(1), SEql(2))) == 0)
-        self.assertTrue(cmp_type_designators(SAnd(SEql(1), SEql(2)), SAnd(SEql(2), SEql(1))) < 0)
-        self.assertTrue(cmp_type_designators(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(1))) > 0)
+        self.assertTrue(cmp_objects(SAnd(SEql(1), SEql(2)), SAnd(SEql(1), SEql(2))) == 0)
+        self.assertTrue(cmp_objects(SAnd(SEql(1), SEql(2)), SAnd(SEql(2), SEql(1))) < 0)
+        self.assertTrue(cmp_objects(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(1))) > 0)
 
-        self.assertTrue(cmp_type_designators(SOr(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0)
-        self.assertTrue(cmp_type_designators(SOr(SEql(2), SEql(3)), SOr(SEql(2), SEql(2))) > 0)
-        self.assertTrue(cmp_type_designators(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(2))) == 0)
+        self.assertTrue(cmp_objects(SOr(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0)
+        self.assertTrue(cmp_objects(SOr(SEql(2), SEql(3)), SOr(SEql(2), SEql(2))) > 0)
+        self.assertTrue(cmp_objects(SAnd(SEql(2), SEql(2)), SAnd(SEql(2), SEql(2))) == 0)
 
-        self.assertTrue(cmp_type_designators(SOr(SEql(2), SEql(1)), SAnd(SEql(2), SEql(2))) > 0)  # alphabetical
-        self.assertTrue(cmp_type_designators(SAnd(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0)
+        self.assertTrue(cmp_objects(SOr(SEql(2), SEql(1)), SAnd(SEql(2), SEql(2))) > 0)  # alphabetical
+        self.assertTrue(cmp_objects(SAnd(SEql(2), SEql(1)), SOr(SEql(2), SEql(2))) < 0)
 
-        self.assertTrue(cmp_type_designators(SNot(SEql(1)), SNot(SEql(2))) < 0)
-        self.assertTrue(cmp_type_designators(SNot(SEql(1)), SNot(SEql(1))) == 0)
-        self.assertTrue(cmp_type_designators(SNot(SEql(2)), SNot(SEql(1))) > 0)
+        self.assertTrue(cmp_objects(SNot(SEql(1)), SNot(SEql(2))) < 0)
+        self.assertTrue(cmp_objects(SNot(SEql(1)), SNot(SEql(1))) == 0)
+        self.assertTrue(cmp_objects(SNot(SEql(2)), SNot(SEql(1))) > 0)
 
-        self.assertTrue(cmp_type_designators(STop, STop) == 0)
-        self.assertTrue(cmp_type_designators(SEmpty, SEmpty) == 0)
-        self.assertTrue(cmp_type_designators(SEmpty, STop) < 0)
-        self.assertTrue(cmp_type_designators(STop, SEmpty) > 0)
+        self.assertTrue(cmp_objects(STop, STop) == 0)
+        self.assertTrue(cmp_objects(SEmpty, SEmpty) == 0)
+        self.assertTrue(cmp_objects(SEmpty, STop) < 0)
+        self.assertTrue(cmp_objects(STop, SEmpty) > 0)
 
-        self.assertTrue(cmp_type_designators(SAtomic(int), SAtomic(int)) == 0)
-        self.assertTrue(cmp_type_designators(SAtomic(int), SAtomic(str)) < 0)
-        self.assertTrue(cmp_type_designators(SAtomic(str), SAtomic(int)) > 0)
+        self.assertTrue(cmp_objects(SAtomic(int), SAtomic(int)) == 0)
+        self.assertTrue(cmp_objects(SAtomic(int), SAtomic(str)) < 0)
+        self.assertTrue(cmp_objects(SAtomic(str), SAtomic(int)) > 0)
 
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
-        self.assertTrue(cmp_type_designators(even, even) == 0)
-        self.assertTrue(cmp_type_designators(even, odd) < 0, f"expecting {even} < {odd}")  # alphabetical by printable
-        self.assertTrue(cmp_type_designators(odd, even) > 0)
+        self.assertTrue(cmp_objects(even, even) == 0)
+        self.assertTrue(cmp_objects(even, odd) < 0, f"expecting {even} < {odd}")  # alphabetical by printable
+        self.assertTrue(cmp_objects(odd, even) > 0)
 
     def test_mdtd(self):
         for depth in range(0, 4):
