@@ -29,17 +29,3 @@ class NormalForm(Enum):
 
 def is_even(x):
 	return isinstance(x, int) and not (x & 1)
-
-
-# return 0 if a == b
-#        -1 if a < b
-#        1 if a > b
-def cmp_type_designators(a, b):
-	if a == b:
-		return 0
-	elif type(a) == type(b):
-		return a.cmp_to_same_class_obj(b)
-	elif type(a).__name__ < type(b).__name__:
-		return -1
-	else:
-		return 1

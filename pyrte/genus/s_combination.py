@@ -412,9 +412,9 @@ class SCombination(SimpleTypeD):
         raise NotImplementedError
 
     def conversion98(self):
-        from genus.genus_types import cmp_type_designators
+        from genus.utils import cmp_objects
 
-        ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_type_designators))
+        ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_objects))
         return self.create(ordered)
 
     def conversion99(self, nf):

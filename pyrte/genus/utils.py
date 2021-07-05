@@ -23,7 +23,6 @@ from collections import OrderedDict
 from collections.abc import Iterable
 
 
-
 def generate_lazy_val(func):
     saved_value = None
     called = False
@@ -93,6 +92,7 @@ def search_replace_splice(xs, search, replace):
             return replace
         else:
             return [x]
+
     return flat_map(select, xs)
 
 
@@ -116,9 +116,21 @@ def find_first(pred, xs, default=None):
     return next(filter(pred, xs), default)
 
 
-def compare_sequence(xs, ys):
-    from genus.genus_types import cmp_type_designators
+# return 0 if a == b
+#        -1 if a < b
+#        1 if a > b
+def cmp_objects(a, b):
+    if a == b:
+        return 0
+    elif type(a) == type(b):
+        return a.cmp_to_same_class_obj(b)
+    elif type(a).__name__ < type(b).__name__:
+        return -1
+    else:
+        return 1
 
+
+def compare_sequence(xs, ys):
     def comp(i):
         if i >= len(xs) and i >= len(ys):
             return 0
@@ -127,9 +139,9 @@ def compare_sequence(xs, ys):
         elif i >= len(ys):
             return 1
         elif xs[i] == ys[i]:
-            return comp(i+1)
+            return comp(i + 1)
         else:
-            return cmp_type_designators(xs[i], ys[i])
+            return cmp_objects(xs[i], ys[i])
 
     return comp(0)
 
@@ -173,3 +185,4 @@ def get_all_subclasses(cls):
         all_subclasses.extend(get_all_subclasses(subclass))
 
     return all_subclasses
+
