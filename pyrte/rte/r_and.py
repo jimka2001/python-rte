@@ -27,6 +27,13 @@ class And (Combination):
     def __str__(self):
         return "And(" + ", ".join([str(td) for td in self.operands]) + ")"
 
+    def create(self,operands):
+        return createAnd(operands)
+
+    def create_dual(self, operands):
+        from rte.r_or import createOr
+        return createOr(operands)
+
     def nullable(self):
         return all(r.nullable() for r in self.operands)
 
@@ -63,35 +70,81 @@ class And (Combination):
     def orInvert(self, x):
         return x
 
+    def conversionA7(self):
+        from rte.r_epsilon import Epsilon
+        from rte.r_emptyset import EmptySet
+        if Epsilon in self.operands and self.matches_only_singletons():
+            return EmptySet
+        else:
+            return self
+
+    def matches_only_singletons(self):
+        from rte.r_sigma import Sigma
+        from rte.r_singleton import singletonp
+        return Sigma in self.operands or any(singletonp(r) for r in self.operands)
+
+    def conversionA8(self):
+        pass
+
+    def conversionA9(self):
+        pass
+
+    def conversionA10(self):
+        pass
+
+    def conversionA12(self):
+        pass
+
+    def conversionA13(self):
+        pass
+
+    def conversionA17(self):
+        pass
+
+    def conversionA17a(self):
+        pass
+
+    def conversionA17b(self):
+        pass
+
+    def conversionA17c(self):
+        pass
+
+    def conversionA18(self):
+        pass
+
+    def conversionA19(self):
+        pass
+
     def canonicalize_once(self):
         from genus.utils import find_simplifier
-        return find_simplifier(self, [lambda: self.conversion1(),
-                                      lambda: self.conversion3(),
-                                      lambda: self.conversion4(),
-                                      lambda: self.conversion4(),
-                                      lambda: self.conversion6(),
-                                      lambda: self.conversion7(),
+        return find_simplifier(self, [lambda: self.conversionC1(),
+                                      lambda: self.conversionC3(),
+                                      lambda: self.conversionC4(),
+                                      lambda: self.conversionC4(),
+                                      lambda: self.conversionC6(),
+                                      lambda: self.conversionA7(),
                                       lambda: self.conversionC7(),
-                                      lambda: self.conversion8(),
-                                      lambda: self.conversion9(),
-                                      lambda: self.conversion10(),
+                                      lambda: self.conversionA8(),
+                                      lambda: self.conversionA9(),
+                                      lambda: self.conversionA10(),
                                       lambda: self.conversionC11(),
-                                      lambda: self.conversion12(),
+                                      lambda: self.conversionC14(),
+                                      lambda: self.conversionA18(),
                                       lambda: self.conversionC12(),
-                                      lambda: self.conversion13(),
-                                      lambda: self.conversion21(),
+                                      lambda: self.conversionA13(),
+                                      lambda: self.conversionC21(),
                                       lambda: self.conversionC15(),
                                       lambda: self.conversionC16(),
                                       lambda: self.conversionC16b(),
-                                      lambda: self.conversion17(),
-                                      lambda: self.conversion17a(),
-                                      lambda: self.conversion17b(),
-                                      lambda: self.conversion17c(),
-                                      lambda: self.conversion18(),
-                                      lambda: self.conversion19(),
+                                      lambda: self.conversionA17(),
+                                      lambda: self.conversionA17a(),
+                                      lambda: self.conversionA17b(),
+                                      lambda: self.conversionA17c(),
+                                      lambda: self.conversionA19(),
                                       lambda: self.conversionC17(),
-                                      lambda: self.conversion99(),
-                                      lambda: self.conversion5(),
+                                      lambda: self.conversionC99(),
+                                      lambda: self.conversionC5(),
                                       lambda: super(And, self).canonicalize_once()])
 
 

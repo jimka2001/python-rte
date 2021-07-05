@@ -227,19 +227,53 @@ class RteCase(unittest.TestCase):
     def test_combo_conversion1(self):
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
-        self.assertIs(And().conversion1(), sigmaStar)
-        self.assertIs(Or().conversion1(), EmptySet)
+        self.assertIs(And().conversionC1(), sigmaStar)
+        self.assertIs(Or().conversionC1(), EmptySet)
 
-        self.assertIs(And(x).conversion1(), x)
-        self.assertIs(Or(x).conversion1(), x)
+        self.assertIs(And(x).conversionC1(), x)
+        self.assertIs(Or(x).conversionC1(), x)
 
-        self.assertEqual(And(x,y).conversion1(), And(x,y))
-        self.assertEqual(Or(x,y).conversion1(), Or(x,y))
+        self.assertEqual(And(x,y).conversionC1(), And(x, y))
+        self.assertEqual(Or(x,y).conversionC1(), Or(x, y))
 
-    def test_combo_conversion3(self):
+    def test_combo_conversionC3(self):
         # Or(... Sigma * ....) -> Sigma *
         # And(... EmptySet....) -> EmptySet
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        self.assertIs(Or(x,Star(Sigma),y).conversionC3(), sigmaStar)
+        self.assertIs(And(x, EmptySet, y).conversionC3(), EmptySet)
 
+    def test_combo_conversionC4(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        self.assertEqual(Or(x, y, y, x, y, y).conversionC4(), Or(x,y))
+        self.assertEqual(And(x, y, y, x, y, y).conversionC4(), And(x, y))
 
+    def test_combo_conversionC5(self):
+        # alphabetize
+        w = Singleton(SEql("w"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        self.assertEqual(Or(z, y, x, w).conversionC5(), Or(w, x, y,z))
+        self.assertEqual(And(z, y, x, w).conversionC5(), And(w, x, y, z))
+        self.assertEqual(Or(Or(x, y), And(x, y)).conversionC5(), Or(And(x, y), Or(x, y)))
+
+    def test_combo_conversionC6(self):
+        w = Singleton(SEql("w"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        # remove Sigma* and flatten And(And(...)...)
+        self.assertEqual(And(x,And(y,z)).conversionC6(), And(x,y,z))
+        self.assertEqual(And(x,Star(Sigma),y).conversionC6(), And(x,y))
+        self.assertEqual(And(And(w,x),Star(Sigma),And(y,z)).conversionC6(), And(w,x,y,z))
+
+        # remove EmptySet and flatten Or(Or(...)...)
+        self.assertEqual(Or(x, Or(y, z)).conversionC6(), Or(x, y, z))
+        self.assertEqual(Or(x, EmptySet, y).conversionC6(), Or(x,y))
+        self.assertEqual(Or(Or(w, x), EmptySet, Or(y, z)).conversionC6(), Or(w, x, y, z))
+        
 if __name__ == '__main__':
     unittest.main()

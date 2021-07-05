@@ -74,10 +74,10 @@ class Combination (Rte):
     def orInvert(self, x):
         raise Exception(f"orInvert not implemented for {type(self)}")
 
-    def conversion1(self):
+    def conversionC1(self):
         return self.create(self.operands)
 
-    def conversion3(self):
+    def conversionC3(self):
         # Or(... Sigma * ....) -> Sigma *
         # And(... EmptySet....) -> EmptySet
         if self.zero() in self.operands:
@@ -85,18 +85,18 @@ class Combination (Rte):
         else:
             return self
 
-    def conversion4(self):
+    def conversionC4(self):
         from genus.utils import uniquify
         return self.create(uniquify(self.operands))
 
-    def conversion5(self):
+    def conversionC5(self):
         from genus.utils import cmp_objects
         import functools
 
         ordered = sorted(self.operands, key=functools.cmp_to_key(cmp_objects))
         return self.create(ordered)
 
-    def conversion6(self):
+    def conversionC6(self):
         # remove Sigma * and flatten And(And(...)...)
         # remove EmptySet and flatten Or(Or(...)...)
         from genus.utils import flat_map
@@ -139,6 +139,19 @@ class Combination (Rte):
         # Or(...x,Not(x)...) --> SigmaStar
         from rte.r_not import notp
         if any(r1 for r1 in self.operands if notp(r1) and r1.operand in self.operands):
+            return self.zero()
+        else:
+            return self
+
+    def conversionC14(self):
+        # generalization of conversionC11
+        # Or(A,Not(B),X) -> Sigma* if B is subtype of A
+        # And(A,Not(B),X) -> EmptySet if A is subtype of B
+        from rte.r_not import notp
+        from rte.r_singleton import singletonp
+        nots = [r.operand.operand for r in self.operands if notp(r) and singletonp(r.operand)]
+        singletons = [r.operand for r in self.operands if singletonp(r)]
+        if any(self.annihilator(sup, sub) is True for sub in nots for sup in singletons):
             return self.zero()
         else:
             return self
@@ -290,7 +303,7 @@ class Combination (Rte):
         rt = Singleton(createSMember([a for a in member.arglist if self.orInvert(td.typep(a))]))
         return self.create(search_replace(self.operands, singleton, rt))
 
-    def conversion21(self):
+    def conversionC21(self):
         from genus.utils import flat_map
         from rte.r_and import andp
         from rte.r_or import orp
@@ -312,5 +325,5 @@ class Combination (Rte):
         else:
             return self
 
-    def conversion99(self):
+    def conversionC99(self):
         return self.create([r.canonicalize_once() for r in self.operands])

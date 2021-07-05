@@ -421,7 +421,7 @@ class SCombination(SimpleTypeD):
         return self.create([td.canonicalize(nf) for td in self.tds])
 
     def canonicalize_once(self, nf=None):
-        simplifiers = [lambda: self.conversion1(),  # should also work self.conversion1, self.conversion2 ...
+        simplifiers = [lambda: self.conversion1(),  # should also work self.conversionC1, self.conversion2 ...
                        lambda: self.conversion2(),
                        lambda: self.conversion3(),
                        lambda: self.conversion4(),
