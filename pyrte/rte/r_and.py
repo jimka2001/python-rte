@@ -30,6 +30,70 @@ class And (Combination):
     def nullable(self):
         return all(r.nullable() for r in self.operands)
 
+    def zero(self):
+        from rte.r_emptyset import EmptySet
+        return EmptySet
+
+    def one(self):
+        from rte.r_constants import sigmaStar
+        return sigmaStar
+
+    def same_combination(self,r):
+        return andp(r)
+
+    def dual_combination(self,r):
+        from rte.r_or import orp
+        return orp(r)
+
+    def set_operation(self, a, b):
+        # intersection
+        return [x for x in a if x in b]
+
+    def set_dual_operation(self, a, b):
+        # union
+        return a + [x for x in b if x not in a]
+
+    def annihilator(self, a, b):
+        return a.subtypep(b)
+
+    def createTypeD(self, operands):
+        from genus.s_and import createSAnd
+        createSAnd(operands)
+
+    def orInvert(self, x):
+        return x
+
+    def canonicalize_once(self):
+        from genus.utils import find_simplifier
+        return find_simplifier(self, [lambda: self.conversion1(),
+                                      lambda: self.conversion3(),
+                                      lambda: self.conversion4(),
+                                      lambda: self.conversion4(),
+                                      lambda: self.conversion6(),
+                                      lambda: self.conversion7(),
+                                      lambda: self.conversionC7(),
+                                      lambda: self.conversion8(),
+                                      lambda: self.conversion9(),
+                                      lambda: self.conversion10(),
+                                      lambda: self.conversionC11(),
+                                      lambda: self.conversion12(),
+                                      lambda: self.conversionC12(),
+                                      lambda: self.conversion13(),
+                                      lambda: self.conversion21(),
+                                      lambda: self.conversionC15(),
+                                      lambda: self.conversionC16(),
+                                      lambda: self.conversionC16b(),
+                                      lambda: self.conversion17(),
+                                      lambda: self.conversion17a(),
+                                      lambda: self.conversion17b(),
+                                      lambda: self.conversion17c(),
+                                      lambda: self.conversion18(),
+                                      lambda: self.conversion19(),
+                                      lambda: self.conversionC17(),
+                                      lambda: self.conversion99(),
+                                      lambda: self.conversion5(),
+                                      lambda: super(And, self).canonicalize_once()])
+
 
 def createAnd(operands):
     from rte.r_star import Star

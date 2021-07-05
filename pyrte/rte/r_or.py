@@ -30,6 +30,64 @@ class Or (Combination):
     def nullable(self):
         return any(r.nullable() for r in self.operands)
 
+    def zero(self):
+        from rte.r_constants import sigmaStar
+        return sigmaStar
+
+    def one(self):
+        from rte.r_emptyset import EmptySet
+        return EmptySet
+
+    def same_combination(self, r):
+        return orp(r)
+
+    def dual_combination(self, r):
+        from rte.r_and import andp
+        return andp(r)
+
+    def set_dual_operation(self, a, b):
+        # intersection
+        return [x for x in a if x in b]
+
+    def set_operation(self, a, b):
+        # union
+        return a + [x for x in b if x not in a]
+
+    def annihilator(self, a, b):
+        return a.supertypep(b)
+
+    def createTypeD(self, operands):
+        from genus.s_or import createSOr
+        createSOr(operands)
+
+    def orInvert(self, x):
+        return not x
+
+    def canonicalize_once(self):
+        from genus.utils import find_simplifier
+        return find_simplifier(self, [lambda: self.conversion1(),
+                                      lambda: self.conversion3(),
+                                      lambda: self.conversion4(),
+                                      lambda: self.conversion4(),
+                                      lambda: self.conversion6(),
+                                      lambda: self.conversionC7(),
+                                      lambda: self.conversion8(),
+                                      lambda: self.conversion9(),
+                                      lambda: self.conversion10(),
+                                      lambda: self.conversionC11(),
+                                      lambda: self.conversion11b(),
+                                      lambda: self.conversionC16(),
+                                      lambda: self.conversionC16b(),
+                                      lambda: self.conversion12(),
+                                      lambda: self.conversion13(),
+                                      lambda: self.conversion14(),
+                                      lambda: self.conversion15(),
+                                      lambda: self.conversion21(),
+                                      lambda: self.conversionC15(),
+                                      lambda: self.conversionC17(),
+                                      lambda: self.conversion99(),
+                                      lambda: self.conversion5(),
+                                      lambda: super(Or, self).canonicalize_once()])
 
 def createOr(operands):
     from rte.r_emptyset import EmptySet

@@ -40,4 +40,6 @@ class Rte:
     def canonicalize_once(self):
         return self
 
-
+    def cmp_to_same_class_obj(self, t):
+        assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
+        raise TypeError(f"cannot compare rtes of type {type(self)}")

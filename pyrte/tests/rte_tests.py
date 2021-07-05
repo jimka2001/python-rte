@@ -87,6 +87,14 @@ class RteCase(unittest.TestCase):
             for r in range(1000):
                 random_rte(depth).__str__()
 
+    def test_first_types(self):
+        from genus.simple_type_d import SimpleTypeD
+        for depth in range(5):
+            for r in range(1000):
+                rt = random_rte(depth)
+                ft = rt.first_types()
+                self.assertTrue(all(isinstance(td, SimpleTypeD) for td in ft))
+
     def test_nullable(self):
         for depth in range(5):
             for r in range(1000):
@@ -215,6 +223,22 @@ class RteCase(unittest.TestCase):
         y = Singleton(SEql("y"))
         self.assertIs(Cat(x, EmptySet, y).conversion3(),
                       EmptySet)
+
+    def test_combo_conversion1(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        self.assertIs(And().conversion1(), sigmaStar)
+        self.assertIs(Or().conversion1(), EmptySet)
+
+        self.assertIs(And(x).conversion1(), x)
+        self.assertIs(Or(x).conversion1(), x)
+
+        self.assertEqual(And(x,y).conversion1(), And(x,y))
+        self.assertEqual(Or(x,y).conversion1(), Or(x,y))
+
+    def test_combo_conversion3(self):
+        # Or(... Sigma * ....) -> Sigma *
+        # And(... EmptySet....) -> EmptySet
 
 
 if __name__ == '__main__':

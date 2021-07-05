@@ -39,6 +39,10 @@ class Not (Rte):
     def __hash__(self):
         return hash(self.operand)
 
+    def cmp_to_same_class_obj(self, t):
+        from genus.utils import cmp_objects
+        return cmp_objects(self.operand, t.operand)
+
     def first_types(self):
         return self.operand.first_types()
 

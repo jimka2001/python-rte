@@ -39,6 +39,10 @@ class Cat(Rte):
     def __hash__(self):
         return hash(tuple(self.operands))
 
+    def cmp_to_same_class_obj(self, t):
+        from genus.utils import compare_sequence
+        return compare_sequence(self.operands, t.operands)
+
     def create(self, operands):
         return createCat(operands)
 
