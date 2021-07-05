@@ -24,7 +24,7 @@ class Rte:
         return self.__str__()
 
     def first_types(self):
-        {}
+        return set()  # empty set
 
     def nullable(self):
         raise Exception(f"nullable not implemented for {self} of type {type(self)}")

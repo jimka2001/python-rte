@@ -65,7 +65,7 @@ class Or (Combination):
 
     def createTypeD(self, operands):
         from genus.s_or import createSOr
-        createSOr(operands)
+        return createSOr(operands)
 
     def orInvert(self, x):
         return not x

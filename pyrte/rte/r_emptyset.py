@@ -35,7 +35,7 @@ class EmptySetImpl (Rte):
         return "∅"
 
     def first_types(self):
-        return {}
+        return set()  # empty set
 
     def nullable(self):
         return False

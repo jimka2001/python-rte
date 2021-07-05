@@ -53,7 +53,7 @@ class Cat(Rte):
         elif 1 == len(self.operands):
             return self.operands[0].first_types()
         elif self.operands[0].nullable():
-            return self.operands[0].first_types().union(createCat(self.operands[1:]))
+            return self.operands[0].first_types().union(createCat(self.operands[1:]).first_types())
         else:
             return self.operands[0].first_types()
 

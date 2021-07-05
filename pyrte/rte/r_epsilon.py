@@ -35,7 +35,7 @@ class EpsilonImpl (Rte):
         return "ε"
 
     def first_types(self):
-        return {}
+        return set()  # empty set
 
     def nullable(self):
         return True

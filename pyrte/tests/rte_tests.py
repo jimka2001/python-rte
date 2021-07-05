@@ -31,6 +31,8 @@ from rte.r_not import Not
 from genus.s_eql import SEql
 from genus.s_top import STop
 from genus.s_empty import SEmpty
+from genus.s_member import SMember
+from genus.s_atomic import SAtomic
 from rte.r_cat import Cat, createCat
 from rte.r_random import random_rte
 from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
@@ -233,21 +235,21 @@ class RteCase(unittest.TestCase):
         self.assertIs(And(x).conversionC1(), x)
         self.assertIs(Or(x).conversionC1(), x)
 
-        self.assertEqual(And(x,y).conversionC1(), And(x, y))
-        self.assertEqual(Or(x,y).conversionC1(), Or(x, y))
+        self.assertEqual(And(x, y).conversionC1(), And(x, y))
+        self.assertEqual(Or(x, y).conversionC1(), Or(x, y))
 
     def test_combo_conversionC3(self):
         # Or(... Sigma * ....) -> Sigma *
         # And(... EmptySet....) -> EmptySet
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
-        self.assertIs(Or(x,Star(Sigma),y).conversionC3(), sigmaStar)
+        self.assertIs(Or(x, Star(Sigma), y).conversionC3(), sigmaStar)
         self.assertIs(And(x, EmptySet, y).conversionC3(), EmptySet)
 
     def test_combo_conversionC4(self):
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
-        self.assertEqual(Or(x, y, y, x, y, y).conversionC4(), Or(x,y))
+        self.assertEqual(Or(x, y, y, x, y, y).conversionC4(), Or(x, y))
         self.assertEqual(And(x, y, y, x, y, y).conversionC4(), And(x, y))
 
     def test_combo_conversionC5(self):
@@ -256,7 +258,7 @@ class RteCase(unittest.TestCase):
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
         z = Singleton(SEql("z"))
-        self.assertEqual(Or(z, y, x, w).conversionC5(), Or(w, x, y,z))
+        self.assertEqual(Or(z, y, x, w).conversionC5(), Or(w, x, y, z))
         self.assertEqual(And(z, y, x, w).conversionC5(), And(w, x, y, z))
         self.assertEqual(Or(Or(x, y), And(x, y)).conversionC5(), Or(And(x, y), Or(x, y)))
 
@@ -266,14 +268,112 @@ class RteCase(unittest.TestCase):
         y = Singleton(SEql("y"))
         z = Singleton(SEql("z"))
         # remove Sigma* and flatten And(And(...)...)
-        self.assertEqual(And(x,And(y,z)).conversionC6(), And(x,y,z))
-        self.assertEqual(And(x,Star(Sigma),y).conversionC6(), And(x,y))
-        self.assertEqual(And(And(w,x),Star(Sigma),And(y,z)).conversionC6(), And(w,x,y,z))
+        self.assertEqual(And(x, And(y, z)).conversionC6(), And(x, y, z))
+        self.assertEqual(And(x, Star(Sigma), y).conversionC6(), And(x, y))
+        self.assertEqual(And(And(w, x), Star(Sigma), And(y, z)).conversionC6(), And(w, x, y, z))
 
         # remove EmptySet and flatten Or(Or(...)...)
         self.assertEqual(Or(x, Or(y, z)).conversionC6(), Or(x, y, z))
-        self.assertEqual(Or(x, EmptySet, y).conversionC6(), Or(x,y))
+        self.assertEqual(Or(x, EmptySet, y).conversionC6(), Or(x, y))
         self.assertEqual(Or(Or(w, x), EmptySet, Or(y, z)).conversionC6(), Or(w, x, y, z))
-        
+
+    def test_combo_conversionC7(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        # (:or A B (:* B) C)
+        # --> (:or A (:* B) C)
+        self.assertEqual(Or(a, b, Star(b), c).conversionC7(), Or(a, Star(b), c))
+        # (:and A B (:* B) C)
+        # --> (:and A B C)
+        self.assertEqual(And(a, b, Star(b), c).conversionC7(), And(a, b, c))
+
+    def test_combo_conversionC11(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        # And(..., x, Not(x)...) -> EmptySet
+        self.assertIs(And(y, x, y, Not(x), y).conversionC11(), EmptySet)
+
+        # Or(..., x, Not(x), ...) -> Sigma *
+        self.assertIs(Or(y, x, y, Not(x), y).conversionC11(), sigmaStar)
+
+    def test_combo_conversionC14(self):
+        x = Singleton(SEql("x"))
+        xy = Singleton(SMember("x", "y"))
+        a = Singleton(SEql("a"))
+        # Or(A, Not(B), X) -> Sigma * if B is subtype of A
+        self.assertIs(Or(a, Not(x), xy).conversionC14(), sigmaStar)
+        # And(A, Not(B), X) -> EmptySet if A is subtype of B
+        self.assertIs(And(a, x, Not(xy)).conversionC14(), EmptySet)
+
+    def test_combo_conversionC12(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        # Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
+        #   --> Or( A, B, ... Not(Singleton(X))
+        self.assertEqual(Or(a, b, Cat(Star(a), a, b, Star(c)), Not(c)).conversionC12(),
+                         Or(a, b, Not(c)))
+
+        # And(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
+        #   --> Or( A, B, ... Cat(Sigma,Sigma,Sigma*) ...)
+        self.assertEqual(And(a, b, Cat(Star(a), a, b, Star(c)), Not(c)).conversionC12(),
+                         And(a, b, Cat(Star(a), a, b, Star(c))))
+
+    def test_combo_conversionC15(self):
+        # simplify to maximum of one SMember(...) and maximum of one Not(SMember(...))
+        # Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+        #   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
+        self.assertEqual(Or(Singleton(SMember(1, 2, 3, 4)),
+                            Singleton(SMember(4, 5, 6, 7)),
+                            Not(Singleton(SMember(10, 11, 12, 13))),
+                            Not(Singleton(SMember(12, 13, 14, 15)))).conversionC15(),
+                         Or(Singleton(SMember(1, 2, 3, 4, 5, 6, 7)),
+                            Not(Singleton(SMember(12, 13)))))
+
+        # And(<{1,2,3,4}>,<{3,4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+        #   --> And(<{3,4}>,Not(<{10,11,12,13,14,15}>))
+        self.assertEqual(And(Singleton(SMember(1, 2, 3, 4)),
+                             Singleton(SMember(3, 4, 5, 6, 7)),
+                             Not(Singleton(SMember(10, 11, 12, 13))),
+                             Not(Singleton(SMember(12, 13, 14, 15)))).conversionC15(),
+                         And(Singleton(SMember(3, 4)),
+                             Not(Singleton(SMember(10, 11, 12, 13, 14, 15)))))
+
+    def test_combo_conversionC16(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        ab = Singleton(SMember("a", "b"))
+        ba = Singleton(SMember("b", "a"))
+        bc = Singleton(SMember("b", "c"))
+        # remove And superclasses
+        self.assertEqual(And(a, b, c, ab, bc).conversionC16(), And(a, b, c))
+
+        # remove Or subclasses
+        self.assertEqual(Or(a, b, c, ab, bc).conversionC16(), Or(ab, bc))
+
+        self.assertNotEqual(And(ab, ba).conversionC16(), sigmaStar)
+        self.assertNotEqual(Or(ab, ba).conversionC16(), EmptySet)
+
+    def test_combo_conversionC17(self):
+        # And({1,2,3},Singleton(X),Not(Singleton(Y)))
+        #  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
+        self.assertEqual(And(Singleton(SMember("a", "b", 1, 2)), Singleton(SAtomic(str))).conversionC17(),
+                         And(Singleton(SMember("a", "b")), Singleton(SAtomic(str))))
+
+        # Or({1,2,3},Singleton(X),Not(Singleton(Y)))
+        #  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
+        self.assertEqual(Or(Singleton(SMember("a", "b", 1, 2)), Singleton(SAtomic(str))).conversionC17(),
+                         Or(Singleton(SMember(1, 2)), Singleton(SAtomic(str))))
+
+    def test_combo_conversionC21(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        ab = Singleton(SMember("a", "b"))
+        self.assertIs(And(a, b, ab).conversionC21(), EmptySet)
+        self.assertIs(Or(Not(a), Not(b), ab).conversionC21(), sigmaStar)
+
+
 if __name__ == '__main__':
     unittest.main()

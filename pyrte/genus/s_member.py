@@ -49,10 +49,10 @@ class SMemberImpl(SimpleTypeD):
 
 	def __eq__(self, that):
 		return type(self) is type(that) and \
-			set(self.arglist) == set(that.arglist)
+			self.arglist == that.arglist
 
 	def __hash__(self):
-		return hash(frozenset(self.arglist))
+		return hash(tuple(self.arglist))
 
 	def typep(self, a):
 		return a in self.arglist

@@ -36,16 +36,18 @@ class Combination (Rte):
     def __hash__(self):
         return hash(tuple(self.operands))
 
+    def create(self, operands):
+        raise Exception(f"create not implemented for {type(self)}")
+
     def cmp_to_same_class_obj(self, t):
         from genus.utils import compare_sequence
         return compare_sequence(self.operands, t.operands)
 
     def first_types(self):
         import functools
-        # TODO fix this missing return after verifying that test fails
-        functools.reduce(lambda acc, tds: acc.union(tds),
-                         [td.first_types() for td in self.operands],
-                         super().first_types())
+        return functools.reduce(lambda acc, tds: acc.union(tds),
+                                [td.first_types() for td in self.operands],
+                                super().first_types())
 
     def one(self):
         raise Exception(f"one not implemented for {type(self)}")
@@ -166,6 +168,13 @@ class Combination (Rte):
         #    empty set, or a set of sequences each of length 2 or more.
         #    And Not(Singleton(X)) contains all all sequences of length 2 or more.
         # So se can remove all such sequences.
+        # E.g. Or(Singleton(SEql(1)),
+        #         Cat(Singleton(SEql(1)),Singleton(SEql(2)),Singleton(SEql(3))),
+        #         Not(Singleton(SEql(0))))
+        #     we can remove Cat(...) because it contains at least 2 non-nullable items,
+        #         and is therefore a subset of Not(Singleton(SEql(0)))
+        # If we have  Or rather than And, then we can remove Not(Singleton(SEql(0)))
+        #         because it is a superset of Cat(...)
         from genus.utils import generate_lazy_val
         from rte.r_or import orp
         from rte.r_and import andp
@@ -176,10 +185,10 @@ class Combination (Rte):
                                           and sum(1 for op in c.operands if not op.nullable())])
         not_sing = [n for n in self.operands if notp(n) and singletonp(n.operand)]
 
-        if not not_sing or not cats:
+        if not not_sing or not cats():
             return self
         elif orp(self):
-            return self.create([op for op in self.operands if op not in cats])
+            return self.create([op for op in self.operands if op not in cats()])
         elif andp(self):
             return self.create([op for op in self.operands if op not in not_sing])
         else:
@@ -207,13 +216,13 @@ class Combination (Rte):
         # find union/intersection of Singleton(SMember(...))  arglists
         new_member_arglist = functools.reduce(self.set_operation,
                                               [sm.operand.arglist for sm in members],
-                                              [])
+                                              members[0].operand.arglist)
         new_member = Singleton(createSMember(new_member_arglist)) if new_member_arglist \
             else self.one()
         # find union/intersection of Not(Singleton(SMember(...))) arglists
         new_not_member_arglist = functools.reduce(self.set_dual_operation,
                                                   [nsm.operand.operand.arglist for nsm in not_members],
-                                                  [])
+                                                  not_members[0].operand.operand.arglist)
         new_not_member = Not(Singleton(createSMember(new_not_member_arglist))) if new_not_member_arglist \
             else self.one()
 
@@ -243,18 +252,17 @@ class Combination (Rte):
 
         def f(i):  # index into ss
             td = ss[i]
-            for j in range(i+1, len(ss)):
-                if self.annihilator(td, ss[j]) is True:
-                    return [ss[j]]
-                elif self.annihilator(ss[j], td) is True:
-                    return [td]
-                else:
-                    return []
+            right = [td] if any(self.annihilator(ss[j], td) is True for j in range(i + 1, len(ss))) else []
+            if right:
+                return right
+            else:
+                left = [ss[j] for j in range(i + 1, len(ss)) if self.annihilator(td, ss[j]) is True]
+                return left
 
         redundant = flat_map(f, range(len(ss)-1))
 
         def g(op):
-            if singletonp(op) and op in redundant:
+            if singletonp(op) and op.operand in redundant:
                 return []
             else:
                 return [op]
@@ -271,9 +279,11 @@ class Combination (Rte):
     def conversionC17(self):
         # And({1,2,3},Singleton(X),Not(Singleton(Y)))
         #  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
+        # --> And({...},Singleton(X),Not(Singleton(Y)))
 
         # Or({1,2,3},Singleton(X),Not(Singleton(Y)))
         #  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
+        # --> Or({...},Singleton(X),Not(Singleton(Y)))
         from genus.utils import find_first, remove_element, flat_map, search_replace
         from genus.s_member import memberimplp, createSMember
         from genus.s_not import SNot
@@ -285,12 +295,12 @@ class Combination (Rte):
             return self
         member = singleton.operand
         singletons = [r for r in remove_element(self.operands, singleton)
-                      if singleton(r) or (notp(r) and singleton(r.operand))]
+                      if singletonp(r) or (notp(r) and singletonp(r.operand))]
 
         def f(r):
-            if singleton(r):
+            if singletonp(r):
                 return [r.operand]
-            elif notp(r) and singleton(r.operand):
+            elif notp(r) and singletonp(r.operand):
                 return [SNot(r.operand.operand)]
             else:
                 return []

@@ -27,7 +27,7 @@ class And (Combination):
     def __str__(self):
         return "And(" + ", ".join([str(td) for td in self.operands]) + ")"
 
-    def create(self,operands):
+    def create(self, operands):
         return createAnd(operands)
 
     def create_dual(self, operands):
@@ -45,10 +45,10 @@ class And (Combination):
         from rte.r_constants import sigmaStar
         return sigmaStar
 
-    def same_combination(self,r):
+    def same_combination(self, r):
         return andp(r)
 
-    def dual_combination(self,r):
+    def dual_combination(self, r):
         from rte.r_or import orp
         return orp(r)
 
@@ -65,7 +65,7 @@ class And (Combination):
 
     def createTypeD(self, operands):
         from genus.s_and import createSAnd
-        createSAnd(operands)
+        return createSAnd(operands)
 
     def orInvert(self, x):
         return x
