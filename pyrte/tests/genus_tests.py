@@ -462,8 +462,24 @@ class GenusCase(unittest.TestCase):
         td1 = SAnd(SOr(SAtomic(int), SAtomic(Test2)),
                    SAtomic(TestA))
         td2 = SOr(SAtomic(Test1), SAtomic(int))
-        self.assertIs(SOr(SNot(td1), SNot(td2)).inhabited(),
-                      SNot(SAnd(td1, td2)).inhabited())
+        self.assertIs(td1.disjoint(td2), True)
+        self.assertIs(SAnd(td1, td2).subtypep_down(SNot(td1)), True,
+                      f"\n  td1={td1}\n  td2={td2}")
+        self.assertIs(SAnd(td1, td2).subtypep(SNot(td1)), True,
+                      f"\n  td1={td1}\n  td2={td2}")
+        self.assertIs(SAnd(td1, td2).subtypep(SNot(td2)), True)
+        self.assertIs(SAnd(td1, td2).subtypep(SOr(SNot(td1), SNot(td2))), True)
+        # since td1 and td2 are disjoint, the lhs and rhs are STop
+        #   but subtypep gets the answer wrong
+        self.assertIsNot(SOr(SNot(td1),SNot(td2)).inhabited(), False)
+        self.assertIsNot(SNot(SAnd(td1,td2)).inhabited(), False)
+        self.assertIs(SAnd(td1,td2).subtypep(td1), True)
+        self.assertIs(td1.subtypep(SNot(SAnd(td1,td2))), True)
+        self.assertIsNot(SNot(td1).subtypep(SNot(SAnd(td1, td2))), False,
+                         f"\n  td1={td1}\n  td2={td2}")
+        self.assertIsNot(SNot(td2).subtypep(SNot(SAnd(td1, td2))), False)
+        self.assertIsNot(SOr(SNot(td1), SNot(td2)).subtypep_down(SNot(SAnd(td1, td2))), False,
+                         f"\n  td1={td1}\n  td2={td2}")
         self.assertIsNot(SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))), False,
                          f"\n  td1={td1}\n  td2={td2}")
 
