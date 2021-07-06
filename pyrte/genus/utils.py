@@ -167,12 +167,12 @@ class CallStack:
         else:
             self.stack.append(value)
             if self.trace:
-                print(f"[ {len(self.stack)} {self.name} {value}")
+                print(f"[{len(self.stack)}: {self.name} {value}")
 
     def pop(self, comment=None):
         if self.trace:
             c2 = "" if comment is None else comment
-            print(f"] {len(self.stack)} {self.name} {c2}")
+            print(f" {len(self.stack)}] {self.name} {c2}")
         self.stack.pop()
 
 
