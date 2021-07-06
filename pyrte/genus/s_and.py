@@ -133,6 +133,8 @@ class SAnd(SCombination):
     def subtypep_down(self, t):
         if not self.tds:
             return STop.subtypep(t)
+        elif 1 == len(self.tds):
+            return self.tds[0].subtypep(t)
         elif any(t2.subtypep(t) for t2 in self.tds):
             return True
         elif t.inhabited() is not True:

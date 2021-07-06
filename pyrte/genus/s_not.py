@@ -20,7 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-
 """
 [0-3] Advancement tracker
 __init__ 1
@@ -111,7 +110,7 @@ class SNot(SimpleTypeD):
 
 		hosted = generate_lazy_val(h)
 
-		if self.s.inhabited() is True and self.s.subtypep(t) is True:
+		if self.s.inhabited() is True and self.s.subtypep(t) is True and SNot(t).inhabited() is True:
 			return False
 		elif hosted() is not None:
 			return hosted()
@@ -164,4 +163,3 @@ class SNot(SimpleTypeD):
 
 def notp(this):
 	return isinstance(this, SNot)
-
