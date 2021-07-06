@@ -23,7 +23,7 @@
 from rte.r_combination import Combination
 
 
-class Or (Combination):
+class Or(Combination):
     def __str__(self):
         return "Or(" + ", ".join([str(td) for td in self.operands]) + ")"
 
@@ -71,19 +71,85 @@ class Or (Combination):
         return not x
 
     def conversionO8(self):
-        return self
+        # (:or A :epsilon B (:cat X (:* X)) C)
+        #   --> (:or A :epsilon B (:* X) C )
+        # (:or :epsilon (:cat X (:* X)))
+        #   --> (:or :epsilon (:* X))
+        # (:or (:* Y) (:cat X (:* X)))
+        #   --> (:or (:* Y) (:* X))
+        from rte.r_star import plusp, starp
+        from rte.r_cat import catp
+        if any(op.nullable() for op in self.operands) and any(plusp(op) for op in self.operands):
+            def f(op):
+                if not catp(op):
+                    return op
+                elif starp(op.operands[1]) and op.operands[0] == op.operands[1].operand:  # Cat(x,Star(x)) -> Star(x)
+                    return op.operands[1]
+                elif starp(op.operands[0]) and op.operands[1] == op.operands[0].operand:  # Cat(Star(x),x) -> Star(x)
+                    return op.operands[0]
+                else:
+                    return op
+
+            return self.create([f(op) for op in self.operands])
+        else:
+            return self
 
     def conversionO9(self):
-        return self
+        from rte.r_cat import catxyp
+        # (:or A :epsilon B (:cat X Y Z (:* (:cat X Y Z))) C)
+        #   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
+        # (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
+        #   --> (:or :epsilon (:* (:cat X Y Z)))
+        if any(op.nullable() for op in self.operands) and any(catxyp(op) for op in self.operands):
+            def f(r):
+                if catxyp(r):
+                    return r.operands[-1]
+                else:
+                    return r
+
+            return self.create([f(r) for r in self.operands])
+        else:
+            return self
 
     def conversionO10(self):
-        return self
+        from rte.r_epsilon import Epsilon
+        from genus.utils import remove_element
+        # (: or A :epsilon B (: * X) C)
+        # --> (: or A B (: * X) C)
+        if Epsilon in self.operands and any(r is not Epsilon and r.nullable() for r in self.operands):
+            return self.create(remove_element(self.operands, Epsilon))
+        else:
+            return self
 
     def conversionO11b(self):
-        return self
+        # if Sigma is in the operands, then filter out all singletons
+        # Or(Singleton(A),Sigma,...) -> Or(Sigma,...)
+        from rte.r_sigma import Sigma
+        from rte.r_singleton import singletonp
+        if Sigma in self.operands:
+            return self.create([r for r in self.operands if not singletonp(r)])
+        else:
+            return self
 
     def conversionO15(self):
-        return self
+        # Or(Not(A),B*,C) = Or(Not(A),C) if A and B  disjoint,
+        #   i.e. remove all B* where B is disjoint from A
+        from rte.r_not import notp
+        from rte.r_singleton import singletonp
+        from rte.r_star import starp
+        from genus.utils import generate_lazy_val
+        tds = [r.operand.operand for r in self.operands if notp(r) and singletonp(r.operand)]
+        stars = generate_lazy_val(lambda: [r for r in self.operands
+                                           if starp(r)
+                                           and singletonp(r.operand)
+                                           and any(a.disjoint(r.operand.operand) is True
+                                                   for a in tds)])
+        if not tds:
+            return self
+        elif not stars():
+            return self
+        else:
+            return self.create([r for r in self.operands if r not in stars()])
 
     def conversionD16b(self):
         # Or(A, x, Not(y)) --> And(A, Not(x)) if x, y disjoint
@@ -98,6 +164,7 @@ class Or (Combination):
                 return []
             else:
                 return [r]
+
         return self.create(flat_map(f, self.operands))
 
     def canonicalize_once(self):

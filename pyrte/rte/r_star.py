@@ -139,3 +139,17 @@ class Star(Rte):
 
 def starp(rte):
     return isinstance(rte, Star)
+
+
+def Plus(r):
+    from rte.r_cat import Cat
+    assert isinstance(r, Rte)
+    return Cat(r, Star(r))
+
+
+def plusp(rte):
+    from rte.r_cat import catp
+    return catp(rte) \
+           and 2 == len(rte.operands) \
+           and (   (starp(rte.operands[1]) and rte.operands[1].operand == rte.operands[0])
+                or (starp(rte.operands[0]) and rte.operands[0].operand == rte.operands[1]))

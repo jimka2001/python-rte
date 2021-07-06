@@ -130,6 +130,18 @@ def catp(op):
     return isinstance(op, Cat)
 
 
+def catxyp(r):  # Cat(x,y,z,Star(Cat(x,y,z)))
+    if not catp(r):
+        return False
+    elif len(r.operands) < 2:
+        return False
+    else:
+        from rte.r_star import starp
+        right = r.operands[-1]
+        left = r.operands[0:-1]
+        return starp(right) and catp(right.operand) and left == right.operand.operands
+
+
 def createCat(operands):
     from rte.r_epsilon import Epsilon
     assert all(isinstance(op, Rte) for op in operands)

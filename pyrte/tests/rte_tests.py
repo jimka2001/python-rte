@@ -23,7 +23,7 @@ import unittest
 from rte.r_sigma import Sigma, SigmaImpl
 from rte.r_epsilon import Epsilon, EpsilonImpl
 from rte.r_emptyset import EmptySet, EmptySetImpl
-from rte.r_star import Star
+from rte.r_star import Star, plusp, Plus
 from rte.r_and import And, createAnd
 from rte.r_or import Or, createOr
 from rte.r_singleton import Singleton
@@ -34,7 +34,7 @@ from genus.s_empty import SEmpty
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
-from rte.r_cat import Cat, createCat
+from rte.r_cat import Cat, createCat, catxyp
 from rte.r_random import random_rte
 from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
 
@@ -488,6 +488,125 @@ class RteCase(unittest.TestCase):
         ac = Singleton(SMember("a", "c"))
         self.assertIs(And(ab, bc, ac).conversionA19(), EmptySet)
         self.assertIs(And(ab, Not(Singleton(SAtomic(str)))).conversionA19(), EmptySet)
+
+    def test_starp(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        self.assertTrue(plusp(Cat(a, Star(a))))
+        self.assertTrue(plusp(Cat(Star(a), a)))
+        self.assertTrue(plusp(Plus(a)))
+        self.assertFalse(plusp(Cat(a, Star(b))))
+        self.assertFalse(Plus(a).nullable())
+
+    def test_catxyp(self):
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        # Cat(x,y,z,Star(Cat(x,y,z)))
+        self.assertTrue(catxyp(Cat(x, y, z, Star(Cat(x, y, z)))))
+        self.assertTrue(catxyp(Cat(x, y, Star(Cat(x, y)))))
+        self.assertTrue(catxyp(Cat(x, Star(Cat(x)))))
+        self.assertFalse(catxyp(Cat(Star(Cat()))))
+        self.assertFalse(catxyp(Cat(x, x, y, z, Star(Cat(x, y, z)))))
+        self.assertFalse(catxyp(Cat(x, y, z, Star(Cat(x, x, y, z)))))
+
+    def test_or_conversionO8(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        # (:or A :epsilon B (:cat X (:* X)) C)
+        #   --> (:or A :epsilon B (:* X) C )
+        self.assertEqual(Or(a, Epsilon, b, Cat(x, Star(x)), c).conversionO8(),
+                         Or(a, Epsilon, b, Star(x), c))
+        self.assertEqual(Or(a, Epsilon, b, Cat(Star(x), x), c).conversionO8(),
+                         Or(a, Epsilon, b, Star(x), c))
+        # (:or :epsilon (:cat X (:* X)))
+        #   --> (:or :epsilon (:* X))
+        self.assertEqual(Or(Epsilon, Cat(x, Star(x))).conversionO8(),
+                         Or(Epsilon, Star(x)))
+        self.assertEqual(Or(Epsilon, Cat(Star(x), x)).conversionO8(),
+                         Or(Epsilon, Star(x)))
+        # (:or (:* Y) (:cat X (:* X)))
+        #   --> (:or (:* Y) (:* X))
+        self.assertEqual(Or(Star(y), Cat(x, Star(x))).conversionO8(),
+                         Or(Star(y), Star(x)))
+        self.assertEqual(Or(Star(y), Cat(Star(x), x)).conversionO8(),
+                         Or(Star(y), Star(x)))
+
+        # multiple instances
+        self.assertEqual(Or(Star(y), Plus(a), Plus(b), Plus(c)).conversionO8(),
+                         Or(Star(y), Star(a), Star(b), Star(c)))
+
+        # no change
+        self.assertEqual(Or(Star(y), Cat(Star(x), y)).conversionO8(),
+                         Or(Star(y), Cat(Star(x), y)))
+        self.assertEqual(Or(a, b, Cat(x, Star(x)), c).conversionO8(),
+                         Or(a, b, Cat(x, Star(x)), c))
+
+    def test_or_conversionO9(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        # (:or A :epsilon B (:cat X Y Z (:* (:cat X Y Z))) C)
+        #   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
+        self.assertEqual(Or(a, Epsilon, b, Cat(x, y, z, Star(Cat(x, y, z))), c).conversionO9(),
+                         Or(a, Epsilon, b, Star(Cat(x, y, z)), c))
+
+        # (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
+        #   --> (:or :epsilon (:* (:cat X Y Z)))
+        self.assertEqual(Or(Epsilon, Cat(x, y, z, Star(Cat(x, y, z)))).conversionO9(),
+                         Or(Epsilon, Star(Cat(x, y, z))))
+
+        s = Star(Cat(x, y, z))
+        c = Cat(x, y, z, s)
+        self.assertEqual(Or(Epsilon, c, c, c).conversionO9(),
+                         Or(Epsilon, s, s, s))
+
+        self.assertEqual(Or(y, c).conversionO9(),
+                         Or(y, c))
+
+    def test_or_conversionO10(self):
+        # (: or A :epsilon B (: * X) C)
+        # --> (: or A B (: * X) C)
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        x = Singleton(SEql("x"))
+        self.assertEqual(Or(a, Epsilon, b, Star(x), c).conversionO10(),
+                         Or(a, b, Star(x), c))
+        self.assertEqual(Or(a, Epsilon, b, Epsilon, c).conversionO10(),
+                         Or(a, Epsilon, b, Epsilon, c))
+
+    def test_or_conversionO11b(self):
+        # if Sigma is in the operands, then filter out all singletons
+        # Or(Singleton(A),Sigma,...) -> Or(Sigma,...)
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        self.assertEqual(Or(a, b, Sigma, Star(b)).conversionO11b(),
+                         Or(Sigma, Star(b)))
+        self.assertIs(Or(a, b, Sigma).conversionO11b(),
+                      Sigma)
+        self.assertEqual(Or(a, b, Star(b)).conversionO11b(),
+                         Or(a, b, Star(b)))
+
+    def test_or_conversionO15(self):
+        # Or(Not(A),B*,C) = Or(Not(A),C) if A and B  disjoint,
+        #   i.e. remove all B* where B is disjoint from A
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        ab = Singleton(SMember("a", "b"))
+        c = Singleton(SEql("c"))
+        self.assertEqual(Or(Not(a), Star(b), c).conversionO15(),
+                         Or(Not(a), c))
+        self.assertEqual(Or(Not(a), Star(b), c, Star(c)).conversionO15(),
+                         Or(Not(a), c))
+        self.assertEqual(Or(Not(a), Not(b), Star(b), c, Star(c), Star(ab)).conversionO15(),
+                         Or(Not(a), Not(b), c, Star(ab)))
 
 
 if __name__ == '__main__':

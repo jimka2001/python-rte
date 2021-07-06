@@ -102,6 +102,7 @@ def search_replace(xs, search, replace):
     return search_replace_splice(xs, search, [replace])
 
 
+# remove a given element from a list every time it occurs
 def remove_element(xs, search):
     assert isinstance(xs, Iterable)
 
