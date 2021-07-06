@@ -103,6 +103,8 @@ class SOr(SCombination):
     def subtypep_down(self, t):
         if not self.tds:
             return STop.subtypep(t)
+        elif 1 == len(self.tds):
+            return self.tds[0].subtypep(t)
         elif all(td.subtypep(t) is True for td in self.tds):
             return True
         elif any(td.subtypep(t) is False for td in self.tds):
