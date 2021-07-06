@@ -457,12 +457,13 @@ class GenusCase(unittest.TestCase):
                          f"\n  td1={td1}\n  td2={td2}")
 
     def test_discovered_case_463(self):
-        odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
         from genus.depthgenerator import Test2, Test1, TestA
 
-        td1 = SAnd(SOr(SEql(0), SAtomic(Test2)),
-                   SAnd(SAtomic(TestA), odd))
+        td1 = SAnd(SOr(SAtomic(int), SAtomic(Test2)),
+                   SAtomic(TestA))
         td2 = SOr(SAtomic(Test1), SAtomic(int))
+        self.assertIs(SOr(SNot(td1), SNot(td2)).inhabited(),
+                      SNot(SAnd(td1, td2)).inhabited())
         self.assertIsNot(SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))), False,
                          f"\n  td1={td1}\n  td2={td2}")
 
