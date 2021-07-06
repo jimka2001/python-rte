@@ -608,6 +608,12 @@ class RteCase(unittest.TestCase):
         self.assertEqual(Or(Not(a), Not(b), Star(b), c, Star(c), Star(ab)).conversionO15(),
                          Or(Not(a), Not(b), c, Star(ab)))
 
+    def test_derivatives(self):
+        for depth in range(5):
+            for r in range(1000):
+                rt = random_rte(depth)
+                self.assertTrue(rt.derivatives())
+
 
 if __name__ == '__main__':
     unittest.main()
