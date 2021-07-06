@@ -1015,6 +1015,10 @@ class GenusCase(unittest.TestCase):
                                       [("a", 2)],
                                       [("b", 2), ("a", 0)]]))
 
+    def test_discovered_case_1018(self):
+        from genus.depthgenerator import Test2
+        odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        self.assertIs(SOr(SAtomic(Test2), odd).subtypep(SOr(odd,SAtomic(Test2))), True)
 
 if __name__ == '__main__':
     unittest.main()
