@@ -79,6 +79,7 @@ class Cat(Rte):
                 return rt.operands
             else:
                 return [rt]
+
         return self.create(flat_map(f, self.operands))
 
     def conversion5(self):
@@ -86,13 +87,13 @@ class Cat(Rte):
         from rte.r_star import starp
         for i in range(len(self.operands) - 2):
             if starp(self.operands[i]) \
-                    and self.operands[i] == self.operands[i+2] \
-                    and self.operands[i].operand == self.operands[i+1]:
-                return self.create(self.operands[0:i+2] + self.operands[i+3:] if i-2 < len(self.operands) else [])
+                    and self.operands[i] == self.operands[i + 2] \
+                    and self.operands[i].operand == self.operands[i + 1]:
+                return self.create(self.operands[0:i + 2] + self.operands[i + 3:] if i - 2 < len(self.operands) else [])
         # and Cat(..., x*, x* ...) --> Cat(..., x*, ...)
         for i in range(len(self.operands) - 1):
-            if self.operands[i] == self.operands[i+1] and starp(self.operands[i]):
-                return self.create(self.operands[0:i] + self.operands[i+1:])
+            if self.operands[i] == self.operands[i + 1] and starp(self.operands[i]):
+                return self.create(self.operands[0:i] + self.operands[i + 1:])
         return self
 
     def conversion6(self):
@@ -124,6 +125,24 @@ class Cat(Rte):
                                       lambda: self.conversion6(),
                                       lambda: self.conversion99(),
                                       lambda: super(Cat, self).canonicalize_once()])
+
+    def derivative_down(self, wrt):
+        from rte.r_epsilon import Epsilon
+        from genus.utils import generate_lazy_val
+        from rte.r_or import Or
+        if not self.operands:
+            return Epsilon.derivative(wrt)
+        elif 1 == len(self.operands):
+            return self.operands[0].derivative(wrt)
+        else:
+            head = self.operands[0]
+            tail = self.operands[1:]
+            term1 = generate_lazy_val(lambda: self.create([head.derivative(wrt)] + tail))
+            term2 = generate_lazy_val(lambda: self.create(tail).derivative(wrt))
+            if head.nullable():
+                return Or(term1(), term2())
+            else:
+                return term1()
 
 
 def catp(op):
