@@ -1,2 +1,2 @@
-pip install genus/
-python3.9 tests/all.py
+pip install pyrte/
+#python3.9 tests/all.py
