@@ -216,13 +216,13 @@ class Combination (Rte):
         # find union/intersection of Singleton(SMember(...))  arglists
         new_member_arglist = functools.reduce(self.set_operation,
                                               [sm.operand.arglist for sm in members],
-                                              members[0].operand.arglist)
+                                              members[0].operand.arglist) if members else None
         new_member = Singleton(createSMember(new_member_arglist)) if new_member_arglist \
             else self.one()
         # find union/intersection of Not(Singleton(SMember(...))) arglists
         new_not_member_arglist = functools.reduce(self.set_dual_operation,
                                                   [nsm.operand.operand.arglist for nsm in not_members],
-                                                  not_members[0].operand.operand.arglist)
+                                                  not_members[0].operand.operand.arglist) if not_members else None
         new_not_member = Not(Singleton(createSMember(new_not_member_arglist))) if new_not_member_arglist \
             else self.one()
 

@@ -100,7 +100,7 @@ class RteCase(unittest.TestCase):
 
     def test_nullable(self):
         for depth in range(5):
-            for r in range(1000):
+            for r in range(2000):
                 rt = random_rte(depth)
                 self.assertIs(rt.nullable(), rt.canonicalize().nullable(),
                               f"\nlhs = {rt.nullable()}\nrhs = {rt.canonicalize().nullable()}" +
