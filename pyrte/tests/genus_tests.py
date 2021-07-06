@@ -431,7 +431,7 @@ class GenusCase(unittest.TestCase):
                 self.assertIsNot(SAnd(td1, td2).subtypep(SAnd(td2, td1)), False,
                                  f"\n  td1={td1}\n  td2={td2}")
                 self.assertIsNot(SOr(td1, td2).subtypep(SOr(td2, td1)), False,
-                                f"td1={td1}\ntd2={td2}")
+                                 f"td1={td1}\ntd2={td2}")
                 self.assertIsNot(SAnd(td1, td2).subtypep(SOr(td1, td2)), False,
                                  f"\n  td1={td1}\n  td2={td2}")
                 self.assertIsNot(SAnd(SNot(td1), SNot(td2)).subtypep(SNot(SOr(td1, td2))), False,
@@ -439,7 +439,7 @@ class GenusCase(unittest.TestCase):
                 self.assertIsNot(SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))), False,
                                  f"\n  td1={td1}\n  td2={td2}")
                 self.assertIsNot(SNot(SOr(td1, td2)).subtypep(SAnd(SNot(td1), SNot(td2))), False,
-                                f"td1={td1}\ntd2={td2}")
+                                 f"td1={td1}\ntd2={td2}")
                 self.assertIsNot(SNot(SAnd(td1, td2)).subtypep(SOr(SNot(td1), SNot(td2))), False,
                                  f"\n  td1={td1}\n  td2={td2}")
 
@@ -450,8 +450,19 @@ class GenusCase(unittest.TestCase):
         from genus.depthgenerator import Test2, Test1, TestA
         td1 = SAnd(SOr(SEql(0), SAtomic(Test2)),
                    SAnd(SAtomic(TestA), odd))
+
         td2 = SOr(SOr(SAtomic(Test1), SAtomic(int)),
                   SAnd(SEql(3.14), SEql("")))
+        self.assertIsNot(SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))), False,
+                         f"\n  td1={td1}\n  td2={td2}")
+
+    def test_discovered_case_463(self):
+        odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        from genus.depthgenerator import Test2, Test1, TestA
+
+        td1 = SAnd(SOr(SEql(0), SAtomic(Test2)),
+                   SAnd(SAtomic(TestA), odd))
+        td2 = SOr(SAtomic(Test1), SAtomic(int))
         self.assertIsNot(SOr(SNot(td1), SNot(td2)).subtypep(SNot(SAnd(td1, td2))), False,
                          f"\n  td1={td1}\n  td2={td2}")
 
@@ -468,11 +479,11 @@ class GenusCase(unittest.TestCase):
                 self.assertIsNot(td.subtypep(tdc2), False)
                 self.assertIsNot(td.subtypep(tdc2), False)
                 self.assertIsNot(tdc1.subtypep(td), False,
-                                f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}")
+                                 f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}")
                 self.assertIsNot(tdc2.subtypep(td), False,
-                                f"expecting tdc2={tdc2} subtype of {td} got {tdc2.subtypep(td)}")
+                                 f"expecting tdc2={tdc2} subtype of {td} got {tdc2.subtypep(td)}")
                 self.assertIsNot(tdc3.subtypep(td), False,
-                                f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}")
+                                 f"expecting tdc3={tdc3} subtype of {td} got {tdc3.subtypep(td)}")
 
     def test_uniquify(self):
         self.assertTrue(uniquify([]) == [])
@@ -1037,7 +1048,8 @@ class GenusCase(unittest.TestCase):
     def test_discovered_case_1018(self):
         from genus.depthgenerator import Test2
         odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
-        self.assertIs(SOr(SAtomic(Test2), odd).subtypep(SOr(odd,SAtomic(Test2))), True)
+        self.assertIs(SOr(SAtomic(Test2), odd).subtypep(SOr(odd, SAtomic(Test2))), True)
+
 
 if __name__ == '__main__':
     unittest.main()
