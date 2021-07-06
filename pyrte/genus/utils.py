@@ -187,3 +187,42 @@ def get_all_subclasses(cls):
 
     return all_subclasses
 
+
+def trace_graph(v0, edges):
+    # v0 type V
+    # edges V => List[(L,V)]
+    # if V is te type of vertex
+    # and L is the type of label
+
+    current_state_id = 0  # int
+    next_available_state = 1  # int
+    es = edges(v0)  # List[(L,V)]
+    int_to_v = [v0]  # List[V]
+    v_to_int = {v0: 0}  # Map[V -> int]
+    m = [[]]
+    esi = 0  # index into es[...]
+    while True:
+        if esi == len(es):
+            nxt = current_state_id + 1
+            if nxt < next_available_state:
+                v2 = int_to_v[nxt]
+                current_state_id = nxt
+                es = edges(v2)
+                esi = 0
+                m.append([])
+                continue
+            else:
+                return int_to_v, m
+        else:
+            label, v1 = es[esi]
+            if v1 not in v_to_int:
+                v_to_int[v1] = next_available_state
+                next_available_state = next_available_state + 1
+                int_to_v = int_to_v + [v1]
+                continue
+            else:
+                # non-destructively update the list held at m[current_state_id]
+                #   by adding a new pair at the end (label,v_to_int[v1])
+                m[current_state_id] = m[current_state_id] + [(label, v_to_int[v1])]
+                esi = esi + 1
+                continue

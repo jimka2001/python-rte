@@ -40,7 +40,7 @@ from genus.simple_type_d import SimpleTypeD, TerminalType
 from genus.utils import compare_sequence, get_all_subclasses, cmp_objects
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map, generate_lazy_val, fixed_point
-from genus.utils import remove_element, search_replace, uniquify
+from genus.utils import remove_element, search_replace, uniquify, trace_graph
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -1000,6 +1000,20 @@ class GenusCase(unittest.TestCase):
                         self.assertEqual(len(containing), 1,
                                          f"expecting exactly one partition to contain v={v}" +
                                          f"\n tds={tds}\n mdtd={computed}\n containing={containing}")
+
+    def test_trace_graph(self):
+        def edges(i):  # V => List[(L,V)]
+            if i == 0:
+                return [("a", 1), ("b", 2)]
+            elif i == 1:
+                return [("a", 2)]
+            else:
+                return [("b", 2), ("a", 0)]
+
+        self.assertEqual(trace_graph(0, edges),
+                         ([0, 1, 2], [[("a", 1), ("b", 2)],
+                                      [("a", 2)],
+                                      [("b", 2), ("a", 0)]]))
 
 
 if __name__ == '__main__':
