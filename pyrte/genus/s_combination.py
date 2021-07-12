@@ -101,12 +101,7 @@ class SCombination(SimpleTypeD):
     def conversion1(self):
         # (and) -> STop, unit = STop, zero = SEmpty
         # (or) -> SEmpty, unit = SEmpty, zero = STop
-        if not self.tds:  # tds == []
-            return self.unit()
-        elif len(self.tds) == 1:
-            return self.tds[0]
-        else:
-            return self
+        self.create(self.tds)
 
     def conversion2(self):
         # (and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
@@ -165,7 +160,7 @@ class SCombination(SimpleTypeD):
         # (and A (not B)) --> SEmpty if B is supertype of A, zero = SEmpty
         for a in self.tds:
             for n in self.tds:
-                if notp(n) and self.annihilator(a, n.s):
+                if notp(n) and self.annihilator(a, n.s) is True:
                     return self.zero()
         return self
 
@@ -314,7 +309,6 @@ class SCombination(SimpleTypeD):
     def conversion14(self):
         # multiple member
         # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
-        # (or String (member 1 2 "3") (member 2 3 4 "5")) --> (or String (member 1 2 4))
         # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
         from genus.s_member import memberimplp, createSMember
 

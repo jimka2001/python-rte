@@ -147,10 +147,10 @@ class SAnd(SCombination):
             return super().subtypep_down(t)
 
     def conversionD1(self):
-        # Note this isn't this consumed in SCombination:conversion16,
+        # Note this isn't consumed in SCombination:conversion16,
         # conversion16 converts SAnd(SMember(42, 43, 44, "a", "b", "c"), SInt)
         # to SAnd(SMember(42, 43, 44), SInt)
-        # while conversionA1() converts it to
+        # while conversionD1() converts it to
         # SMember(42, 43, 44)
 
         # SAnd(SMember(42, 43, 44), A, B, C)

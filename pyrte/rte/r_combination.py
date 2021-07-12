@@ -182,7 +182,7 @@ class Combination (Rte):
         from rte.r_not import notp
         from rte.r_singleton import singletonp
         cats = generate_lazy_val(lambda: [c for c in self.operands if catp(c)
-                                          and sum(1 for op in c.operands if not op.nullable())])
+                                          and sum(1 for op in c.operands if not op.nullable()) > 1])
         not_sing = [n for n in self.operands if notp(n) and singletonp(n.operand)]
 
         if not not_sing or not cats():
