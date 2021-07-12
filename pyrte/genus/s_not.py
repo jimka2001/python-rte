@@ -133,17 +133,14 @@ class SNot(SimpleTypeD):
 			return SNot(self.s.canonicalize_once(nf)).to_nf(nf)
 
 	def compute_dnf(self):
-		from genus.s_and import andp, createSAnd
-		from genus.s_or import orp, createSOr
+		from genus.s_combination import combop
 		# SNot(SAnd(x1, x2, x3))
 		# --> SOr(SNot(x1), SNot(x2), SNot(x3)
 		#
 		# SNot(SOr(x1, x2, x3))
 		# --> SAnd(SNot(x1), SNot(x2), SNot(x3))
-		if andp(self.s):
-			return createSOr([SNot(td) for td in self.s.tds])
-		elif orp(self.s):
-			return createSAnd([SNot(td) for td in self.s.tds])
+		if combop(self.s):
+			return self.create_dual([SNot(td) for td in self.s.tds])
 		else:
 			return self
 
