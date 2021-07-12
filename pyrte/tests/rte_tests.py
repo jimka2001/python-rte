@@ -316,6 +316,11 @@ class RteCase(unittest.TestCase):
         self.assertEqual(Or(a, b, Cat(Star(a), a, b, Star(c)), Not(c)).conversionC12(),
                          Or(a, b, Not(c)))
 
+        self.assertEqual(Or(a,
+                            b,
+                            Cat(Star(a), c, Star(c)),
+                            Not(c)).conversionC12(),
+                         Or(a, b, Cat(Star(a), c, Star(c)), Not(c)))
         # And(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
         #   --> Or( A, B, ... Cat(Sigma,Sigma,Sigma*) ...)
         self.assertEqual(And(a, b, Cat(Star(a), a, b, Star(c)), Not(c)).conversionC12(),
