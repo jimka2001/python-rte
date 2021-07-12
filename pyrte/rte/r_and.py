@@ -293,7 +293,6 @@ class And(Combination):
         return find_simplifier(self, [lambda: self.conversionC1(),
                                       lambda: self.conversionC3(),
                                       lambda: self.conversionC4(),
-                                      lambda: self.conversionC4(),
                                       lambda: self.conversionC6(),
                                       lambda: self.conversionA7(),
                                       lambda: self.conversionC7(),
