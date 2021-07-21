@@ -98,7 +98,8 @@ class SOr(SCombination):
         elif any(td.disjoint(t) is False for td in self.tds):
             return False
         else:
-            return super().disjoint_down(t)
+            s = super().disjoint_down(t)  # variable s useful for debugging
+            return s
 
     def subtypep_down(self, t):
         if not self.tds:
