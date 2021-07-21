@@ -95,7 +95,6 @@ class SAnd(SCombination):
 
         inhabited_dnf = generate_lazy_val(lambda: dnf().inhabited())
         inhabited_cnf = generate_lazy_val(lambda: cnf().inhabited())
-
         if any(t.inhabited() is False for t in self.tds):
             return False
         elif all(atomicp(t) for t in self.tds):
@@ -110,6 +109,13 @@ class SAnd(SCombination):
             return inhabited_dnf()
         elif cnf() != self and inhabited_cnf() is not None:
             return inhabited_cnf()
+        # in the special case of (and A B) if A and B are NOT disjoint,
+        #   then the intersection is inhabited.  This does not generalize
+        #   to (and A B C...), because even if not(A||B), not(B||C), and not(A||C),
+        #   the intersection might still be empty.
+        # E.g., (and (member 1 2) (member 2 3) (member 1 3)) is empty yet no pair is disjoint.
+        elif 2 == len(self.tds) and self.tds[0].disjoint(self.tds[1]) is False:
+            return True
         else:
             return super().inhabited_down()
 
