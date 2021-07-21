@@ -156,6 +156,24 @@ class SNot(SimpleTypeD):
 			return 0
 		else:
 			return cmp_objects(self.s, td.s)
+        elif self.s == t:  # if self and t are complements, then they are disjoint
+            return True
+        elif self.s.disjoint(t) is True and t.inhabited() is True:
+            return False
+        elif notp(t) and atomicp(self.s) and atomicp(t.s):
+            return False
+        # if t2 < t1, then t2 disjoint from (not t1)   (strict subset)
+        # (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
+        elif t.subtypep(self.s) is True and self.s.subtypep(t) is False:
+            return True
+        # (disjoint? '(not (member 1 2 3)) '(member a b c 1 2 3) )
+        elif self.s.subtypep(t) is True and t.subtypep(self.s) is False:
+            return False
+        # (disjoint? SNot(SMember(1,2,3)) SNot(SAtomic(str)))
+        elif memberimplp(self.s) \
+                and notp(t) \
+                and atomicp(t.s):
+            return False
 
 
 def notp(this):
