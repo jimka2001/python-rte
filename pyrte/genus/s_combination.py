@@ -101,7 +101,7 @@ class SCombination(SimpleTypeD):
     def conversion1(self):
         # (and) -> STop, unit = STop, zero = SEmpty
         # (or) -> SEmpty, unit = SEmpty, zero = STop
-        self.create(self.tds)
+        return self.create(self.tds)
 
     def conversion2(self):
         # (and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
