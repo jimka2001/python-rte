@@ -307,16 +307,59 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SEmpty.subtypep(SAtomic(object)) is True)
         self.assertTrue(SEmpty.subtypep(SEmpty) is True)
 
-    def test_disjoint_375(self):
+    def test_disjoint_310(self):
+        # (disjoint? SNot(SMember(1, 2, 3)) SNot(SAtomic(str)))
+        from genus.depthgenerator import Test2
+        self.assertIs(SNot(SMember(1, 2, 3)).disjoint(SNot(SAtomic(str))), False)
+        self.assertIs(SNot(SAtomic(str)).disjoint(SNot(SMember(1, 2, 3))), False)
+        self.assertIs(SNot(SMember(1, 2, 3, "hello")).disjoint(SNot(SAtomic(str))), False)
+        self.assertIs(SNot(SAtomic(str)).disjoint(SNot(SMember(1, 2, 3, "hello"))), False)
+        self.assertIs(SNot(SOr(SNot(SEql(3.14)), SOr(SEql(0), SEql(-1))))
+                      .disjoint(SNot(SOr(STop, SAtomic(Test2)))), True)
+        self.assertIs(SNot(SOr(STop, SAtomic(Test2)))
+                      .disjoint(SNot(SOr(SNot(SEql(3.14)), SOr(SEql(0), SEql(-1))))), True)
+        self.assertIs(SOr(STop, STop).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
+        self.assertIs(SOr(STop, SNot(SEmpty)).disjoint(SNot(STop)), True)
+        self.assertIs(SNot(SOr(STop, SAtomic(float))).disjoint(SOr(STop, SNot(SEmpty))), True)
+        self.assertIs(STop.disjoint(SNot(SOr(STop, SAtomic(float)))), True)
+        self.assertIs(SNot(SEmpty).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
+        self.assertIs(SOr(STop, SNot(SEmpty)).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
+        self.assertIs(SOr(STop, SNot(SMember())).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
+        self.assertIs(SOr(SAnd(STop,STop),SNot(SMember())).disjoint(SNot(SOr(STop,SAtomic(float)))),True)
+
+    def test_disjoint_320(self):
         for depth in range(0, 4):
             for _ in range(num_random_tests):
                 td1 = random_type_designator(depth)
                 td2 = random_type_designator(depth)
+                d12 = td1.disjoint(td2)
+                d21 = td2.disjoint(td1)
+                self.assertIs(d12, d21,
+                              f"\ntd1={td1}\ntd2={td2}\ntd1.disjoint(td2)={d12}\ntd2.disjoint(td1)={d21}")
+
+    def test_disjoint_375(self):
+        # Traceback (most recent call last):
+        #  File "/Users/jnewton/Repos/python-rte/pyrte/tests/genus_tests.py", line 316, in test_disjoint_375
+        #   self.assertTrue(td1.disjoint(td2) is not False,
+        # AssertionError: False is not true : found types with empty intersection but not disjoint
+        # td1=SOr(SNot([= 3.14]), SOr([= 0], [= -1]))
+        # td2=SNot(SOr(STop, SAtomic(Test2)))
+
+        # self.assertTrue(td1.disjoint(td2) is not False,
+        #   AssertionError: False is not true : found types with empty intersection but not disjoint
+        #   td1=SNot(SAnd(SAtomic(int), [= 1]))
+        #   td2=SNot(SOr(SAtomic(int), STop))
+        for depth in range(0, 4):
+            for _ in range(num_random_tests):
+                td1 = random_type_designator(depth)
+                td2 = random_type_designator(depth)
+                d12 = td1.disjoint(td2)
                 if SAnd(td1, td2).canonicalize(NormalForm.DNF) is SEmpty:
-                    self.assertTrue(td1.disjoint(td2) is not False,
+                    self.assertTrue(d12 is not False,
                                     "found types with empty intersection but not disjoint" +
                                     f"\ntd1={td1}" +
-                                    f"\ntd2={td2}")
+                                    f"\ntd2={td2}" +
+                                    f"\ntd1.disjoint(td2) = {d12}")
 
     def test_discovered_case_385(self):
         even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
@@ -471,10 +514,10 @@ class GenusCase(unittest.TestCase):
         self.assertIs(SAnd(td1, td2).subtypep(SOr(SNot(td1), SNot(td2))), True)
         # since td1 and td2 are disjoint, the lhs and rhs are STop
         #   but subtypep gets the answer wrong
-        self.assertIsNot(SOr(SNot(td1),SNot(td2)).inhabited(), False)
-        self.assertIsNot(SNot(SAnd(td1,td2)).inhabited(), False)
-        self.assertIs(SAnd(td1,td2).subtypep(td1), True)
-        self.assertIs(td1.subtypep(SNot(SAnd(td1,td2))), True)
+        self.assertIsNot(SOr(SNot(td1), SNot(td2)).inhabited(), False)
+        self.assertIsNot(SNot(SAnd(td1, td2)).inhabited(), False)
+        self.assertIs(SAnd(td1, td2).subtypep(td1), True)
+        self.assertIs(td1.subtypep(SNot(SAnd(td1, td2))), True)
         self.assertIsNot(SNot(td1).subtypep(SNot(SAnd(td1, td2))), False,
                          f"\n  td1={td1}\n  td2={td2}")
         self.assertIsNot(SNot(td2).subtypep(SNot(SAnd(td1, td2))), False)
@@ -1066,6 +1109,11 @@ class GenusCase(unittest.TestCase):
         from genus.depthgenerator import Test2
         odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
         self.assertIs(SOr(SAtomic(Test2), odd).subtypep(SOr(odd, SAtomic(Test2))), True)
+
+    def test_discovered_case_134(self):  # test case copied from clojure code
+        self.assertIs(SNot(SMember(1, 2, 3)).disjoint(SNot(SAtomic(str))), False)
+        self.assertIs(SAnd(SNot(SMember(1, 2, 3)), SNot(SAtomic(str))).inhabited(), True)
+        self.assertIs(SAnd(SNot(SMember(1, 2, 3)), SNot(SAtomic(str))).disjoint(STop), False)
 
 
 if __name__ == '__main__':

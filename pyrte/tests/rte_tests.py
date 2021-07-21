@@ -289,6 +289,9 @@ class RteCase(unittest.TestCase):
         # --> (:and A B C)
         self.assertEqual(And(a, b, Star(b), c).conversionC7(), And(a, b, c))
 
+        self.assertEqual(And(Star(Epsilon),Not(Epsilon)).conversionC7(),
+                         And(Star(Epsilon),Not(Epsilon)))
+
     def test_combo_conversionC11(self):
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
