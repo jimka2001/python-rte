@@ -139,7 +139,7 @@ class SNot(SimpleTypeD):
 		# SNot(SOr(x1, x2, x3))
 		# --> SAnd(SNot(x1), SNot(x2), SNot(x3))
 		if combop(self.s):
-			return self.create_dual([SNot(td) for td in self.s.tds])
+			return self.s.create_dual([SNot(td) for td in self.s.tds])
 		else:
 			return self
 
