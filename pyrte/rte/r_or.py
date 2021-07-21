@@ -160,7 +160,7 @@ class Or(Combination):
         nss = [r.operand.operand for r in self.operands if notp(r) and singletonp(r.operand)]
 
         def f(r):
-            if singletonp(r) and any(r.operand.disjoint(d) for d in nss):
+            if singletonp(r) and any(r.operand.disjoint(d) is True for d in nss):
                 return []
             else:
                 return [r]

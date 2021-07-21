@@ -129,7 +129,7 @@ class Combination (Rte):
             def f(r):
                 if orp(self) and Star(r) in stars:
                     return []
-                elif starp(r) and andp(self) and r in stars:
+                elif starp(r) and andp(self) and r.operand in self.operands:
                     return []
                 else:
                     return [r]
