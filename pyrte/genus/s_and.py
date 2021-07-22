@@ -131,7 +131,6 @@ class SAnd(SCombination):
                 and (all(x.subtypep(t) is True for x in self.tds)
                      or
                      all(t.subtypep(x) is True for x in self.tds)):
-
             return False
         else:
             return super().disjoint_down(t)
