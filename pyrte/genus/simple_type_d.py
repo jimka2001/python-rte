@@ -200,9 +200,12 @@ class SimpleTypeD():
     def canonicalize(self, nf=None):
         if nf not in self.canonicalized_hash:
             def processor(td):
+                assert isinstance(td, SimpleTypeD)
                 return td.canonicalize_once(nf)
 
             def good_enough(a, b):
+                assert isinstance(a, SimpleTypeD), f"expecting SimpleTypeD not {a}"
+                assert isinstance(b, SimpleTypeD), f"expecting SimpleTypeD not {b}"
                 return type(a) == type(b) and a == b
             
             res = fixed_point(self, processor, good_enough)
