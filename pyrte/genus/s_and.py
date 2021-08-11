@@ -130,9 +130,8 @@ class SAnd(SCombination):
             return False
         elif t.inhabited() is True \
                 and self.inhabited() is True \
-                and (all(x.subtypep(t) is True for x in self.tds)
-                     or
-                     all(t.subtypep(x) is True for x in self.tds)):
+                and (any((x.subtypep(t) is True) or (t.subtypep(x) is True)
+                         for x in self.tds)):
             return False
         else:
             return super().disjoint_down(t)
