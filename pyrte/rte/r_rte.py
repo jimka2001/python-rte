@@ -94,18 +94,21 @@ class Rte:
                 try:
                     return rt.derivative(wrt).canonicalize()
                 except CannotComputeDerivative as e:
-                    msg = "\n".join([f"When generating derivatives from {self}",
-                                     f"  when computing edges of {rt}",
-                                     f"  which canonicalizes to {self.canonicalize()}",
-                                     f"  computing derivative of {e.rte}",
-                                     f"  wrt={e.wrt}",
-                                     f"  derivatives() reported: {e.msg}"])
-                    raise CannotComputeDerivatives(msg=msg,
-                                                   rte=rt,
-                                                   wrt=wrt,
-                                                   first_types=fts,
-                                                   mdtd=wrts) from None
-
+                    if rt == rt.canonicalize():
+                        msg = "\n".join([f"When generating derivatives from {self}",
+                                         f"  when computing edges of {rt}",
+                                         f"  which canonicalizes to {rt.canonicalize()}",
+                                         f"  computing derivative of {e.rte}",
+                                         f"  wrt={e.wrt}",
+                                         f"  derivatives() reported: {e.msg}"])
+                        raise CannotComputeDerivatives(msg=msg,
+                                                       rte=rt,
+                                                       wrt=wrt,
+                                                       first_types=fts,
+                                                       mdtd=wrts) from None
+                    else:
+                        print(f"failed to compute derivative of {rt} wrt={wrt}, computing derivative of {rt.canonicalize()} instead")
+                        return rt.canonicalize().derivative(wrt).canonicalize()
             return [(td, d(td)) for td in wrts]
 
         return trace_graph(self, edges)
