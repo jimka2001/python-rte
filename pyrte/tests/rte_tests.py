@@ -289,6 +289,9 @@ class RteCase(unittest.TestCase):
         # --> (:and A B C)
         self.assertEqual(And(a, b, Star(b), c).conversionC7(), And(a, b, c))
 
+        self.assertEqual(And(Star(Epsilon),Not(Epsilon)).conversionC7(),
+                         And(Star(Epsilon),Not(Epsilon)))
+
     def test_combo_conversionC11(self):
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
@@ -612,6 +615,12 @@ class RteCase(unittest.TestCase):
                          Or(Not(a), c))
         self.assertEqual(Or(Not(a), Not(b), Star(b), c, Star(c), Star(ab)).conversionO15(),
                          Or(Not(a), Not(b), c, Star(ab)))
+
+    def test_derivatives(self):
+        for depth in range(5):
+            for r in range(1000):
+                rt = random_rte(depth)
+                self.assertTrue(rt.derivatives())
 
 
 if __name__ == '__main__':

@@ -136,6 +136,10 @@ class Star(Rte):
                                       lambda: self.conversion3(),
                                       lambda: self.conversion99()])
 
+    def derivative_down(self, wrt):
+        from rte.r_cat import Cat
+        return Cat(self.operand.derivative(wrt), self)
+
 
 def starp(rte):
     return isinstance(rte, Star)

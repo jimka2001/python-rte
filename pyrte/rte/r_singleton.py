@@ -24,7 +24,7 @@ from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 
 
-class Singleton (Rte):
+class Singleton(Rte):
     def __init__(self, operand):
         super(Singleton, self).__init__()
         assert isinstance(operand, SimpleTypeD)
@@ -49,6 +49,52 @@ class Singleton (Rte):
 
     def nullable(self):
         return False
+
+    def derivative(self, wrt):
+        from genus.s_empty import SEmpty
+        from genus.s_top import STop
+        from rte.r_emptyset import EmptySet
+        from rte.r_sigma import Sigma
+        td = self.operand
+        if td is SEmpty:
+            return EmptySet.derivative(wrt)
+        elif td is STop:
+            return Sigma.derivative(wrt)
+        elif wrt is None:
+            return self
+        elif td.inhabited() is False:
+            return EmptySet.derivative(wrt)
+        else:
+            return super().derivative(wrt)
+
+    def derivative_down(self, wrt):
+        from rte.r_epsilon import Epsilon
+        from rte.r_emptyset import EmptySet
+        from genus.s_top import STop
+        from genus.s_and import SAnd
+        from genus.s_not import SNot
+        from rte.r_rte import CannotComputeDerivative
+        td = self.operand  # SimpleTypeD
+        if wrt == td:
+            return Epsilon
+        elif wrt == STop:
+            return Epsilon
+        elif isinstance(wrt, SimpleTypeD) and wrt.disjoint(td) is True:
+            return EmptySet
+        elif isinstance(wrt, SimpleTypeD) and wrt.subtypep(td) is True:
+            return Epsilon
+        elif isinstance(wrt, SAnd) and SNot(td) in wrt.tds:
+            return EmptySet
+        elif isinstance(wrt, SAnd) and td in wrt.tds:
+            return Epsilon
+        else:
+            raise CannotComputeDerivative(
+                msg="\n".join([f"Singleton.derivative_down cannot compute derivative of {self}",
+                               f"  wrt={wrt}",
+                               f"  disjoint={wrt.disjoint(td)}",
+                               f"  subtypep={wrt.subtypep(td)}"]),
+                rte=self,
+                wrt=wrt)
 
 
 def singletonp(op):

@@ -90,14 +90,15 @@ class SAnd(SCombination):
     def inhabited_down(self):
         from genus.genus_types import NormalForm
         from genus.s_atomic import atomicp
+        from genus.s_not import notp
+        from genus.s_member import memberimplp
         dnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.DNF))
         cnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.CNF))
 
-        inhabited_dnf = generate_lazy_val(lambda: dnf().inhabited())
-        inhabited_cnf = generate_lazy_val(lambda: cnf().inhabited())
-
         if any(t.inhabited() is False for t in self.tds):
             return False
+        elif len(self.tds) > 1 and all(notp(td) and (atomicp(td.s) or memberimplp(td.s)) for td in self.tds):
+            return True
         elif all(atomicp(t) for t in self.tds):
             #   here we would like to check every 2-element subset
             #   if we find a,b such that a and b are disjoint,
@@ -106,26 +107,35 @@ class SAnd(SCombination):
                     for a in range(len(self.tds))
                     for b in range(a + 1, len(self.tds)))
             return not s
-        elif dnf() != self and inhabited_dnf() is not None:
-            return inhabited_dnf()
-        elif cnf() != self and inhabited_cnf() is not None:
-            return inhabited_cnf()
+        elif dnf() != self and dnf().inhabited() is not None:
+            return dnf().inhabited()
+        elif cnf() != self and cnf().inhabited() is not None:
+            return cnf().inhabited()
+        # in the special case of (and A B) if A and B are NOT disjoint,
+        #   then the intersection is inhabited.  This does not generalize
+        #   to (and A B C...), because even if not(A||B), not(B||C), and not(A||C),
+        #   the intersection might still be empty.
+        # E.g., (and (member 1 2) (member 2 3) (member 1 3)) is empty yet no pair is disjoint.
+        elif 2 == len(self.tds) and self.tds[0].disjoint(self.tds[1]) is False:
+            return True
         else:
             return super().inhabited_down()
 
     def disjoint_down(self, t):
         assert isinstance(t, SimpleTypeD)
-
+        
         if any(t.disjoint(t2) is True for t2 in self.tds):
             return True
-        elif t in self.tds and t.inhabited() is True and self.inhabited() is True:
+        elif t.inhabited() is not True or self.inhabited() is not True:
+            return super().disjoint_down(t)
+        elif t in self.tds:
             return False
-        elif t.inhabited() is True \
-                and self.inhabited() is True \
-                and (all(x.subtypep(t) is True for x in self.tds)
-                     or
-                     all(t.subtypep(x) is True for x in self.tds)):
-
+        # this code is commented out because it is simply wrong.
+        #elif (any((td.subtypep(t) is True) or (t.subtypep(td) is True)
+        #          for td in self.tds)):
+        #    return False
+        elif (all(td.subtypep(t) is True for td in self.tds) or
+              all(t.subtypep(td) is True for td in self.tds)):
             return False
         else:
             return super().disjoint_down(t)
@@ -133,6 +143,8 @@ class SAnd(SCombination):
     def subtypep_down(self, t):
         if not self.tds:
             return STop.subtypep(t)
+        elif 1 == len(self.tds):
+            return self.tds[0].subtypep(t)
         elif any(t2.subtypep(t) for t2 in self.tds):
             return True
         elif t.inhabited() is not True:

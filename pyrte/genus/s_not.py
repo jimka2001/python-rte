@@ -20,7 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-
 """
 [0-3] Advancement tracker
 __init__ 1
@@ -39,126 +38,147 @@ from genus.simple_type_d import SimpleTypeD
 
 
 class SNot(SimpleTypeD):
-	"""A negation of a type.
+    """A negation of a type.
 	@param s the type we want to get the complement"""
-	def __init__(self, s):
-		super(SNot, self).__init__()
-		assert isinstance(s, SimpleTypeD)
-		self.s = s
-	
-	def __str__(self):
-		return "SNot(" + str(self.s) + ")"
 
-	def __eq__(self, that):
-		return type(self) is type(that) and \
-			self.s == that.s
+    def __init__(self, s):
+        super(SNot, self).__init__()
+        assert isinstance(s, SimpleTypeD)
+        self.s = s
 
-	def __hash__(self):
-		return hash(self.s)
+    def __str__(self):
+        return "SNot(" + str(self.s) + ")"
 
-	def typep(self, a):
-		return not self.s.typep(a)
+    def __eq__(self, that):
+        return type(self) is type(that) and \
+               self.s == that.s
 
-	def inhabited_down(self):
-		from genus.s_top import topp
-		from genus.s_empty import emptyp
-		from genus.s_atomic import atomicp
-		from genus.s_member import memberimplp
-		from genus.s_atomic import SAtomic
+    def __hash__(self):
+        return hash(self.s)
 
-		if topp(self.s):
-			return False
-		elif emptyp(self.s):
-			return True
-		elif self.s == SAtomic(object):
-			return False
-		elif atomicp(self.s):
-			return True
-		elif memberimplp(self.s):
-			return True
-		elif notp(self.s):
-			return self.s.s.inhabited()
-		else:
-			return None
+    def typep(self, a):
+        return not self.s.typep(a)
 
-	def disjoint_down(self, t):
-		assert isinstance(t, SimpleTypeD)
-		# is SNot(s) disjoint with t
-		# first we ask whether t is a subtype of s,
-		#  t <: s = > not (s) // t
-		if t.subtypep(self.s) is True:  # if it is empty this is empty and is thus evaluated as False
-			return True
-		else:
-			return super().disjoint_down(t)
+    def inhabited_down(self):
+        from genus.s_top import topp
+        from genus.s_empty import emptyp
+        from genus.s_atomic import atomicp
+        from genus.s_member import memberimplp
+        from genus.s_atomic import SAtomic
 
-	def subtypep_down(self, t):
-		from genus.utils import generate_lazy_val
-		from genus.s_atomic import atomicp
-		# SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
-		#    however b.subtypep(a) might return None
-		os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
-		# SNot(SAtomic(Long)).subtype(SAtomic(Double)) ??
+        if topp(self.s):
+            return False
+        elif emptyp(self.s):
+            return True
+        elif self.s == SAtomic(object):
+            return False
+        elif atomicp(self.s):
+            return True
+        elif memberimplp(self.s):
+            return True
+        elif notp(self.s):
+            return self.s.s.inhabited()
+        else:
+            return None
 
-		def h():
-			if not atomicp(t):
-				return None
-			elif not atomicp(self.s):
-				return None
-			elif self.s.disjoint(t):
-				return False
-			else:
-				return None
+    def disjoint_down(self, t):
+        from genus.s_atomic import atomicp
+        from genus.s_member import memberimplp
+        assert isinstance(t, SimpleTypeD)
+        # is SNot(s) disjoint with t
+        # first we ask whether t is a subtype of s,
+        #  t <: s = > not (s) // t
+        if t.subtypep(self.s) is True:
+            return True
+        elif self.s == t:  # if self and t are complements, then they are disjoint
+            return True
+        elif self.s.disjoint(t) is True and t.inhabited() is True:
+            return False
+        elif notp(t) and atomicp(self.s) and atomicp(t.s):
+            return False
+        # if t2 < t1, then t2 disjoint from (not t1)   (strict subset)
+        # (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
+        elif t.subtypep(self.s) is True and self.s.subtypep(t) is False:
+            return True
+        # (disjoint? '(not (member 1 2 3)) '(member a b c 1 2 3) )
+        elif self.s.subtypep(t) is True and t.subtypep(self.s) is False:
+            return False
+        # (disjoint? SNot(SMember(1,2,3)) SNot(SAtomic(str)))
+        elif memberimplp(self.s) \
+                and notp(t) \
+                and atomicp(t.s):
+            return False
+        else:
+            return super().disjoint_down(t)
 
-		hosted = generate_lazy_val(h)
+    def subtypep_down(self, t):
+        from genus.utils import generate_lazy_val
+        from genus.s_atomic import atomicp
+        # SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
+        #    however b.subtypep(a) might return None
+        os = generate_lazy_val(lambda: t.s.subtypep(self.s) if notp(t) else None)
 
-		if self.s.inhabited() is True and self.s.subtypep(t) is True:
-			return False
-		elif hosted() is not None:
-			return hosted()
-		elif os() is not None:
-			return os()
-		else:
-			return super().subtypep_down(t)
+        # SNot(SAtomic(Long)).subtype(SAtomic(Double)) ??
 
-	def canonicalize_once(self, nf=None):
-		from genus.s_top import topp, STop
-		from genus.s_empty import SEmpty, emptyp
-		if notp(self.s):
-			return self.s.s.canonicalize_once(nf)
-		elif topp(self.s):
-			return SEmpty
-		elif emptyp(self.s):
-			return STop
-		else:
-			return SNot(self.s.canonicalize_once(nf)).to_nf(nf)
+        def h():
+            if not atomicp(t):
+                return None
+            elif not atomicp(self.s):
+                return None
+            elif self.s.disjoint(t):
+                return False
+            else:
+                return None
 
-	def compute_dnf(self):
-		from genus.s_combination import combop
-		# SNot(SAnd(x1, x2, x3))
-		# --> SOr(SNot(x1), SNot(x2), SNot(x3)
-		#
-		# SNot(SOr(x1, x2, x3))
-		# --> SAnd(SNot(x1), SNot(x2), SNot(x3))
-		if combop(self.s):
-			return self.create_dual([SNot(td) for td in self.s.tds])
-		else:
-			return self
+        hosted = generate_lazy_val(h)
 
-	def compute_cnf(self):
-		# we convert a not to DNF or CNF the same way, i.e., by pushing down the SNot
-		#   and converting SAnd to SOr
-		return self.compute_dnf()
+        if self.s.inhabited() is True and self.s.subtypep(t) is True and SNot(t).inhabited() is True:
+            return False
+        elif hosted() is not None:
+            return hosted()
+        elif os() is not None:
+            return os()
+        else:
+            return super().subtypep_down(t)
 
-	def cmp_to_same_class_obj(self, td):
-		from genus.utils import cmp_objects
-		if type(self) != type(td):
-			return super().cmp_to_same_class_obj(td)
-		elif self == td:
-			return 0
-		else:
-			return cmp_objects(self.s, td.s)
+    def canonicalize_once(self, nf=None):
+        from genus.s_top import topp, STop
+        from genus.s_empty import SEmpty, emptyp
+        if notp(self.s):
+            return self.s.s.canonicalize_once(nf)
+        elif topp(self.s):
+            return SEmpty
+        elif emptyp(self.s):
+            return STop
+        else:
+            return SNot(self.s.canonicalize_once(nf)).to_nf(nf)
+
+    def compute_dnf(self):
+        from genus.s_combination import combop
+        # SNot(SAnd(x1, x2, x3))
+        # --> SOr(SNot(x1), SNot(x2), SNot(x3)
+        #
+        # SNot(SOr(x1, x2, x3))
+        # --> SAnd(SNot(x1), SNot(x2), SNot(x3))
+        if combop(self.s):
+            return self.s.create_dual([SNot(td) for td in self.s.tds])
+        else:
+            return self
+
+    def compute_cnf(self):
+        # we convert a not to DNF or CNF the same way, i.e., by pushing down the SNot
+        #   and converting SAnd to SOr
+        return self.compute_dnf()
+
+    def cmp_to_same_class_obj(self, td):
+        from genus.utils import cmp_objects
+        if type(self) != type(td):
+            return super().cmp_to_same_class_obj(td)
+        elif self == td:
+            return 0
+        else:
+            return cmp_objects(self.s, td.s)
 
 
 def notp(this):
-	return isinstance(this, SNot)
-
+    return isinstance(this, SNot)

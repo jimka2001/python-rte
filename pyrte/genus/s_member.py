@@ -68,7 +68,8 @@ class SMemberImpl(SimpleTypeD):
 		return all(t2.typep(a) for a in self.arglist)
 
 	def canonicalize_once(self, _nf=None):
-		return self
+		from genus.utils import uniquify
+		return createSMember(sorted(uniquify(self.arglist), key=lambda s: (type(s).__name__,s)))
 
 	def cmp_to_same_class_obj(self, t):
 		if type(self) != type(t):
@@ -110,8 +111,10 @@ def createSMember(items):
 	else:
 		return SMember(*items)
 
+
 def memberimplp(this):
 	return isinstance(this, SMemberImpl)
+
 
 def memberp(this):
 	return isinstance(this, SMember)

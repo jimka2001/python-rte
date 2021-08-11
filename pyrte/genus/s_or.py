@@ -43,7 +43,6 @@ from genus.utils import find_first
 from genus.utils import uniquify
 
 
-
 class SOr(SCombination):
     """Union type designator.  The operands are themselves type designators.
     @param tds list, zero or more type designators"""
@@ -99,7 +98,20 @@ class SOr(SCombination):
         elif any(td.disjoint(t) is False for td in self.tds):
             return False
         else:
-            return super().disjoint_down(t)
+            s = super().disjoint_down(t)  # variable s useful for debugging
+            return s
+
+    def subtypep_down(self, t):
+        if not self.tds:
+            return STop.subtypep(t)
+        elif 1 == len(self.tds):
+            return self.tds[0].subtypep(t)
+        elif all(td.subtypep(t) is True for td in self.tds):
+            return True
+        elif any(td.subtypep(t) is False for td in self.tds):
+            return False
+        else:
+            return super().subtypep_down(t)
 
     def conversionD1(self):
         from genus.s_not import SNot, notp
@@ -139,14 +151,13 @@ class SOr(SCombination):
 
 
 def createSOr(tds):
-	if not tds:
-		return SEmpty
-	elif len(tds) == 1:
-		return tds[0]
-	else:
-		return SOr(*tds)
+    if not tds:
+        return SEmpty
+    elif len(tds) == 1:
+        return tds[0]
+    else:
+        return SOr(*tds)
 
 
 def orp(this):
-	return isinstance(this, SOr)
-
+    return isinstance(this, SOr)

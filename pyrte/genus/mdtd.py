@@ -30,16 +30,16 @@ def mdtd(tds):
     tds = [td for td in tds if td.inhabited() is not False]
     decomposition = [STop]
     for td in tds:
-        n = SNot(td).canonicalize()
+        n = generate_lazy_val(lambda: SNot(td).canonicalize())
 
         def f(td1):
             from genus.s_and import SAnd
 
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
-            b = generate_lazy_val(lambda: SAnd(n, td1).canonicalize())
+            b = generate_lazy_val(lambda: SAnd(n(), td1).canonicalize())
             if td.disjoint(td1) is True:
                 return [td1]
-            elif n.disjoint(td1) is True:
+            elif n().disjoint(td1) is True:
                 return [td1]
             elif a().inhabited() is False:
                 return [td1]

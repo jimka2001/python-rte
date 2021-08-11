@@ -144,7 +144,7 @@ class And(Combination):
 
     def conversionA17(self):
         # if And(...) contains a Cat(...) with at least 2 non-nullable components,
-        #    this Cat matches only sequences of length 2 or more.
+        #    then this Cat matches only sequences of length 2 or more.
         # If And(...) contains a singleton, then it matches only sequences
         #    of length 1, perhaps an empty set of such sequences if the singleton type
         #    is empty.
@@ -224,7 +224,7 @@ class And(Combination):
     def conversionA17c(self):
         # if And(...) contains a Cat with no nullables, (or explicit Sigma or Singleton)
         #  then remove the nullables from ever other Cat with that many non-nullables,
-
+        # Since 7b has run, there should be no cat with more than this many non-nullables
         # find a Cat(...) with no nullables, there should be at most one because
         #    conversion17a as run.
         from rte.r_cat import catp, createCat
@@ -271,6 +271,9 @@ class And(Combination):
             return self
 
     def conversionA19(self):
+        # if there is at least one singleton and zero or more Not(x) where x is a singleton
+        #   then build a SimpleTypeD and ask whether it is inhabited.
+        #   if it is not inhabited, then self converts to EmptySet
         from genus.s_and import createSAnd
         from genus.s_not import SNot
         from genus.genus_types import NormalForm

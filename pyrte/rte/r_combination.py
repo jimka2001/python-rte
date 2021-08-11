@@ -129,7 +129,7 @@ class Combination (Rte):
             def f(r):
                 if orp(self) and Star(r) in stars:
                     return []
-                elif starp(r) and andp(self) and r in stars:
+                elif starp(r) and andp(self) and r.operand in self.operands:
                     return []
                 else:
                     return [r]
@@ -199,7 +199,7 @@ class Combination (Rte):
         # Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
         #   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
         #
-        # And(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+        # And(<{1,2,3,4}>,<{3,4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
         #   --> And(<{3,4}>,Not(<{10,11,12,13,14,15}>))
         from rte.r_singleton import singletonp, Singleton
         from rte.r_not import notp, Not
@@ -337,3 +337,6 @@ class Combination (Rte):
 
     def conversionC99(self):
         return self.create([r.canonicalize_once() for r in self.operands])
+
+    def derivative_down(self,wrt):
+        return self.create([ob.derivative(wrt) for ob in self.operands])

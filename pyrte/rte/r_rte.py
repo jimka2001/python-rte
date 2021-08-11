@@ -19,6 +19,24 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.r_rte.py
 
+class CannotComputeDerivative(Exception):
+    def __init__(self, msg, rte, wrt):
+        self.msg = msg
+        self.rte = rte
+        self.wrt = wrt
+        super().__init__(msg)
+
+
+class CannotComputeDerivatives(Exception):
+    def __init__(self, msg, rte, wrt, first_types, mdtd):
+        self.msg = msg
+        self.rte = rte
+        self.wrt = wrt
+        self.first_types = first_types
+        self.mdtd = mdtd
+        super().__init__(msg)
+
+
 class Rte:
     def __repr__(self):
         return self.__str__()
@@ -43,3 +61,54 @@ class Rte:
     def cmp_to_same_class_obj(self, t):
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare rtes of type {type(self)}")
+
+    def derivative(self, wrt):
+        from rte.r_emptyset import EmptySet
+        if wrt is None:
+            return self
+        elif wrt.inhabited() is False:
+            return EmptySet
+        else:
+            return self.derivative_down(wrt)
+
+    def derivative_down(self, wrt):
+        raise TypeError(f"derivative_down not implemented for {self} of type {type(self)}")
+
+    # Computes a pair of Vectors: (Vector[Rte], Vector[Seq[(SimpleTypeD,Int)]])
+    #   Vector[Rte] is a mapping from Int to Rte designating the states
+    #      of a Dfa.  Each state, i, corresponds to the i'th Rte in this vector.
+    #  Vector[Seq[(SimpleTypeD,Int)]] designates the transitions from each state.
+    #      the i'th component designates a Seq of transitions, each of the form
+    #      (td:SimpleTypeD,j:Int), indicating that in state i, an object of type
+    #      td transitions to state j.
+    def derivatives(self):
+        from genus.utils import trace_graph
+        from genus.mdtd import mdtd
+
+        def edges(rt):
+            assert isinstance(rt, Rte)
+            fts = rt.first_types()
+            wrts = mdtd(fts)
+
+            def d(wrt):
+                try:
+                    return rt.derivative(wrt).canonicalize()
+                except CannotComputeDerivative as e:
+                    if rt == rt.canonicalize():
+                        msg = "\n".join([f"When generating derivatives from {self}",
+                                         f"  when computing edges of {rt}",
+                                         f"  which canonicalizes to {rt.canonicalize()}",
+                                         f"  computing derivative of {e.rte}",
+                                         f"  wrt={e.wrt}",
+                                         f"  derivatives() reported: {e.msg}"])
+                        raise CannotComputeDerivatives(msg=msg,
+                                                       rte=rt,
+                                                       wrt=wrt,
+                                                       first_types=fts,
+                                                       mdtd=wrts) from None
+                    else:
+                        print(f"failed to compute derivative of {rt} wrt={wrt}, computing derivative of {rt.canonicalize()} instead")
+                        return rt.canonicalize().derivative(wrt).canonicalize()
+            return [(td, d(td)) for td in wrts]
+
+        return trace_graph(self, edges)
