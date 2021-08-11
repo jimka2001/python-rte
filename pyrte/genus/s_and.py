@@ -97,6 +97,8 @@ class SAnd(SCombination):
 
         if any(t.inhabited() is False for t in self.tds):
             return False
+        elif len(self.tds) > 1 and all(notp(td) and (atomicp(td.s) or memberimplp(td.s)) for td in self.tds):
+            return True
         elif all(atomicp(t) for t in self.tds):
             #   here we would like to check every 2-element subset
             #   if we find a,b such that a and b are disjoint,
