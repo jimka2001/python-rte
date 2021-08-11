@@ -90,11 +90,11 @@ class SAnd(SCombination):
     def inhabited_down(self):
         from genus.genus_types import NormalForm
         from genus.s_atomic import atomicp
+        from genus.s_not import notp
+        from genus.s_member import memberimplp
         dnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.DNF))
         cnf = generate_lazy_val(lambda: self.canonicalize(NormalForm.CNF))
 
-        inhabited_dnf = generate_lazy_val(lambda: dnf().inhabited())
-        inhabited_cnf = generate_lazy_val(lambda: cnf().inhabited())
         if any(t.inhabited() is False for t in self.tds):
             return False
         elif all(atomicp(t) for t in self.tds):
@@ -105,10 +105,10 @@ class SAnd(SCombination):
                     for a in range(len(self.tds))
                     for b in range(a + 1, len(self.tds)))
             return not s
-        elif dnf() != self and inhabited_dnf() is not None:
-            return inhabited_dnf()
-        elif cnf() != self and inhabited_cnf() is not None:
-            return inhabited_cnf()
+        elif dnf() != self and dnf().inhabited() is not None:
+            return dnf().inhabited()
+        elif cnf() != self and cnf().inhabited() is not None:
+            return cnf().inhabited()
         # in the special case of (and A B) if A and B are NOT disjoint,
         #   then the intersection is inhabited.  This does not generalize
         #   to (and A B C...), because even if not(A||B), not(B||C), and not(A||C),
