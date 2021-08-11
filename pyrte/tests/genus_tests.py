@@ -417,7 +417,7 @@ class GenusCase(unittest.TestCase):
         td2 = SAnd(SNot(SAnd(SNot(SAtomic(TestB)),
                              SOr(SAtomic(Test1), even))),
                    SNot(SAtomic(int))).canonicalize(NormalForm.CNF)
-        # self.assertIs(SAnd(td1, td2).canonicalize(NormalForm.DNF), SEmpty)
+        self.assertIs(SAnd(td1, td2).canonicalize(NormalForm.DNF), SEmpty)
         print("-----------------------")
         self.assertIsNot(td1.disjoint(td2), False,
                          f"\n td1={td1}\n td2={td2}\n td1.disjoint(td2) = {td1.disjoint(td2)}")
