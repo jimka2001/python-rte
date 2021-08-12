@@ -289,8 +289,8 @@ class RteCase(unittest.TestCase):
         # --> (:and A B C)
         self.assertEqual(And(a, b, Star(b), c).conversionC7(), And(a, b, c))
 
-        self.assertEqual(And(Star(Epsilon),Not(Epsilon)).conversionC7(),
-                         And(Star(Epsilon),Not(Epsilon)))
+        self.assertEqual(And(Star(Epsilon), Not(Epsilon)).conversionC7(),
+                         And(Star(Epsilon), Not(Epsilon)))
 
     def test_combo_conversionC11(self):
         x = Singleton(SEql("x"))
@@ -627,7 +627,7 @@ class RteCase(unittest.TestCase):
         r = Singleton(SAtomic(TestA))
         wrt = SAnd(SNot(SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")),
                    SOr(SAtomic(Test1)), SEql(-1))
-        r.derivative(wrt)
+        self.assertIsNotNone(r.derivative(wrt))
 
     def test_derivatives(self):
         for depth in range(5):
