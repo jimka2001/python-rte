@@ -616,6 +616,19 @@ class RteCase(unittest.TestCase):
         self.assertEqual(Or(Not(a), Not(b), Star(b), c, Star(c), Star(ab)).conversionO15(),
                          Or(Not(a), Not(b), c, Star(ab)))
 
+    def test_discovered_case_619(self):
+        # rte.r_rte.CannotComputeDerivative: Singleton.derivative_down cannot compute derivative of
+        # Singleton(SAtomic(TestA))
+        # wrt=SAnd(SNot(odd?), SOr(SAtomic(Test1), [= -1]))
+        from genus.depthgenerator import TestA, Test1
+        from genus.s_not import SNot
+        from genus.s_custom import SCustom
+        from genus.s_or import SOr
+        r = Singleton(SAtomic(TestA))
+        wrt = SAnd(SNot(SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")),
+                   SOr(SAtomic(Test1)), SEql(-1))
+        r.derivative(wrt)
+
     def test_derivatives(self):
         for depth in range(5):
             for r in range(1000):
