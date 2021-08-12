@@ -167,6 +167,13 @@ class Or(Combination):
 
         return self.create(flat_map(f, self.operands))
 
+    # the naming convention of the conversion functions is as follows:
+    #   conversionC... -- a method on Combination
+    #   conversionA... -- a method on And
+    #   conversionO... -- a method on Or
+    #   conversionD... -- a method declared in Combination but implemented in And and Or in a dual way
+    #                          I.e. the And and Or methods of this name implement dual operations.
+
     def canonicalize_once(self):
         from genus.utils import find_simplifier
         return find_simplifier(self, [lambda: self.conversionC1(),
