@@ -131,7 +131,7 @@ class SAnd(SCombination):
         elif t in self.tds:
             return False
         # this code is commented out because it is simply wrong.
-        #elif (any((td.subtypep(t) is True) or (t.subtypep(td) is True)
+        # elif (any((td.subtypep(t) is True) or (t.subtypep(td) is True)
         #          for td in self.tds)):
         #    return False
         elif (all(td.subtypep(t) is True for td in self.tds) or
