@@ -20,20 +20,24 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.r_rte.py
 
 class CannotComputeDerivative(Exception):
-    def __init__(self, msg, rte, wrt):
+    def __init__(self, msg, rte, wrt, factors, disjoints):
         self.msg = msg
         self.rte = rte
         self.wrt = wrt
+        self.factors = factors
+        self.disjoints = disjoints
         super().__init__(msg)
 
 
 class CannotComputeDerivatives(Exception):
-    def __init__(self, msg, rte, wrt, first_types, mdtd):
+    def __init__(self, msg, rte, wrt, first_types, mdtd, factors, disjoints):
         self.msg = msg
         self.rte = rte
         self.wrt = wrt
         self.first_types = first_types
         self.mdtd = mdtd
+        self.factors = factors
+        self.disjoints = disjoints
         super().__init__(msg)
 
 
@@ -62,16 +66,16 @@ class Rte:
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare rtes of type {type(self)}")
 
-    def derivative(self, wrt):
+    def derivative(self, wrt, factors, disjoints):
         from rte.r_emptyset import EmptySet
         if wrt is None:
             return self
         elif wrt.inhabited() is False:
             return EmptySet
         else:
-            return self.derivative_down(wrt)
+            return self.derivative_down(wrt, factors, disjoints)
 
-    def derivative_down(self, wrt):
+    def derivative_down(self, wrt, factors, disjoints):
         raise TypeError(f"derivative_down not implemented for {self} of type {type(self)}")
 
     # Computes a pair of Vectors: (Vector[Rte], Vector[Seq[(SimpleTypeD,Int)]])
@@ -90,9 +94,9 @@ class Rte:
             fts = rt.first_types()
             wrts = mdtd(fts)
 
-            def d(wrt):
+            def d(wrt, factors, disjoints):
                 try:
-                    return rt.derivative(wrt).canonicalize()
+                    return rt.derivative(wrt, factors, disjoints).canonicalize()
                 except CannotComputeDerivative as e:
                     if rt == rt.canonicalize():
                         msg = "\n".join([f"When generating derivatives from {self}",
@@ -100,16 +104,20 @@ class Rte:
                                          f"  which canonicalizes to {rt.canonicalize()}",
                                          f"  computing derivative of {e.rte}",
                                          f"  wrt={e.wrt}",
+                                         f"  factors={factors}",
+                                         f"  disjoints={disjoints}",
                                          f"  derivatives() reported: {e.msg}"])
                         raise CannotComputeDerivatives(msg=msg,
                                                        rte=rt,
                                                        wrt=wrt,
+                                                       factors=factors,
+                                                       disjoints=disjoints,
                                                        first_types=fts,
                                                        mdtd=wrts) from None
                     else:
                         print(f"failed to compute derivative of {rt} wrt={wrt}," +
                               f" computing derivative of {rt.canonicalize()} instead")
                         return rt.canonicalize().derivative(wrt).canonicalize()
-            return [(td, d(td)) for td in wrts]
+            return [(td, d(td, factors, disjoints)) for [td, factors, disjoints] in wrts]
 
         return trace_graph(self, edges)

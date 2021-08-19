@@ -40,7 +40,7 @@ class EmptySetImpl (Rte):
     def nullable(self):
         return False
 
-    def derivative_down(self, wrt):
+    def derivative_down(self, wrt, factors, disjoints):
         return EmptySet
 
 

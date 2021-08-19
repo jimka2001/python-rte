@@ -28,24 +28,26 @@ def mdtd(tds):
     # of its input rather it computes the mdtd of tds unioned with STop, which is
     # what is actually needed at the client side.
     tds = [td for td in tds if td.inhabited() is not False]
-    decomposition = [STop]
+    decomposition = [[STop, [], []]]
     for td in tds:
-        n = generate_lazy_val(lambda: SNot(td).canonicalize())
+        n = SNot(td)
+        nc = generate_lazy_val(lambda: n.canonicalize())
 
-        def f(td1):
+        def f(triple):
             from genus.s_and import SAnd
-
+            td1, factors, disjoints = triple
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
-            b = generate_lazy_val(lambda: SAnd(n(), td1).canonicalize())
+            b = generate_lazy_val(lambda: SAnd(nc(), td1).canonicalize())
             if td.disjoint(td1) is True:
-                return [td1]
-            elif n().disjoint(td1) is True:
-                return [td1]
+                return [[td1, factors + [n], disjoints + [td]]]
+            elif nc().disjoint(td1) is True:
+                return [[td1, factors + [td], disjoints + [n]]]
             elif a().inhabited() is False:
-                return [td1]
+                return [[td1, factors + [n], disjoints + [td]]]
             elif b().inhabited() is False:
-                return [td1]
+                return [[td1, factors + [td], disjoints + [n]]]
             else:
-                return [a(), b()]
+                return [[a(), factors + [td], disjoints + [n]],
+                        [b(), factors + [n], disjoints + [td]]]
         decomposition = flat_map(f, decomposition)
     return decomposition
