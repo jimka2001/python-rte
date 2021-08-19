@@ -338,5 +338,5 @@ class Combination (Rte):
     def conversionC99(self):
         return self.create([r.canonicalize_once() for r in self.operands])
 
-    def derivative_down(self, wrt):
-        return self.create([ob.derivative(wrt) for ob in self.operands])
+    def derivative_down(self, wrt, factors, disjoints):
+        return self.create([ob.derivative(wrt, factors, disjoints) for ob in self.operands])

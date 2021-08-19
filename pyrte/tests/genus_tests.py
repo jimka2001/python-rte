@@ -1076,17 +1076,19 @@ class GenusCase(unittest.TestCase):
                     tds = [random_type_designator(depth) for _ in range(length)]
                     computed = mdtd(tds)
                     for i in range(len(computed)):
+                        td_i, factors_i, disjoints_i = computed[i]
                         for j in range(i + 1, len(computed)):
-                            cc = computed[i].disjoint(computed[j])
-                            intersection = SAnd(computed[i], computed[j]).canonicalize(NormalForm.DNF)
+                            td_j, factors_j, disjoints_j = computed[j]
+                            cc = td_i.disjoint(td_j)
+                            intersection = SAnd(td_i, td_j).canonicalize(NormalForm.DNF)
                             self.assertTrue(cc is not False,
                                             f"\n tds={tds}" +
                                             f"\n mdtd={computed}" +
-                                            f"\n {computed[i]}.disjoint({cc})" +
+                                            f"\n {td_i}.disjoint({cc})" +
                                             f"\n intersection = {intersection}")
 
                     for v in test_values:
-                        containing = [td for td in computed if td.typep(v)]
+                        containing = [td for [td, factors, disjoint] in computed if td.typep(v)]
                         self.assertEqual(len(containing), 1,
                                          f"expecting exactly one partition to contain v={v}" +
                                          f"\n tds={tds}\n mdtd={computed}\n containing={containing}")

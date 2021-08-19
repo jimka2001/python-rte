@@ -627,7 +627,7 @@ class RteCase(unittest.TestCase):
         r = Singleton(SAtomic(TestA))
         wrt = SAnd(SNot(SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")),
                    SOr(SAtomic(Test1)), SEql(-1))
-        self.assertIsNotNone(r.derivative(wrt))
+        self.assertIsNotNone(r.derivative1(wrt))
 
     def test_derivatives(self):
         for depth in range(5):

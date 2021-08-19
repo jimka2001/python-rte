@@ -41,7 +41,7 @@ class SigmaImpl (Rte):
     def nullable(self):
         return False
 
-    def derivative_down(self, wrt):
+    def derivative_down(self, wrt, factors, disjoints):
         from rte.r_epsilon import Epsilon
         return Epsilon
 

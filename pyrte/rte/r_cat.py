@@ -126,19 +126,19 @@ class Cat(Rte):
                                       lambda: self.conversion99(),
                                       lambda: super(Cat, self).canonicalize_once()])
 
-    def derivative_down(self, wrt):
+    def derivative_down(self, wrt, factors, disjoints):
         from rte.r_epsilon import Epsilon
         from genus.utils import generate_lazy_val
         from rte.r_or import Or
         if not self.operands:
-            return Epsilon.derivative(wrt)
+            return Epsilon.derivative(wrt, factors, disjoints)
         elif 1 == len(self.operands):
-            return self.operands[0].derivative(wrt)
+            return self.operands[0].derivative(wrt, factors, disjoints)
         else:
             head = self.operands[0]
             tail = self.operands[1:]
-            term1 = generate_lazy_val(lambda: self.create([head.derivative(wrt)] + tail))
-            term2 = generate_lazy_val(lambda: self.create(tail).derivative(wrt))
+            term1 = generate_lazy_val(lambda: self.create([head.derivative(wrt, factors, disjoints)] + tail))
+            term2 = generate_lazy_val(lambda: self.create(tail).derivative(wrt, factors, disjoints))
             if head.nullable():
                 return Or(term1(), term2())
             else:

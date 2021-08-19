@@ -40,7 +40,7 @@ class EpsilonImpl (Rte):
     def nullable(self):
         return True
 
-    def derivative_down(self, wrt):
+    def derivative_down(self, wrt, factors, disjoints):
         from rte.r_emptyset import EmptySet
         return EmptySet
 

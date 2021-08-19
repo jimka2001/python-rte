@@ -50,24 +50,24 @@ class Singleton(Rte):
     def nullable(self):
         return False
 
-    def derivative(self, wrt):
+    def derivative(self, wrt, factors, disjoints):
         from genus.s_empty import SEmpty
         from genus.s_top import STop
         from rte.r_emptyset import EmptySet
         from rte.r_sigma import Sigma
         td = self.operand
         if td is SEmpty:
-            return EmptySet.derivative(wrt)
+            return EmptySet.derivative(wrt, factors, disjoints)
         elif td is STop:
-            return Sigma.derivative(wrt)
+            return Sigma.derivative(wrt, factors, disjoints)
         elif wrt is None:
             return self
         elif td.inhabited() is False:
-            return EmptySet.derivative(wrt)
+            return EmptySet.derivative(wrt, factors, disjoints)
         else:
-            return super().derivative(wrt)
+            return super().derivative(wrt, factors, disjoints)
 
-    def derivative_down(self, wrt):
+    def derivative_down(self, wrt, factors, disjoints):
         from rte.r_epsilon import Epsilon
         from rte.r_emptyset import EmptySet
         from genus.s_top import STop
@@ -79,6 +79,10 @@ class Singleton(Rte):
             return Epsilon
         elif wrt == STop:
             return Epsilon
+        elif td in factors:
+            return Epsilon
+        elif td in disjoints:
+            return EmptySet
         elif isinstance(wrt, SimpleTypeD) and wrt.disjoint(td) is True:
             return EmptySet
         elif isinstance(wrt, SimpleTypeD) and wrt.subtypep(td) is True:
@@ -92,9 +96,13 @@ class Singleton(Rte):
                 msg="\n".join([f"Singleton.derivative_down cannot compute derivative of {self}",
                                f"  wrt={wrt}",
                                f"  disjoint={wrt.disjoint(td)}",
-                               f"  subtypep={wrt.subtypep(td)}"]),
+                               f"  subtypep={wrt.subtypep(td)}",
+                               f"  factors={factors}",
+                               f"  disjoints={disjoints}"]),
                 rte=self,
-                wrt=wrt)
+                wrt=wrt,
+                factors=factors,
+                disjoints=disjoints)
 
 
 def singletonp(op):

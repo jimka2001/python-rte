@@ -98,8 +98,8 @@ class Not (Rte):
                                       lambda: self.conversion3(),
                                       lambda: self.conversion99()])
 
-    def derivative_down(self, wrt):
-        return Not(self.operand.derivative(wrt))
+    def derivative_down(self, wrt, factors, disjoints):
+        return Not(self.operand.derivative(wrt, factors, disjoints))
 
 
 def notp(op):
