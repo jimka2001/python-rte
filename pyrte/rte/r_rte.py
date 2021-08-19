@@ -75,6 +75,9 @@ class Rte:
         else:
             return self.derivative_down(wrt, factors, disjoints)
 
+    def derivative1(self, wrt):
+        return self.derivative(wrt, [], [])
+
     def derivative_down(self, wrt, factors, disjoints):
         raise TypeError(f"derivative_down not implemented for {self} of type {type(self)}")
 
