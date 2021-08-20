@@ -38,6 +38,7 @@ from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
 from genus.s_or import SOr
+from genus.s_not import SNot
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
