@@ -53,6 +53,30 @@ class XymbolycoCase(unittest.TestCase):
                 rt = random_rte(depth)
                 transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
                 self.assertTrue(createDfa(None,transitions, accepting, exit_map, combine_labels))
+    def test_extract_discovered_case_57(self):
+        rt1 = Singleton(SNot(SOr(STop,SMember())))
+        rt2 = rt1.to_dfa(True).to_rte()[True]
+        empty1 = Or(And(rt2,Not(rt1)),
+                    And(Not(rt2),rt1)).canonicalize()
+        rt_empty = empty1.to_dfa(True).to_rte()[True]
+        self.assertEqual(rt_empty,EmptySet)
+
+    def test_extract_rte(self):
+        for depth in range(5):
+            for r in range(num_random_tests):
+                rt1 = random_rte(depth)
+                extracted = rt1.to_dfa(depth*10).extract_rte()
+                if extracted:
+                    rt2 = extracted[depth*10]
+                    empty1 = Or(And(rt2,Not(rt1)),
+                               And(Not(rt2),rt1)).canonicalize()
+                    if empty1 != EmptySet:
+                        rt_empty = empty1.to_dfa(True).to_rte()[True]
+                        self.assertEqual(rt_empty,EmptySet,
+                                         f"rt1={rt1}\n" +
+                                         f"rt2={rt2}\n" +
+                                         f"empty={empty1}\n" +
+                                         f"  --> {rt_empty}\n"
 
 
 if __name__ == '__main__':

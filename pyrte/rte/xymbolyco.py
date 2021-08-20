@@ -166,6 +166,119 @@ class Dfa:
     def minimize(self):
         # TODO implement minimization
         return self
+
+    def extract_rte(self):
+        from functools import reduce
+        from rte.r_epsilon import Epsilon
+        from rte.r_singleton import Singleton
+        from rte.r_or import createOr
+        from rte.r_cat import createCat
+        from rte.r_star import Star
+        #    1. minimize and trim the given dfa
+        #    2. generate a list of transition triples [from label to]
+        #    3. add transitions from extra-state-I to all initial states with :epsilon transition
+        #    4. add transitions from all accepting states to extra-state-F (one per exit value) with :epsilon transition
+        #    5. loop on each state
+        #    6.    partition transitions into 4 groups [to-this-state loops-on-state from-state everything-else]
+        #    7.    combine parallel transitions
+        #    8.    n^2 iteration to-this-state x from-this-state
+        #    9.    append new transitions in next iteration of loop 5.
+        #    10. this reduces to one transition per exit value, returns the map of exit-value to label
+
+        # step 1
+        dfa = self.trim().minimize()
+
+        # step 2
+        _, old_transition_triples, accepting, _, _ = dfa.serialize()
+        old_transitions = [(src, Singleton(td), dst) for src,td,dst in old_transition_triples]
+        # step 3
+        new_initial_transitions = [("I", Epsilon, 0)]
+        # step 4
+        new_final_transitions = [(qid, Epsilon, ("F", self.exit_map[qid])) for qid in accepting]
+
+        def combine_parallel_labels(rtes):
+            return createOr(rtes).canonicalize()
+
+        def extract_labels(triples):
+            return [l for _, l, _ in triples]
+
+        def combine_parallel(triples):
+            #  accepts a sequence of triples, each of the form [from label to]
+            #   groups them by common from/to, these are parallel transitions
+            #   combines the labels of the parallel transitions, into one single label
+            #   and collects a sequence of transitions, none of which are parallel.
+            #   This action is important because it greatly reduces the number of transitions
+            #   created.  The caller, the computation of new-triples, makes an NxM loop
+            #   creating NxM new triples.   This reduces N and M by eliminating parallel
+            #   transitions.
+            sources = list(set([s for s,_,_ in triples]))
+            return [(src,
+                     combine_parallel_labels([l for _, l, d in from_src if d == dst]),
+                     dst)
+                    for src in sources
+                    for from_src in [[[s, l, d] for s, l, d in triples if s == src]]  # singleton
+                    for dst in list(set([d for _, _, d in from_src]))
+                    ]
+
+        def eliminate_state(triples,qid):
+            def f(acc,triple):
+                x_to_q, q_to_q, q_to_x, others = acc
+                src, _, dst = triple
+                if src == qid and dst == qid:
+                    return x_to_q, q_to_q+[triple], q_to_x, others
+                elif src == qid:
+                    return x_to_q, q_to_q, q_to_x+[triple], others
+                elif dst == qid:
+                    return x_to_q+[triple], q_to_q, q_to_x, others
+                else:
+                    return x_to_q, q_to_q, q_to_x, others+[triple]
+
+            # step 6
+            x_to_q, q_to_q, q_to_x, others = reduce(f, triples, ([], [], [], []))
+
+            # step 7
+            self_loop_label = combine_parallel_labels(extract_labels(q_to_q))
+            # step 8
+            new_triples = [(src,lab,dst)
+                           for src, pre_label, _ in combine_parallel(x_to_q)
+                           for _, post_label, dst in combine_parallel(q_to_x)
+                           for lab in [createCat([pre_label,
+                                                  Star(self_loop_label),
+                                                  post_label]).canonicalize()]
+                           ]
+            return others + new_triples  # from eliminate_state
+
+        # step 5 and 9
+        new_transition_triples = reduce(eliminate_state,
+                                        # we eliminate all states whose id is an integer,
+                                        #  recall we have added states with id ("F",?) and also with
+                                        #  id "I".  These will remain.
+                                        range(len(self.states)),
+                                        new_initial_transitions + old_transitions + new_final_transitions)
+        exit_values = list(set([self.exit_map[qid] for qid in accepting]))
+        for triple in new_transition_triples:
+            assert isinstance(triple, tuple)
+            assert 3 == len(triple)
+            assert "I" == triple[0]
+            assert isinstance(triple[1], Rte)
+            assert isinstance(triple[2], tuple)
+            assert 2 == len(triple[2])
+            assert "F" == triple[2][0]
+            assert triple[2][1] in exit_values
+
+        return dict([(exit_value, combine_parallel_labels(labels).canonicalize())
+                     for exit_value in exit_values  # step 10
+                     for labels in [[l for _,l,[_,e] in new_transition_triples if e == exit_value]]])
+
+    def to_rte(self):
+        from rte.r_emptyset import EmptySet
+        extracted = self.extract_rte()
+        if extracted:
+            return extracted
+        else:
+            return dict([(True, EmptySet)])
+
+
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce
 
