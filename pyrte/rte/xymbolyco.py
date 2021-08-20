@@ -67,7 +67,7 @@ class Dfa:
         assert canonicalized is None or isinstance(canonicalized, Rte)
         assert isinstance(states, list)
         for st in states:
-            isinstance(st, State)
+            assert isinstance(st, State)
         assert isinstance(exit_map, dict)
         for i in exit_map:
             assert isinstance(i, int)
