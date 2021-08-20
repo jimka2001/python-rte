@@ -667,6 +667,5 @@ class RteCase(unittest.TestCase):
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
 
-
 if __name__ == '__main__':
     unittest.main()
