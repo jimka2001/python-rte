@@ -127,27 +127,24 @@ class Rte:
         return trace_graph(self, edges)
 
     def to_dfa(self, exit_value):
-        from rte.xymbolyco import Dfa, State
+        from rte.xymbolyco import createDfa
         from genus.s_or import createSOr
         rtes, transitions = self.derivatives()
-
-        def make_state(i):
-            return State(index=i,
-                         initial=(i == 0),
-                         accepting=rtes[i].nullable(),
-                         pattern=rtes[i],
-                         transitions=dict(transitions[i]))
+        # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
+        transition_triples = [(src,td,dst)
+                              for src in range(len(transitions))
+                              for td, dst in transitions[src]
+                              ]
 
         def combine_labels(td1, td2):
             return createSOr([td1, td2]).canonicalize()
 
-        states = [make_state(i) for i, rte in enumerate(rtes)]
-        exit_map = dict([(i, exit_value) for i, rte in enumerate(rtes) if states[i].accepting])
-        return Dfa(pattern=self,
-                   canonicalized=self.canonicalize(),
-                   states=states,
-                   exit_map=exit_map,
-                   combine_labels=combine_labels)
+        accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
+        return createDfa(pattern=self,
+                         transition_triples = transition_triples,
+                         accepting_states = accepting_states,
+                         exit_map = dict([(i, exit_value) for i in accepting_states]),
+                         combine_labels = combine_labels)
 
     def simulate(self, exit_value, sequence):
         return self.to_dfa(exit_value).simulate(sequence)

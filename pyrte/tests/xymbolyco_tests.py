@@ -52,7 +52,8 @@ class XymbolycoCase(unittest.TestCase):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
                 transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
-                self.assertTrue(createDfa(transitions, accepting, exit_map, combine_labels))
+                self.assertTrue(createDfa(None,transitions, accepting, exit_map, combine_labels))
+
 
 if __name__ == '__main__':
     unittest.main()

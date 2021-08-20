@@ -66,12 +66,10 @@ def default_combine_labels(l1, l2):
 class Dfa:
     def __init__(self,
                  pattern=None,
-                 canonicalized=None,
                  states=[createSinkState(0)],
                  exit_map=dict([]),
                  combine_labels=default_combine_labels):
         assert pattern is None or isinstance(pattern, Rte)
-        assert canonicalized is None or isinstance(canonicalized, Rte)
         assert isinstance(states, list)
         for st in states:
             assert isinstance(st, State)
@@ -81,7 +79,6 @@ class Dfa:
             assert i >= 0
         assert callable(combine_labels)
         self.pattern = pattern  # Rte
-        self.canonicalized = canonicalized  # bool
         self.states = states  # vector of State objects
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
@@ -117,8 +114,13 @@ class Dfa:
         return [transitions(), accepting(), exit_map(), self.combine_labels]
 
 
-def createDfa(transition_triples, accepting_states, exit_map, combine_labels):
+def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce
+
+    assert isinstance(accepting_states,list)
+    for i in accepting_states:
+        assert isinstance(i,int)
+        assert i >= 0
 
     def f(acc,triple):
         src, _, dst = triple
@@ -151,6 +153,7 @@ def createDfa(transition_triples, accepting_states, exit_map, combine_labels):
             return createSinkState(i)
 
     states = [make_state(i) for i in range(1+max_index)]
-    return Dfa(states=states,
+    return Dfa(pattern=pattern,
+               states=states,
                exit_map=exit_map,
                combine_labels=combine_labels)
