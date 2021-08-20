@@ -78,6 +78,8 @@ class XymbolycoCase(unittest.TestCase):
                                          f"rt2={rt2}\n" +
                                          f"empty={empty1}\n" +
                                          f"  --> {rt_empty}\n"
+                                         )
+
 
 
 if __name__ == '__main__':
