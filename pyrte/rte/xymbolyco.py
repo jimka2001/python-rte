@@ -41,6 +41,20 @@ class State:
         self.transitions = transitions  # Map SimpleTypeD -> Int
         super().__init__()
 
+
+def createSinkState(index):
+    from genus.s_top import STop
+
+    return State(index=index,
+                 initial=(index == 0),
+                 accepting=False,
+                 pattern=None,
+                 transitions={STop: index})
+
+
+def default_combine_labels(l1, l2):
+    raise Exception('Missing combine_labels for Dfa')
+
 class Dfa:
     def __init__(self,
                  pattern=None,
@@ -76,5 +90,28 @@ class Dfa:
 
         if not self.states[state_id].accepting:
             return None
+
+def createDfa(transition_triples, accepting_states, exit_map, combine_labels):
+    from functools import reduce
+
+    def f(acc,triple):
+        src, _, dst = triple
+        return max(acc, src, dst)
+
+    max_index = reduce(f,transition_triples,0)
+
+    def make_state(i):
+        transitions = dict([(td,dst) for src,td,dst in transition_triples if src == i])
+        if transitions:
+            return State(index=i,
+                         initial= i == 0,
+                         accepting= i in accepting_states,
+                         pattern=None,
+                         transitions=transitions)
         else:
-            return self.exit_map[state_id]
+            return createSinkState(i)
+
+    states = [make_state(i) for i in range(1+max_index)]
+    return Dfa(states=states,
+               exit_map=exit_map,
+               combine_labels=combine_labels)

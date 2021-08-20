@@ -656,6 +656,14 @@ class RteCase(unittest.TestCase):
         self.assertIs(None, Star(Or(Singleton(SOr(SAtomic(str),
                                                    SAtomic(int))))).simulate(42, [1, "b", 3.4]))
 
+    def test_createDfa(self):
+        from rte.xymbolyco import createDfa
+        for depth in range(3,4):
+            for r in range(num_random_tests):
+                rt = random_rte(depth)
+                transitions, accepting, exit_map, combine_labels =  rt.to_dfa(depth*10).serialize()
+                createDfa(transitions, accepting, exit_map, combine_labels)
+
 
 if __name__ == '__main__':
     unittest.main()
