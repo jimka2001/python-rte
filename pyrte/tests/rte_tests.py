@@ -39,10 +39,10 @@ from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
 from genus.s_or import SOr
 
-
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
-num_random_tests = 10
+num_random_tests = 1000
+
 
 class RteCase(unittest.TestCase):
     def test_sigma(self):
@@ -661,18 +661,19 @@ class RteCase(unittest.TestCase):
                                                   SAtomic(int))))).simulate(42, [1, "b", 3.4]))
 
     def test_serialize(self):
-        for depth in range(3,4):
+        for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
-                print(rt.to_dfa(depth*10).serialize())
+                self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
     def test_createDfa(self):
         from rte.xymbolyco import createDfa
-        for depth in range(3,4):
+        for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
-                transitions, accepting, exit_map, combine_labels =  rt.to_dfa(depth*10).serialize()
-                createDfa(transitions, accepting, exit_map, combine_labels)
+                transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
+                self.assertTrue(createDfa(transitions, accepting, exit_map, combine_labels))
+
 
 
 if __name__ == '__main__':
