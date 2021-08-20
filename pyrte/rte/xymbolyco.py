@@ -18,9 +18,22 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+from rte.r_rte import Rte
+from genus.simple_type_d import SimpleTypeD
+
 
 class State:
     def __init__(self, index, initial, accepting, pattern, transitions):
+        assert isinstance(index, int)
+        assert index >= 0
+        assert isinstance(initial, bool)
+        assert isinstance(accepting, bool)
+        assert pattern is None or isinstance(pattern, Rte)
+        assert isinstance(transitions, dict), f"transitions has type {type(transitions)} expecting dict: transitions={transitions}"
+        for tr in transitions:
+            assert isinstance(tr, SimpleTypeD), f"tr={tr} (type={type(tr)}) is not a SimpleTypeD"
+            assert isinstance(transitions[tr], int)
+
         self.index = index  # int
         self.initial = initial  # bool
         self.accepting = accepting  # bool
@@ -29,7 +42,22 @@ class State:
         super().__init__()
 
 class Dfa:
-    def __init__(self, pattern, canonicalized, states, exit_map, combine_labels ):
+    def __init__(self,
+                 pattern=None,
+                 canonicalized=None,
+                 states=[createSinkState(0)],
+                 exit_map=dict([]),
+                 combine_labels=default_combine_labels):
+        assert pattern is None or isinstance(pattern, Rte)
+        assert canonicalized is None or isinstance(canonicalized, Rte)
+        assert isinstance(states, list)
+        for st in states:
+            isinstance(st, State)
+        assert isinstance(exit_map, dict)
+        for i in exit_map:
+            assert isinstance(i, int)
+            assert i >= 0
+        assert callable(combine_labels)
         self.pattern = pattern  # Rte
         self.canonicalized = canonicalized  # bool
         self.states = states  # vector of State objects
