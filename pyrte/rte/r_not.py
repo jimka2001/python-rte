@@ -104,3 +104,10 @@ class Not (Rte):
 
 def notp(op):
     return isinstance(op, Not)
+
+def createNot(operand):
+    if notp(operand):
+        return operand.operand
+    else:
+        return Not(operand)
+
