@@ -34,6 +34,12 @@ class State:
         for tr in transitions:
             assert isinstance(tr, SimpleTypeD), f"tr={tr} (type={type(tr)}) is not a SimpleTypeD"
             assert isinstance(transitions[tr], int)
+        tr_list = list(transitions)
+        for i in range(len(tr_list)):
+            for j in range(i):
+                tr1 = tr_list[i]
+                tr2 = tr_list[j]
+                assert tr1.disjoint(tr2) is not False, f"expecting disjoint transitions: not {tr1} vs {tr2}"
 
         self.index = index  # int
         self.initial = initial  # bool
@@ -120,9 +126,22 @@ def createDfa(transition_triples, accepting_states, exit_map, combine_labels):
 
     max_index = reduce(f,transition_triples,0)
 
+    def merge_tds(dst1,transitions):
+        assert transitions, "merge_tds expected transitions to be non-empty"
+        tds = [td for td, dst2 in transitions if dst1 == dst2]
+        return reduce(combine_labels, tds)
+
     def make_state(i):
-        transitions = dict([(td,dst) for src,td,dst in transition_triples if src == i])
-        if transitions:
+        transitions_pre = [(td,dst) for src,td,dst in transition_triples if src == i]
+        # error if a td appears more than once.
+        #   we would like to error if the tds are not disjoint, but this is already
+        #   checked in State initialization
+        tds = [td for td, _ in transitions_pre]
+        assert len(tds) == len(set(tds)), f"transitions from state {i} are ambiguous: {transition_triples}"
+        destinations = list(set([dst for _, dst in transitions_pre]))
+
+        if transitions_pre:
+            transitions = dict([(merge_tds(dst, transitions_pre), dst) for dst in destinations])
             return State(index=i,
                          initial= i == 0,
                          accepting= i in accepting_states,
