@@ -282,24 +282,24 @@ class Dfa:
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce
 
-    assert isinstance(accepting_states,list)
+    assert isinstance(accepting_states, list)
     for i in accepting_states:
-        assert isinstance(i,int)
+        assert isinstance(i, int)
         assert i >= 0
 
-    def f(acc,triple):
+    def f(acc, triple):
         src, _, dst = triple
         return max(acc, src, dst)
 
-    max_index = reduce(f,transition_triples,0)
+    max_index = reduce(f, transition_triples, 0)
 
-    def merge_tds(dst1,transitions):
+    def merge_tds(dst1, transitions):
         assert transitions, "merge_tds expected transitions to be non-empty"
         tds = [td for td, dst2 in transitions if dst1 == dst2]
         return reduce(combine_labels, tds)
 
     def make_state(i):
-        transitions_pre = [(td,dst) for src,td,dst in transition_triples if src == i]
+        transitions_pre = [(td, dst) for src, td, dst in transition_triples if src == i]
         # error if a td appears more than once.
         #   we would like to error if the tds are not disjoint, but this is already
         #   checked in State initialization
@@ -310,14 +310,14 @@ def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_l
         if transitions_pre:
             transitions = dict([(merge_tds(dst, transitions_pre), dst) for dst in destinations])
             return State(index=i,
-                         initial= i == 0,
-                         accepting= i in accepting_states,
+                         initial=i == 0,
+                         accepting=i in accepting_states,
                          pattern=None,
                          transitions=transitions)
         else:
             return createSinkState(i)
 
-    states = [make_state(i) for i in range(1+max_index)]
+    states = [make_state(i) for i in range(1 + max_index)]
     return Dfa(pattern=pattern,
                states=states,
                exit_map=exit_map,
