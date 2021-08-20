@@ -138,6 +138,18 @@ class Dfa:
                              exit_map=exit_map,
                              combine_labels=combine_labels)
 
+    def complement(self, exit_map):
+        from rte.r_not import createNot
+        pattern_old, transitions, accepting, _, combine_labels = self.complete().serialize()
+        if pattern_old is None:
+            pattern = None
+        else:
+            pattern = createNot(self.pattern)
+        return createDfa(pattern=pattern,
+                         transition_triples=transitions,
+                         accepting_states=[i for i in range(len(self.states)) if i not in accepting],
+                         exit_map=exit_map,
+                         combine_labels=combine_labels)
 
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce
