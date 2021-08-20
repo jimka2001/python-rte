@@ -50,6 +50,33 @@ class Singleton(Rte):
     def nullable(self):
         return False
 
+    def canonicalize_once(self):
+        from genus.s_top import STop
+        from genus.s_empty import SEmpty
+        from genus.s_and import andp
+        from genus.s_or import orp
+        from genus.s_not import notp
+        from rte.r_sigma import Sigma
+        from rte.r_emptyset import EmptySet
+        from rte.r_and import createAnd, And
+        from rte.r_or import createOr
+        from rte.r_not import Not
+        td = self.operand.canonicalize()
+        if td == STop:
+            return Sigma
+        elif td == SEmpty:
+            return EmptySet
+        elif andp(td):
+            return createAnd([Singleton(td1) for td1 in td.tds])
+        elif orp(td):
+            return createOr([Singleton(td1) for td1 in td.tds])
+        elif notp(td):
+            return And(Not(Singleton(td.s)), Sigma)
+        else:
+            return Singleton(td)
+
+
+
     def derivative(self, wrt, factors, disjoints):
         from genus.s_empty import SEmpty
         from genus.s_top import STop
