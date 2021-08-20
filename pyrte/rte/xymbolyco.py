@@ -151,6 +151,13 @@ class Dfa:
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
+    def trim(self):
+        # TODO implement trimming
+        return self
+
+    def minimize(self):
+        # TODO implement minimization
+        return self
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce
 
