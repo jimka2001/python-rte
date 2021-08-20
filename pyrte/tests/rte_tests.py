@@ -666,14 +666,6 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
-    def test_createDfa(self):
-        from rte.xymbolyco import createDfa
-        for depth in range(4):
-            for r in range(num_random_tests):
-                rt = random_rte(depth)
-                transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
-                self.assertTrue(createDfa(transitions, accepting, exit_map, combine_labels))
-
 
 
 if __name__ == '__main__':
