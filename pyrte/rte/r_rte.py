@@ -147,6 +147,52 @@ class Rte:
                    states=states,
                    exit_map=exit_map,
                    combine_labels = combine_labels)
+def random_rte(depth):
+    import random
+
+    def random_and():
+        from rte.r_and import And
+        return And(random_rte(depth - 1),
+                   random_rte(depth - 1))
+
+    def random_or():
+        from rte.r_or import Or
+        return Or(random_rte(depth - 1),
+                  random_rte(depth - 1))
 
     def simulate(self,exit_value,sequence):
-        return self.to_dfa(exit_value).simulate(sequence)
+        return self.to_dfa(exit_value).simulate(sequence)    def random_not():
+    def random_not():
+        from rte.r_not import Not
+        return Not(random_rte(depth - 1))
+
+    def random_star():
+        from rte.r_star import Star
+        return Star(random_rte(depth - 1))
+
+    def random_cat():
+        from rte.r_cat import Cat
+        return Cat(random_rte(depth - 1),
+                   random_rte(depth - 1))
+
+    def random_singleton():
+        from genus.depthgenerator import random_type_designator
+        return random_type_designator(depth)
+
+    def random_leaf():
+        from rte.r_sigma import Sigma
+        from rte.r_emptyset import EmptySet
+        from rte.r_epsilon import Epsilon
+        return random.choice([Sigma,EmptySet,Epsilon])
+
+    if depth <= 0:
+        return random_singleton()
+    else:
+        randomizer = random.choice([random_and,
+                                    random_or,
+                                    random_not,
+                                    random_star,
+                                    random_cat,
+                                    random_singleton,
+                                    random_leaf])
+        return randomizer()
