@@ -34,6 +34,7 @@ from genus.s_empty import SEmpty
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
+from genus.s_or import SOr
 from rte.r_cat import Cat, createCat, catxyp
 from rte.r_random import random_rte
 from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
@@ -634,6 +635,26 @@ class RteCase(unittest.TestCase):
             for r in range(1000):
                 rt = random_rte(depth)
                 self.assertTrue(rt.derivatives())
+
+    def test_simulate(self):
+        self.assertIs(True,Star(Singleton(SAtomic(str))).simulate(True,["a","b","c"]))
+        self.assertIs(None,Star(Singleton(SAtomic(str))).simulate(True,["a","b",3]))
+        self.assertIs(True, Star(Singleton(SAtomic(str))).simulate(True, []))
+        self.assertEqual(42, Star(Singleton(SAtomic(str))).simulate(42, ["a", "b", "c"]))
+        self.assertEqual(42, Or(Star(Singleton(SAtomic(str))),
+                                Star(Singleton(SAtomic(int)))).simulate(42, ["a", "b", "c"]))
+        self.assertEqual(42, Or(Star(Singleton(SAtomic(str))),
+                                Star(Singleton(SAtomic(int)))).simulate(42, [1, 2, 3]))
+        self.assertIs(None, Or(Star(Singleton(SAtomic(str))),
+                                Star(Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
+        self.assertEqual(42, Star(Or(Singleton(SAtomic(str)),
+                                    Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
+        self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str),SAtomic(int))))).simulate(42, [1, "b", 3]))
+        self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str),
+                                                   # warning True is an int in Python isinstance(True,int) --> True
+                                                  SAtomic(int))))).simulate(42, [1, "b", True]))
+        self.assertIs(None, Star(Or(Singleton(SOr(SAtomic(str),
+                                                   SAtomic(int))))).simulate(42, [1, "b", 3.4]))
 
 
 if __name__ == '__main__':

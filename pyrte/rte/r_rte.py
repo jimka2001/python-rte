@@ -124,3 +124,29 @@ class Rte:
             return [(td, d(td, factors, disjoints)) for [td, factors, disjoints] in wrts]
 
         return trace_graph(self, edges)
+
+    def to_dfa(self, exit_value):
+        from rte.xymbolyco import Dfa, State
+        from genus.s_or import createSOr
+        rtes, transitions = self.derivatives()
+
+        def make_state(i):
+            return State(index=i,
+                         initial=(i == 0),
+                         accepting=rtes[i].nullable(),
+                         pattern=rtes[i],
+                         transitions=dict(transitions[i]))
+
+        def combine_labels(td1,td2):
+            return createSOr([td1, td2]).canonicalize()
+
+        states = [make_state(i) for i,rte in enumerate(rtes)]
+        exit_map = dict([(i,exit_value) for i,rte in enumerate(rtes) if states[i].accepting])
+        return Dfa(pattern=self,
+                   canonicalized=self.canonicalize(),
+                   states=states,
+                   exit_map=exit_map,
+                   combine_labels = combine_labels)
+
+    def simulate(self,exit_value,sequence):
+        return self.to_dfa(exit_value).simulate(sequence)

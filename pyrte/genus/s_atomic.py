@@ -177,4 +177,3 @@ class SAtomic(SimpleTypeD, TerminalType):
 
 def atomicp(this):
 	return isinstance(this, SAtomic)
-
