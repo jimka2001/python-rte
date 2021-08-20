@@ -55,6 +55,7 @@ def createSinkState(index):
 def default_combine_labels(l1, l2):
     raise Exception('Missing combine_labels for Dfa')
 
+
 class Dfa:
     def __init__(self,
                  pattern=None,
@@ -80,7 +81,7 @@ class Dfa:
 
     def simulate(self, sequence):
         state_id = 0
-        for element in sequence :
+        for element in sequence:
             transitions = self.states[state_id].transitions
             itr = iter(transitions)
             state_id = next((transitions[td] for td in itr if td.typep(element)),
@@ -88,8 +89,26 @@ class Dfa:
             if state_id is None:
                 return None
 
-        if not self.states[state_id].accepting:
+        if self.states[state_id].accepting:
+            return self.exit_map[state_id]
+        else:
             return None
+
+    def serialize(self):
+        def transitions():
+            return [(state.index, tr, state.transitions[tr])
+                    for state in self.states
+                    for tr in state.transitions]
+
+        def accepting():
+            return [state.index for state in self.states if state.accepting]
+
+        def exit_map():
+            # return [(id, self.exit_map[id]) for id in self.exit_map]
+            return self.exit_map
+
+        return [transitions(), accepting(), exit_map(), self.combine_labels]
+
 
 def createDfa(transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce

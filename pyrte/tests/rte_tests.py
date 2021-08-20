@@ -28,6 +28,9 @@ from rte.r_and import And, createAnd
 from rte.r_or import Or, createOr
 from rte.r_singleton import Singleton
 from rte.r_not import Not
+from rte.r_cat import Cat, createCat, catxyp
+from rte.r_random import random_rte
+from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
 from genus.s_eql import SEql
 from genus.s_top import STop
 from genus.s_empty import SEmpty
@@ -35,10 +38,11 @@ from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
 from genus.s_or import SOr
-from rte.r_cat import Cat, createCat, catxyp
-from rte.r_random import random_rte
-from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
 
+
+# default value of num_random_tests is 1000, but you can temporarily edit this file
+#   and set it to a smaller number for a quicker run of the tests.
+num_random_tests = 10
 
 class RteCase(unittest.TestCase):
     def test_sigma(self):
@@ -655,6 +659,12 @@ class RteCase(unittest.TestCase):
                                                   SAtomic(int))))).simulate(42, [1, "b", True]))
         self.assertIs(None, Star(Or(Singleton(SOr(SAtomic(str),
                                                    SAtomic(int))))).simulate(42, [1, "b", 3.4]))
+
+    def test_serialize(self):
+        for depth in range(3,4):
+            for r in range(num_random_tests):
+                rt = random_rte(depth)
+                print(rt.to_dfa(depth*10).serialize())
 
     def test_createDfa(self):
         from rte.xymbolyco import createDfa
