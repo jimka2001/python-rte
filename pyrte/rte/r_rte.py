@@ -121,6 +121,7 @@ class Rte:
                         print(f"failed to compute derivative of {rt} wrt={wrt}," +
                               f" computing derivative of {rt.canonicalize()} instead")
                         return rt.canonicalize().derivative(wrt).canonicalize()
+
             return [(td, d(td, factors, disjoints)) for [td, factors, disjoints] in wrts]
 
         return trace_graph(self, edges)
@@ -137,16 +138,21 @@ class Rte:
                          pattern=rtes[i],
                          transitions=dict(transitions[i]))
 
-        def combine_labels(td1,td2):
+        def combine_labels(td1, td2):
             return createSOr([td1, td2]).canonicalize()
 
-        states = [make_state(i) for i,rte in enumerate(rtes)]
-        exit_map = dict([(i,exit_value) for i,rte in enumerate(rtes) if states[i].accepting])
+        states = [make_state(i) for i, rte in enumerate(rtes)]
+        exit_map = dict([(i, exit_value) for i, rte in enumerate(rtes) if states[i].accepting])
         return Dfa(pattern=self,
                    canonicalized=self.canonicalize(),
                    states=states,
                    exit_map=exit_map,
-                   combine_labels = combine_labels)
+                   combine_labels=combine_labels)
+
+    def simulate(self, exit_value, sequence):
+        return self.to_dfa(exit_value).simulate(sequence)
+
+
 def random_rte(depth):
     import random
 
@@ -160,8 +166,6 @@ def random_rte(depth):
         return Or(random_rte(depth - 1),
                   random_rte(depth - 1))
 
-    def simulate(self,exit_value,sequence):
-        return self.to_dfa(exit_value).simulate(sequence)    def random_not():
     def random_not():
         from rte.r_not import Not
         return Not(random_rte(depth - 1))
