@@ -112,6 +112,31 @@ class Dfa:
             return self.exit_map
 
         return [transitions(), accepting(), exit_map(), self.combine_labels]
+    def complete(self):
+        from rte.r_not import Not
+        from rte.r_or import createOr
+        from genus.s_top import STop
+        pattern, transitions, accepting, exit_map, combine_labels = self.serialize()
+        sink_states = self.find_sink_states()
+        if sink_states:
+            sink_id = sink_states[0]
+        else:
+            sink_id = len(self.states)
+        extra_transitions = [(q.index, td, sink_id)
+                             for q in self.states
+                             for tds in [[td for td, _ in q.transitions]]
+                             for td in [Not(createOr(tds)).canonicalize()]
+                             if td.inhabited() is not False
+                             ]
+
+        if not extra_transitions:
+            return self
+        else:
+            return createDfa(pattern=pattern,
+                             transition_triples=transitions + extra_transitions + [[sink_id, STop, sink_id]],
+                             accepting_states=accepting,
+                             exit_map=exit_map,
+                             combine_labels=combine_labels)
 
 
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
