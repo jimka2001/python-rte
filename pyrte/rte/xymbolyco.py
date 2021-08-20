@@ -112,6 +112,14 @@ class Dfa:
             return self.exit_map
 
         return [transitions(), accepting(), exit_map(), self.combine_labels]
+
+    def find_sink_states(self):  # returns a list of integers
+        from genus.s_top import STop
+        return [q.index for q in self.states
+                if not q.accepting
+                and 1 == len(q.transitions)
+                and q.transitions[STop] == q.index]
+
     def complete(self):
         from rte.r_not import Not
         from rte.r_or import createOr
