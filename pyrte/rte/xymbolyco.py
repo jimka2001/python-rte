@@ -29,7 +29,8 @@ class State:
         assert isinstance(initial, bool)
         assert isinstance(accepting, bool)
         assert pattern is None or isinstance(pattern, Rte)
-        assert isinstance(transitions, dict), f"transitions has type {type(transitions)} expecting dict: transitions={transitions}"
+        assert isinstance(transitions,
+                          dict), f"transitions has type {type(transitions)} expecting dict: transitions={transitions}"
         for tr in transitions:
             assert isinstance(tr, SimpleTypeD), f"tr={tr} (type={type(tr)}) is not a SimpleTypeD"
             assert isinstance(transitions[tr], int)
