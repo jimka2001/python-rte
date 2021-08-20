@@ -111,7 +111,7 @@ class Dfa:
             # return [(id, self.exit_map[id]) for id in self.exit_map]
             return self.exit_map
 
-        return [transitions(), accepting(), exit_map(), self.combine_labels]
+        return [self.pattern, transitions(), accepting(), exit_map(), self.combine_labels]
 
     def find_sink_states(self):  # returns a list of integers
         from genus.s_top import STop

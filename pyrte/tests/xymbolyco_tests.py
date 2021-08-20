@@ -51,8 +51,9 @@ class XymbolycoCase(unittest.TestCase):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
-                transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
-                self.assertTrue(createDfa(None,transitions, accepting, exit_map, combine_labels))
+                pattern,transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
+                self.assertTrue(createDfa(pattern,transitions, accepting, exit_map, combine_labels))
+
     def test_extract_discovered_case_57(self):
         rt1 = Singleton(SNot(SOr(STop,SMember())))
         rt2 = rt1.to_dfa(True).to_rte()[True]
