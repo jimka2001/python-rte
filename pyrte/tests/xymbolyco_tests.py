@@ -52,35 +52,43 @@ class XymbolycoCase(unittest.TestCase):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
-                pattern,transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
-                self.assertTrue(createDfa(pattern,transitions, accepting, exit_map, combine_labels))
+                pattern, transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
+                self.assertTrue(createDfa(pattern, transitions, accepting, exit_map, combine_labels))
 
     def test_extract_discovered_case_57(self):
-        rt1 = Singleton(SNot(SOr(STop,SMember())))
-        rt2 = rt1.to_dfa(True).to_rte()[True]
-        empty1 = Or(And(rt2,Not(rt1)),
-                    And(Not(rt2),rt1)).canonicalize()
-        rt_empty = empty1.to_dfa(True).to_rte()[True]
-        self.assertEqual(rt_empty,EmptySet)
+        from genus.depthgenerator import Test2
+        for rt in [Cat(Not(EmptySet), Star(Singleton(SEql(1)))),
+                   Cat(Star(Sigma), Star(Singleton(SEql(1)))),
+                   Cat(Not(EmptySet), Star(Singleton(SAtomic(int)))),
+                   Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(int)))),
+                   Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(Test2)))),
+                   Singleton(SNot(SOr(STop, SMember())))
+                   ]:
+            print(f"rt={rt}")
+            self.check_extraction_cycle(rt)
+
+    def check_extraction_cycle(self, rt):
+        rt1 = rt  # .canonicalize()
+        extracted = rt1.to_dfa(True).to_rte()
+        if extracted:
+            rt2 = extracted[True]
+            # compute xor, should be emptyset if rt1 is eqiv to rt2
+            empty1 = Or(And(rt2, Not(rt1)),
+                        And(Not(rt2), rt1)).canonicalize()
+            if empty1 != EmptySet:
+                print(f"empty1={empty1}")
+                rt_empty = empty1.to_dfa(True).to_rte()[True]
+                self.assertEqual(rt_empty, EmptySet,
+                                 f"rt1={rt1}\n" +
+                                 f"rt2={rt2}\n" +
+                                 f"empty={empty1}\n" +
+                                 f"  --> {rt_empty}\n"
+                                 )
 
     def test_extract_rte(self):
-        for depth in range(5):
+        for depth in range(3, 4):
             for r in range(num_random_tests):
-                rt1 = random_rte(depth)
-                extracted = rt1.to_dfa(depth*10).extract_rte()
-                if extracted:
-                    rt2 = extracted[depth*10]
-                    empty1 = Or(And(rt2,Not(rt1)),
-                               And(Not(rt2),rt1)).canonicalize()
-                    if empty1 != EmptySet:
-                        rt_empty = empty1.to_dfa(True).to_rte()[True]
-                        self.assertEqual(rt_empty,EmptySet,
-                                         f"rt1={rt1}\n" +
-                                         f"rt2={rt2}\n" +
-                                         f"empty={empty1}\n" +
-                                         f"  --> {rt_empty}\n"
-                                         )
-
+                self.check_extraction_cycle(random_rte(depth))
 
 
 if __name__ == '__main__':

@@ -75,8 +75,6 @@ class Singleton(Rte):
         else:
             return Singleton(td)
 
-
-
     def derivative(self, wrt, factors, disjoints):
         from genus.s_empty import SEmpty
         from genus.s_top import STop
@@ -91,6 +89,8 @@ class Singleton(Rte):
             return self
         elif td.inhabited() is False:
             return EmptySet.derivative(wrt, factors, disjoints)
+        #elif td.inhabited() is None:
+        #    raise Exception(f"cannot compute derivative of {td} because its habitation is unknown")
         else:
             return super().derivative(wrt, factors, disjoints)
 

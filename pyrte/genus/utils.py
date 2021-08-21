@@ -226,3 +226,8 @@ def trace_graph(v0, edges):
                 m[current_state_id] = m[current_state_id] + [(label, v_to_int[v1])]
                 esi = esi + 1
                 continue
+
+
+def stringify(vec, tabs):
+    i = 0
+    return "[" + ("\n" + " " * (1+tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"

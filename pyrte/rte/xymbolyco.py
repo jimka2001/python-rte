@@ -174,6 +174,7 @@ class Dfa:
         from rte.r_or import createOr
         from rte.r_cat import createCat
         from rte.r_star import Star
+        from genus.utils import stringify
         #    1. minimize and trim the given dfa
         #    2. generate a list of transition triples [from label to]
         #    3. add transitions from extra-state-I to all initial states with :epsilon transition
@@ -190,10 +191,10 @@ class Dfa:
 
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
-        old_transitions = [(src, Singleton(td), dst) for src,td,dst in old_transition_triples]
-        # step 3
+        old_transitions = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
+        # step 3  # adding state whose index is NOT integer
         new_initial_transitions = [("I", Epsilon, 0)]
-        # step 4
+        # step 4  # adding state whose index is NOT integer
         new_final_transitions = [(qid, Epsilon, ("F", self.exit_map[qid])) for qid in accepting]
 
         def combine_parallel_labels(rtes):
@@ -211,7 +212,7 @@ class Dfa:
             #   created.  The caller, the computation of new-triples, makes an NxM loop
             #   creating NxM new triples.   This reduces N and M by eliminating parallel
             #   transitions.
-            sources = list(set([s for s,_,_ in triples]))
+            sources = list(set([s for s, _, _ in triples]))
             return [(src,
                      combine_parallel_labels([l for _, l, d in from_src if d == dst]),
                      dst)
@@ -220,8 +221,8 @@ class Dfa:
                     for dst in list(set([d for _, _, d in from_src]))
                     ]
 
-        def eliminate_state(triples,qid):
-            def f(acc,triple):
+        def eliminate_state(triples, qid):
+            def f(acc, triple):
                 x_to_q, q_to_q, q_to_x, others = acc
                 src, _, dst = triple
                 if src == qid and dst == qid:
@@ -239,12 +240,13 @@ class Dfa:
             # step 7
             self_loop_label = combine_parallel_labels(extract_labels(q_to_q))
             # step 8
-            new_triples = [(src,lab,dst)
+            new_triples = [(src, lab, dst)
                            for src, pre_label, _ in combine_parallel(x_to_q)
                            for _, post_label, dst in combine_parallel(q_to_x)
                            for lab in [createCat([pre_label,
                                                   Star(self_loop_label),
-                                                  post_label]).canonicalize()]
+                                                  post_label]
+                                                 ).canonicalize()]
                            ]
             return others + new_triples  # from eliminate_state
 
@@ -266,9 +268,15 @@ class Dfa:
             assert "F" == triple[2][0]
             assert triple[2][1] in exit_values
 
-        return dict([(exit_value, combine_parallel_labels(labels).canonicalize())
-                     for exit_value in exit_values  # step 10
-                     for labels in [[l for _,l,[_,e] in new_transition_triples if e == exit_value]]])
+        els = [(exit_value, labels)
+             for exit_value in exit_values  # step 10
+             for labels in [[l for i, l, [f, e] in new_transition_triples
+                             if e == exit_value
+                             if f == "F"
+                             if i == "I"]]]
+        d = [(exit_value,combine_parallel_labels(labels).canonicalize())
+             for exit_value, labels in els]
+        return dict(d)
 
     def to_rte(self):
         from rte.r_emptyset import EmptySet
