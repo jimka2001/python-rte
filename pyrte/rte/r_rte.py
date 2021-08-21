@@ -121,6 +121,79 @@ class Rte:
                         print(f"failed to compute derivative of {rt} wrt={wrt}," +
                               f" computing derivative of {rt.canonicalize()} instead")
                         return rt.canonicalize().derivative(wrt).canonicalize()
+
             return [(td, d(td, factors, disjoints)) for [td, factors, disjoints] in wrts]
 
         return trace_graph(self, edges)
+
+    def to_dfa(self, exit_value):
+        from rte.xymbolyco import createDfa
+        from genus.s_or import createSOr
+        rtes, transitions = self.derivatives()
+        # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
+        transition_triples = [(src,td,dst)
+                              for src in range(len(transitions))
+                              for td, dst in transitions[src]
+                              ]
+
+        def combine_labels(td1, td2):
+            return createSOr([td1, td2]).canonicalize()
+
+        accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
+        return createDfa(pattern=self,
+                         transition_triples = transition_triples,
+                         accepting_states = accepting_states,
+                         exit_map = dict([(i, exit_value) for i in accepting_states]),
+                         combine_labels = combine_labels)
+
+    def simulate(self, exit_value, sequence):
+        return self.to_dfa(exit_value).simulate(sequence)
+
+
+def random_rte(depth):
+    import random
+
+    def random_and():
+        from rte.r_and import And
+        return And(random_rte(depth - 1),
+                   random_rte(depth - 1))
+
+    def random_or():
+        from rte.r_or import Or
+        return Or(random_rte(depth - 1),
+                  random_rte(depth - 1))
+
+    def random_not():
+        from rte.r_not import Not
+        return Not(random_rte(depth - 1))
+
+    def random_star():
+        from rte.r_star import Star
+        return Star(random_rte(depth - 1))
+
+    def random_cat():
+        from rte.r_cat import Cat
+        return Cat(random_rte(depth - 1),
+                   random_rte(depth - 1))
+
+    def random_singleton():
+        from genus.depthgenerator import random_type_designator
+        return random_type_designator(depth)
+
+    def random_leaf():
+        from rte.r_sigma import Sigma
+        from rte.r_emptyset import EmptySet
+        from rte.r_epsilon import Epsilon
+        return random.choice([Sigma,EmptySet,Epsilon])
+
+    if depth <= 0:
+        return random_singleton()
+    else:
+        randomizer = random.choice([random_and,
+                                    random_or,
+                                    random_not,
+                                    random_star,
+                                    random_cat,
+                                    random_singleton,
+                                    random_leaf])
+        return randomizer()
