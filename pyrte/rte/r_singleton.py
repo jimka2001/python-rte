@@ -102,9 +102,9 @@ class Singleton(Rte):
         from genus.s_not import SNot
         from rte.r_rte import CannotComputeDerivative
         td = self.operand  # SimpleTypeD
-        if wrt == td:
+        if wrt == td and td.inhabited() is True:
             return Epsilon
-        elif wrt == STop:
+        elif wrt == STop and td.inhabited() is True:
             return Epsilon
         elif td in factors:
             return Epsilon
