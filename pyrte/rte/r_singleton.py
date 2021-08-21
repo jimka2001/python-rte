@@ -75,9 +75,9 @@ class Singleton(Rte):
         from genus.s_not import SNot
         from rte.r_rte import CannotComputeDerivative
         td = self.operand  # SimpleTypeD
-        if wrt == td:
+        if wrt == td and td.inhabited() is True:
             return Epsilon
-        elif wrt == STop:
+        elif wrt == STop and td.inhabited() is True:
             return Epsilon
         elif isinstance(wrt, SimpleTypeD) and wrt.disjoint(td) is True:
             return EmptySet
