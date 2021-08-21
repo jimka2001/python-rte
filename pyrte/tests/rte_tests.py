@@ -640,6 +640,19 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.derivatives())
 
+    def test_derivative_643(self):
+        from genus.utils import stringify
+        rt1 = Cat(Star(Sigma), Star(Singleton(SEql(1))))
+        rt2 = Cat(Not(EmptySet), Star(Singleton(SEql(1))))
+        v1, v2 = rt1.derivatives()
+        print(f"rt1={rt1}")
+        print("v1=" + stringify(v1,3))
+        print("v2=" + stringify(v2,3))
+        u1, u2 = rt2.derivatives()
+        print(f"rt2={rt2}")
+        print("u1=" + stringify(u1, 3))
+        print("u2=" + stringify(u2, 3))
+
     def test_simulate(self):
         self.assertIs(True,Star(Singleton(SAtomic(str))).simulate(True,["a","b","c"]))
         self.assertIs(None,Star(Singleton(SAtomic(str))).simulate(True,["a","b",3]))
