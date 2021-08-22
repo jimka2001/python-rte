@@ -226,13 +226,13 @@ class Dfa:
                 x_to_q, q_to_q, q_to_x, others = acc
                 src, _, dst = triple
                 if src == qid and dst == qid:
-                    return x_to_q, q_to_q+[triple], q_to_x, others
+                    return x_to_q, q_to_q + [triple], q_to_x, others
                 elif src == qid:
-                    return x_to_q, q_to_q, q_to_x+[triple], others
+                    return x_to_q, q_to_q, q_to_x + [triple], others
                 elif dst == qid:
-                    return x_to_q+[triple], q_to_q, q_to_x, others
+                    return x_to_q + [triple], q_to_q, q_to_x, others
                 else:
-                    return x_to_q, q_to_q, q_to_x, others+[triple]
+                    return x_to_q, q_to_q, q_to_x, others + [triple]
 
             # step 6
             x_to_q, q_to_q, q_to_x, others = reduce(f, triples, ([], [], [], []))
