@@ -128,7 +128,7 @@ class Rte:
 
         return trace_graph(self, edges)
 
-    def to_dfa(self, exit_value):
+    def to_dfa(self, exit_value=True):
         from rte.xymbolyco import createDfa
         from genus.s_or import createSOr
         rtes, transitions = self.derivatives()
