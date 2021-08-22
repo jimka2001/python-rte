@@ -90,6 +90,7 @@ class Dfa:
 
         if view:
             dot_string = self.to_dot(title=title,
+                                     verbose=verbose,
                                      view=False,
                                      abbrev=abbrev,
                                      draw_sink=draw_sink,
