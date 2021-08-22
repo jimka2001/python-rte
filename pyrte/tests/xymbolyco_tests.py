@@ -105,8 +105,8 @@ class XymbolycoCase(unittest.TestCase):
             for _rep in range(num_random_tests):
                 rt = random_rte(depth)
                 can = rt.canonicalize()
-                self.assertTrue(Or(And(rt,Not(can)),
-                                   And(Not(rt),can)).to_dfa(True).vacuous(),
+                self.assertTrue(Or(And(rt, Not(can)),
+                                   And(Not(rt), can)).to_dfa(True).vacuous(),
                                 f"\nrt={rt}\n" +
                                 f"can={can}")
 

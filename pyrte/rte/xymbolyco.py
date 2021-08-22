@@ -144,6 +144,7 @@ class Dfa:
                         text.write(f"   q{q.index} -> q{next_state_id} [label=\"{label}\"];\n")
         text.write("}\n")
         return text.getvalue()
+
     def simulate(self, sequence):
         state_id = 0
         for element in sequence:
@@ -311,17 +312,17 @@ class Dfa:
                            ]
             print("\n")
             print(f"eliminating qid={qid}")
-            print(f"triples={stringify(triples,8)}")
-            print(f"  x_to_q =     {stringify(x_to_q,15)}")
+            print(f"triples={stringify(triples, 8)}")
+            print(f"  x_to_q =     {stringify(x_to_q, 15)}")
             if set(x_to_q) != set(combine_parallel(x_to_q)):
-                print(f"    combined = {stringify(combine_parallel(x_to_q),15)}")
-            print(f"  q_to_q = {stringify(q_to_q,11)}")
+                print(f"    combined = {stringify(combine_parallel(x_to_q), 15)}")
+            print(f"  q_to_q = {stringify(q_to_q, 11)}")
             print(f"    self_loop_label = {self_loop_label}")
-            print(f"  q_to_x =     {stringify(q_to_x,15)}")
+            print(f"  q_to_x =     {stringify(q_to_x, 15)}")
             if set(q_to_x) != set(combine_parallel(q_to_x)):
-                print(f"    combined = {stringify(combine_parallel(q_to_x),15)}")
-            print(f"  new_triples = {stringify(new_triples,16)}")
-            print(f"  others = {stringify(others,11)}")
+                print(f"    combined = {stringify(combine_parallel(q_to_x), 15)}")
+            print(f"  new_triples = {stringify(new_triples, 16)}")
+            print(f"  others = {stringify(others, 11)}")
             return others + new_triples  # from eliminate_state
 
         # step 5 and 9
@@ -331,7 +332,7 @@ class Dfa:
                                         #  id "I".  These will remain.
                                         range(len(self.states)),
                                         new_initial_transitions + old_transitions + new_final_transitions)
-        print(f"  new_transition_triples={stringify(new_transition_triples,25)}")
+        print(f"  new_transition_triples={stringify(new_transition_triples, 25)}")
         exit_values = list(set([self.exit_map[qid] for qid in accepting]))
         for triple in new_transition_triples:
             assert isinstance(triple, tuple)
@@ -351,7 +352,7 @@ class Dfa:
                              if i == "I"]]]
         d = [(exit_value,combine_parallel_labels(labels).canonicalize())
              for exit_value, labels in els]
-        print(f"els={stringify(els,5)}")
+        print(f"els={stringify(els, 5)}")
         return dict(d)
 
     def to_rte(self):
