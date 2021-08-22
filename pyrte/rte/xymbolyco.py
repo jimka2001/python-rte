@@ -83,6 +83,67 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
+    def to_dot(self, title, view=False, abbrev=True, draw_sink=False, state_legend=True):
+        from genus.utils import dot_view
+        import io
+        text = io.StringIO()
+
+        if view:
+            dot_string = self.to_dot(title=title,
+                                     view=False,
+                                     abbrev=abbrev,
+                                     draw_sink=draw_sink,
+                                     state_legend=state_legend)
+            #print(f"{dot_string}")
+            return dot_view(dot_string,verbose=True,title=title)
+        sink_state_indices = self.find_sink_states()
+        if draw_sink:
+            visible_states = self.states
+        else:
+            visible_states = [q for q in self.states if q.index not in sink_state_indices]
+        transition_labels = list(set([td for q in visible_states
+                             for td in q.transitions
+                             for dst_id in [q.transitions[td]]
+                             if self.states[dst_id] in visible_states
+                             ]))
+        abbrevs = dict(zip(transition_labels,range(len(transition_labels))))
+        labels = dict([(abbrevs[td],td) for td in abbrevs])
+        text.write("digraph G {\n")
+        if title:
+            text.write(f"  // {title}\n")
+        text.write( "  rankdir=LR;\n")
+        text.write( "  fontname=courier;\n")
+        if abbrev:
+            text.write( f"   label=\"{title} ")
+            for index in labels:
+                text.write(f"\\lt{index}= {labels[index]}")
+            text.write( "\\l\"\n")
+        text.write("  graph [labeljust=l,nojustify=true];\n")
+        text.write("  node [fontname=Arial, fontsize=25];\n")
+        text.write("  edge [fontname=Helvetica, fontsize=20];\n")
+        for q in self.states:
+            if q.index in sink_state_indices:
+                pass
+            else:
+                if q.accepting:
+                    text.write(f"   q{q.index} [shape=doublecircle] ;\n")
+                    text.write(f"   X{q.index} [label=\"{self.exit_map[q.index]}\", shape=rarrow]\n" )
+                    text.write(f"   q{q.index} -> X{q.index} ;\n")
+                if q.initial:
+                    text.write(f"   H{q.index} [label=\"\", style=invis, width=0]\n")
+                    text.write(f"   H{q.index} -> q{q.index};\n")
+                for td in q.transitions:
+                    next_state_id = q.transitions[td]
+                    if not draw_sink and next_state_id in sink_state_indices:
+                        pass
+                    else:
+                        if abbrev:
+                            label = f"t{abbrevs[td]}"
+                        else:
+                            label = f"{td}"
+                        text.write(f"   q{q.index} -> q{next_state_id} [label=\"{label}\"];\n")
+        text.write("}\n")
+        return text.getvalue()
     def simulate(self, sequence):
         state_id = 0
         for element in sequence:
