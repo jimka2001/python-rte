@@ -212,3 +212,10 @@ def createOr(operands):
 
 def orp(op):
     return isinstance(op, Or)
+
+
+def Xor(td1, td2):
+    from rte.r_and import And
+    from rte.r_not import Not
+    return Or(And(td1, Not(td2)),
+              And(Not(td1), td2))
