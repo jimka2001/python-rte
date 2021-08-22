@@ -118,12 +118,12 @@ class Cat(Rte):
 
     def canonicalize_once(self):
         from genus.utils import find_simplifier
-        return find_simplifier(self, [lambda: self.conversion1(),
-                                      lambda: self.conversion3(),
-                                      lambda: self.conversion4(),
-                                      lambda: self.conversion5(),
-                                      lambda: self.conversion6(),
-                                      lambda: self.conversion99(),
+        return find_simplifier(self, [self.conversion1,
+                                      self.conversion3,
+                                      self.conversion4,
+                                      self.conversion5,
+                                      self.conversion6,
+                                      self.conversion99,
                                       lambda: super(Cat, self).canonicalize_once()])
 
     def derivative_down(self, wrt, factors, disjoints):
