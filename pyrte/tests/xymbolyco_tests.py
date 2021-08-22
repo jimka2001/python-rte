@@ -57,10 +57,9 @@ class XymbolycoCase(unittest.TestCase):
 
     def test_extract_discovered_case_57(self):
         from genus.depthgenerator import Test2
-        Σ = Sigma
         o = Singleton(SEql(1))
-        x = Or(Star(Or(And(Not(o), Σ),
-                       Cat(o, Star(o), And(Not(o), Σ)))),
+        x = Or(Star(Or(And(Not(o), Sigma),
+                       Cat(o, Star(o), And(Not(o), Sigma)))),
                Star(o))
 
         for rt in [Cat(Not(EmptySet), Star(o)),
@@ -82,8 +81,9 @@ class XymbolycoCase(unittest.TestCase):
             rt2 = extracted[True]
             # compute xor, should be emptyset if rt1 is eqiv to rt2
             empty1 = Or(And(rt2, Not(rt1)),
-                        And(Not(rt2), rt1)) #.canonicalize()
+                        And(Not(rt2), rt1))  # .canonicalize()
             empty_dfa = empty1.to_dfa(True)
+
             if empty_dfa.vacuous():
                 label_path = None
             else:
@@ -111,21 +111,56 @@ class XymbolycoCase(unittest.TestCase):
                                 f"can={can}")
 
     def test_discovered_113(self):
+        from rte.xymbolyco import reconstructLabels
         so = Singleton(SEql(1))
-        rt = Or(Cat(Epsilon, Star(EmptySet), Epsilon),
-                Cat(so, Star(so), Epsilon),
-                Cat(Or(And(Not(so), Sigma),
-                       Cat(so, Star(so), And(Not(so), Sigma))),
-                    Star(Or(And(Not(so), Sigma),
-                            Cat(so,
-                                Star(so),
-                                And(Not(so), Sigma)))),
-                    Star(so)))
-        can = rt.canonicalize()
-        self.assertTrue(Or(And(rt, Not(can)),
-                           And(Not(rt), can)).to_dfa(True).vacuous(),
-                        f"\nrt={rt}\n" +
-                        f"can={can}")
+        samples = [
+            # Or(Star(so),
+            #    Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
+            #    Epsilon),
+
+            Or(Cat(so, Star(so)),
+               Cat(Or(And(Not(so), Sigma),
+                      Cat(so, Star(so), And(Not(so), Sigma))),
+                   Star(Or(And(Not(so), Sigma),
+                           Cat(so, Star(so), And(Not(so), Sigma)))),
+                   Star(so)),
+               Epsilon
+               ),
+            #     Or(Cat(Or(And(Not(so), Sigma),
+            #               Cat(so, Star(so), And(Not(so), Sigma))),
+            #            Star(Or(And(Not(so), Sigma),
+            #                    Cat(so, Star(so), And(Not(so), Sigma)))),
+            #            Star(so)),
+            #        Epsilon,
+            #        so)
+        ]
+        for i in range(len(samples)):
+            print(f"=== {i} ===")
+            rt = samples[i]
+            can = rt.canonicalize_once()
+            #self.assertTrue(can.to_dfa(True).simulate([2, 1]))
+            #self.assertTrue(rt.to_dfa(True).simulate([2, 1]))
+
+            if rt != can:
+                print(f"{i} rt ={rt}")
+                print(f"  can={can}")
+            xor = Or(And(rt, Not(can)),
+                     And(Not(rt), can))
+            dfa = xor.to_dfa(True)
+            rt.to_dfa(True).to_dot(title="rt", view=True, draw_sink=True)
+            can.to_dfa(True).to_dot(title="can", view=True, draw_sink=True)
+            dfa.to_dot(title="empty_dfa", view=True, draw_sink=True)
+            # self.assertTrue(dfa.simulate([2, 1]))
+            paths = dfa.paths_to_accepting()
+            if paths:
+                example = reconstructLabels(paths[0])
+            else:
+                example = None
+            self.assertTrue(dfa.vacuous(),
+                            f"\n{i} rt={rt}\n" +
+                            f" can={can}\n" +
+                            f"example={example}")
+
 
 if __name__ == '__main__':
     unittest.main()
