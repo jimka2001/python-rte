@@ -301,6 +301,55 @@ class Dfa:
         else:
             return dict([(True, EmptySet)])
 
+    def paths_to_accepting(self):
+        from genus.utils import flat_map
+
+        def extend_path_1(path):
+            tail = path[-1]
+            return [path + [self.states[qid]]
+                    for td in tail.transitions
+                    for qid in [tail.transitions[td]]
+                    if self.states[qid] not in path  # avoid loops
+                    if td.inhabited() is True  # ignore paths containing False of None
+                    ]
+
+        def extend_paths_1(paths):
+            return flat_map(extend_path_1, paths)
+
+        def extend_paths(paths):
+            if not paths:
+                return paths
+            else:
+                return [p for p in paths if p[-1].accepting] + extend_paths(extend_paths_1(paths))
+
+        initials = [[self.states[0]]]
+        return extend_paths(initials)
+
+    def vacuous(self):
+        if not self.states:
+            return True
+        # if every state is non-accepting then the dfa is vacuous
+        elif all(not q.accepting for q in self.states):
+            return True
+        # otherwise if there is not satisfiable path to an accepting state
+        #   then it is vacuous.
+        elif not self.paths_to_accepting():
+            return True
+        else:
+            return False
+
+
+def reconstructLabels(path):
+    # path is a list of states which form a path through (or partially through)
+    # a Dfa
+    def connecting_label(q1,q2):
+        for td in q1.transitions:
+            qid = q1.transitions[td]
+            if qid == q2.index:
+                return td
+        return None
+
+    return [connecting_label(path[i],path[i+1]) for i in range(len(path)-1)]
 
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
     from functools import reduce
