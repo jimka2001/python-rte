@@ -57,39 +57,75 @@ class XymbolycoCase(unittest.TestCase):
 
     def test_extract_discovered_case_57(self):
         from genus.depthgenerator import Test2
-        for rt in [Cat(Not(EmptySet), Star(Singleton(SEql(1)))),
-                   Cat(Star(Sigma), Star(Singleton(SEql(1)))),
+        Σ = Sigma
+        o = Singleton(SEql(1))
+        x = Or(Star(Or(And(Not(o), Σ),
+                       Cat(o, Star(o), And(Not(o), Σ)))),
+               Star(o))
+
+        for rt in [Cat(Not(EmptySet), Star(o)),
+                   Cat(Star(Sigma), Star(o)),
                    Cat(Not(EmptySet), Star(Singleton(SAtomic(int)))),
                    Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(int)))),
                    Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(Test2)))),
                    Singleton(SNot(SOr(STop, SMember())))
                    ]:
             print(f"rt={rt}")
+            print(f"rt.can= {rt.canonicalize()}")
             self.check_extraction_cycle(rt)
 
     def check_extraction_cycle(self, rt):
+        from rte.xymbolyco import reconstructLabels
         rt1 = rt  # .canonicalize()
         extracted = rt1.to_dfa(True).to_rte()
-        if extracted:
+        if extracted[True]:
             rt2 = extracted[True]
             # compute xor, should be emptyset if rt1 is eqiv to rt2
             empty1 = Or(And(rt2, Not(rt1)),
-                        And(Not(rt2), rt1)).canonicalize()
-            if empty1 != EmptySet:
-                print(f"empty1={empty1}")
-                rt_empty = empty1.to_dfa(True).to_rte()[True]
-                self.assertEqual(rt_empty, EmptySet,
-                                 f"rt1={rt1}\n" +
-                                 f"rt2={rt2}\n" +
-                                 f"empty={empty1}\n" +
-                                 f"  --> {rt_empty}\n"
-                                 )
+                        And(Not(rt2), rt1)) #.canonicalize()
+            empty_dfa = empty1.to_dfa(True)
+            if empty_dfa.vacuous():
+                label_path = None
+            else:
+                label_path = reconstructLabels(empty_dfa.paths_to_accepting()[0])
+            self.assertTrue(empty_dfa.vacuous(),
+                            f"\nrt1={rt1}\n" +
+                            f"rt2={rt2}\n" +
+                            f"empty={empty1}\n" +
+                            f"path={label_path}"
+                            )
 
     def test_extract_rte(self):
         for depth in range(3, 4):
             for r in range(num_random_tests):
                 self.check_extraction_cycle(random_rte(depth))
 
+    def test_canonicalize(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt = random_rte(depth)
+                can = rt.canonicalize()
+                self.assertTrue(Or(And(rt,Not(can)),
+                                   And(Not(rt),can)).to_dfa(True).vacuous(),
+                                f"\nrt={rt}\n" +
+                                f"can={can}")
+
+    def test_discovered_113(self):
+        so = Singleton(SEql(1))
+        rt = Or(Cat(Epsilon, Star(EmptySet), Epsilon),
+                Cat(so, Star(so), Epsilon),
+                Cat(Or(And(Not(so), Sigma),
+                       Cat(so, Star(so), And(Not(so), Sigma))),
+                    Star(Or(And(Not(so), Sigma),
+                            Cat(so,
+                                Star(so),
+                                And(Not(so), Sigma)))),
+                    Star(so)))
+        can = rt.canonicalize()
+        self.assertTrue(Or(And(rt, Not(can)),
+                           And(Not(rt), can)).to_dfa(True).vacuous(),
+                        f"\nrt={rt}\n" +
+                        f"can={can}")
 
 if __name__ == '__main__':
     unittest.main()
