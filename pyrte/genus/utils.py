@@ -233,7 +233,7 @@ def stringify(vec, tabs):
     return "[" + ("\n" + " " * (1+tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"
 
 
-def dot_view(dot_string,verbose=False,view=False,title="no-name"):
+def dot_view(dot_string,verbose=False,title="no-name"):
     import platform
     import subprocess
     import tempfile

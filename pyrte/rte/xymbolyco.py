@@ -83,7 +83,7 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
-    def to_dot(self, title, view=False, abbrev=True, draw_sink=False, state_legend=True):
+    def to_dot(self, title, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
         from genus.utils import dot_view
         import io
         text = io.StringIO()
@@ -95,7 +95,7 @@ class Dfa:
                                      draw_sink=draw_sink,
                                      state_legend=state_legend)
             #print(f"{dot_string}")
-            return dot_view(dot_string,verbose=True,title=title)
+            return dot_view(dot_string,verbose=verbose,title=title)
         sink_state_indices = self.find_sink_states()
         if draw_sink:
             visible_states = self.states
