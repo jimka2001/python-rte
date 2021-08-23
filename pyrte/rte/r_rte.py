@@ -151,6 +151,14 @@ class Rte:
     def simulate(self, exit_value, sequence):
         return self.to_dfa(exit_value).simulate(sequence)
 
+    def to_dot(self, title, exit_value=True, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
+        return self.to_dfa(exit_value).to_dot(title=title,
+                                              view=view,
+                                              abbrev=abbrev,
+                                              draw_sink=draw_sink,
+                                              state_legend=state_legend,
+                                              verbose=verbose)
+
 
 def random_rte(depth):
     import random
