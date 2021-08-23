@@ -54,7 +54,7 @@ def fixed_point(v, f, good_enough):
             v = v2
 
 
-def find_simplifier(self, simplifiers):
+def find_simplifier(self, simplifiers, verbose=False):
     """simplifiers is a list of 0-ary functions.
     Calling such a function either returns `this` or something else.
     We call all the functions in turn, as long as they return `this`.

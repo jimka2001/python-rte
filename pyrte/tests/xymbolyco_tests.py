@@ -20,23 +20,20 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import unittest
-from rte.r_sigma import Sigma, SigmaImpl
-from rte.r_epsilon import Epsilon, EpsilonImpl
-from rte.r_emptyset import EmptySet, EmptySetImpl
-from rte.r_star import Star, plusp, Plus
-from rte.r_and import And, createAnd
-from rte.r_or import Or, createOr
+from rte.r_sigma import Sigma
+from rte.r_epsilon import Epsilon
+from rte.r_emptyset import EmptySet
+from rte.r_star import Star
+from rte.r_and import And
+from rte.r_or import Or, Xor
 from rte.r_singleton import Singleton
 from rte.r_not import Not
-from rte.r_cat import Cat, createCat, catxyp
+from rte.r_cat import Cat
 from rte.r_random import random_rte
-from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
 from genus.s_eql import SEql
 from genus.s_top import STop
-from genus.s_empty import SEmpty
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
-from genus.s_and import SAnd
 from genus.s_or import SOr
 from genus.s_not import SNot
 
@@ -57,20 +54,15 @@ class XymbolycoCase(unittest.TestCase):
 
     def test_extract_discovered_case_57(self):
         from genus.depthgenerator import Test2
-        o = Singleton(SEql(1))
-        x = Or(Star(Or(And(Not(o), Sigma),
-                       Cat(o, Star(o), And(Not(o), Sigma)))),
-               Star(o))
+        so = Singleton(SEql(1))
 
-        for rt in [Cat(Not(EmptySet), Star(o)),
-                   Cat(Star(Sigma), Star(o)),
+        for rt in [Cat(Not(EmptySet), Star(so)),
+                   Cat(Star(Sigma), Star(so)),
                    Cat(Not(EmptySet), Star(Singleton(SAtomic(int)))),
                    Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(int)))),
                    Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(Test2)))),
                    Singleton(SNot(SOr(STop, SMember())))
                    ]:
-            print(f"rt={rt}")
-            print(f"rt.can= {rt.canonicalize()}")
             self.check_extraction_cycle(rt)
 
     def check_extraction_cycle(self, rt):
@@ -79,7 +71,7 @@ class XymbolycoCase(unittest.TestCase):
         extracted = rt1.to_dfa(True).to_rte()
         if extracted[True]:
             rt2 = extracted[True]
-            # compute xor, should be emptyset if rt1 is eqiv to rt2
+            # compute xor, should be emptyset if rt1 is equivalent to rt2
             empty1 = Or(And(rt2, Not(rt1)),
                         And(Not(rt2), rt1))  # .canonicalize()
             empty_dfa = empty1.to_dfa(True)
@@ -114,42 +106,43 @@ class XymbolycoCase(unittest.TestCase):
         from rte.xymbolyco import reconstructLabels
         so = Singleton(SEql(1))
         samples = [
-            # Or(Star(so),
-            #    Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
-            #    Epsilon),
+
+            Or(And(Cat(Star(so),
+                       And(Not(so), Sigma),
+                       Star(Or(And(Not(so), Sigma),
+                               Cat(so, Star(so), And(Not(so), Sigma))))),
+                   Not(Cat(Star(so),
+                           And(Not(so), Sigma),
+                           Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
+                           Star(so))),
+                   Not(Star(so))),
+               And(Cat(Star(so),
+                       And(Not(so), Sigma),
+                       Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
+                       Star(so)),
+                   Not(Cat(Star(so),
+                           And(Not(so), Sigma),
+                           Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))))),
+                   Not(Star(so)))),
 
             Or(Cat(so, Star(so)),
                Cat(Or(And(Not(so), Sigma),
                       Cat(so, Star(so), And(Not(so), Sigma))),
                    Star(Or(And(Not(so), Sigma),
                            Cat(so, Star(so), And(Not(so), Sigma)))),
-                   Star(so)),
-               Epsilon
-               ),
-            #     Or(Cat(Or(And(Not(so), Sigma),
-            #               Cat(so, Star(so), And(Not(so), Sigma))),
-            #            Star(Or(And(Not(so), Sigma),
-            #                    Cat(so, Star(so), And(Not(so), Sigma)))),
-            #            Star(so)),
-            #        Epsilon,
-            #        so)
+                   Star(so))),
         ]
         for i in range(len(samples)):
-            print(f"=== {i} ===")
             rt = samples[i]
             can = rt.canonicalize_once()
-            #self.assertTrue(can.to_dfa(True).simulate([2, 1]))
-            #self.assertTrue(rt.to_dfa(True).simulate([2, 1]))
+            self.assertTrue(can.to_dfa(True).simulate([2, 1]))
+            self.assertTrue(rt.to_dfa(True).simulate([2, 1]))
 
-            if rt != can:
-                print(f"{i} rt ={rt}")
-                print(f"  can={can}")
-            xor = Or(And(rt, Not(can)),
-                     And(Not(rt), can))
+            xor = Xor(rt, can)
             dfa = xor.to_dfa(True)
-            rt.to_dfa(True).to_dot(title="rt", view=True, draw_sink=True)
-            can.to_dfa(True).to_dot(title="can", view=True, draw_sink=True)
-            dfa.to_dot(title="empty_dfa", view=True, draw_sink=True)
+            rt.to_dfa(True).to_dot(title=f"rt-{i}", view=False, draw_sink=True)
+            can.to_dfa(True).to_dot(title=f"can-{i}", view=False, draw_sink=True)
+            dfa.to_dot(title=f"empty_dfa={i}", view=False, draw_sink=True)
             # self.assertTrue(dfa.simulate([2, 1]))
             paths = dfa.paths_to_accepting()
             if paths:

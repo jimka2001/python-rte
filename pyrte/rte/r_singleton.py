@@ -116,7 +116,7 @@ class Singleton(Rte):
             return Epsilon
         elif isinstance(wrt, SAnd) and SNot(td) in wrt.tds:
             return EmptySet
-        elif isinstance(wrt, SAnd) and td in wrt.tds:
+        elif isinstance(wrt, SAnd) and td in wrt.tds and wrt.inhabited() is True:
             return Epsilon
         else:
             raise CannotComputeDerivative(

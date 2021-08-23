@@ -77,11 +77,15 @@ class Or(Combination):
         #   --> (:or :epsilon (:* X))
         # (:or (:* Y) (:cat X (:* X)))
         #   --> (:or (:* Y) (:* X))
+        # BUT NOT
+        # (:or :epsilon (:cat X (:* X) ANYTHING))
         from rte.r_star import plusp, starp
         from rte.r_cat import catp
         if any(op.nullable() for op in self.operands) and any(plusp(op) for op in self.operands):
             def f(op):
                 if not catp(op):
+                    return op
+                elif not plusp(op):
                     return op
                 elif starp(op.operands[1]) and op.operands[0] == op.operands[1].operand:  # Cat(x,Star(x)) -> Star(x)
                     return op.operands[1]
