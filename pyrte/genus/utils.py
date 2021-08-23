@@ -249,3 +249,7 @@ def dot_view(dot_string,verbose=False,title="no-name"):
     if "Darwin" == platform.system():
         return subprocess.run(["open", "-g", "-a", "Preview", png_file_name])
     return None
+
+def stack_depth():
+    import inspect
+    return len(inspect.stack(0))
