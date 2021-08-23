@@ -39,10 +39,10 @@ from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
 from genus.s_or import SOr
 
-
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
 num_random_tests = 1000
+
 
 class RteCase(unittest.TestCase):
     def test_sigma(self):
@@ -657,8 +657,8 @@ class RteCase(unittest.TestCase):
         self.assertTrue(u2)
 
     def test_simulate(self):
-        self.assertIs(True,Star(Singleton(SAtomic(str))).simulate(True,["a","b","c"]))
-        self.assertIs(None,Star(Singleton(SAtomic(str))).simulate(True,["a","b",3]))
+        self.assertIs(True, Star(Singleton(SAtomic(str))).simulate(True, ["a", "b", "c"]))
+        self.assertIs(None, Star(Singleton(SAtomic(str))).simulate(True, ["a", "b", 3]))
         self.assertIs(True, Star(Singleton(SAtomic(str))).simulate(True, []))
         self.assertEqual(42, Star(Singleton(SAtomic(str))).simulate(42, ["a", "b", "c"]))
         self.assertEqual(42, Or(Star(Singleton(SAtomic(str))),
@@ -666,13 +666,13 @@ class RteCase(unittest.TestCase):
         self.assertEqual(42, Or(Star(Singleton(SAtomic(str))),
                                 Star(Singleton(SAtomic(int)))).simulate(42, [1, 2, 3]))
         self.assertIs(None, Or(Star(Singleton(SAtomic(str))),
-                                Star(Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
+                               Star(Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
         self.assertEqual(42, Star(Or(Singleton(SAtomic(str)),
-                                    Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
-        self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str),SAtomic(int))))).simulate(42, [1, "b", 3]))
+                                     Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
+        self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str), SAtomic(int))))).simulate(42, [1, "b", 3]))
         self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str),
                                                    # warning True is an int in Python isinstance(True,int) --> True
-                                                  SAtomic(int))))).simulate(42, [1, "b", True]))
+                                                   SAtomic(int))))).simulate(42, [1, "b", True]))
         self.assertIs(None, Star(Or(Singleton(SOr(SAtomic(str),
                                                   SAtomic(int))))).simulate(42, [1, "b", 3.4]))
 
