@@ -716,9 +716,9 @@ class RteCase(unittest.TestCase):
                       Epsilon)
                    ]:
             can = rt.canonicalize()
-            rt.to_dot(exit_value=True, view=True, title=f"rt-{i}")
+            rt.to_dot(exit_value=True, view=False, title=f"rt-{i}")
             self.assertIs(rt.simulate(True, [2, 1]), True)
-            can.to_dot(exit_value=True, view=True, title=f"can-{i}")
+            can.to_dot(exit_value=True, view=False, title=f"can-{i}")
             self.assertIs(can.simulate(True, [2, 1]), True,
                           f"rt-{i} accepts [2,1], but rejects when canonicalized:\n rt={rt}\n can={can}")
             i = i + 1
