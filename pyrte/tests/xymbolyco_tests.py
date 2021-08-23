@@ -21,7 +21,6 @@
 
 import unittest
 from rte.r_sigma import Sigma
-from rte.r_epsilon import Epsilon
 from rte.r_emptyset import EmptySet
 from rte.r_star import Star
 from rte.r_and import And
