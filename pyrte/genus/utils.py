@@ -230,14 +230,14 @@ def trace_graph(v0, edges):
 
 def stringify(vec, tabs):
     i = 0
-    return "[" + ("\n" + " " * (1+tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"
+    return "[" + ("\n" + " " * (1 + tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"
 
 
-def dot_view(dot_string,verbose=False,title="no-name"):
+def dot_view(dot_string, verbose=False, title="no-name"):
     import platform
     import subprocess
     import tempfile
-    png_file_name = tempfile.mkstemp(prefix=title+"-",suffix=".png")[1]
+    png_file_name = tempfile.mkstemp(prefix=title + "-", suffix=".png")[1]
 
     cmd = ["/usr/local/bin/dot", "-Tpng", "-o", png_file_name]
     exit_status = subprocess.run(cmd, input=str.encode(dot_string))
@@ -249,6 +249,7 @@ def dot_view(dot_string,verbose=False,title="no-name"):
     if "Darwin" == platform.system():
         return subprocess.run(["open", "-g", "-a", "Preview", png_file_name])
     return None
+
 
 def stack_depth():
     import inspect
