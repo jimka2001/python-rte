@@ -77,11 +77,15 @@ class Or(Combination):
         #   --> (:or :epsilon (:* X))
         # (:or (:* Y) (:cat X (:* X)))
         #   --> (:or (:* Y) (:* X))
+        # BUT NOT
+        # (:or :epsilon (:cat X (:* X) ANYTHING))
         from rte.r_star import plusp, starp
         from rte.r_cat import catp
         if any(op.nullable() for op in self.operands) and any(plusp(op) for op in self.operands):
             def f(op):
                 if not catp(op):
+                    return op
+                elif not plusp(op):
                     return op
                 elif starp(op.operands[1]) and op.operands[0] == op.operands[1].operand:  # Cat(x,Star(x)) -> Star(x)
                     return op.operands[1]
@@ -176,26 +180,26 @@ class Or(Combination):
 
     def canonicalize_once(self):
         from genus.utils import find_simplifier
-        return find_simplifier(self, [lambda: self.conversionC1(),
-                                      lambda: self.conversionC3(),
-                                      lambda: self.conversionC4(),
-                                      lambda: self.conversionC6(),
-                                      lambda: self.conversionC7(),
-                                      lambda: self.conversionO8(),
-                                      lambda: self.conversionO9(),
-                                      lambda: self.conversionO10(),
-                                      lambda: self.conversionC11(),
-                                      lambda: self.conversionC14(),
-                                      lambda: self.conversionO11b(),
-                                      lambda: self.conversionC16(),
-                                      lambda: self.conversionD16b(),
-                                      lambda: self.conversionC12(),
-                                      lambda: self.conversionO15(),
-                                      lambda: self.conversionC21(),
-                                      lambda: self.conversionC15(),
-                                      lambda: self.conversionC17(),
-                                      lambda: self.conversionC99(),
-                                      lambda: self.conversionC5(),
+        return find_simplifier(self, [self.conversionC1,
+                                      self.conversionC3,
+                                      self.conversionC4,
+                                      self.conversionC6,
+                                      self.conversionC7,
+                                      self.conversionO8,
+                                      self.conversionO9,
+                                      self.conversionO10,
+                                      self.conversionC11,
+                                      self.conversionC14,
+                                      self.conversionO11b,
+                                      self.conversionC16,
+                                      self.conversionD16b,
+                                      self.conversionC12,
+                                      self.conversionO15,
+                                      self.conversionC21,
+                                      self.conversionC15,
+                                      self.conversionC17,
+                                      self.conversionC99,
+                                      self.conversionC5,
                                       lambda: super(Or, self).canonicalize_once()])
 
 
@@ -212,3 +216,10 @@ def createOr(operands):
 
 def orp(op):
     return isinstance(op, Or)
+
+
+def Xor(td1, td2):
+    from rte.r_and import And
+    from rte.r_not import Not
+    return Or(And(td1, Not(td2)),
+              And(Not(td1), td2))

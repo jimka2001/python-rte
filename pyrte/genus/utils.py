@@ -39,10 +39,17 @@ def generate_lazy_val(func):
     return lazy_holder
 
 
-def fixed_point(v, f, good_enough):
+def fixed_point(v, f, good_enough, invariant=None):
+    # if invariant is given, it should be a function we can call on the
+    #   input v, and also on the computed result, f(v)
+    #   if the invariant fails to return True, the an exception will be thrown
     history = []
+    if invariant:
+        assert invariant(v), f"invariant failed on initial value v={v}"
     while True:
         v2 = f(v)
+        if invariant:
+            assert invariant(v2), f"invariant failed on computed value\n  starting v={v}\n computed v2={v2}"
         if good_enough(v, v2):
             return v
         if v2 in history:
@@ -54,7 +61,7 @@ def fixed_point(v, f, good_enough):
             v = v2
 
 
-def find_simplifier(self, simplifiers):
+def find_simplifier(self, simplifiers, verbose=False):
     """simplifiers is a list of 0-ary functions.
     Calling such a function either returns `this` or something else.
     We call all the functions in turn, as long as they return `this`.
@@ -65,6 +72,9 @@ def find_simplifier(self, simplifiers):
     for s in simplifiers:
         out = s()
         if self != out:
+            if verbose:
+                print(f"Simplifier: {stack_depth()}")
+                print(f" {s}\n      {self}\n  --> {out}")
             return out
     return self
 
@@ -226,3 +236,31 @@ def trace_graph(v0, edges):
                 m[current_state_id] = m[current_state_id] + [(label, v_to_int[v1])]
                 esi = esi + 1
                 continue
+
+
+def stringify(vec, tabs):
+    i = 0
+    return "[" + ("\n" + " " * (1 + tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"
+
+
+def dot_view(dot_string, verbose=False, title="no-name"):
+    import platform
+    import subprocess
+    import tempfile
+    png_file_name = tempfile.mkstemp(prefix=title + "-", suffix=".png")[1]
+
+    cmd = ["/usr/local/bin/dot", "-Tpng", "-o", png_file_name]
+    exit_status = subprocess.run(cmd, input=str.encode(dot_string))
+    if verbose:
+        print(f"dot_view: {png_file_name}")
+    if exit_status.returncode != 0:
+        print("exit_status={exit_status}")
+        return None
+    if "Darwin" == platform.system():
+        return subprocess.run(["open", "-g", "-a", "Preview", png_file_name])
+    return None
+
+
+def stack_depth():
+    import inspect
+    return len(inspect.stack(0))

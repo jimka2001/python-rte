@@ -99,7 +99,9 @@ class Rte:
 
             def d(wrt, factors, disjoints):
                 try:
-                    return rt.derivative(wrt, factors, disjoints).canonicalize()
+                    deriv = rt.derivative(wrt, factors, disjoints).canonicalize()
+                    #print(f"{rt}.derivative.({wrt}) = {deriv}")
+                    return deriv
                 except CannotComputeDerivative as e:
                     if rt == rt.canonicalize():
                         msg = "\n".join([f"When generating derivatives from {self}",
@@ -126,7 +128,7 @@ class Rte:
 
         return trace_graph(self, edges)
 
-    def to_dfa(self, exit_value):
+    def to_dfa(self, exit_value=True):
         from rte.xymbolyco import createDfa
         from genus.s_or import createSOr
         rtes, transitions = self.derivatives()
@@ -148,6 +150,14 @@ class Rte:
 
     def simulate(self, exit_value, sequence):
         return self.to_dfa(exit_value).simulate(sequence)
+
+    def to_dot(self, title, exit_value=True, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
+        return self.to_dfa(exit_value).to_dot(title=title,
+                                              view=view,
+                                              abbrev=abbrev,
+                                              draw_sink=draw_sink,
+                                              state_legend=state_legend,
+                                              verbose=verbose)
 
 
 def random_rte(depth):

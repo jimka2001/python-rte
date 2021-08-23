@@ -38,16 +38,23 @@ def mdtd(tds):
             td1, factors, disjoints = triple
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
             b = generate_lazy_val(lambda: SAnd(nc(), td1).canonicalize())
+            # each time td is intersected with td1, either explicitly or implicitly
+            #   td is added to factors in the accumulated value.
+            # each time SNot(td) is intersected, td is added to disjoints.
+            #   the disjoints and factors list makes it much easier for the
+            #   Singleton derivative function to determine whether the
+            #   type in question is a subtype or a disjoint type, simply
+            #   by looking it up in the factors or disjoint list.
             if td.disjoint(td1) is True:
-                return [[td1, factors + [n], disjoints + [td]]]
+                return [[td1, factors, disjoints + [td]]]
             elif nc().disjoint(td1) is True:
-                return [[td1, factors + [td], disjoints + [n]]]
+                return [[td1, factors + [td], disjoints]]
             elif a().inhabited() is False:
-                return [[td1, factors + [n], disjoints + [td]]]
+                return [[td1, factors, disjoints + [td]]]
             elif b().inhabited() is False:
-                return [[td1, factors + [td], disjoints + [n]]]
+                return [[td1, factors + [td], disjoints]]
             else:
-                return [[a(), factors + [td], disjoints + [n]],
-                        [b(), factors + [n], disjoints + [td]]]
+                return [[a(), factors + [td], disjoints],
+                        [b(), factors, disjoints + [td]]]
         decomposition = flat_map(f, decomposition)
     return decomposition

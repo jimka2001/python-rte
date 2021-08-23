@@ -83,6 +83,69 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
+    def to_dot(self, title, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
+        from genus.utils import dot_view
+        import io
+        text = io.StringIO()
+
+        if view:
+            dot_string = self.to_dot(title=title,
+                                     verbose=verbose,
+                                     view=False,
+                                     abbrev=abbrev,
+                                     draw_sink=draw_sink,
+                                     state_legend=state_legend)
+            #print(f"{dot_string}")
+            return dot_view(dot_string,verbose=verbose,title=title)
+        sink_state_indices = self.find_sink_states()
+        if draw_sink:
+            visible_states = self.states
+        else:
+            visible_states = [q for q in self.states if q.index not in sink_state_indices]
+        transition_labels = list(set([td for q in visible_states
+                             for td in q.transitions
+                             for dst_id in [q.transitions[td]]
+                             if self.states[dst_id] in visible_states
+                             ]))
+        abbrevs = dict(zip(transition_labels,range(len(transition_labels))))
+        labels = dict([(abbrevs[td],td) for td in abbrevs])
+        text.write("digraph G {\n")
+        if title:
+            text.write(f"  // {title}\n")
+        text.write( "  rankdir=LR;\n")
+        text.write( "  fontname=courier;\n")
+        if abbrev:
+            text.write( f"   label=\"{title} ")
+            for index in labels:
+                text.write(f"\\lt{index}= {labels[index]}")
+            text.write( "\\l\"\n")
+        text.write("  graph [labeljust=l,nojustify=true];\n")
+        text.write("  node [fontname=Arial, fontsize=25];\n")
+        text.write("  edge [fontname=Helvetica, fontsize=20];\n")
+        for q in self.states:
+            if q.index in sink_state_indices:
+                pass
+            else:
+                if q.accepting:
+                    text.write(f"   q{q.index} [shape=doublecircle] ;\n")
+                    text.write(f"   X{q.index} [label=\"{self.exit_map[q.index]}\", shape=rarrow]\n" )
+                    text.write(f"   q{q.index} -> X{q.index} ;\n")
+                if q.initial:
+                    text.write(f"   H{q.index} [label=\"\", style=invis, width=0]\n")
+                    text.write(f"   H{q.index} -> q{q.index};\n")
+                for td in q.transitions:
+                    next_state_id = q.transitions[td]
+                    if not draw_sink and next_state_id in sink_state_indices:
+                        pass
+                    else:
+                        if abbrev:
+                            label = f"t{abbrevs[td]}"
+                        else:
+                            label = f"{td}"
+                        text.write(f"   q{q.index} -> q{next_state_id} [label=\"{label}\"];\n")
+        text.write("}\n")
+        return text.getvalue()
+
     def simulate(self, sequence):
         state_id = 0
         for element in sequence:
@@ -174,6 +237,7 @@ class Dfa:
         from rte.r_or import createOr
         from rte.r_cat import createCat
         from rte.r_star import Star
+        from genus.utils import stringify
         #    1. minimize and trim the given dfa
         #    2. generate a list of transition triples [from label to]
         #    3. add transitions from extra-state-I to all initial states with :epsilon transition
@@ -190,10 +254,10 @@ class Dfa:
 
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
-        old_transitions = [(src, Singleton(td), dst) for src,td,dst in old_transition_triples]
-        # step 3
+        old_transitions = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
+        # step 3  # adding state whose index is NOT integer
         new_initial_transitions = [("I", Epsilon, 0)]
-        # step 4
+        # step 4  # adding state whose index is NOT integer
         new_final_transitions = [(qid, Epsilon, ("F", self.exit_map[qid])) for qid in accepting]
 
         def combine_parallel_labels(rtes):
@@ -211,7 +275,7 @@ class Dfa:
             #   created.  The caller, the computation of new-triples, makes an NxM loop
             #   creating NxM new triples.   This reduces N and M by eliminating parallel
             #   transitions.
-            sources = list(set([s for s,_,_ in triples]))
+            sources = list(set([s for s, _, _ in triples]))
             return [(src,
                      combine_parallel_labels([l for _, l, d in from_src if d == dst]),
                      dst)
@@ -220,18 +284,18 @@ class Dfa:
                     for dst in list(set([d for _, _, d in from_src]))
                     ]
 
-        def eliminate_state(triples,qid):
-            def f(acc,triple):
+        def eliminate_state(triples, qid):
+            def f(acc, triple):
                 x_to_q, q_to_q, q_to_x, others = acc
                 src, _, dst = triple
                 if src == qid and dst == qid:
-                    return x_to_q, q_to_q+[triple], q_to_x, others
+                    return x_to_q, q_to_q + [triple], q_to_x, others
                 elif src == qid:
-                    return x_to_q, q_to_q, q_to_x+[triple], others
+                    return x_to_q, q_to_q, q_to_x + [triple], others
                 elif dst == qid:
-                    return x_to_q+[triple], q_to_q, q_to_x, others
+                    return x_to_q + [triple], q_to_q, q_to_x, others
                 else:
-                    return x_to_q, q_to_q, q_to_x, others+[triple]
+                    return x_to_q, q_to_q, q_to_x, others + [triple]
 
             # step 6
             x_to_q, q_to_q, q_to_x, others = reduce(f, triples, ([], [], [], []))
@@ -239,13 +303,16 @@ class Dfa:
             # step 7
             self_loop_label = combine_parallel_labels(extract_labels(q_to_q))
             # step 8
-            new_triples = [(src,lab,dst)
+            new_triples = [(src, lab, dst)
                            for src, pre_label, _ in combine_parallel(x_to_q)
                            for _, post_label, dst in combine_parallel(q_to_x)
                            for lab in [createCat([pre_label,
                                                   Star(self_loop_label),
-                                                  post_label]).canonicalize()]
+                                                  post_label]
+                                                 ).canonicalize()
+                                       ]
                            ]
+
             return others + new_triples  # from eliminate_state
 
         # step 5 and 9
@@ -266,9 +333,17 @@ class Dfa:
             assert "F" == triple[2][0]
             assert triple[2][1] in exit_values
 
-        return dict([(exit_value, combine_parallel_labels(labels).canonicalize())
-                     for exit_value in exit_values  # step 10
-                     for labels in [[l for _,l,[_,e] in new_transition_triples if e == exit_value]]])
+        els = [(exit_value, labels)
+               for exit_value in exit_values  # step 10
+               for labels in [[l for i, l, [f, e] in new_transition_triples
+                               if e == exit_value
+                               if f == "F"
+                               if i == "I"]]]
+
+        d = [(exit_value, combine_parallel_labels(labels).canonicalize()
+              )
+             for exit_value, labels in els]
+        return dict(d)
 
     def to_rte(self):
         from rte.r_emptyset import EmptySet
@@ -277,6 +352,58 @@ class Dfa:
             return extracted
         else:
             return dict([(True, EmptySet)])
+
+    def paths_to_accepting(self):
+        from genus.utils import flat_map
+
+        def extend_path_1(path):
+            tail = path[-1]
+            return [path + [self.states[qid]]
+                    for td in tail.transitions
+                    for qid in [tail.transitions[td]]
+                    if self.states[qid] not in path  # avoid loops
+                    if td.inhabited() is True  # ignore paths containing False of None
+                    ]
+
+        def extend_paths_1(paths):
+            return flat_map(extend_path_1, paths)
+
+        def extend_paths(paths):
+            if not paths:
+                return paths
+            else:
+                return [p for p in paths if p[-1].accepting] + extend_paths(extend_paths_1(paths))
+
+        initials = [[self.states[0]]]
+        return extend_paths(initials)
+
+    def vacuous(self):
+        if not self.states:
+            return True
+        # if every state is non-accepting then the dfa is vacuous
+        elif all(not q.accepting for q in self.states):
+            return True
+        # otherwise if there is not satisfiable path to an accepting state
+        #   then it is vacuous.
+        elif not self.paths_to_accepting():
+            return True
+        else:
+            return False
+
+
+def reconstructLabels(path):
+    # path is a list of states which form a path through (or partially through)
+    # a Dfa
+    def connecting_label(q1,q2):
+        for td in q1.transitions:
+            qid = q1.transitions[td]
+            if qid == q2.index:
+                return td
+        return None
+    if len(path) < 2:
+        return None
+    else:
+        return [connecting_label(path[i],path[i+1]) for i in range(len(path)-1)]
 
 
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):

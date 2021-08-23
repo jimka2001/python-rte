@@ -20,23 +20,19 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import unittest
-from rte.r_sigma import Sigma, SigmaImpl
-from rte.r_epsilon import Epsilon, EpsilonImpl
-from rte.r_emptyset import EmptySet, EmptySetImpl
-from rte.r_star import Star, plusp, Plus
-from rte.r_and import And, createAnd
-from rte.r_or import Or, createOr
+from rte.r_sigma import Sigma
+from rte.r_emptyset import EmptySet
+from rte.r_star import Star
+from rte.r_and import And
+from rte.r_or import Or, Xor
 from rte.r_singleton import Singleton
 from rte.r_not import Not
-from rte.r_cat import Cat, createCat, catxyp
+from rte.r_cat import Cat
 from rte.r_random import random_rte
-from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
 from genus.s_eql import SEql
 from genus.s_top import STop
-from genus.s_empty import SEmpty
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
-from genus.s_and import SAnd
 from genus.s_or import SOr
 from genus.s_not import SNot
 
@@ -52,35 +48,110 @@ class XymbolycoCase(unittest.TestCase):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
-                pattern,transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
-                self.assertTrue(createDfa(pattern,transitions, accepting, exit_map, combine_labels))
+                pattern, transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
+                self.assertTrue(createDfa(pattern, transitions, accepting, exit_map, combine_labels))
 
     def test_extract_discovered_case_57(self):
-        rt1 = Singleton(SNot(SOr(STop,SMember())))
-        rt2 = rt1.to_dfa(True).to_rte()[True]
-        empty1 = Or(And(rt2,Not(rt1)),
-                    And(Not(rt2),rt1)).canonicalize()
-        rt_empty = empty1.to_dfa(True).to_rte()[True]
-        self.assertEqual(rt_empty,EmptySet)
+        from genus.depthgenerator import Test2
+        so = Singleton(SEql(1))
+
+        for rt in [Cat(Not(EmptySet), Star(so)),
+                   Cat(Star(Sigma), Star(so)),
+                   Cat(Not(EmptySet), Star(Singleton(SAtomic(int)))),
+                   Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(int)))),
+                   Cat(Star(Not(EmptySet)), Star(Singleton(SAtomic(Test2)))),
+                   Singleton(SNot(SOr(STop, SMember())))
+                   ]:
+            self.check_extraction_cycle(rt)
+
+    def check_extraction_cycle(self, rt):
+        from rte.xymbolyco import reconstructLabels
+        rt1 = rt  # .canonicalize()
+        extracted = rt1.to_dfa(True).to_rte()
+        if extracted[True]:
+            rt2 = extracted[True]
+            # compute xor, should be emptyset if rt1 is equivalent to rt2
+            empty1 = Or(And(rt2, Not(rt1)),
+                        And(Not(rt2), rt1))  # .canonicalize()
+            empty_dfa = empty1.to_dfa(True)
+
+            if empty_dfa.vacuous():
+                label_path = None
+            else:
+                label_path = reconstructLabels(empty_dfa.paths_to_accepting()[0])
+            self.assertTrue(empty_dfa.vacuous(),
+                            f"\nrt1={rt1}\n" +
+                            f"rt2={rt2}\n" +
+                            f"empty={empty1}\n" +
+                            f"path={label_path}"
+                            )
 
     def test_extract_rte(self):
-        for depth in range(5):
+        for depth in range(3, 4):
             for r in range(num_random_tests):
-                rt1 = random_rte(depth)
-                extracted = rt1.to_dfa(depth*10).extract_rte()
-                if extracted:
-                    rt2 = extracted[depth*10]
-                    empty1 = Or(And(rt2,Not(rt1)),
-                               And(Not(rt2),rt1)).canonicalize()
-                    if empty1 != EmptySet:
-                        rt_empty = empty1.to_dfa(True).to_rte()[True]
-                        self.assertEqual(rt_empty,EmptySet,
-                                         f"rt1={rt1}\n" +
-                                         f"rt2={rt2}\n" +
-                                         f"empty={empty1}\n" +
-                                         f"  --> {rt_empty}\n"
-                                         )
+                self.check_extraction_cycle(random_rte(depth))
 
+    def test_canonicalize(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt = random_rte(depth)
+                can = rt.canonicalize()
+                self.assertTrue(Or(And(rt, Not(can)),
+                                   And(Not(rt), can)).to_dfa(True).vacuous(),
+                                f"\nrt={rt}\n" +
+                                f"can={can}")
+
+    def test_discovered_113(self):
+        from rte.xymbolyco import reconstructLabels
+        so = Singleton(SEql(1))
+        samples = [
+
+            Or(And(Cat(Star(so),
+                       And(Not(so), Sigma),
+                       Star(Or(And(Not(so), Sigma),
+                               Cat(so, Star(so), And(Not(so), Sigma))))),
+                   Not(Cat(Star(so),
+                           And(Not(so), Sigma),
+                           Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
+                           Star(so))),
+                   Not(Star(so))),
+               And(Cat(Star(so),
+                       And(Not(so), Sigma),
+                       Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
+                       Star(so)),
+                   Not(Cat(Star(so),
+                           And(Not(so), Sigma),
+                           Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))))),
+                   Not(Star(so)))),
+
+            Or(Cat(so, Star(so)),
+               Cat(Or(And(Not(so), Sigma),
+                      Cat(so, Star(so), And(Not(so), Sigma))),
+                   Star(Or(And(Not(so), Sigma),
+                           Cat(so, Star(so), And(Not(so), Sigma)))),
+                   Star(so))),
+        ]
+        for i in range(len(samples)):
+            rt = samples[i]
+            can = rt.canonicalize_once()
+            self.assertTrue(can.to_dfa(True).simulate([2, 1]))
+            self.assertTrue(rt.to_dfa(True).simulate([2, 1]))
+
+            xor = Xor(rt, can)
+            dfa = xor.to_dfa(True)
+            rt.to_dfa(True).to_dot(title=f"rt-{i}", view=False, draw_sink=True)
+            can.to_dfa(True).to_dot(title=f"can-{i}", view=False, draw_sink=True)
+            dfa.to_dot(title=f"empty_dfa={i}", view=False, draw_sink=True)
+            # self.assertTrue(dfa.simulate([2, 1]))
+            paths = dfa.paths_to_accepting()
+            if paths:
+                example = reconstructLabels(paths[0])
+            else:
+                example = None
+            self.assertTrue(dfa.vacuous(),
+                            f"\n{i} rt={rt}\n" +
+                            f" can={can}\n" +
+                            f"example={example}")
 
 
 if __name__ == '__main__':

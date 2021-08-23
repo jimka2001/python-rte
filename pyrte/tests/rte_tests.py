@@ -39,10 +39,10 @@ from genus.s_atomic import SAtomic
 from genus.s_and import SAnd
 from genus.s_or import SOr
 
-
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
 num_random_tests = 1000
+
 
 class RteCase(unittest.TestCase):
     def test_sigma(self):
@@ -529,6 +529,11 @@ class RteCase(unittest.TestCase):
         c = Singleton(SEql("c"))
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
+        #(:or :epsilon (:cat X (:* X) ANYTHING)) -> itself
+        self.assertEqual(Or(a, Epsilon, b, Cat(x, Star(x), y), c).conversionO8(),
+                         Or(a, Epsilon, b, Cat(x, Star(x), y), c))
+        self.assertEqual(Or(a, Epsilon, b, Cat(Star(x), x, y), c).conversionO8(),
+                         Or(a, Epsilon, b, Cat(Star(x), x, y), c))
         # (:or A :epsilon B (:cat X (:* X)) C)
         #   --> (:or A :epsilon B (:* X) C )
         self.assertEqual(Or(a, Epsilon, b, Cat(x, Star(x)), c).conversionO8(),
@@ -640,9 +645,20 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.derivatives())
 
+    def test_derivative_643(self):
+        from genus.utils import stringify
+        rt1 = Cat(Star(Sigma), Star(Singleton(SEql(1))))
+        rt2 = Cat(Not(EmptySet), Star(Singleton(SEql(1))))
+        v1, v2 = rt1.derivatives()
+        self.assertTrue(v1)
+        self.assertTrue(v2)
+        u1, u2 = rt2.derivatives()
+        self.assertTrue(u1)
+        self.assertTrue(u2)
+
     def test_simulate(self):
-        self.assertIs(True,Star(Singleton(SAtomic(str))).simulate(True,["a","b","c"]))
-        self.assertIs(None,Star(Singleton(SAtomic(str))).simulate(True,["a","b",3]))
+        self.assertIs(True, Star(Singleton(SAtomic(str))).simulate(True, ["a", "b", "c"]))
+        self.assertIs(None, Star(Singleton(SAtomic(str))).simulate(True, ["a", "b", 3]))
         self.assertIs(True, Star(Singleton(SAtomic(str))).simulate(True, []))
         self.assertEqual(42, Star(Singleton(SAtomic(str))).simulate(42, ["a", "b", "c"]))
         self.assertEqual(42, Or(Star(Singleton(SAtomic(str))),
@@ -650,13 +666,13 @@ class RteCase(unittest.TestCase):
         self.assertEqual(42, Or(Star(Singleton(SAtomic(str))),
                                 Star(Singleton(SAtomic(int)))).simulate(42, [1, 2, 3]))
         self.assertIs(None, Or(Star(Singleton(SAtomic(str))),
-                                Star(Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
+                               Star(Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
         self.assertEqual(42, Star(Or(Singleton(SAtomic(str)),
-                                    Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
-        self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str),SAtomic(int))))).simulate(42, [1, "b", 3]))
+                                     Singleton(SAtomic(int)))).simulate(42, [1, "b", 3]))
+        self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str), SAtomic(int))))).simulate(42, [1, "b", 3]))
         self.assertEqual(42, Star(Or(Singleton(SOr(SAtomic(str),
                                                    # warning True is an int in Python isinstance(True,int) --> True
-                                                  SAtomic(int))))).simulate(42, [1, "b", True]))
+                                                   SAtomic(int))))).simulate(42, [1, "b", True]))
         self.assertIs(None, Star(Or(Singleton(SOr(SAtomic(str),
                                                   SAtomic(int))))).simulate(42, [1, "b", 3.4]))
 
@@ -665,6 +681,82 @@ class RteCase(unittest.TestCase):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
+
+    def test_discovered_682(self):
+        so = Singleton(SEql(1))
+        i = 0
+        for rt in [Cat(And(Not(so), Sigma),  # 0
+                       Star(so)),
+                   Cat(Or(And(Not(so), Sigma),  # 1
+                          Cat(so, Star(so), And(Not(so), Sigma))),
+                       Star(so)),
+                   Cat(Or(And(Not(so), Sigma),  # 2
+                          Cat(so, Star(so), And(Not(so), Sigma))),
+                       Star(Or(And(Not(so), Sigma),
+                               Cat(so, Star(so), And(Not(so), Sigma)))),
+                       Star(so)),
+                   Or(Cat(Or(And(Not(so), Sigma),  # 3
+                             Cat(so, Star(so), And(Not(so), Sigma))),
+                          Star(Or(And(Not(so), Sigma),
+                                  Cat(so, Star(so), And(Not(so), Sigma)))),
+                          Star(so))),
+                   Or(Cat(so, Star(so)),  # 4
+                      Cat(Or(And(Not(so), Sigma),
+                             Cat(so, Star(so), And(Not(so), Sigma))),
+                          Star(Or(And(Not(so), Sigma),
+                                  Cat(so, Star(so), And(Not(so), Sigma)))),
+                          Star(so))),
+
+                   Or(Cat(so, Star(so)),  # 5
+                      Cat(Or(And(Not(so), Sigma),
+                             Cat(so, Star(so), And(Not(so), Sigma))),
+                          Star(Or(And(Not(so), Sigma),
+                                  Cat(so, Star(so), And(Not(so), Sigma)))),
+                          Star(so)),
+                      Epsilon)
+                   ]:
+            can = rt.canonicalize()
+            rt.to_dot(exit_value=True, view=False, title=f"rt-{i}")
+            self.assertIs(rt.simulate(True, [2, 1]), True)
+            can.to_dot(exit_value=True, view=False, title=f"can-{i}")
+            self.assertIs(can.simulate(True, [2, 1]), True,
+                          f"rt-{i} accepts [2,1], but rejects when canonicalized:\n rt={rt}\n can={can}")
+            i = i + 1
+
+    def test_discovered_733(self):
+        from genus.utils import fixed_point
+        so = Singleton(SEql(1))
+        nso = And(Not(so), Sigma)
+        rt = Or(Cat(so, Star(so)),
+                Cat(Or(nso,
+                       Cat(so, Star(so), nso)),
+                    Star(Or(nso,
+                            Cat(so, Star(so), nso))),
+                    Star(so)),
+                Epsilon)
+
+        self.assertIs(rt.simulate(True, [2, 1]), True)
+
+        def invariant(r):
+            return r.simulate(True, [2, 1])
+
+        fixed_point(rt, lambda r: r.canonicalize_once(), lambda a, b: a == b, invariant)
+        
+    def test_discovered_752(self):
+        from genus.utils import fixed_point
+        so = Singleton(SEql(1))
+        rt = Or(Cat(Or(And(Not(EmptySet), Epsilon),
+                       Cat(EmptySet, Star(so), And(Not(so), Sigma))),
+                    Star(Or(And(Not(so), Sigma), Cat(so, Star(so), And(Not(so), Sigma)))),
+                    Star(so)),
+                EmptySet)
+
+        self.assertIs(rt.simulate(True, [2, 1]), True)
+
+        def invariant(r):
+            return r.simulate(True, [2, 1])
+
+        fixed_point(rt, lambda r: r.canonicalize_once(), lambda a, b: a == b, invariant)
 
 
 if __name__ == '__main__':
