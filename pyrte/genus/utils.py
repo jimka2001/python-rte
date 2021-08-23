@@ -39,10 +39,17 @@ def generate_lazy_val(func):
     return lazy_holder
 
 
-def fixed_point(v, f, good_enough):
+def fixed_point(v, f, good_enough, invariant=None):
+    # if invariant is given, it should be a function we can call on the
+    #   input v, and also on the computed result, f(v)
+    #   if the invariant fails to return True, the an exception will be thrown
     history = []
+    if invariant:
+        assert invariant(v), f"invariant failed on initial value v={v}"
     while True:
         v2 = f(v)
+        if invariant:
+            assert invariant(v2), f"invariant failed on computed value\n  starting v={v}\n computed v2={v2}"
         if good_enough(v, v2):
             return v
         if v2 in history:
@@ -65,6 +72,9 @@ def find_simplifier(self, simplifiers, verbose=False):
     for s in simplifiers:
         out = s()
         if self != out:
+            if verbose:
+                print(f"Simplifier: {stack_depth()}")
+                print(f" {s}\n      {self}\n  --> {out}")
             return out
     return self
 
