@@ -222,9 +222,65 @@ class Dfa:
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
-    def trim(self):
-        # TODO implement trimming
-        return self
+    def find_accessibles(self):  # returns a pair of two lists of indices (accessibles, co-accessables)
+        def reachable(seen, triples):
+            # returns pair (reachables,remaining_triples),
+            # reachables is list of int, triples are remaining triples to consider on future iteration
+            frontier = [(src, label, dst) for src, label, dst in triples if src in seen]
+            remaining = [triple for triple in triples if triple not in frontier]
+            return (seen + [dst for _, _, dst in frontier if dst not in seen],
+                    remaining)
+
+        def expand_reachable(seen, triples):
+            while triples:
+                s = len(seen)
+                seen, triples = reachable(seen, triples)
+                if s == len(seen):
+                    return seen
+            return seen
+
+        _, transitions, accepting_ids, _, _ = self.serialize()
+        accessibles = expand_reachable([0], transitions)
+        # now reverse src and dst and recompute reachable, these are coaccessible.
+        coaccessibles = expand_reachable(accepting_ids, [(dst, label, src) for src, label, dst in transitions])
+        return accessibles, coaccessibles
+
+    def trim(self, compact=True):
+        pattern, transitions, accepting_ids, exit_map, combine_labels = self.serialize()
+        accessibles, coaccessibles = self.find_accessibles()
+        useful_states = set(accessibles + coaccessibles)
+        useful_transitions = [(src, label, dst) for src, label, dst in transitions
+                              if src in useful_states or dst in useful_states]
+        if compact:
+            # after removing useless transitions, thus effectively removing useless states
+            # there may now be gaps.  ie. a Dfa is constructed with an array/list of states
+            # where the index in the array is the same as the index of the state.
+            # so we may need to decrease some of the higher indices to fill the gaps.
+            def rename_index(old, new, idx):
+                if idx == old:
+                    return new
+                else:
+                    return idx
+
+            def rename_state(old, new, xitions, accepting, em):
+                xitions = [(rename_index(old, new, src),
+                            label,
+                            rename_index(old, new, dst))
+                           for src, label, dst in xitions]
+                accepting = [rename_index(old, new, idx) for idx in accepting]
+                em = dict([(rename_index(old, new, idx), label)
+                           for idx in em
+                           for label in [em[idx]]])
+                return xitions, accepting, em
+
+            for new_index, old_index in enumerate(sorted(list(useful_states))):
+                useful_transitions, accepting_ids, exit_map = rename_state(old_index,
+                                                                           new_index,
+                                                                           useful_transitions,
+                                                                           accepting_ids,
+                                                                           exit_map)
+
+        return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
 
     def minimize(self):
         # TODO implement minimization
