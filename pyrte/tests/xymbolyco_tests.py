@@ -71,8 +71,7 @@ class XymbolycoCase(unittest.TestCase):
         if extracted[True]:
             rt2 = extracted[True]
             # compute xor, should be emptyset if rt1 is equivalent to rt2
-            empty1 = Or(And(rt2, Not(rt1)),
-                        And(Not(rt2), rt1))  # .canonicalize()
+            empty1 = Xor(rt1, rt2)
             empty_dfa = empty1.to_dfa(True)
 
             if empty_dfa.vacuous():
