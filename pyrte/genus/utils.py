@@ -21,6 +21,8 @@
 
 from collections import OrderedDict
 from collections.abc import Iterable
+from functools import reduce  # import needed for python3; builtin in python2
+from collections import defaultdict
 
 
 def generate_lazy_val(func):
@@ -264,3 +266,6 @@ def dot_view(dot_string, verbose=False, title="no-name"):
 def stack_depth():
     import inspect
     return len(inspect.stack(0))
+
+def group_by(key, seq):
+    return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
