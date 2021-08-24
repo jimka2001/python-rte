@@ -95,30 +95,30 @@ class Dfa:
                                      abbrev=abbrev,
                                      draw_sink=draw_sink,
                                      state_legend=state_legend)
-            #print(f"{dot_string}")
-            return dot_view(dot_string,verbose=verbose,title=title)
+            # print(f"{dot_string}")
+            return dot_view(dot_string, verbose=verbose, title=title)
         sink_state_indices = self.find_sink_states()
         if draw_sink:
             visible_states = self.states
         else:
             visible_states = [q for q in self.states if q.index not in sink_state_indices]
         transition_labels = list(set([td for q in visible_states
-                             for td in q.transitions
-                             for dst_id in [q.transitions[td]]
-                             if self.states[dst_id] in visible_states
-                             ]))
-        abbrevs = dict(zip(transition_labels,range(len(transition_labels))))
-        labels = dict([(abbrevs[td],td) for td in abbrevs])
+                                      for td in q.transitions
+                                      for dst_id in [q.transitions[td]]
+                                      if self.states[dst_id] in visible_states
+                                      ]))
+        abbrevs = dict(zip(transition_labels, range(len(transition_labels))))
+        labels = dict([(abbrevs[td], td) for td in abbrevs])
         text.write("digraph G {\n")
         if title:
             text.write(f"  // {title}\n")
-        text.write( "  rankdir=LR;\n")
-        text.write( "  fontname=courier;\n")
+        text.write("  rankdir=LR;\n")
+        text.write("  fontname=courier;\n")
         if abbrev:
-            text.write( f"   label=\"{title} ")
+            text.write(f"   label=\"{title} ")
             for index in labels:
                 text.write(f"\\lt{index}= {labels[index]}")
-            text.write( "\\l\"\n")
+            text.write("\\l\"\n")
         text.write("  graph [labeljust=l,nojustify=true];\n")
         text.write("  node [fontname=Arial, fontsize=25];\n")
         text.write("  edge [fontname=Helvetica, fontsize=20];\n")
@@ -128,7 +128,7 @@ class Dfa:
             else:
                 if q.accepting:
                     text.write(f"   q{q.index} [shape=doublecircle] ;\n")
-                    text.write(f"   X{q.index} [label=\"{self.exit_map[q.index]}\", shape=rarrow]\n" )
+                    text.write(f"   X{q.index} [label=\"{self.exit_map[q.index]}\", shape=rarrow]\n")
                     text.write(f"   q{q.index} -> X{q.index} ;\n")
                 if q.initial:
                     text.write(f"   H{q.index} [label=\"\", style=invis, width=0]\n")
@@ -394,16 +394,17 @@ class Dfa:
 def reconstructLabels(path):
     # path is a list of states which form a path through (or partially through)
     # a Dfa
-    def connecting_label(q1,q2):
+    def connecting_label(q1, q2):
         for td in q1.transitions:
             qid = q1.transitions[td]
             if qid == q2.index:
                 return td
         return None
+
     if len(path) < 2:
         return None
     else:
-        return [connecting_label(path[i],path[i+1]) for i in range(len(path)-1)]
+        return [connecting_label(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
 
 def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
