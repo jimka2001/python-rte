@@ -18,6 +18,9 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 
@@ -145,6 +148,9 @@ class Dfa:
                         text.write(f"   q{q.index} -> q{next_state_id} [label=\"{label}\"];\n")
         text.write("}\n")
         return text.getvalue()
+
+    def delta(self, source_state, target_label):
+        return self.states[source_state.transitions[target_label]]
 
     def simulate(self, sequence):
         state_id = 0
@@ -281,10 +287,6 @@ class Dfa:
                                                                            exit_map)
 
         return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
-
-    def minimize(self):
-        # TODO implement minimization
-        return self
 
     def extract_rte(self):
         from functools import reduce
@@ -445,6 +447,37 @@ class Dfa:
             return True
         else:
             return False
+
+    def find_hopcroft_partition(self):
+        from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
+        from genus.s_empty import SEmpty
+        finals = [q for q in self.states if q.accepting]
+        non_finals = [q for q in self.states if not q.accepting]
+        pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + non_finals
+
+        def refine(partition):
+            def phi(source_state, label):
+                return find_eqv_class(partition, self.delta(source_state, label))
+
+            def Phi_1(s):
+                return [(label, phi(s, label)) for label in s.transitions]
+
+            def Phi(s):
+                grouped = group_by(lambda v: v[1], Phi_1(s))
+                return [(label,k) for k in grouped
+                        for pairs in [grouped[k]]
+                        for labels in [[a for a,_ in pairs]]
+                        for label in [reduce( lambda a,b: self.combine_labels(a,b), labels, SEmpty)]]
+
+            def repartition(eqv_class):
+                return split_eqv_class(eqv_class, Phi)
+
+            return flat_map(repartition,partition)
+
+        return fixed_point(pi_0, refine, lambda a, b: a == b)
+
+    def minimize(self):
+        return self
 
 
 def reconstructLabels(path):
