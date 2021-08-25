@@ -169,5 +169,14 @@ class XymbolycoCase(unittest.TestCase):
                 self.assertTrue(minimized)
                 self.assertTrue(len(minimized.states) <= len(dfa.states))
 
+    def test_minimize_loop(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt1 = random_rte(depth).canonicalize()
+                dfa1 = rt1.to_dfa(True)
+                rt2 = dfa1.minimize().to_rte()[True]
+                self.assertTrue(Xor(rt1, rt2))
+
+
 if __name__ == '__main__':
     unittest.main()
