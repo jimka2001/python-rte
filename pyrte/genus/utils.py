@@ -268,6 +268,9 @@ def stack_depth():
     return len(inspect.stack(0))
 
 
+# this implementation comes directly from stackoverflow
+#   https://stackoverflow.com/users/1056941/ronen
+# thanks to ronen user:1056941 for the code sample
 def group_by(key, seq):
     return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
