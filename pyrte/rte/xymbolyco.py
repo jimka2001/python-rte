@@ -514,6 +514,72 @@ class Dfa:
                          new_exit_map,
                          self.combine_labels)
 
+    def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value):
+        from genus.s_and import SAnd
+        from genus.genus_types import NormalForm
+        dfa1 = self  # IDE warns if I name the parameter dfa1 rather than self. :-(
+
+        def compute_cross_transitions(src1, src2):
+            state1 = next(q for q in dfa1.states if src1 == q.index)
+            state2 = next(q for q in dfa2.states if src2 == q.index)
+            return [((src1, src2), label_sxp, (dst1, dst2))
+                    for label1 in state1.transitions
+                    for dst1 in [state1.transitions[label1]]
+                    for label2 in state2.transisions
+                    for dst2 in [state2.transitions[label2]]
+                    if label1.disjoint(label2) is not True  # continue if not-disjoint or if dont-know
+                    for label_sxp in [SAnd(label1, label2).canonicalize(NormalForm.DNF)]
+                    if label_sxp.inhabited is not False  # continue if is inhabited or if dont-know
+                    ]
+
+        def compute_all_cross_transitions():
+            triples = compute_cross_transitions(0, 0)
+            done_pairs = set([(0, 0)])
+            i = 0
+            while i < len(triples):
+                _, label, (dst1, dst2) = triples[i]
+                if (dst1, dst2) not in done_pairs:
+                    triples.extend(compute_cross_transitions(dst1, dst2))
+                    done_pairs.add((dst1, dst2))
+                i = i + 1
+            return triples
+
+        cross_transitions = compute_all_cross_transitions()
+        cross_states = sorted(list(set([i for src, _, dst in cross_transitions
+                                        for i in [src, dst]])))
+        cross_state_to_new_id = dict([((cross_states[i], i) for i in range(len(cross_states)))])
+        transition_triples = [(cross_state_to_new_id[src],
+                               label,
+                               cross_state_to_new_id[dst])
+                              for src, label, dst in cross_transitions]
+        accepting_states = [cross_state_to_new_id[(id1, id2)]
+                            for id1, id2 in cross_state_to_new_id
+                            for q1 in [next(q for q in dfa1.states if id1 == q.index)]
+                            for q2 in [next(q for q in dfa2.states if id2 == q.index)]
+                            if f_arbitrate_accepting(q1.accepting, q2.accepting)]
+
+        def compute_exit_value(q1, q2):
+            if q1.accepting and q2.accepting:
+                return f_arbitrate_exit_value(q1, q2)
+            elif q1.accepting and not q2.accepting:
+                return dfa1.exit_map[q1.index]
+            elif q2.accepting and not q1.accepting:
+                return dfa2.exit_map[q2.index]
+            else:
+                return f_arbitrate_exit_value(q1, q2)
+
+        exit_map = [(cross_state_to_new_id[(id1, id2)], compute_exit_value(q1, q2))
+                    for id1, id2 in cross_state_to_new_id
+                    if cross_state_to_new_id[(id1, id2)] in accepting_states
+                    for q1 in [next(q for q in dfa1.states if id1 == q.index)]
+                    for q2 in [next(q for q in dfa2.states if id2 == q.index)]
+                    ]
+        return createDfa(pattern=None,
+                         transition_triples=transition_triples,
+                         accepting_states=accepting_states,
+                         exit_map=dict(exit_map),
+                         combine_labels=dfa1.combine_labels)
+
 
 def reconstructLabels(path):
     # path is a list of states which form a path through (or partially through)
