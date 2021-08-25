@@ -26,7 +26,8 @@ from rte.r_rte import Rte
 class Not (Rte):
     def __init__(self, operand):
         super(Not, self).__init__()
-        assert isinstance(operand, Rte), f"expecting object of type Rte not {type(operand)}: {operand}"
+        assert isinstance(operand, Rte), \
+            f"expecting object of type Rte got {type(operand)}: {operand}"
         self.operand = operand
 
     def __str__(self):
