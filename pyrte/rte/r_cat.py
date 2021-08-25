@@ -26,7 +26,8 @@ from rte.r_rte import Rte
 class Cat(Rte):
     def __init__(self, *operands):
         self.operands = list(operands)
-        assert all(isinstance(operand, Rte) for operand in operands)
+        assert all(isinstance(operand, Rte) for operand in operands), \
+            f"Cat(...) expects Rtes as arguments, got {[type(o) for o in operands]}"
         super().__init__()
 
     def __str__(self):

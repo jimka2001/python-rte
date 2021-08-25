@@ -152,6 +152,31 @@ class XymbolycoCase(unittest.TestCase):
                             f" can={can}\n" +
                             f"example={example}")
 
+    def test_find_hopcroft_partition(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt = random_rte(depth).canonicalize()
+                dfa = rt.to_dfa(True)
+                print(dfa.find_hopcroft_partition())
+                self.assertTrue(dfa.find_hopcroft_partition())
+
+    def test_minimize(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt = random_rte(depth).canonicalize()
+                dfa = rt.to_dfa(True)
+                minimized = dfa.minimize()
+                self.assertTrue(minimized)
+                self.assertTrue(len(minimized.states) <= len(dfa.states))
+
+    def test_minimize_loop(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt1 = random_rte(depth).canonicalize()
+                dfa1 = rt1.to_dfa(True)
+                rt2 = dfa1.minimize().to_rte()[True]
+                self.assertTrue(Xor(rt1, rt2))
+
 
 if __name__ == '__main__':
     unittest.main()

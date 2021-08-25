@@ -41,7 +41,8 @@ class Star(Rte):
 
     def __init__(self, operand):
         super(Star, self).__init__()
-        assert isinstance(operand, Rte), f"expecting Rte: got {operand} of type {type(operand)}"
+        assert isinstance(operand, Rte), \
+            f"expecting Rte: got {operand} of type {type(operand)}"
         self.operand = operand
 
     def __str__(self):

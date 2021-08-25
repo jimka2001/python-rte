@@ -18,6 +18,9 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 
@@ -145,6 +148,9 @@ class Dfa:
                         text.write(f"   q{q.index} -> q{next_state_id} [label=\"{label}\"];\n")
         text.write("}\n")
         return text.getvalue()
+
+    def delta(self, source_state, target_label):
+        return self.states[source_state.transitions[target_label]]
 
     def simulate(self, sequence):
         state_id = 0
@@ -282,9 +288,23 @@ class Dfa:
 
         return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
 
-    def minimize(self):
-        # TODO implement minimization
-        return self
+    def combine_parallel_triples(self, triples, combine_parallel_labels):
+        #  accepts a sequence of triples, each of the form [from label to]
+        #   groups them by common from/to, these are parallel transitions
+        #   combines the labels of the parallel transitions, into one single label
+        #   and collects a sequence of transitions, none of which are parallel.
+        #   This action is important because it greatly reduces the number of transitions
+        #   created.  The caller, the computation of new-triples, makes an NxM loop
+        #   creating NxM new triples.   This reduces N and M by eliminating parallel
+        #   transitions.
+        sources = list(set([s for s, _, _ in triples]))
+        return [(src,
+                 combine_parallel_labels([l for _, l, d in from_src if d == dst]),
+                 dst)
+                for src in sources
+                for from_src in [[[s, l, d] for s, l, d in triples if s == src]]  # singleton
+                for dst in list(set([d for _, _, d in from_src]))
+                ]
 
     def extract_rte(self):
         from functools import reduce
@@ -322,24 +342,6 @@ class Dfa:
         def extract_labels(triples):
             return [l for _, l, _ in triples]
 
-        def combine_parallel(triples):
-            #  accepts a sequence of triples, each of the form [from label to]
-            #   groups them by common from/to, these are parallel transitions
-            #   combines the labels of the parallel transitions, into one single label
-            #   and collects a sequence of transitions, none of which are parallel.
-            #   This action is important because it greatly reduces the number of transitions
-            #   created.  The caller, the computation of new-triples, makes an NxM loop
-            #   creating NxM new triples.   This reduces N and M by eliminating parallel
-            #   transitions.
-            sources = list(set([s for s, _, _ in triples]))
-            return [(src,
-                     combine_parallel_labels([l for _, l, d in from_src if d == dst]),
-                     dst)
-                    for src in sources
-                    for from_src in [[[s, l, d] for s, l, d in triples if s == src]]  # singleton
-                    for dst in list(set([d for _, _, d in from_src]))
-                    ]
-
         def eliminate_state(triples, qid):
             def f(acc, triple):
                 x_to_q, q_to_q, q_to_x, others = acc
@@ -360,8 +362,8 @@ class Dfa:
             self_loop_label = combine_parallel_labels(extract_labels(q_to_q))
             # step 8
             new_triples = [(src, lab, dst)
-                           for src, pre_label, _ in combine_parallel(x_to_q)
-                           for _, post_label, dst in combine_parallel(q_to_x)
+                           for src, pre_label, _ in self.combine_parallel_triples(x_to_q, combine_parallel_labels)
+                           for _, post_label, dst in self.combine_parallel_triples(q_to_x, combine_parallel_labels)
                            for lab in [createCat([pre_label,
                                                   Star(self_loop_label),
                                                   post_label]
@@ -445,6 +447,72 @@ class Dfa:
             return True
         else:
             return False
+
+    def find_hopcroft_partition(self):
+        from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
+        from genus.s_empty import SEmpty
+        finals = [q for q in self.states if q.accepting]
+        non_finals = [q for q in self.states if not q.accepting]
+        pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + [non_finals]
+
+        def refine(partition):
+            def phi(source_state, label):
+                return find_eqv_class(partition, self.delta(source_state, label))
+
+            def Phi_1(s):
+                return [(label, phi(s, label)) for label in s.transitions]
+
+            def Phi(s):
+                grouped = group_by(lambda v: tuple(v[1]), Phi_1(s))
+                vec = [(label, k) for k in grouped
+                       for pairs in [grouped[k]]
+                       for labels in [[a for a, _ in pairs]]
+                       for label in [reduce(lambda a, b: self.combine_labels(a, b), labels, SEmpty)]]
+                return tuple(vec)
+
+            def repartition(eqv_class):
+                return split_eqv_class(eqv_class, Phi)
+
+            return [tuple(eqv_class) for eqv_class in flat_map(repartition, partition)]
+
+        return fixed_point(pi_0, refine, lambda a, b: a == b)
+
+    def minimize(self):
+        from genus.utils import find_eqv_class
+        from genus.s_or import createSOr
+
+        def min_state(eqv_class):
+            return reduce(min, [q.index for q in eqv_class])
+
+        pi_minimized = self.find_hopcroft_partition()
+        ids = [min_state(eqv_class) for eqv_class in pi_minimized]
+        ids_map = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
+
+        def merge_parallel(transitions):
+            return self.combine_parallel_triples(transitions, lambda labels: createSOr(labels).canonicalize())
+
+        def new_id(old_state):
+            assert isinstance(old_state, State) or isinstance(old_state, int)
+            if isinstance(old_state, State):
+                return ids_map[find_eqv_class(pi_minimized, old_state)]
+            else:
+                return new_id(next(q for q in self.states if q.index == old_state))
+
+        new_fids = [idx for idx, eqv_class in zip(ids, pi_minimized)
+                    if any(q.accepting for q in eqv_class)]
+
+        new_exit_map = dict([(new_id(f), self.exit_map[f]) for f in self.exit_map])
+        new_transitions = [(src, label, dst) for eqv_class in pi_minimized
+                           for q in [eqv_class[0]]
+                           for src in [new_id(q)]
+                           for label in q.transitions
+                           for dst in [new_id(q.transitions[label])]
+                           ]
+        return createDfa(self.pattern,
+                         merge_parallel(new_transitions),
+                         new_fids,
+                         new_exit_map,
+                         self.combine_labels)
 
 
 def reconstructLabels(path):
