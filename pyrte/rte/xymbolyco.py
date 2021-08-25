@@ -525,7 +525,7 @@ class Dfa:
             return [((src1, src2), label_sxp, (dst1, dst2))
                     for label1 in state1.transitions
                     for dst1 in [state1.transitions[label1]]
-                    for label2 in state2.transisions
+                    for label2 in state2.transitions
                     for dst2 in [state2.transitions[label2]]
                     if label1.disjoint(label2) is not True  # continue if not-disjoint or if dont-know
                     for label_sxp in [SAnd(label1, label2).canonicalize(NormalForm.DNF)]
@@ -547,7 +547,7 @@ class Dfa:
         cross_transitions = compute_all_cross_transitions()
         cross_states = sorted(list(set([i for src, _, dst in cross_transitions
                                         for i in [src, dst]])))
-        cross_state_to_new_id = dict([((cross_states[i], i) for i in range(len(cross_states)))])
+        cross_state_to_new_id = dict([(cross_states[i], i) for i in range(len(cross_states))])
         transition_triples = [(cross_state_to_new_id[src],
                                label,
                                cross_state_to_new_id[dst])
@@ -580,6 +580,23 @@ class Dfa:
                          exit_map=dict(exit_map),
                          combine_labels=dfa1.combine_labels)
 
+
+def synchronized_union(dfa1,dfa2):
+    return dfa1.sxp(dfa2,
+                    lambda a, b: a or b,
+                    lambda q1, _: dfa1.exit_map[q1.index])
+
+
+def synchronized_intersection(dfa1,dfa2):
+    return dfa1.sxp(dfa2,
+                    lambda a, b: a and b,
+                    lambda q1, _: dfa1.exit_map[q1.index])
+
+
+def synchronized_xor(dfa1,dfa2):
+    return dfa1.sxp(dfa2,
+                    lambda a, b: (a and not b) or (b and not a),
+                    lambda q1, _: dfa1.exit_map[q1.index])
 
 def reconstructLabels(path):
     # path is a list of states which form a path through (or partially through)
