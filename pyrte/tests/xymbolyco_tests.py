@@ -177,7 +177,7 @@ class XymbolycoCase(unittest.TestCase):
                 rt2 = dfa1.minimize().to_rte()[True]
                 self.assertTrue(Xor(rt1, rt2))
 
-    def test_sxp(self):
+    def test_sxp_1(self):
         from rte.xymbolyco import synchronized_union, synchronized_intersection, synchronized_xor
         for depth in range(4):
             for _rep in range(num_random_tests):
@@ -192,7 +192,22 @@ class XymbolycoCase(unittest.TestCase):
                 x = synchronized_xor(dfa1,dfa2)
                 self.assertTrue(x)
 
+    def test_sxp_2(self):
+        from rte.xymbolyco import synchronized_union, synchronized_intersection, synchronized_xor
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt1 = random_rte(depth).canonicalize()
+                rt2 = random_rte(depth).canonicalize()
+                dfa1 = rt1.to_dfa(True)
+                dfa2 = rt2.to_dfa(True)
+                u = synchronized_union(dfa1,dfa2)
+                self.assertTrue(synchronized_xor(u,Or(rt1,rt2).to_dfa(True)).vacuous())
 
+                i = synchronized_intersection(dfa1,dfa2)
+                self.assertTrue(synchronized_xor(i,And(rt1,rt2).to_dfa(True)).vacuous())
+
+                x = synchronized_xor(dfa1,dfa2)
+                self.assertTrue(synchronized_xor(x,Xor(rt1,rt2).to_dfa(True)).vacuous())
 
 if __name__ == '__main__':
     unittest.main()
