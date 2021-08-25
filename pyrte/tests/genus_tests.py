@@ -325,7 +325,7 @@ class GenusCase(unittest.TestCase):
         self.assertIs(SNot(SEmpty).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
         self.assertIs(SOr(STop, SNot(SEmpty)).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
         self.assertIs(SOr(STop, SNot(SMember())).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
-        self.assertIs(SOr(SAnd(STop,STop),SNot(SMember())).disjoint(SNot(SOr(STop,SAtomic(float)))),True)
+        self.assertIs(SOr(SAnd(STop, STop), SNot(SMember())).disjoint(SNot(SOr(STop, SAtomic(float)))), True)
 
     def test_disjoint_320(self):
         for depth in range(0, 4):
@@ -1116,6 +1116,25 @@ class GenusCase(unittest.TestCase):
         self.assertIs(SNot(SMember(1, 2, 3)).disjoint(SNot(SAtomic(str))), False)
         self.assertIs(SAnd(SNot(SMember(1, 2, 3)), SNot(SAtomic(str))).inhabited(), True)
         self.assertIs(SAnd(SNot(SMember(1, 2, 3)), SNot(SAtomic(str))).disjoint(STop), False)
+
+    def test_group_by(self):
+        from genus.utils import group_by
+        grouped = group_by(lambda n: n % 3, [1, 2, 3, 4, 10, 11, 12])
+        self.assertEqual(set(grouped[0]), set([3, 12]))
+        self.assertEqual(set(grouped[1]), set([1, 4, 10]))
+        self.assertEqual(set(grouped[2]), set([2, 11]))
+
+    def test_find_eqv_class(self):
+        from genus.utils import find_eqv_class
+        self.assertEqual([1, 2, 3], find_eqv_class([[1, 2, 3], [4, 5, 6]], 2))
+        self.assertIsNone(find_eqv_class([[1, 2, 3], [4, 5, 6]], 0))
+
+    def test_split_eqv_class(self):
+        from genus.utils import split_eqv_class
+        partition = split_eqv_class([1, 2, 3, 10, 11, 12], lambda n: n % 3)
+        self.assertTrue([1, 10] in partition)
+        self.assertTrue([2, 11] in partition)
+        self.assertTrue([3, 12] in partition)
 
 
 if __name__ == '__main__':

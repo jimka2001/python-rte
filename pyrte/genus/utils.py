@@ -272,15 +272,17 @@ def group_by(key, seq):
     return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
 
-def split_eqv_class(objects,f):
+def split_eqv_class(objects, f):
     if len(objects) == 1:
-        return set([objects])
+        return [objects]
     else:
-        grouped= group_by(f,objects)
-        return set([grouped[k] for k in grouped])
+        grouped = group_by(f, objects)
+        return [grouped[k] for k in grouped]
 
 
 def find_eqv_class(partition, target):
+    # given partition, a list of mutually disjoint lists
+    # return the list which contains target, or None if not found
     for eqv_class in partition:
         if target in eqv_class:
             return eqv_class
