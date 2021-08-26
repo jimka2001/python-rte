@@ -427,7 +427,7 @@ class Dfa:
         # and ending in an accepting state.
         # no path contains the same state twice, i.e. no paths with loops
         # The parameter allow_maybe_satisfiable controls how strict the
-        #  the satisiability criteria is honored.
+        #  the satisfiability criteria is honored.
         #  If allow_maybe_satisfiable is False (the default)
         #  then only transitions which are definitely satisfiable
         #  are traversed.  i.e., the type-descriptor labeling the transition
