@@ -69,9 +69,13 @@ def default_combine_labels(l1, l2):
 class Dfa:
     def __init__(self,
                  pattern=None,
-                 states=[createSinkState(0)],
-                 exit_map=dict([]),
+                 states=None,
+                 exit_map=None,
                  combine_labels=default_combine_labels):
+        if exit_map is None:
+            exit_map = dict([])
+        if not states:
+            states = [createSinkState(0)]
         assert pattern is None or isinstance(pattern, Rte)
         assert isinstance(states, list)
         for st in states:
@@ -81,6 +85,9 @@ class Dfa:
             assert isinstance(i, int)
             assert i >= 0
         assert callable(combine_labels)
+        for q in states:
+            if q.accepting:
+                assert q.index in exit_map, f"accepting state {q.index} missing from exit_map {exit_map}"
         self.pattern = pattern  # Rte
         self.states = states  # vector of State objects
         self.exit_map = exit_map  # map index -> return_value
@@ -328,13 +335,17 @@ class Dfa:
         # step 1
         dfa = self.trim().minimize()
 
+        # it is not really necessary to set self to None, but previous versions of the code
+        # were accessing self rather than accesing dfa.
+        self = None
+
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
         old_transitions = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
         new_initial_transitions = [("I", Epsilon, 0)]
         # step 4  # adding state whose index is NOT integer
-        new_final_transitions = [(qid, Epsilon, ("F", self.exit_map[qid])) for qid in accepting]
+        new_final_transitions = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
 
         def combine_parallel_labels(rtes):
             return createOr(rtes).canonicalize()
@@ -362,8 +373,8 @@ class Dfa:
             self_loop_label = combine_parallel_labels(extract_labels(q_to_q))
             # step 8
             new_triples = [(src, lab, dst)
-                           for src, pre_label, _ in self.combine_parallel_triples(x_to_q, combine_parallel_labels)
-                           for _, post_label, dst in self.combine_parallel_triples(q_to_x, combine_parallel_labels)
+                           for src, pre_label, _ in dfa.combine_parallel_triples(x_to_q, combine_parallel_labels)
+                           for _, post_label, dst in dfa.combine_parallel_triples(q_to_x, combine_parallel_labels)
                            for lab in [createCat([pre_label,
                                                   Star(self_loop_label),
                                                   post_label]
@@ -378,9 +389,9 @@ class Dfa:
                                         # we eliminate all states whose id is an integer,
                                         #  recall we have added states with id ("F",?) and also with
                                         #  id "I".  These will remain.
-                                        range(len(self.states)),
+                                        range(len(dfa.states)),
                                         new_initial_transitions + old_transitions + new_final_transitions)
-        exit_values = list(set([self.exit_map[qid] for qid in accepting]))
+        exit_values = list(set([dfa.exit_map[qid] for qid in accepting]))
         for triple in new_transition_triples:
             assert isinstance(triple, tuple)
             assert 3 == len(triple)
