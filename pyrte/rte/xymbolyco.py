@@ -591,23 +591,25 @@ class Dfa:
                          exit_map=dict(exit_map),
                          combine_labels=dfa1.combine_labels)
 
+    def equivalent(self, dfa2):
+        # returns True, False, or None
+        return self.xor(dfa2).vacuous()
 
-def synchronized_union(dfa1,dfa2):
-    return dfa1.sxp(dfa2,
-                    lambda a, b: a or b,
-                    lambda q1, _: dfa1.exit_map[q1.index])
+    def union(self,dfa2):
+        return self.sxp(dfa2,
+                        lambda a, b: a or b,
+                        lambda q1, _: self.exit_map[q1.index])
 
+    def intersection(self,dfa2):
+        return self.sxp(dfa2,
+                        lambda a, b: a and b,
+                        lambda q1, _: self.exit_map[q1.index])
 
-def synchronized_intersection(dfa1,dfa2):
-    return dfa1.sxp(dfa2,
-                    lambda a, b: a and b,
-                    lambda q1, _: dfa1.exit_map[q1.index])
+    def xor(self,dfa2):
+        return self.sxp(dfa2,
+                        lambda a, b: (a and not b) or (b and not a),
+                        lambda q1, _: self.exit_map[q1.index])
 
-
-def synchronized_xor(dfa1,dfa2):
-    return dfa1.sxp(dfa2,
-                    lambda a, b: (a and not b) or (b and not a),
-                    lambda q1, _: dfa1.exit_map[q1.index])
 
 def reconstructLabels(path):
     # path is a list of states which form a path through (or partially through)
