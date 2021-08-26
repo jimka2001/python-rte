@@ -99,9 +99,7 @@ class Rte:
 
             def d(wrt, factors, disjoints):
                 try:
-                    deriv = rt.derivative(wrt, factors, disjoints).canonicalize()
-                    #print(f"{rt}.derivative.({wrt}) = {deriv}")
-                    return deriv
+                    return rt.derivative(wrt, factors, disjoints).canonicalize()
                 except CannotComputeDerivative as e:
                     if rt == rt.canonicalize():
                         msg = "\n".join([f"When generating derivatives from {self}",
