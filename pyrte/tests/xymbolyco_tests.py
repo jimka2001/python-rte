@@ -177,36 +177,43 @@ class XymbolycoCase(unittest.TestCase):
                 self.assertTrue(Xor(rt1, rt2))
 
     def test_sxp_1(self):
-        from rte.xymbolyco import synchronized_union, synchronized_intersection, synchronized_xor
         for depth in range(4):
             for _rep in range(num_random_tests):
                 rt1 = random_rte(depth).canonicalize()
                 rt2 = random_rte(depth).canonicalize()
                 dfa1 = rt1.to_dfa(1)
                 dfa2 = rt2.to_dfa(2)
-                u = synchronized_union(dfa1, dfa2)
+                u = dfa1.union(dfa2)
                 self.assertTrue(u)
-                i = synchronized_intersection(dfa1, dfa2)
+                i = dfa1.intersection(dfa2)
                 self.assertTrue(i)
-                x = synchronized_xor(dfa1, dfa2)
+                x = dfa1.xor(dfa2)
                 self.assertTrue(x)
 
     def test_sxp_2(self):
-        from rte.xymbolyco import synchronized_union, synchronized_intersection, synchronized_xor
         for depth in range(4):
             for _rep in range(num_random_tests):
                 rt1 = random_rte(depth).canonicalize()
                 rt2 = random_rte(depth).canonicalize()
                 dfa1 = rt1.to_dfa(True)
                 dfa2 = rt2.to_dfa(True)
-                u = synchronized_union(dfa1, dfa2)
-                self.assertTrue(synchronized_xor(u, Or(rt1, rt2).to_dfa(True)).vacuous())
+                u = dfa1.union(dfa2)
+                self.assertTrue(u.equivalent(Or(rt1, rt2).to_dfa(True)),
+                                f"rt1={rt1}\n" +
+                                f"rt2={rt2}\n" +
+                                "union of dfas does not correspond to dfa of union")
 
-                i = synchronized_intersection(dfa1, dfa2)
-                self.assertTrue(synchronized_xor(i, And(rt1, rt2).to_dfa(True)).vacuous())
+                i = dfa1.intersection(dfa2)
+                self.assertTrue(i.equivalent(And(rt1, rt2).to_dfa(True)),
+                                f"rt1={rt1}\n" +
+                                f"rt2={rt2}\n" +
+                                "intersection of dfas does not correspond to dfa of intersection")
 
-                x = synchronized_xor(dfa1, dfa2)
-                self.assertTrue(synchronized_xor(x, Xor(rt1, rt2).to_dfa(True)).vacuous())
+                x = dfa1.xor(dfa2)
+                self.assertTrue(x.equivalent(Xor(rt1, rt2).to_dfa(True)),
+                                f"rt1={rt1}\n" +
+                                f"rt2={rt2}\n" +
+                                "xor of dfas does not correspond to dfa of xor")
 
 
 if __name__ == '__main__':
