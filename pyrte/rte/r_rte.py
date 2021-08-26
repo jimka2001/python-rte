@@ -157,6 +157,16 @@ class Rte:
                                               draw_sink=draw_sink,
                                               state_legend=state_legend,
                                               verbose=verbose)
+    
+    def inhabited(self):
+        return self.to_dfa(True).inhabited()
+
+    def vacuous(self):
+        inh = self.inhabited()
+        if inh is None:
+            return None
+        else:
+            return not inh
 
     def equivalent(self, rte2):
         rte1 = self

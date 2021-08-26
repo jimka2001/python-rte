@@ -494,6 +494,13 @@ class Dfa:
         else:
             return False
 
+    def inhabited(self):
+        v = self.vacuous()
+        if v is None:
+            return None
+        else:
+            return not v
+
     def find_hopcroft_partition(self):
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
         from genus.s_empty import SEmpty
