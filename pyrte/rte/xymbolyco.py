@@ -320,7 +320,6 @@ class Dfa:
         from rte.r_or import createOr
         from rte.r_cat import createCat
         from rte.r_star import Star
-        from genus.utils import stringify
         #    1. minimize and trim the given dfa
         #    2. generate a list of transition triples [from label to]
         #    3. add transitions from extra-state-I to all initial states with :epsilon transition
@@ -336,7 +335,7 @@ class Dfa:
         dfa = self.trim().minimize()
 
         # it is not really necessary to set self to None, but previous versions of the code
-        # were accessing self rather than accesing dfa.
+        # were accessing self rather than accessing dfa.
         self = None
 
         # step 2
@@ -422,8 +421,36 @@ class Dfa:
         else:
             return dict([(True, EmptySet)])
 
-    def paths_to_accepting(self):
+    def paths_to_accepting(self, allow_maybe_satisfiable=False):
+        # returns a list of paths
+        # each paths is a list of states starting with self.states[0]
+        # and ending in an accepting state.
+        # no path contains the same state twice, i.e. no paths with loops
+        # The parameter allow_maybe_satisfiable controls how strict the
+        #  the satisiability criteria is honored.
+        #  If allow_maybe_satisfiable is False (the default)
+        #  then only transitions which are definitely satisfiable
+        #  are traversed.  i.e., the type-descriptor labeling the transition
+        #  is td.inhabited() returns True.
+        #  However, lack of such a path does not guarantee that there
+        #  is no accepting path, because there might be a transition such as satisfies-f
+        #  for which we do not know if the type is inhabited.
+        #  if allow_maybe_satisfiable is true, then we also traverse such
+        #  transitions.    If this relaxed search yields no path from initial state
+        #  to a final state, then there is definitely no accepting path, and
+        #  the language of the Dfa is empty.
         from genus.utils import flat_map
+
+        def acceptable(td):
+            inh = td.inhabited()
+            if inh is True:
+                return True
+            elif allow_maybe_satisfiable is False:
+                return False
+            elif inh is None:
+                return True
+            else:
+                return False
 
         def extend_path_1(path):
             tail = path[-1]
@@ -431,7 +458,7 @@ class Dfa:
                     for td in tail.transitions
                     for qid in [tail.transitions[td]]
                     if self.states[qid] not in path  # avoid loops
-                    if td.inhabited() is True  # ignore paths containing False of None
+                    if acceptable(td)
                     ]
 
         def extend_paths_1(paths):
@@ -447,6 +474,12 @@ class Dfa:
         return extend_paths(initials)
 
     def vacuous(self):
+        # this function returns True, False, or None.
+        #   True ==> there is no accepting path from initial state to final state
+        #   False ==> There is an accepting path from initial state to final state
+        #   None ==> There may be an accepting path, but we can neither verify nor falsify
+        #            because every path between initial and final contains at least one
+        #            label, td, for which td.inhabited() returns None (i.e., dont-know).
         if not self.states:
             return True
         # if every state is non-accepting then the dfa is vacuous
@@ -454,8 +487,10 @@ class Dfa:
             return True
         # otherwise if there is not satisfiable path to an accepting state
         #   then it is vacuous.
-        elif not self.paths_to_accepting():
-            return True
+        elif self.paths_to_accepting(allow_maybe_satisfiable=False):
+            return False  # there is an accepting path, so not vacuous
+        elif self.paths_to_accepting(allow_maybe_satisfiable=True):
+            return None
         else:
             return False
 
