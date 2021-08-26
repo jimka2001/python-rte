@@ -69,9 +69,13 @@ def default_combine_labels(l1, l2):
 class Dfa:
     def __init__(self,
                  pattern=None,
-                 states=[createSinkState(0)],
-                 exit_map=dict([]),
+                 states=None,
+                 exit_map=None,
                  combine_labels=default_combine_labels):
+        if exit_map is None:
+            exit_map = dict([])
+        if not states:
+            states = [createSinkState(0)]
         assert pattern is None or isinstance(pattern, Rte)
         assert isinstance(states, list)
         for st in states:
@@ -81,6 +85,9 @@ class Dfa:
             assert isinstance(i, int)
             assert i >= 0
         assert callable(combine_labels)
+        for q in states:
+            if q.accepting:
+                assert q.index in exit_map, f"accepting state {q.index} missing from exit_map {exit_map}"
         self.pattern = pattern  # Rte
         self.states = states  # vector of State objects
         self.exit_map = exit_map  # map index -> return_value
@@ -313,7 +320,6 @@ class Dfa:
         from rte.r_or import createOr
         from rte.r_cat import createCat
         from rte.r_star import Star
-        from genus.utils import stringify
         #    1. minimize and trim the given dfa
         #    2. generate a list of transition triples [from label to]
         #    3. add transitions from extra-state-I to all initial states with :epsilon transition
@@ -328,13 +334,17 @@ class Dfa:
         # step 1
         dfa = self.trim().minimize()
 
+        # it is not really necessary to set self to None, but previous versions of the code
+        # were accessing self rather than accessing dfa.
+        self = None
+
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
         old_transitions = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
         new_initial_transitions = [("I", Epsilon, 0)]
         # step 4  # adding state whose index is NOT integer
-        new_final_transitions = [(qid, Epsilon, ("F", self.exit_map[qid])) for qid in accepting]
+        new_final_transitions = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
 
         def combine_parallel_labels(rtes):
             return createOr(rtes).canonicalize()
@@ -362,8 +372,8 @@ class Dfa:
             self_loop_label = combine_parallel_labels(extract_labels(q_to_q))
             # step 8
             new_triples = [(src, lab, dst)
-                           for src, pre_label, _ in self.combine_parallel_triples(x_to_q, combine_parallel_labels)
-                           for _, post_label, dst in self.combine_parallel_triples(q_to_x, combine_parallel_labels)
+                           for src, pre_label, _ in dfa.combine_parallel_triples(x_to_q, combine_parallel_labels)
+                           for _, post_label, dst in dfa.combine_parallel_triples(q_to_x, combine_parallel_labels)
                            for lab in [createCat([pre_label,
                                                   Star(self_loop_label),
                                                   post_label]
@@ -378,9 +388,9 @@ class Dfa:
                                         # we eliminate all states whose id is an integer,
                                         #  recall we have added states with id ("F",?) and also with
                                         #  id "I".  These will remain.
-                                        range(len(self.states)),
+                                        range(len(dfa.states)),
                                         new_initial_transitions + old_transitions + new_final_transitions)
-        exit_values = list(set([self.exit_map[qid] for qid in accepting]))
+        exit_values = list(set([dfa.exit_map[qid] for qid in accepting]))
         for triple in new_transition_triples:
             assert isinstance(triple, tuple)
             assert 3 == len(triple)
@@ -411,8 +421,36 @@ class Dfa:
         else:
             return dict([(True, EmptySet)])
 
-    def paths_to_accepting(self):
+    def paths_to_accepting(self, allow_maybe_satisfiable=False):
+        # returns a list of paths
+        # each paths is a list of states starting with self.states[0]
+        # and ending in an accepting state.
+        # no path contains the same state twice, i.e. no paths with loops
+        # The parameter allow_maybe_satisfiable controls how strict the
+        #  the satisfiability criteria is honored.
+        #  If allow_maybe_satisfiable is False (the default)
+        #  then only transitions which are definitely satisfiable
+        #  are traversed.  i.e., the type-descriptor labeling the transition
+        #  is td.inhabited() returns True.
+        #  However, lack of such a path does not guarantee that there
+        #  is no accepting path, because there might be a transition such as satisfies-f
+        #  for which we do not know if the type is inhabited.
+        #  if allow_maybe_satisfiable is true, then we also traverse such
+        #  transitions.    If this relaxed search yields no path from initial state
+        #  to a final state, then there is definitely no accepting path, and
+        #  the language of the Dfa is empty.
         from genus.utils import flat_map
+
+        def acceptable(td):
+            inh = td.inhabited()
+            if inh is True:
+                return True
+            elif allow_maybe_satisfiable is False:
+                return False
+            elif inh is None:
+                return True
+            else:
+                return False
 
         def extend_path_1(path):
             tail = path[-1]
@@ -420,7 +458,7 @@ class Dfa:
                     for td in tail.transitions
                     for qid in [tail.transitions[td]]
                     if self.states[qid] not in path  # avoid loops
-                    if td.inhabited() is True  # ignore paths containing False of None
+                    if acceptable(td)
                     ]
 
         def extend_paths_1(paths):
@@ -436,6 +474,12 @@ class Dfa:
         return extend_paths(initials)
 
     def vacuous(self):
+        # this function returns True, False, or None.
+        #   True ==> there is no accepting path from initial state to final state
+        #   False ==> There is an accepting path from initial state to final state
+        #   None ==> There may be an accepting path, but we can neither verify nor falsify
+        #            because every path between initial and final contains at least one
+        #            label, td, for which td.inhabited() returns None (i.e., dont-know).
         if not self.states:
             return True
         # if every state is non-accepting then the dfa is vacuous
@@ -443,10 +487,19 @@ class Dfa:
             return True
         # otherwise if there is not satisfiable path to an accepting state
         #   then it is vacuous.
-        elif not self.paths_to_accepting():
-            return True
+        elif self.paths_to_accepting(allow_maybe_satisfiable=False):
+            return False  # there is an accepting path, so not vacuous
+        elif self.paths_to_accepting(allow_maybe_satisfiable=True):
+            return None
         else:
             return False
+
+    def inhabited(self):
+        v = self.vacuous()
+        if v is None:
+            return None
+        else:
+            return not v
 
     def find_hopcroft_partition(self):
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
@@ -513,6 +566,91 @@ class Dfa:
                          new_fids,
                          new_exit_map,
                          self.combine_labels)
+
+    def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value):
+        from genus.s_and import SAnd
+        from genus.genus_types import NormalForm
+        dfa1 = self  # IDE warns if I name the parameter dfa1 rather than self. :-(
+
+        def compute_cross_transitions(src1, src2):
+            state1 = next(q for q in dfa1.states if src1 == q.index)
+            state2 = next(q for q in dfa2.states if src2 == q.index)
+            return [((src1, src2), label_sxp, (dst1, dst2))
+                    for label1 in state1.transitions
+                    for dst1 in [state1.transitions[label1]]
+                    for label2 in state2.transitions
+                    for dst2 in [state2.transitions[label2]]
+                    if label1.disjoint(label2) is not True  # continue if not-disjoint or if dont-know
+                    for label_sxp in [SAnd(label1, label2).canonicalize(NormalForm.DNF)]
+                    if label_sxp.inhabited is not False  # continue if is inhabited or if dont-know
+                    ]
+
+        def compute_all_cross_transitions():
+            triples = compute_cross_transitions(0, 0)
+            done_pairs = set([(0, 0)])
+            i = 0
+            while i < len(triples):
+                _, label, (dst1, dst2) = triples[i]
+                if (dst1, dst2) not in done_pairs:
+                    triples.extend(compute_cross_transitions(dst1, dst2))
+                    done_pairs.add((dst1, dst2))
+                i = i + 1
+            return triples
+
+        cross_transitions = compute_all_cross_transitions()
+        cross_states = sorted(list(set([i for src, _, dst in cross_transitions
+                                        for i in [src, dst]])))
+        cross_state_to_new_id = dict([(cross_states[i], i) for i in range(len(cross_states))])
+        transition_triples = [(cross_state_to_new_id[src],
+                               label,
+                               cross_state_to_new_id[dst])
+                              for src, label, dst in cross_transitions]
+        accepting_states = [cross_state_to_new_id[(id1, id2)]
+                            for id1, id2 in cross_state_to_new_id
+                            for q1 in [next(q for q in dfa1.states if id1 == q.index)]
+                            for q2 in [next(q for q in dfa2.states if id2 == q.index)]
+                            if f_arbitrate_accepting(q1.accepting, q2.accepting)]
+
+        def compute_exit_value(q1, q2):
+            if q1.accepting and q2.accepting:
+                return f_arbitrate_exit_value(q1, q2)
+            elif q1.accepting and not q2.accepting:
+                return dfa1.exit_map[q1.index]
+            elif q2.accepting and not q1.accepting:
+                return dfa2.exit_map[q2.index]
+            else:
+                return f_arbitrate_exit_value(q1, q2)
+
+        exit_map = [(cross_state_to_new_id[(id1, id2)], compute_exit_value(q1, q2))
+                    for id1, id2 in cross_state_to_new_id
+                    if cross_state_to_new_id[(id1, id2)] in accepting_states
+                    for q1 in [next(q for q in dfa1.states if id1 == q.index)]
+                    for q2 in [next(q for q in dfa2.states if id2 == q.index)]
+                    ]
+        return createDfa(pattern=None,
+                         transition_triples=transition_triples,
+                         accepting_states=accepting_states,
+                         exit_map=dict(exit_map),
+                         combine_labels=dfa1.combine_labels)
+
+    def equivalent(self, dfa2):
+        # returns True, False, or None
+        return self.xor(dfa2).vacuous()
+
+    def union(self,dfa2):
+        return self.sxp(dfa2,
+                        lambda a, b: a or b,
+                        lambda q1, _: self.exit_map[q1.index])
+
+    def intersection(self,dfa2):
+        return self.sxp(dfa2,
+                        lambda a, b: a and b,
+                        lambda q1, _: self.exit_map[q1.index])
+
+    def xor(self,dfa2):
+        return self.sxp(dfa2,
+                        lambda a, b: (a and not b) or (b and not a),
+                        lambda q1, _: self.exit_map[q1.index])
 
 
 def reconstructLabels(path):

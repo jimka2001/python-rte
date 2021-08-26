@@ -99,9 +99,7 @@ class Rte:
 
             def d(wrt, factors, disjoints):
                 try:
-                    deriv = rt.derivative(wrt, factors, disjoints).canonicalize()
-                    #print(f"{rt}.derivative.({wrt}) = {deriv}")
-                    return deriv
+                    return rt.derivative(wrt, factors, disjoints).canonicalize()
                 except CannotComputeDerivative as e:
                     if rt == rt.canonicalize():
                         msg = "\n".join([f"When generating derivatives from {self}",
@@ -133,7 +131,7 @@ class Rte:
         from genus.s_or import createSOr
         rtes, transitions = self.derivatives()
         # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
-        transition_triples = [(src,td,dst)
+        transition_triples = [(src, td, dst)
                               for src in range(len(transitions))
                               for td, dst in transitions[src]
                               ]
@@ -143,21 +141,36 @@ class Rte:
 
         accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
         return createDfa(pattern=self,
-                         transition_triples = transition_triples,
-                         accepting_states = accepting_states,
-                         exit_map = dict([(i, exit_value) for i in accepting_states]),
-                         combine_labels = combine_labels)
+                         transition_triples=transition_triples,
+                         accepting_states=accepting_states,
+                         exit_map=dict([(i, exit_value) for i in accepting_states]),
+                         combine_labels=combine_labels)
 
     def simulate(self, exit_value, sequence):
         return self.to_dfa(exit_value).simulate(sequence)
 
-    def to_dot(self, title, exit_value=True, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
+    def to_dot(self, title, exit_value=True, view=False, abbrev=True, draw_sink=False, state_legend=True,
+               verbose=False):
         return self.to_dfa(exit_value).to_dot(title=title,
                                               view=view,
                                               abbrev=abbrev,
                                               draw_sink=draw_sink,
                                               state_legend=state_legend,
                                               verbose=verbose)
+
+    def inhabited(self):
+        return self.to_dfa(True).inhabited()
+
+    def vacuous(self):
+        inh = self.inhabited()
+        if inh is None:
+            return None
+        else:
+            return not inh
+
+    def equivalent(self, rte2):
+        rte1 = self
+        return rte1.to_dfa(True).equivalent(rte2.to_dfa(True))
 
 
 def random_rte(depth):
@@ -194,7 +207,7 @@ def random_rte(depth):
         from rte.r_sigma import Sigma
         from rte.r_emptyset import EmptySet
         from rte.r_epsilon import Epsilon
-        return random.choice([Sigma,EmptySet,Epsilon])
+        return random.choice([Sigma, EmptySet, Epsilon])
 
     if depth <= 0:
         return random_singleton()

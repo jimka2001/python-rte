@@ -157,7 +157,6 @@ class XymbolycoCase(unittest.TestCase):
             for _rep in range(num_random_tests):
                 rt = random_rte(depth).canonicalize()
                 dfa = rt.to_dfa(True)
-                print(dfa.find_hopcroft_partition())
                 self.assertTrue(dfa.find_hopcroft_partition())
 
     def test_minimize(self):
@@ -176,6 +175,45 @@ class XymbolycoCase(unittest.TestCase):
                 dfa1 = rt1.to_dfa(True)
                 rt2 = dfa1.minimize().to_rte()[True]
                 self.assertTrue(Xor(rt1, rt2))
+
+    def test_sxp_1(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt1 = random_rte(depth).canonicalize()
+                rt2 = random_rte(depth).canonicalize()
+                dfa1 = rt1.to_dfa(1)
+                dfa2 = rt2.to_dfa(2)
+                u = dfa1.union(dfa2)
+                self.assertTrue(u)
+                i = dfa1.intersection(dfa2)
+                self.assertTrue(i)
+                x = dfa1.xor(dfa2)
+                self.assertTrue(x)
+
+    def test_sxp_2(self):
+        for depth in range(4):
+            for _rep in range(num_random_tests):
+                rt1 = random_rte(depth).canonicalize()
+                rt2 = random_rte(depth).canonicalize()
+                dfa1 = rt1.to_dfa(True)
+                dfa2 = rt2.to_dfa(True)
+                u = dfa1.union(dfa2)
+                self.assertTrue(u.equivalent(Or(rt1, rt2).to_dfa(True)),
+                                f"rt1={rt1}\n" +
+                                f"rt2={rt2}\n" +
+                                "union of dfas does not correspond to dfa of union")
+
+                i = dfa1.intersection(dfa2)
+                self.assertTrue(i.equivalent(And(rt1, rt2).to_dfa(True)),
+                                f"rt1={rt1}\n" +
+                                f"rt2={rt2}\n" +
+                                "intersection of dfas does not correspond to dfa of intersection")
+
+                x = dfa1.xor(dfa2)
+                self.assertTrue(x.equivalent(Xor(rt1, rt2).to_dfa(True)),
+                                f"rt1={rt1}\n" +
+                                f"rt2={rt2}\n" +
+                                "xor of dfas does not correspond to dfa of xor")
 
 
 if __name__ == '__main__':

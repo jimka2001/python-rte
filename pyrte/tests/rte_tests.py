@@ -529,7 +529,7 @@ class RteCase(unittest.TestCase):
         c = Singleton(SEql("c"))
         x = Singleton(SEql("x"))
         y = Singleton(SEql("y"))
-        #(:or :epsilon (:cat X (:* X) ANYTHING)) -> itself
+        # (:or :epsilon (:cat X (:* X) ANYTHING)) -> itself
         self.assertEqual(Or(a, Epsilon, b, Cat(x, Star(x), y), c).conversionO8(),
                          Or(a, Epsilon, b, Cat(x, Star(x), y), c))
         self.assertEqual(Or(a, Epsilon, b, Cat(Star(x), x, y), c).conversionO8(),
@@ -682,6 +682,17 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
+    def test_serialize(self):
+        for depth in range(4):
+            for r in range(num_random_tests):
+                rt = random_rte(depth)
+                i = rt.inhabited()
+                v = rt.vacuous()
+                if i is None:
+                    self.assertIsNone(v)
+                else:
+                    self.assertEqual(i, not v)
+
     def test_discovered_682(self):
         so = Singleton(SEql(1))
         i = 0
@@ -741,7 +752,7 @@ class RteCase(unittest.TestCase):
             return r.simulate(True, [2, 1])
 
         fixed_point(rt, lambda r: r.canonicalize_once(), lambda a, b: a == b, invariant)
-        
+
     def test_discovered_752(self):
         from genus.utils import fixed_point
         so = Singleton(SEql(1))
