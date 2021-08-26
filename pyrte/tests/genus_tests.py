@@ -1136,6 +1136,86 @@ class GenusCase(unittest.TestCase):
         self.assertTrue([2, 11] in partition)
         self.assertTrue([3, 12] in partition)
 
+    def test_transition_to_ite(self):
+        from genus.ite import transitions_to_ite
+        self.assertEqual(transitions_to_ite([], default=None), (None,))
+        self.assertEqual(transitions_to_ite([(STop, 42)], None), (42,))
+        self.assertEqual(transitions_to_ite([(SEmpty, 42)], None), (None,))
+        self.assertEqual(transitions_to_ite([(SEmpty, 42),
+                                             (STop, 43)], None), (43,))
+        self.assertEqual(transitions_to_ite([(SAtomic(int), 42),
+                                             (SAtomic(str), 43)], None),
+                         (SAtomic(int), (42,),
+                          (SAtomic(str), (43,), (None,))))
+        self.assertEqual(transitions_to_ite([(SOr(SAtomic(int),
+                                                  SEql("hello")), 42),
+                                             (SAtomic(str), 43)], None),
+                         (SAtomic(int), (42,),
+                          (SEql("hello"), (42,),
+                           (SAtomic(str), (43,), (None,)))))
+        self.assertEqual(transitions_to_ite([(SNot(SEql("hello")), 41),
+                                             (SOr(SAtomic(int),
+                                                  SEql("hello")), 42),
+                                             (SAtomic(str), 43)], None),
+                         (SEql("hello"), (42,), (41,)))
+
+        self.assertEqual(transitions_to_ite([(SMember(1, 2, 3), 42),
+                                             (SMember(1, 2), 43),
+                                             (SMember(1), 44)]),
+                         (SMember(1, 2, 3), (42,), (None,)))
+
+        self.assertEqual(transitions_to_ite([(SMember(1, 2), 43),
+                                             (SMember(1, 2, 3), 42),
+                                             (SMember(1), 44)]),
+                         (SMember(1, 2), (43,), (SEql(3), (42,), (None,))))
+
+        self.assertEqual(transitions_to_ite([(SOr(SMember(1, 2), SAtomic(tuple)), 43),
+                                             (SOr(SMember(1, 2, 3), SAtomic(str)), 42),
+                                             (SOr(SMember(1), SAtomic(list)), 44)]),
+                         (SAtomic(tuple),
+                          (43,),
+                          (SMember(1, 2),
+                           (43,),
+                           (SAtomic(str), (42,), (SEql(3), (42,), (SAtomic(list), (44,), (None,)))))))
+
+        class TestX:
+            pass
+
+        class TestY(TestX):
+            pass
+
+        class Test1:
+            pass
+
+        class Test2(Test1):
+            pass
+
+        self.assertEqual(transitions_to_ite([(SOr(SAtomic(TestX), SAtomic(Test2)), 44),
+                                             (SOr(SAtomic(TestY), SAtomic(Test1)), 43)]),
+                         (SAtomic(Test2),
+                          (44,),
+                          (SAtomic(TestX), (44,), (SAtomic(Test1), (43,), (None,)))))
+
+        self.assertEqual(transitions_to_ite([(SOr(SAtomic(TestY), SAtomic(Test1)), 44),
+                                             (SOr(SAtomic(TestX), SAtomic(Test2)), 43)]),
+                         (SAtomic(Test1),
+                          (44,),
+                          (SAtomic(TestY), (44,), (SAtomic(TestX), (43,), (None,)))))
+        self.assertEqual(transitions_to_ite([(SNot(SOr(SAtomic(TestY), SAtomic(Test1))), 44),
+                                             (SOr(SAtomic(TestX), SAtomic(Test2)), 43)]),
+                         (SAtomic(Test1),
+                          (SAtomic(Test2), (43,), (None,)),
+                          (SAtomic(TestY), (43,), (44,))))
+
+    def test_ite_2(self):
+        from genus.ite import transitions_to_ite, eval_ite
+        for depth in range(0, 4):
+            for _ in range(num_random_tests):
+                td = random_type_designator(depth)
+                ite = transitions_to_ite([(td, True)], False)
+                for v in test_values:
+                    self.assertIs(eval_ite(ite, v), td.typep(v))
+
 
 if __name__ == '__main__':
     unittest.main()

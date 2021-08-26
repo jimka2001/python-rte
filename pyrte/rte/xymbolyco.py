@@ -39,6 +39,7 @@ class State:
             assert isinstance(transitions[tr], int)
         tr_list = list(transitions)
         for i in range(len(tr_list)):
+
             for j in range(i):
                 tr1 = tr_list[i]
                 tr2 = tr_list[j]
