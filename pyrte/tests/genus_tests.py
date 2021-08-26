@@ -1216,6 +1216,24 @@ class GenusCase(unittest.TestCase):
                 for v in test_values:
                     self.assertIs(eval_ite(ite, v), td.typep(v))
 
+    def test_ite_3(self):
+        from genus.ite import transitions_to_ite, eval_ite
+        for depth in range(0, 4):
+            for _ in range(num_random_tests*5):
+                td1 = random_type_designator(depth)
+                td2 = SAnd(random_type_designator(depth),SNot(td1))
+                ite = transitions_to_ite([(td2, 2),
+                                          (td1, 1)], 3)
+                for v in test_values:
+                    if td1.typep(v):
+                        expected = 1
+                    elif td2.typep(v):
+                        expected = 2
+                    else:
+                        expected = 3
+
+                    self.assertIs(eval_ite(ite, v), expected)
+
 
 if __name__ == '__main__':
     unittest.main()
