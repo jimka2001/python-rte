@@ -637,17 +637,17 @@ class Dfa:
         # returns True, False, or None
         return self.xor(dfa2).vacuous()
 
-    def union(self,dfa2):
+    def union(self, dfa2):
         return self.sxp(dfa2,
                         lambda a, b: a or b,
                         lambda q1, _: self.exit_map[q1.index])
 
-    def intersection(self,dfa2):
+    def intersection(self, dfa2):
         return self.sxp(dfa2,
                         lambda a, b: a and b,
                         lambda q1, _: self.exit_map[q1.index])
 
-    def xor(self,dfa2):
+    def xor(self, dfa2):
         return self.sxp(dfa2,
                         lambda a, b: (a and not b) or (b and not a),
                         lambda q1, _: self.exit_map[q1.index])
