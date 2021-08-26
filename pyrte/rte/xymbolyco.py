@@ -23,10 +23,11 @@
 from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
-
+from genus.ite import eval_ite, transitions_to_ite
 
 class State:
     def __init__(self, index, initial, accepting, pattern, transitions):
+        from genus.utils import generate_lazy_val
         assert isinstance(index, int)
         assert index >= 0
         assert isinstance(initial, bool)
@@ -39,6 +40,7 @@ class State:
             assert isinstance(transitions[tr], int)
         tr_list = list(transitions)
         for i in range(len(tr_list)):
+
             for j in range(i):
                 tr1 = tr_list[i]
                 tr2 = tr_list[j]
@@ -49,6 +51,10 @@ class State:
         self.accepting = accepting  # bool
         self.pattern = pattern  # Rte
         self.transitions = transitions  # Map SimpleTypeD -> Int
+        # it is not clear whether this ite structure needs to be generated at state creation time,
+        #  or at simulation time.  Here we delay its generation to the first time dfa.simulate(...)
+        #  encounters this State.
+        self.ite = generate_lazy_val(lambda: transitions_to_ite([(td,transitions[td]) for td in transitions]))
         super().__init__()
 
 
@@ -162,18 +168,7 @@ class Dfa:
     def simulate(self, sequence):
         state_id = 0
         for element in sequence:
-            transitions = self.states[state_id].transitions
-            itr = iter(transitions)
-            # the following search tries to find some type-designator for which
-            #  this element is of that designated type.   The code is simple,
-            #  but it is far from the best approach performance-wise,
-            #  because the type-designator may be a compound designator and
-            #  calling typep may check the same low level types multiple times
-            #  including multiple checks of slow satisfies functions.
-            #  TODO, we need to replace this check with some sort of
-            #  optimized decision tree based function.
-            state_id = next((transitions[td] for td in itr if td.typep(element)),
-                            None)
+            state_id = eval_ite(self.states[state_id].ite(), element)
             if state_id is None:
                 return None
 

@@ -31,6 +31,8 @@ from rte.r_cat import Cat
 from rte.r_random import random_rte
 from genus.s_eql import SEql
 from genus.s_top import STop
+from genus.s_empty import SEmpty
+from genus.s_and import SAnd
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_or import SOr

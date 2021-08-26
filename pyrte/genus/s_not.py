@@ -179,6 +179,12 @@ class SNot(SimpleTypeD):
         else:
             return cmp_objects(self.s, td.s)
 
+    def replace_down(self, search, replace):
+        return SNot(self.s.replace(search,replace))
+
+    def find_first_leaf_td(self):
+        return self.s.find_first_leaf_td()
+
 
 def notp(this):
     return isinstance(this, SNot)

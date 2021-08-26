@@ -76,6 +76,8 @@ class STopImpl(SimpleTypeD, TerminalType):
         else:
             return 0
 
+    def find_first_leaf_td(self):
+        return None
 
 STop = STopImpl()
 

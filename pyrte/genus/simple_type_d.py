@@ -198,6 +198,9 @@ class SimpleTypeD():
         return self
 
     def canonicalize(self, nf=None):
+        # td.canonicalize(NormalForm.DNF)
+        # td.canonicalize(NormalForm.CNf)
+        # td.canonicalize(None)
         if nf not in self.canonicalized_hash:
             def processor(td):
                 assert isinstance(td, SimpleTypeD)
@@ -227,3 +230,18 @@ class SimpleTypeD():
     def cmp_to_same_class_obj(self, t):
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare type designators of type {type(self)}")
+
+    def replace_down(self, _search, _replace):
+        return self
+
+    def replace(self, td_search, td_replace):
+        if self == td_search:
+            return td_replace
+        else:
+            return self.replace_down(td_search, td_replace)
+
+    def find_first_leaf_td(self):
+        return self
+
+
+

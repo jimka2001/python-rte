@@ -468,6 +468,11 @@ class SCombination(SimpleTypeD):
                                                   for x in self.tds])
                                      for y in td.tds])
 
+    def replace_down(self, search, replace):
+        return self.create([td.replace(search,replace) for td in self.tds])
+
+    def find_first_leaf_td(self):
+        return next(td.find_first_leaf_td() for td in self.tds)
 
 def combop(this):
     return isinstance(this, SCombination)
