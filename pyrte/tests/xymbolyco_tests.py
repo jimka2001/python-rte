@@ -157,7 +157,6 @@ class XymbolycoCase(unittest.TestCase):
             for _rep in range(num_random_tests):
                 rt = random_rte(depth).canonicalize()
                 dfa = rt.to_dfa(True)
-                print(dfa.find_hopcroft_partition())
                 self.assertTrue(dfa.find_hopcroft_partition())
 
     def test_minimize(self):
