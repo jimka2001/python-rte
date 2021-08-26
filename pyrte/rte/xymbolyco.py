@@ -164,6 +164,14 @@ class Dfa:
         for element in sequence:
             transitions = self.states[state_id].transitions
             itr = iter(transitions)
+            # the following search tries to find some type-designator for which
+            #  this element is of that designated type.   The code is simple,
+            #  but it is far from the best approach performance-wise,
+            #  because the type-designator may be a compound designator and
+            #  calling typep may check the same low level types multiple times
+            #  including multiple checks of slow satisfies functions.
+            #  TODO, we need to replace this check with some sort of
+            #  optimized decision tree based function.
             state_id = next((transitions[td] for td in itr if td.typep(element)),
                             None)
             if state_id is None:
