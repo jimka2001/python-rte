@@ -185,11 +185,11 @@ class XymbolycoCase(unittest.TestCase):
                 rt2 = random_rte(depth).canonicalize()
                 dfa1 = rt1.to_dfa(1)
                 dfa2 = rt2.to_dfa(2)
-                u = synchronized_union(dfa1,dfa2)
+                u = synchronized_union(dfa1, dfa2)
                 self.assertTrue(u)
-                i = synchronized_intersection(dfa1,dfa2)
+                i = synchronized_intersection(dfa1, dfa2)
                 self.assertTrue(i)
-                x = synchronized_xor(dfa1,dfa2)
+                x = synchronized_xor(dfa1, dfa2)
                 self.assertTrue(x)
 
     def test_sxp_2(self):
@@ -200,14 +200,15 @@ class XymbolycoCase(unittest.TestCase):
                 rt2 = random_rte(depth).canonicalize()
                 dfa1 = rt1.to_dfa(True)
                 dfa2 = rt2.to_dfa(True)
-                u = synchronized_union(dfa1,dfa2)
-                self.assertTrue(synchronized_xor(u,Or(rt1,rt2).to_dfa(True)).vacuous())
+                u = synchronized_union(dfa1, dfa2)
+                self.assertTrue(synchronized_xor(u, Or(rt1, rt2).to_dfa(True)).vacuous())
 
-                i = synchronized_intersection(dfa1,dfa2)
-                self.assertTrue(synchronized_xor(i,And(rt1,rt2).to_dfa(True)).vacuous())
+                i = synchronized_intersection(dfa1, dfa2)
+                self.assertTrue(synchronized_xor(i, And(rt1, rt2).to_dfa(True)).vacuous())
 
-                x = synchronized_xor(dfa1,dfa2)
-                self.assertTrue(synchronized_xor(x,Xor(rt1,rt2).to_dfa(True)).vacuous())
+                x = synchronized_xor(dfa1, dfa2)
+                self.assertTrue(synchronized_xor(x, Xor(rt1, rt2).to_dfa(True)).vacuous())
+
 
 if __name__ == '__main__':
     unittest.main()
