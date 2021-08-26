@@ -160,6 +160,10 @@ class Rte:
                                               state_legend=state_legend,
                                               verbose=verbose)
 
+    def equivalent(self, rte2):
+        rte1 = self
+        return rte1.to_dfa(True).equivalent(rte2.to_dfa(True))
+
 
 def random_rte(depth):
     import random
