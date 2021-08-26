@@ -682,6 +682,17 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
+    def test_serialize(self):
+        for depth in range(4):
+            for r in range(num_random_tests):
+                rt = random_rte(depth)
+                i = rt.inhabited()
+                v = rt.vacuous()
+                if i is None:
+                    self.assertIsNone(v)
+                else:
+                    self.assertEqual(i, not v)
+
     def test_discovered_682(self):
         so = Singleton(SEql(1))
         i = 0

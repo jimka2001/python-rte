@@ -157,7 +157,7 @@ class Rte:
                                               draw_sink=draw_sink,
                                               state_legend=state_legend,
                                               verbose=verbose)
-    
+
     def inhabited(self):
         return self.to_dfa(True).inhabited()
 
