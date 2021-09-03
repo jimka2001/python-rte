@@ -172,6 +172,26 @@ class And(Combination):
     def conversionA17a(self):
         # if And(...) has more than one Cat(...) which has no nullable operand,
         #    then the number of non-nullables must be the same, else EmptySet.
+        from rte.r_cat import catp, createCat
+        from rte.r_emptyset import EmptySet
+        from genus.utils import uniquify
+        # build a list of cat operands which contain no nullables
+        cats = [c.operands
+                for c in self.operands
+                if catp(c)
+                and all(not td.nullable() for td in c.operands)]
+        if not cats:
+            return self
+        elif 1 == len(cats):
+            return self
+        elif any(len(cats[0]) != len(cats[i]) for i in range(1, len(cats))):
+            # we found two Cat(...) of necessarily different lengths
+            return EmptySet
+        else:
+            return self
+
+    def conversionA17a2(self):
+        # if And(...) has more than one Cat(...) which has no nullable operand,
         #    We also replace the several Cat(...) (having no nullables)
         #    with a single Cat(...) with intersections of operands.
         #    And(Cat(a,b,c),Cat(x,y,z) ...)
@@ -190,7 +210,7 @@ class And(Combination):
             return self
         elif any(len(cats[0]) != len(cats[i]) for i in range(1, len(cats))):
             # we found two Cat(...) of necessarily different lengths
-            return EmptySet
+            return self
         else:
             invert = [[c[i] for c in cats] for i in range(0, len(cats[0]))]
             cat = createCat([self.create(r) for r in invert])
@@ -320,6 +340,7 @@ class And(Combination):
                                       self.conversionD16b,
                                       self.conversionA17,
                                       self.conversionA17a,
+                                      self.conversionA17a2,
                                       self.conversionA17b,
                                       self.conversionA17c,
                                       self.conversionA19,

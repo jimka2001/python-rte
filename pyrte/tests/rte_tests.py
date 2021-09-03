@@ -463,7 +463,20 @@ class RteCase(unittest.TestCase):
                          And(Cat(a, b, c, Star(d)), Cat(x, y, z)))
         self.assertEqual(And(Cat(a, b, c), x).conversionA17a(),
                          And(Cat(a, b, c), x))
-        self.assertEqual(And(Cat(a, b, c), d, Cat(x, y, z)).conversionA17a(),
+
+    def test_and_conversionA17a2(self):
+        a = Singleton(SEql("a"))
+        b = Singleton(SEql("b"))
+        c = Singleton(SEql("c"))
+        d = Singleton(SEql("d"))
+        x = Singleton(SEql("x"))
+        y = Singleton(SEql("y"))
+        z = Singleton(SEql("z"))
+        self.assertEqual(And(Cat(a, b, c, Star(d)), Cat(x, y, z)).conversionA17a2(),
+                         And(Cat(a, b, c, Star(d)), Cat(x, y, z)))
+        self.assertEqual(And(Cat(a, b, c), x).conversionA17a2(),
+                         And(Cat(a, b, c), x))
+        self.assertEqual(And(Cat(a, b, c), d, Cat(x, y, z)).conversionA17a2(),
                          And(d, Cat(And(a, x), And(b, y), And(c, z))))
 
     def test_and_conversionA17b(self):
