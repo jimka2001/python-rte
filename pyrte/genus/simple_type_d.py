@@ -54,13 +54,14 @@ from abc import ABCMeta, abstractmethod
 from genus.genus_types import NormalForm
 from genus.utils import generate_lazy_val, fixed_point
 
+
 # is it useful, though ? all classes are types by default in python
 class TerminalType(metaclass=ABCMeta):
     """This class is just here to emulate the TerminalType trait in Scala"""
     pass
 
 
-class SimpleTypeD():
+class SimpleTypeD:
     """SimpleTypeD is the super class of all of the
     representations of type in Genus"""
     def __init__(self):
@@ -242,6 +243,3 @@ class SimpleTypeD():
 
     def find_first_leaf_td(self):
         return self
-
-
-
