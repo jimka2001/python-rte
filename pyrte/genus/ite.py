@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-def transitions_to_ite(td_id_pairs,default=None):
+def transitions_to_ite(td_id_pairs, default=None):
     # compute an ite structure from a list of pairs. each pair is a SimpleTypeD and an exit_value.
     #  normally the exit_value is an int, but may actually be anything, even another ite.
     # An ite is either a 1-tuple, such as (42,), or it is a 3-tuple consisting of (SimpleTypeD,ite,ite).

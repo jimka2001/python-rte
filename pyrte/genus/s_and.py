@@ -41,7 +41,8 @@ from genus.s_empty import SEmpty
 from genus.s_top import STop
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
-
+from typing_extensions import Literal
+from typing import List, Literal
 
 # from utils import CallStack
 # subtypep_and_callstack = CallStack("subtypep.SAnd")

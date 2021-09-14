@@ -21,6 +21,8 @@
 
 import functools
 from abc import abstractmethod
+from typing_extensions import Literal
+from typing import List
 
 """
 [0-3] Advancement tracker
@@ -41,7 +43,6 @@ from genus.utils import flat_map
 from genus.utils import remove_element, search_replace, uniquify
 from genus.simple_type_d import SimpleTypeD
 
-
 class SCombination(SimpleTypeD):
     """SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 
@@ -55,7 +56,7 @@ class SCombination(SimpleTypeD):
         super().__init__()
 
     @abstractmethod
-    def create(self, tds):
+    def create(self, tds) -> SimpleTypeD:
         pass
 
     def __eq__(self, that):
@@ -67,43 +68,43 @@ class SCombination(SimpleTypeD):
 
     @property
     @abstractmethod
-    def unit(self):
+    def unit(self) -> SimpleTypeD:
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def zero(self):
+    def zero(self) -> SimpleTypeD:
         raise NotImplementedError
 
     @abstractmethod
-    def annihilator(self, a, b):
+    def annihilator(self, a, b) -> Literal[True,False,None]:
         # apparently this name may change, so keep track of it
         raise NotImplementedError
 
-    def same_combination(self, td):
+    def same_combination(self, td) -> bool:
         return type(self) == type(td)
 
-    def dual_combination(self, td):
+    def dual_combination(self, td) -> bool:
         raise NotImplementedError
 
-    def combo_filter(self, pred, xs):
+    def combo_filter(self, pred, xs) -> List:
         raise NotImplementedError
 
-    def combinator(self, a, b):
+    def combinator(self, a, b) -> List:
         raise NotImplementedError
 
-    def dual_combinator(self, a, b):
+    def dual_combinator(self, a, b) -> List:
         raise NotImplementedError
 
-    def create_dual(self, tds):
+    def create_dual(self, tds) -> SimpleTypeD:
         raise NotImplementedError
 
-    def conversion1(self):
+    def conversion1(self) -> SimpleTypeD:
         # (and) -> STop, unit = STop, zero = SEmpty
         # (or) -> SEmpty, unit = SEmpty, zero = STop
         return self.create(self.tds)
 
-    def conversion2(self):
+    def conversion2(self) -> SimpleTypeD:
         # (and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
         # (or A B STop C D) -> STop, unit = SEmpty, zero = STop
         if self.zero() in self.tds:
@@ -111,7 +112,7 @@ class SCombination(SimpleTypeD):
         else:
             return self
 
-    def conversion3(self):
+    def conversion3(self) -> SimpleTypeD:
         from genus.s_not import SNot
 
         # (and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
@@ -121,7 +122,7 @@ class SCombination(SimpleTypeD):
         else:
             return self
 
-    def conversion4(self):
+    def conversion4(self) -> SimpleTypeD:
         # SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
         # SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop
         if self.unit() in self.tds:
@@ -129,12 +130,12 @@ class SCombination(SimpleTypeD):
         else:
             return self
 
-    def conversion5(self):
+    def conversion5(self) -> SimpleTypeD:
         # (and A B A C) -> (and A B C)
         # (or A B A C) -> (or A B C)
         return self.create(uniquify(self.tds))
 
-    def conversion6(self):
+    def conversion6(self) -> SimpleTypeD:
         # (and A ( and B C) D) --> (and A B C D)
         # (or A ( or B C) D) --> (or A B C D)
 
@@ -151,10 +152,10 @@ class SCombination(SimpleTypeD):
 
             return self.create(flat_map(f, self.tds))
 
-    def conversion7(self, nf):
+    def conversion7(self, nf) -> SimpleTypeD:
         return self.to_nf(nf)
 
-    def conversion8(self):
+    def conversion8(self) -> SimpleTypeD:
         from genus.s_not import notp
         # (or A (not B)) --> STop if B is subtype of A, zero = STop
         # (and A (not B)) --> SEmpty if B is supertype of A, zero = SEmpty
@@ -164,7 +165,7 @@ class SCombination(SimpleTypeD):
                     return self.zero()
         return self
 
-    def conversion9(self):
+    def conversion9(self) -> SimpleTypeD:
 
         # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
@@ -196,7 +197,7 @@ class SCombination(SimpleTypeD):
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
-    def conversion10(self):
+    def conversion10(self) -> SimpleTypeD:
         # (and A B C) --> (and A C) if A is subtype of B
         # (or A B C) -->  (or B C) if A is subtype of B
         def pred(u):
@@ -215,7 +216,7 @@ class SCombination(SimpleTypeD):
             keep = [sup for sup in self.tds if sup == sub or not self.annihilator(sub, sup) is True]
             return self.create(keep)
 
-    def conversion11(self):
+    def conversion11(self) -> SimpleTypeD:
         from genus.s_not import SNot
 
         # A + !A B -> A + B
@@ -249,7 +250,7 @@ class SCombination(SimpleTypeD):
 
             return self.create(flat_map(consume, self.tds))
 
-    def conversion12(self):
+    def conversion12(self) -> SimpleTypeD:
         from genus.s_not import notp
         # AXBC + !X = ABC + !X
         # find !X
@@ -272,7 +273,7 @@ class SCombination(SimpleTypeD):
 
             return self.create([f(td) for td in self.tds])
 
-    def conversion13(self):
+    def conversion13(self) -> SimpleTypeD:
         from genus.s_not import SNot, notp
         from genus.s_member import memberimplp, createSMember
 
@@ -306,7 +307,7 @@ class SCombination(SimpleTypeD):
             #  replaces the right-most one, and removes all others.
             return self.create(uniquify([f(td) for td in self.tds]))
 
-    def conversion14(self):
+    def conversion14(self) -> SimpleTypeD:
         # multiple member
         # (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
         # (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
@@ -329,7 +330,7 @@ class SCombination(SimpleTypeD):
 
             return self.create(uniquify([f(td) for td in self.tds]))
 
-    def conversion15(self):
+    def conversion15(self) -> SimpleTypeD:
         from genus.s_not import SNot, notp
         from genus.s_member import memberimplp, createSMember
         from genus.s_and import andp
@@ -375,7 +376,7 @@ class SCombination(SimpleTypeD):
 
             return self.create(flat_map(f, self.tds))
 
-    def conversion16(self):
+    def conversion16(self) -> SimpleTypeD:
         from genus.s_not import SNot, notp
         from genus.s_member import memberimplp, createSMember
 
@@ -399,22 +400,22 @@ class SCombination(SimpleTypeD):
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
-    def conversionD1(self):
+    def conversionD1(self) -> SimpleTypeD:
         raise NotImplementedError
 
-    def conversionD3(self):
+    def conversionD3(self) -> SimpleTypeD:
         raise NotImplementedError
 
-    def conversion98(self):
+    def conversion98(self) -> SimpleTypeD:
         from genus.utils import cmp_objects
 
         ordered = sorted(self.tds, key=functools.cmp_to_key(cmp_objects))
         return self.create(ordered)
 
-    def conversion99(self, nf):
+    def conversion99(self, nf) -> SimpleTypeD:
         return self.create([td.canonicalize(nf) for td in self.tds])
 
-    def canonicalize_once(self, nf=None):
+    def canonicalize_once(self, nf=None) -> SimpleTypeD:
         simplifiers = [lambda: self.conversion1(),  # should also work self.conversionC1, self.conversion2 ...
                        lambda: self.conversion2(),
                        lambda: self.conversion3(),
@@ -437,7 +438,7 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion99(nf)]
         return find_simplifier(self, simplifiers)
 
-    def cmp_to_same_class_obj(self, td):
+    def cmp_to_same_class_obj(self, td) -> int:
         if type(self) != type(td):
             return super().cmp_to_same_class_obj(td)
         elif self == td:
@@ -445,7 +446,7 @@ class SCombination(SimpleTypeD):
         else:
             return compare_sequence(self.tds, td.tds)
 
-    def compute_nf(self):
+    def compute_nf(self) -> SimpleTypeD:
         # it turns out SAnd.compute_dnf and SOr.compute_cnf contain
         # the exact same code.  So I've factored that code here.
         # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
@@ -468,11 +469,12 @@ class SCombination(SimpleTypeD):
                                                   for x in self.tds])
                                      for y in td.tds])
 
-    def replace_down(self, search, replace):
+    def replace_down(self, search, replace) -> SimpleTypeD:
         return self.create([td.replace(search,replace) for td in self.tds])
 
-    def find_first_leaf_td(self):
+    def find_first_leaf_td(self) -> SimpleTypeD:
         return next(td.find_first_leaf_td() for td in self.tds)
 
-def combop(this):
+
+def combop(this) -> bool:
     return isinstance(this, SCombination)

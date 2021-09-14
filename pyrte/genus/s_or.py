@@ -41,6 +41,8 @@ from genus.s_empty import SEmpty
 from genus.s_top import STop
 from genus.utils import find_first
 from genus.utils import uniquify
+from genus.simple_type_d import SimpleTypeD
+from typing import List, Literal
 
 
 class SOr(SCombination):
@@ -50,41 +52,41 @@ class SOr(SCombination):
     def __str__(self):
         return "SOr(" + ", ".join([str(td) for td in self.tds]) + ")"
 
-    def create(self, tds):
+    def create(self, tds) -> SimpleTypeD:
         return createSOr(tds)
 
-    def unit(self):
+    def unit(self) -> SimpleTypeD:
         return SEmpty
 
-    def zero(self):
+    def zero(self) -> SimpleTypeD:
         return STop
 
-    def annihilator(self, a, b):
+    def annihilator(self, a, b) -> Literal[True,False,None]:
         return b.subtypep(a)
 
-    def dual_combination(self, td):
+    def dual_combination(self, td) -> bool:
         from genus.s_and import andp
         return andp(td)
 
-    def dual_combinator(self, a, b):
+    def dual_combinator(self, a, b) -> List:
         return [x for x in a if x in b]
 
-    def combinator(self, a, b):
+    def combinator(self, a, b) -> List:
         assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
         assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
         return uniquify(a + b)
 
-    def combo_filter(self, pred, xs):
+    def combo_filter(self, pred, xs) -> List:
         return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
 
-    def create_dual(self, tds):
+    def create_dual(self, tds) -> SimpleTypeD:
         from genus.s_and import createSAnd
         return createSAnd(tds)
 
-    def typep(self, a):
+    def typep(self, a) -> bool:
         return any(td.typep(a) for td in self.tds)
 
-    def inhabited_down(self):
+    def inhabited_down(self) -> Literal[True,False,None]:
         if any(td.inhabited() is True for td in self.tds):
             return True
         elif all(td.inhabited() is False for td in self.tds):
@@ -92,7 +94,7 @@ class SOr(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t) -> Literal[True,False,None]:
         if all(td.disjoint(t) is True for td in self.tds):
             return True
         elif any(td.disjoint(t) is False for td in self.tds):
@@ -101,7 +103,7 @@ class SOr(SCombination):
             s = super().disjoint_down(t)  # variable s useful for debugging
             return s
 
-    def subtypep_down(self, t):
+    def subtypep_down(self, t) -> Literal[True,False,None]:
         if not self.tds:
             return STop.subtypep(t)
         elif 1 == len(self.tds):
@@ -113,7 +115,7 @@ class SOr(SCombination):
         else:
             return super().subtypep_down(t)
 
-    def conversionD1(self):
+    def conversionD1(self) -> SimpleTypeD:
         from genus.s_not import SNot, notp
         from genus.s_member import memberimplp, createSMember
         # Dual of SAnd.conversionA1
@@ -127,7 +129,7 @@ class SOr(SCombination):
         else:
             return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
 
-    def conversionD3(self):
+    def conversionD3(self) -> SimpleTypeD:
         from genus.s_not import notp
         # dual of  disjoint pair
         # SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
@@ -140,7 +142,7 @@ class SOr(SCombination):
                     return STop
         return self
 
-    def compute_cnf(self):
+    def compute_cnf(self) -> SimpleTypeD:
         # convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
         #    --> td = SAnd(y1,y2,y3)
         # --> SAnd(SOr(x1,x2,  y1,  x3,x4),
@@ -150,7 +152,7 @@ class SOr(SCombination):
         return self.compute_nf()
 
 
-def createSOr(tds):
+def createSOr(tds) -> SimpleTypeD:
     if not tds:
         return SEmpty
     elif len(tds) == 1:
@@ -159,5 +161,5 @@ def createSOr(tds):
         return SOr(*tds)
 
 
-def orp(this):
+def orp(this) -> bool:
     return isinstance(this, SOr)

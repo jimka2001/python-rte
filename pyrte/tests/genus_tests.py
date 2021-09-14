@@ -1088,7 +1088,7 @@ class GenusCase(unittest.TestCase):
                                             f"\n intersection = {intersection}")
 
                     for v in test_values:
-                        containing = [td for [td, factors, disjoint] in computed if td.typep(v)]
+                        containing = [td for (td, factors, disjoint) in computed if td.typep(v)]
                         self.assertEqual(len(containing), 1,
                                          f"expecting exactly one partition to contain v={v}" +
                                          f"\n tds={tds}\n mdtd={computed}\n containing={containing}")
