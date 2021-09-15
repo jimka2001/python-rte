@@ -45,6 +45,7 @@ class SimpleTypeD:
         self.subtypep_cache = {}
         self.disjoint_cache = {}
         self.canonicalized_hash = {}
+        self.lazy_inhabited = generate_lazy_val(lambda: self.inhabited_down())
         self.nf_cache = {}
 
     def __repr__(self):
@@ -94,9 +95,7 @@ class SimpleTypeD:
         return None
 
     def inhabited(self) -> Literal[True, False, None]:
-        if not hasattr(self, "hold_inhabited"):
-            self.hold_inhabited = self.inhabited_down()
-        return self.hold_inhabited
+        return self.lazy_inhabited()
 
     def disjoint_down(self, t) -> Literal[True, False, None]:
         assert isinstance(t, SimpleTypeD)
