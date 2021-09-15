@@ -42,8 +42,9 @@ from genus.s_top import STop
 from genus.utils import find_first
 from genus.utils import uniquify
 from genus.simple_type_d import SimpleTypeD
-from typing import List, Literal
+from typing import List, Literal, TypeVar, Callable
 
+T = TypeVar('T')      # Declare type variable
 
 class SOr(SCombination):
     """Union type designator.  The operands are themselves type designators.
@@ -61,25 +62,25 @@ class SOr(SCombination):
     def zero(self) -> SimpleTypeD:
         return STop
 
-    def annihilator(self, a, b) -> Literal[True,False,None]:
+    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Literal[True, False, None]:
         return b.subtypep(a)
 
-    def dual_combination(self, td) -> bool:
+    def dual_combination(self, td: SimpleTypeD) -> bool:
         from genus.s_and import andp
         return andp(td)
 
-    def dual_combinator(self, a, b) -> List:
+    def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
         return [x for x in a if x in b]
 
-    def combinator(self, a, b) -> List:
+    def combinator(self, a: List[T], b: List[T]) -> List[T]:
         assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
         assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
         return uniquify(a + b)
 
-    def combo_filter(self, pred, xs) -> List:
+    def combo_filter(self, pred: Callable[[T], bool], xs: List[T]) -> List[T]:
         return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
 
-    def create_dual(self, tds) -> SimpleTypeD:
+    def create_dual(self, tds:List[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_and import createSAnd
         return createSAnd(tds)
 
@@ -94,7 +95,7 @@ class SOr(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self, t) -> Literal[True,False,None]:
+    def disjoint_down(self, t: SimpleTypeD) -> Literal[True,False,None]:
         if all(td.disjoint(t) is True for td in self.tds):
             return True
         elif any(td.disjoint(t) is False for td in self.tds):
@@ -103,7 +104,7 @@ class SOr(SCombination):
             s = super().disjoint_down(t)  # variable s useful for debugging
             return s
 
-    def subtypep_down(self, t) -> Literal[True,False,None]:
+    def subtypep_down(self, t: SimpleTypeD) -> Literal[True,False,None]:
         if not self.tds:
             return STop.subtypep(t)
         elif 1 == len(self.tds):
@@ -152,7 +153,7 @@ class SOr(SCombination):
         return self.compute_nf()
 
 
-def createSOr(tds) -> SimpleTypeD:
+def createSOr(tds: List[SimpleTypeD]) -> SimpleTypeD:
     if not tds:
         return SEmpty
     elif len(tds) == 1:
@@ -161,5 +162,5 @@ def createSOr(tds) -> SimpleTypeD:
         return SOr(*tds)
 
 
-def orp(this) -> bool:
+def orp(this: SimpleTypeD) -> bool:
     return isinstance(this, SOr)

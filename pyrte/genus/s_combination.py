@@ -22,26 +22,15 @@
 import functools
 from abc import abstractmethod
 from typing_extensions import Literal
-from typing import List
-
-"""
-[0-3] Advancement tracker
-
-__init__ 3
-create 3
-unit 3
-zero 3
-annihilator 3
-same_combination 3
-canonicalize_once 3
-cmp_to_same_class 3
-"""
-
+from typing import List, Callable, TypeVar, Union
 from genus.utils import compare_sequence
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map
 from genus.utils import remove_element, search_replace, uniquify
 from genus.simple_type_d import SimpleTypeD
+from genus.genus_types import NormalForm
+
+T = TypeVar('T')  # Declare type variable
 
 
 class SCombination(SimpleTypeD):
@@ -57,7 +46,7 @@ class SCombination(SimpleTypeD):
         super().__init__()
 
     @abstractmethod
-    def create(self, tds) -> SimpleTypeD:
+    def create(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         pass
 
     def __eq__(self, that):
@@ -76,26 +65,26 @@ class SCombination(SimpleTypeD):
         raise NotImplementedError
 
     @abstractmethod
-    def annihilator(self, a, b) -> Literal[True, False, None]:
+    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Literal[True, False, None]:
         # apparently this name may change, so keep track of it
         raise NotImplementedError
 
-    def same_combination(self, td) -> bool:
+    def same_combination(self, td: SimpleTypeD) -> bool:
         return type(self) == type(td)
 
-    def dual_combination(self, td) -> bool:
+    def dual_combination(self, td: SimpleTypeD) -> bool:
         raise NotImplementedError
 
-    def combo_filter(self, pred, xs) -> List:
+    def combo_filter(self, pred: Callable[[T], bool], xs: List[T]) -> List:
         raise NotImplementedError
 
-    def combinator(self, a, b) -> List:
+    def combinator(self, a: List[T], b: List[T]) -> List[T]:
         raise NotImplementedError
 
-    def dual_combinator(self, a, b) -> List:
+    def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
         raise NotImplementedError
 
-    def create_dual(self, tds) -> SimpleTypeD:
+    def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         raise NotImplementedError
 
     def conversion1(self) -> SimpleTypeD:
@@ -151,7 +140,7 @@ class SCombination(SimpleTypeD):
 
             return self.create(flat_map(f, self.tds))
 
-    def conversion7(self, nf) -> SimpleTypeD:
+    def conversion7(self, nf: Union[NormalForm, None]) -> SimpleTypeD:
         return self.to_nf(nf)
 
     def conversion8(self) -> SimpleTypeD:
@@ -414,7 +403,7 @@ class SCombination(SimpleTypeD):
     def conversion99(self, nf) -> SimpleTypeD:
         return self.create([td.canonicalize(nf) for td in self.tds])
 
-    def canonicalize_once(self, nf=None) -> SimpleTypeD:
+    def canonicalize_once(self, nf: Union[NormalForm, None] = None) -> SimpleTypeD:
         simplifiers = [lambda: self.conversion1(),  # should also work self.conversionC1, self.conversion2 ...
                        lambda: self.conversion2(),
                        lambda: self.conversion3(),
@@ -437,7 +426,7 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion99(nf)]
         return find_simplifier(self, simplifiers)
 
-    def cmp_to_same_class_obj(self, td) -> int:
+    def cmp_to_same_class_obj(self, td: SimpleTypeD) -> Literal[-1, 0, 1]:
         if type(self) != type(td):
             return super().cmp_to_same_class_obj(td)
         elif self == td:
@@ -468,12 +457,12 @@ class SCombination(SimpleTypeD):
                                                   for x in self.tds])
                                      for y in td.tds])
 
-    def replace_down(self, search, replace) -> SimpleTypeD:
+    def replace_down(self, search: SimpleTypeD, replace: SimpleTypeD) -> SimpleTypeD:
         return self.create([td.replace(search, replace) for td in self.tds])
 
     def find_first_leaf_td(self) -> SimpleTypeD:
         return next(td.find_first_leaf_td() for td in self.tds)
 
 
-def combop(this) -> bool:
+def combop(this: SimpleTypeD) -> bool:
     return isinstance(this, SCombination)

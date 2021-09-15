@@ -41,8 +41,9 @@ from genus.s_empty import SEmpty
 from genus.s_top import STop
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
-from typing_extensions import Literal
-from typing import List, Literal
+from typing import List, Literal, TypeVar, Callable
+
+T = TypeVar('T')      # Declare type variable
 
 # from utils import CallStack
 # subtypep_and_callstack = CallStack("subtypep.SAnd")
@@ -56,36 +57,36 @@ class SAnd(SCombination):
     def __str__(self):
         return "SAnd(" + ", ".join([str(td) for td in self.tds]) + ")"
 
-    def create(self, tds):
+    def create(self, tds) -> SimpleTypeD:
         return createSAnd(tds)
 
-    def unit(self):
+    def unit(self) -> SimpleTypeD:
         return STop
 
-    def zero(self):
+    def zero(self) -> SimpleTypeD:
         return SEmpty
 
-    def annihilator(self, a, b):
+    def annihilator(self, a, b) -> Literal[True,False,None]:
         return a.subtypep(b)
 
-    def dual_combination(self, td):
+    def dual_combination(self, td) -> bool:
         from genus.s_or import orp
         return orp(td)
 
-    def dual_combinator(self, a, b):
+    def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
         return uniquify(a + b)
 
-    def combinator(self, a, b):
+    def combinator(self, a: List[T], b: List[T]) -> List[T]:
         return [x for x in a if x in b]
 
-    def combo_filter(self, pred, xs):
+    def combo_filter(self, pred: Callable[[T], bool], xs:List[T]) -> List[T]:
         return filter(pred, xs)  # calling filter from Python std library
 
-    def create_dual(self, tds):
+    def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_or import createSOr
         return createSOr(tds)
 
-    def typep(self, a):
+    def typep(self, a) -> bool:
         return all(td.typep(a) for td in self.tds)
 
     def inhabited_down(self):
@@ -122,7 +123,7 @@ class SAnd(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t: SimpleTypeD) -> Literal[True, False, None]:
         assert isinstance(t, SimpleTypeD)
         
         if any(t.disjoint(t2) is True for t2 in self.tds):
@@ -141,7 +142,7 @@ class SAnd(SCombination):
         else:
             return super().disjoint_down(t)
 
-    def subtypep_down(self, t):
+    def subtypep_down(self, t: SimpleTypeD) -> Literal[True, False, None]:
         if not self.tds:
             return STop.subtypep(t)
         elif 1 == len(self.tds):
@@ -157,7 +158,7 @@ class SAnd(SCombination):
         else:
             return super().subtypep_down(t)
 
-    def conversionD1(self):
+    def conversionD1(self) -> SimpleTypeD:
         # Note this isn't consumed in SCombination:conversion16,
         # conversion16 converts SAnd(SMember(42, 43, 44, "a", "b", "c"), SInt)
         # to SAnd(SMember(42, 43, 44), SInt)
@@ -174,7 +175,7 @@ class SAnd(SCombination):
         else:
             return createSMember([x for x in member.arglist if self.typep(x)])
 
-    def conversionD3(self):
+    def conversionD3(self) -> SimpleTypeD:
         # discover disjoint pair
         for i in range(len(self.tds)):
             for j in range(i + 1, len(self.tds)):
@@ -182,7 +183,7 @@ class SAnd(SCombination):
                     return SEmpty
         return self
 
-    def compute_dnf(self):
+    def compute_dnf(self) -> SimpleTypeD:
         # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
         #    --> td = SOr(y1,y2,y3)
         # --> SOr(SAnd(x1,x2,  y1,  x3,x4),
@@ -192,7 +193,7 @@ class SAnd(SCombination):
         return self.compute_nf()
 
 
-def createSAnd(tds):
+def createSAnd(tds) -> SimpleTypeD:
     if not tds:
         return STop
     elif len(tds) == 1:
@@ -201,5 +202,5 @@ def createSAnd(tds):
         return SAnd(*tds)
 
 
-def andp(this):
+def andp(this) -> bool:
     return isinstance(this, SAnd)
