@@ -21,8 +21,7 @@
 
 import functools
 from abc import abstractmethod
-from typing_extensions import Literal
-from typing import List, Callable, TypeVar, Union
+from typing import List, Callable, TypeVar, Union, Literal
 from genus.utils import compare_sequence
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map

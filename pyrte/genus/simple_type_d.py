@@ -19,32 +19,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# TODO:
-#   maybe rewrite the static variable using methods as properties ?
-
-""" test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
-typep       3
-disjoint    2
-inhabited_down     3
-inhabited   3
-disjoint_down  3
-subtypep
-fixed_point 3
-find_simplifier     1
-compute_dnf    3
-to_dnf  3
-compute_cnf    3
-to_cnf  fully done
-maybe_dnf   2
-maybe_cnf   2
-canonicalize_once   3
-canonicalize    3
-supertypep  1
-cmp_to_same_class_obj   3
-"""
 
 from abc import ABCMeta, abstractmethod
-from typing_extensions import Literal
+from typing import Literal
 
 # from utils import CallStack
 # subtypep_callstack = CallStack("subtypep",trace=True)
