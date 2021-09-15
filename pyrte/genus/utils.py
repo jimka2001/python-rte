@@ -23,9 +23,14 @@ from collections import OrderedDict
 from collections.abc import Iterable
 from functools import reduce  # import needed for python3; builtin in python2
 from collections import defaultdict
+from typing import TypeVar, Callable, List, Literal, Union, Dict, Tuple
+T = TypeVar('T')      # Declare type variable
+S = TypeVar('S')      # Declare type variable
+V = TypeVar('V')      # Declare type variable
+L = TypeVar('L')      # Declare type variable
 
 
-def generate_lazy_val(func):
+def generate_lazy_val(func: Callable[[], T]) -> Callable[[], T]:
     saved_value = None
     called = False
 
@@ -41,7 +46,10 @@ def generate_lazy_val(func):
     return lazy_holder
 
 
-def fixed_point(v, f, good_enough, invariant=None):
+def fixed_point(v: T,
+                f: Callable[[T], T],
+                good_enough: Callable[[T], bool],
+                invariant: Union[None, Callable[[T], bool]] = None) -> T:
     # if invariant is given, it should be a function we can call on the
     #   input v, and also on the computed result, f(v)
     #   if the invariant fails to return True, the an exception will be thrown
@@ -63,7 +71,8 @@ def fixed_point(v, f, good_enough, invariant=None):
             v = v2
 
 
-def find_simplifier(self, simplifiers, verbose=False):
+def find_simplifier(self: T, simplifiers: List[Callable[[], T]],
+                    verbose: bool = False) -> T:
     """simplifiers is a list of 0-ary functions.
     Calling such a function either returns `this` or something else.
     We call all the functions in turn, as long as they return `this`.
@@ -81,7 +90,7 @@ def find_simplifier(self, simplifiers, verbose=False):
     return self
 
 
-def uniquify(seq):
+def uniquify(seq: List[T]) -> List[T]:
     """remove duplicates from a list, but preserve the order.
     If duplicates occur in the given list, then left-most occurrences
     are removed, so that the right-most occurrence remains.
@@ -90,13 +99,16 @@ def uniquify(seq):
     return list(reversed(list(OrderedDict.fromkeys(reversed(seq)))))
 
 
-def flat_map(f, xs):
+def flat_map(f: Callable[[T], List[T]],
+             xs: List[T]) -> List[T]:
     assert isinstance(xs, Iterable), f"expecting Iterable not {xs}"
 
     return [y for z in xs for y in f(z)]
 
 
-def search_replace_splice(xs, search, replace):
+def search_replace_splice(xs: List[T],
+                          search: T,
+                          replace: List[T]) -> List[T]:
     assert isinstance(xs, Iterable)
 
     def select(x):
@@ -108,14 +120,17 @@ def search_replace_splice(xs, search, replace):
     return flat_map(select, xs)
 
 
-def search_replace(xs, search, replace):
+def search_replace(xs: List[T],
+                   search: T,
+                   replace: T) -> List[T]:
     assert isinstance(xs, Iterable)
 
     return search_replace_splice(xs, search, [replace])
 
 
 # remove a given element from a list every time it occurs
-def remove_element(xs, search):
+def remove_element(xs: List[T],
+                   search: T) -> List[T]:
     assert isinstance(xs, Iterable)
 
     return search_replace_splice(xs, search, [])
@@ -123,7 +138,9 @@ def remove_element(xs, search):
 
 # find first element of list which makes the predicate true
 # if no such element is found, return the given default or None
-def find_first(pred, xs, default=None):
+def find_first(pred: Callable[[T], bool],
+               xs: List[T],
+               default: S = None) -> Union[T, S]:
     assert isinstance(xs, Iterable)
 
     return next(filter(pred, xs), default)
@@ -132,7 +149,7 @@ def find_first(pred, xs, default=None):
 # return 0 if a == b
 #        -1 if a < b
 #        1 if a > b
-def cmp_objects(a, b):
+def cmp_objects(a: T, b: T) -> Literal[-1, 0, 1]:
     if a == b:
         return 0
     elif type(a) == type(b):
@@ -143,7 +160,8 @@ def cmp_objects(a, b):
         return 1
 
 
-def compare_sequence(xs, ys):
+def compare_sequence(xs: List[T],
+                     ys: List[T]) -> Literal[-1, 0, 1]:
     def comp(i):
         if i >= len(xs) and i >= len(ys):
             return 0
@@ -200,7 +218,8 @@ def get_all_subclasses(cls):
     return all_subclasses
 
 
-def trace_graph(v0, edges):
+def trace_graph(v0: V,
+                edges: Callable[[V], List[Tuple[L, V]]]) -> Tuple[List[V], List[List[int]]]:
     # v0 type V
     # edges V => List[(L,V)]
     # if V is te type of vertex
@@ -211,7 +230,7 @@ def trace_graph(v0, edges):
     es = edges(v0)  # List[(L,V)]
     int_to_v = [v0]  # List[V]
     v_to_int = {v0: 0}  # Map[V -> int]
-    m = [[]]
+    m = [[]]  # List[List[int]]
     esi = 0  # index into es[...]
     while True:
         if esi == len(es):
@@ -240,12 +259,15 @@ def trace_graph(v0, edges):
                 continue
 
 
-def stringify(vec, tabs):
+def stringify(vec: List[T],
+              tabs: int) -> str:
     i = 0
     return "[" + ("\n" + " " * (1 + tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"
 
 
-def dot_view(dot_string, verbose=False, title="no-name"):
+def dot_view(dot_string,
+             verbose=False,
+             title="no-name"):
     import platform
     import subprocess
     import tempfile
@@ -263,7 +285,7 @@ def dot_view(dot_string, verbose=False, title="no-name"):
     return None
 
 
-def stack_depth():
+def stack_depth() -> int:
     import inspect
     return len(inspect.stack(0))
 
@@ -271,11 +293,13 @@ def stack_depth():
 # this implementation comes directly from stackoverflow
 #   https://stackoverflow.com/users/1056941/ronen
 # thanks to ronen user:1056941 for the code sample
-def group_by(key, seq):
+def group_by(key: Callable[[T], S],
+             seq: List[T]) -> Dict[S, List[T]]:
     return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
 
-def split_eqv_class(objects, f):
+def split_eqv_class(objects: List[T],
+                    f: Callable[[T], S]) -> List[List[T]]:
     if len(objects) == 1:
         return [objects]
     else:
@@ -283,7 +307,8 @@ def split_eqv_class(objects, f):
         return [grouped[k] for k in grouped]
 
 
-def find_eqv_class(partition, target):
+def find_eqv_class(partition: List[List[T]],
+                   target: T) -> Union[List[T], Literal[None]]:
     # given partition, a list of mutually disjoint lists
     # return the list which contains target, or None if not found
     for eqv_class in partition:
