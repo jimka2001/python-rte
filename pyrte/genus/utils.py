@@ -291,3 +291,11 @@ def find_eqv_class(partition, target):
             return eqv_class
     return None
 
+
+def pip_install(package):
+    import pip
+
+    if hasattr(pip, 'main'):
+        pip.main(['install', package])
+    else:
+        pip._internal.main(['install', package])
