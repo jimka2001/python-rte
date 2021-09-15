@@ -43,6 +43,7 @@ from genus.utils import flat_map
 from genus.utils import remove_element, search_replace, uniquify
 from genus.simple_type_d import SimpleTypeD
 
+
 class SCombination(SimpleTypeD):
     """SCombination is abstract because it has at least one abstractmethod and inherits from an abstract class"""
 
@@ -66,18 +67,16 @@ class SCombination(SimpleTypeD):
     def __hash__(self):
         return hash(tuple(self.tds))
 
-    @property
     @abstractmethod
     def unit(self) -> SimpleTypeD:
         raise NotImplementedError
 
-    @property
     @abstractmethod
     def zero(self) -> SimpleTypeD:
         raise NotImplementedError
 
     @abstractmethod
-    def annihilator(self, a, b) -> Literal[True,False,None]:
+    def annihilator(self, a, b) -> Literal[True, False, None]:
         # apparently this name may change, so keep track of it
         raise NotImplementedError
 
@@ -470,7 +469,7 @@ class SCombination(SimpleTypeD):
                                      for y in td.tds])
 
     def replace_down(self, search, replace) -> SimpleTypeD:
-        return self.create([td.replace(search,replace) for td in self.tds])
+        return self.create([td.replace(search, replace) for td in self.tds])
 
     def find_first_leaf_td(self) -> SimpleTypeD:
         return next(td.find_first_leaf_td() for td in self.tds)
