@@ -26,6 +26,8 @@ from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
 from typing import List, Union, Tuple, Any
 
+Triple = Tuple[str, Rte, Union[int, Tuple[str, Any]]]
+
 
 class State:
     def __init__(self, index, initial, accepting, pattern, transitions):
@@ -345,7 +347,6 @@ class Dfa:
 
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
-        Triple = Tuple[str, SimpleTypeD, Union[int, Tuple[str, Any]]]
         old_transitions: List[Triple] = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
         new_initial_transitions: List[Triple] = [("I", Epsilon, 0)]
