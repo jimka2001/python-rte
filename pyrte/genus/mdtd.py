@@ -23,10 +23,10 @@ from genus.simple_type_d import SimpleTypeD
 from typing import List, Tuple
 
 
-def mdtd(tds: List[SimpleTypeD]) -> List[Tuple[SimpleTypeD,List[SimpleTypeD],List[SimpleTypeD]]]:
+def mdtd(tds: List[SimpleTypeD]) -> List[Tuple[SimpleTypeD, List[SimpleTypeD], List[SimpleTypeD]]]:
     from genus.s_not import SNot
     from genus.s_top import STop
-    from genus.utils import flat_map, generate_lazy_val    
+    from genus.utils import flat_map, generate_lazy_val
     # This algorithm doesn't exactly compute the maximal disjoint type decomposition
     # of its input rather it computes the mdtd of tds unioned with STop, which is
     # what is actually needed at the client side.
@@ -59,5 +59,6 @@ def mdtd(tds: List[SimpleTypeD]) -> List[Tuple[SimpleTypeD,List[SimpleTypeD],Lis
             else:
                 return [(a(), factors + [td], disjoints),
                         (b(), factors, disjoints + [td])]
+
         decomposition = flat_map(f, decomposition)
     return decomposition

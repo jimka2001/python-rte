@@ -65,12 +65,12 @@ def eval_ite(ite, element):
     # on the positive_ite (the then part), else eval_ite on the negative_ite (the else part).
     # If the node is a leaf node, (i.e., a 1-tuple), then return the 0'th element of that
     # 1-tuple.
-    assert isinstance(ite,tuple)
+    assert isinstance(ite, tuple)
     if 3 == len(ite):
         td, positive, negative = ite
         if td.typep(element):
-            return eval_ite(positive,element)
+            return eval_ite(positive, element)
         else:
-            return eval_ite(negative,element)
+            return eval_ite(negative, element)
     else:
         return ite[0]

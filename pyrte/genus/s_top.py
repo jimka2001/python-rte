@@ -79,8 +79,9 @@ class STopImpl(SimpleTypeD, TerminalType):
     def find_first_leaf_td(self):
         return None
 
+
 STop = STopImpl()
 
-def topp(this):
-	return isinstance(this, STopImpl)
 
+def topp(this):
+    return isinstance(this, STopImpl)

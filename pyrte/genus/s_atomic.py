@@ -31,7 +31,6 @@ canonicalize_once 1
 cmp_to_same_class_obj 3
 """
 
-
 from genus.s_and import SAnd
 from genus.s_custom import SCustom
 from genus.s_empty import SEmptyImpl, SEmpty
@@ -45,6 +44,7 @@ from genus.utils import get_all_subclasses
 class SAtomic(SimpleTypeD, TerminalType):
     """The atoms of our type system: a simple type built from a native python type."""
     __instances = {}
+
     # reminder: the types are:
     # numerical: "int", "float", "complex"
     # sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
@@ -175,5 +175,6 @@ class SAtomic(SimpleTypeD, TerminalType):
         else:
             return 1
 
+
 def atomicp(this):
-	return isinstance(this, SAtomic)
+    return isinstance(this, SAtomic)

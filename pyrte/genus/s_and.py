@@ -19,22 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 3
-__str__ 3
-create 3
-unit 3
-zero 3
-annihilator 3
-same_combination 3
-typep 3
-inhabited_down 0
-disjoint_down 1
-subtypep 1
-canonicalize_once 3
-compute_dnf 3
-"""
 
 from genus.s_combination import SCombination
 from genus.s_empty import SEmpty
@@ -125,7 +109,7 @@ class SAnd(SCombination):
 
     def disjoint_down(self, t: SimpleTypeD) -> Literal[True, False, None]:
         assert isinstance(t, SimpleTypeD)
-        
+
         if any(t.disjoint(t2) is True for t2 in self.tds):
             return True
         elif t.inhabited() is not True or self.inhabited() is not True:

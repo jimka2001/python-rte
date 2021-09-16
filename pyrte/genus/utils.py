@@ -23,11 +23,12 @@ from collections import OrderedDict
 from collections.abc import Iterable
 from functools import reduce  # import needed for python3; builtin in python2
 from collections import defaultdict
-from typing import TypeVar, Callable, List, Literal, Union, Dict, Tuple
-T = TypeVar('T')      # Declare type variable
-S = TypeVar('S')      # Declare type variable
-V = TypeVar('V')      # Declare type variable
-L = TypeVar('L')      # Declare type variable
+from typing import TypeVar, Callable, List, Literal, Union, Dict, Tuple, Optional
+
+T = TypeVar('T')  # Declare type variable
+S = TypeVar('S')  # Declare type variable
+V = TypeVar('V')  # Declare type variable
+L = TypeVar('L')  # Declare type variable
 
 
 def generate_lazy_val(func: Callable[[], T]) -> Callable[[], T]:

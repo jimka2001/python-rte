@@ -1219,9 +1219,9 @@ class GenusCase(unittest.TestCase):
     def test_ite_3(self):
         from genus.ite import transitions_to_ite, eval_ite
         for depth in range(0, 4):
-            for _ in range(num_random_tests*5):
+            for _ in range(num_random_tests * 5):
                 td1 = random_type_designator(depth)
-                td2 = SAnd(random_type_designator(depth),SNot(td1))
+                td2 = SAnd(random_type_designator(depth), SNot(td1))
                 ite = transitions_to_ite([(td2, 2),
                                           (td1, 1)], 3)
                 for v in test_values:

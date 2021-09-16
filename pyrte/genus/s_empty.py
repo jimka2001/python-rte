@@ -70,7 +70,9 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
     def find_first_leaf_td(self):
         return None
 
+
 SEmpty = SEmptyImpl()
 
+
 def emptyp(this):
-	return isinstance(this, SEmptyImpl)
+    return isinstance(this, SEmptyImpl)
