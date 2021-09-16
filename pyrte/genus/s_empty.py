@@ -20,17 +20,8 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""
-[0-3] Advancement tracker
-__str__ 3
-typep 3
-inhabited 3
-disjoint_down 3
-subtypep 3
-cmp_to_same_class_obj 3
-"""
-
 from genus.simple_type_d import SimpleTypeD, TerminalType
+from typing import Optional, Literal, Any
 
 
 class SEmptyImpl(SimpleTypeD, TerminalType):
@@ -45,32 +36,34 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
             SEmptyImpl.__instance = super(SEmptyImpl, cls).__new__(cls, *a, **kw)
         return SEmptyImpl.__instance
 
-    def __str__(self):
+    def __str__(self) -> Literal["SEmpty"]:
         return "SEmpty"
 
-    def typep(self, _any):
+    def typep(self, _any: Any) -> Literal[False]:
         return False
 
-    def inhabited(self):
+    def inhabited(self) -> Literal[False]:
         return False
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t: SimpleTypeD) -> Literal[True]:
         assert isinstance(t, SimpleTypeD)
         return True
 
-    def subtypep(self, t):
+    def subtypep(self, t: SimpleTypeD) -> Literal[True]:
         return True
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t: 'EmptyImpl') -> Literal[-1, 0, 1]:
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         else:
             return 0
 
-    def find_first_leaf_td(self):
+    def find_first_leaf_td(self) -> Literal[None]:
         return None
+
 
 SEmpty = SEmptyImpl()
 
-def emptyp(this):
-	return isinstance(this, SEmptyImpl)
+
+def emptyp(this: Any) -> bool:
+    return isinstance(this, SEmptyImpl)

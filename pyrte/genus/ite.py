@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-def transitions_to_ite(td_id_pairs,default=None):
+def transitions_to_ite(td_id_pairs, default=None):
     # compute an ite structure from a list of pairs. each pair is a SimpleTypeD and an exit_value.
     #  normally the exit_value is an int, but may actually be anything, even another ite.
     # An ite is either a 1-tuple, such as (42,), or it is a 3-tuple consisting of (SimpleTypeD,ite,ite).
@@ -65,12 +65,12 @@ def eval_ite(ite, element):
     # on the positive_ite (the then part), else eval_ite on the negative_ite (the else part).
     # If the node is a leaf node, (i.e., a 1-tuple), then return the 0'th element of that
     # 1-tuple.
-    assert isinstance(ite,tuple)
+    assert isinstance(ite, tuple)
     if 3 == len(ite):
         td, positive, negative = ite
         if td.typep(element):
-            return eval_ite(positive,element)
+            return eval_ite(positive, element)
         else:
-            return eval_ite(negative,element)
+            return eval_ite(negative, element)
     else:
         return ite[0]

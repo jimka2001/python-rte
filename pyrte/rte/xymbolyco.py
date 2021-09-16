@@ -24,6 +24,10 @@ from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
+from typing import List, Union, Tuple, Any
+
+Triple = Tuple[str, Rte, Union[int, Tuple[str, Any]]]
+
 
 class State:
     def __init__(self, index, initial, accepting, pattern, transitions):
@@ -54,7 +58,7 @@ class State:
         # it is not clear whether this ite structure needs to be generated at state creation time,
         #  or at simulation time.  Here we delay its generation to the first time dfa.simulate(...)
         #  encounters this State.
-        self.ite = generate_lazy_val(lambda: transitions_to_ite([(td,transitions[td]) for td in transitions]))
+        self.ite = generate_lazy_val(lambda: transitions_to_ite([(td, transitions[td]) for td in transitions]))
         super().__init__()
 
 
@@ -68,7 +72,7 @@ def createSinkState(index):
                  transitions={STop: index})
 
 
-def default_combine_labels(l1, l2):
+def default_combine_labels(_l1, _l2):
     raise Exception('Missing combine_labels for Dfa')
 
 
@@ -343,11 +347,11 @@ class Dfa:
 
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
-        old_transitions = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
+        old_transitions: List[Triple] = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
-        new_initial_transitions = [("I", Epsilon, 0)]
+        new_initial_transitions: List[Triple] = [("I", Epsilon, 0)]
         # step 4  # adding state whose index is NOT integer
-        new_final_transitions = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
+        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
 
         def combine_parallel_labels(rtes):
             return createOr(rtes).canonicalize()
@@ -590,7 +594,7 @@ class Dfa:
 
         def compute_all_cross_transitions():
             triples = compute_cross_transitions(0, 0)
-            done_pairs = set([(0, 0)])
+            done_pairs = {(0, 0)}
             i = 0
             while i < len(triples):
                 _, label, (dst1, dst2) = triples[i]

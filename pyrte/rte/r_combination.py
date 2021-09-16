@@ -23,11 +23,11 @@
 from rte.r_rte import Rte
 
 
-class Combination (Rte):
+class Combination(Rte):
     def __init__(self, *operands):
         self.operands = list(operands)
         assert all(isinstance(operand, Rte) for operand in operands), \
-                f"And and Or expect Rtes as arguments, got {[type(o) for o in operands]}"
+            f"And and Or expect Rtes as arguments, got {[type(o) for o in operands]}"
         super().__init__()
 
     def __eq__(self, that):
@@ -260,7 +260,7 @@ class Combination (Rte):
                 left = [ss[j] for j in range(i + 1, len(ss)) if self.annihilator(td, ss[j]) is True]
                 return left
 
-        redundant = flat_map(f, range(len(ss)-1))
+        redundant = flat_map(f, range(len(ss) - 1))
 
         def g(op):
             if singletonp(op) and op.operand in redundant:
@@ -328,10 +328,11 @@ class Combination (Rte):
                 return [r.operand.operand]
             else:
                 return []
+
         singletons = flat_map(f, self.operands)
         if any(singletons[i].disjoint(singletons[j]) is True
                for i in range(len(singletons))
-               for j in range(i+1, len(singletons))):
+               for j in range(i + 1, len(singletons))):
             return self.zero()
         else:
             return self

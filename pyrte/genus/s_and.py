@@ -19,28 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 3
-__str__ 3
-create 3
-unit 3
-zero 3
-annihilator 3
-same_combination 3
-typep 3
-inhabited_down 0
-disjoint_down 1
-subtypep 1
-canonicalize_once 3
-compute_dnf 3
-"""
 
 from genus.s_combination import SCombination
-from genus.s_empty import SEmpty
-from genus.s_top import STop
+from genus.s_empty import SEmpty, SEmptyImpl
+from genus.s_top import STop, STopImpl
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
+from typing import List, Literal, TypeVar, Callable, Iterable, Optional, Any
+
+T = TypeVar('T')  # Declare type variable
 
 
 # from utils import CallStack
@@ -50,44 +37,44 @@ from genus.utils import find_first, generate_lazy_val, uniquify
 
 class SAnd(SCombination):
     """An intersection type, which is the intersection of zero or more types.
-    @param tds list, zero or more type designators"""
+    param tds list, zero or more type designators"""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "SAnd(" + ", ".join([str(td) for td in self.tds]) + ")"
 
-    def create(self, tds):
+    def create(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         return createSAnd(tds)
 
-    def unit(self):
+    def unit(self) -> STopImpl:
         return STop
 
-    def zero(self):
+    def zero(self) -> SEmptyImpl:
         return SEmpty
 
-    def annihilator(self, a, b):
+    def annihilator(self, a, b) -> Optional[bool]:
         return a.subtypep(b)
 
-    def dual_combination(self, td):
+    def dual_combination(self, td) -> bool:
         from genus.s_or import orp
         return orp(td)
 
-    def dual_combinator(self, a, b):
+    def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
         return uniquify(a + b)
 
-    def combinator(self, a, b):
+    def combinator(self, a: Iterable[T], b: Iterable[T]) -> List[T]:
         return [x for x in a if x in b]
 
-    def combo_filter(self, pred, xs):
-        return filter(pred, xs)  # calling filter from Python std library
+    def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
+        return [x for x in xs if pred(x)]  # cannot use filter from Python std library because of type incompatibility
 
-    def create_dual(self, tds):
+    def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_or import createSOr
         return createSOr(tds)
 
-    def typep(self, a):
+    def typep(self, a: Any) -> bool:
         return all(td.typep(a) for td in self.tds)
 
-    def inhabited_down(self):
+    def inhabited_down(self) -> Optional[bool]:
         from genus.genus_types import NormalForm
         from genus.s_atomic import atomicp
         from genus.s_not import notp
@@ -121,9 +108,9 @@ class SAnd(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
         assert isinstance(t, SimpleTypeD)
-        
+
         if any(t.disjoint(t2) is True for t2 in self.tds):
             return True
         elif t.inhabited() is not True or self.inhabited() is not True:
@@ -140,7 +127,7 @@ class SAnd(SCombination):
         else:
             return super().disjoint_down(t)
 
-    def subtypep_down(self, t):
+    def subtypep_down(self, t: SimpleTypeD) -> Optional[bool]:
         if not self.tds:
             return STop.subtypep(t)
         elif 1 == len(self.tds):
@@ -156,7 +143,7 @@ class SAnd(SCombination):
         else:
             return super().subtypep_down(t)
 
-    def conversionD1(self):
+    def conversionD1(self) -> SimpleTypeD:
         # Note this isn't consumed in SCombination:conversion16,
         # conversion16 converts SAnd(SMember(42, 43, 44, "a", "b", "c"), SInt)
         # to SAnd(SMember(42, 43, 44), SInt)
@@ -173,7 +160,7 @@ class SAnd(SCombination):
         else:
             return createSMember([x for x in member.arglist if self.typep(x)])
 
-    def conversionD3(self):
+    def conversionD3(self) -> SimpleTypeD:
         # discover disjoint pair
         for i in range(len(self.tds)):
             for j in range(i + 1, len(self.tds)):
@@ -181,7 +168,7 @@ class SAnd(SCombination):
                     return SEmpty
         return self
 
-    def compute_dnf(self):
+    def compute_dnf(self) -> SimpleTypeD:
         # convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
         #    --> td = SOr(y1,y2,y3)
         # --> SOr(SAnd(x1,x2,  y1,  x3,x4),
@@ -191,14 +178,14 @@ class SAnd(SCombination):
         return self.compute_nf()
 
 
-def createSAnd(tds):
+def createSAnd(tds: Iterable[SimpleTypeD]) -> SimpleTypeD:
     if not tds:
         return STop
-    elif len(tds) == 1:
+    elif len(list(tds)) == 1:
         return tds[0]
     else:
         return SAnd(*tds)
 
 
-def andp(this):
+def andp(this: Any) -> bool:
     return isinstance(this, SAnd)

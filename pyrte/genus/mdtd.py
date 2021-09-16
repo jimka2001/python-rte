@@ -19,21 +19,24 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+from genus.simple_type_d import SimpleTypeD
+from typing import List, Tuple, Set
 
-def mdtd(tds):
+
+def mdtd(tds: Set[SimpleTypeD]) -> List[Tuple[SimpleTypeD, List[SimpleTypeD], List[SimpleTypeD]]]:
     from genus.s_not import SNot
     from genus.s_top import STop
-    from genus.utils import flat_map, generate_lazy_val    
+    from genus.utils import flat_map, generate_lazy_val
     # This algorithm doesn't exactly compute the maximal disjoint type decomposition
     # of its input rather it computes the mdtd of tds unioned with STop, which is
     # what is actually needed at the client side.
     tds = [td for td in tds if td.inhabited() is not False]
-    decomposition = [[STop, [], []]]
+    decomposition = [(STop, [], [])]
     for td in tds:
         n = SNot(td)
         nc = generate_lazy_val(lambda: n.canonicalize())
 
-        def f(triple):
+        def f(triple) -> List[Tuple[SimpleTypeD, List[SimpleTypeD], List[SimpleTypeD]]]:
             from genus.s_and import SAnd
             td1, factors, disjoints = triple
             a = generate_lazy_val(lambda: SAnd(td, td1).canonicalize())
@@ -46,15 +49,16 @@ def mdtd(tds):
             #   type in question is a subtype or a disjoint type, simply
             #   by looking it up in the factors or disjoint list.
             if td.disjoint(td1) is True:
-                return [[td1, factors, disjoints + [td]]]
+                return [(td1, factors, disjoints + [td])]
             elif nc().disjoint(td1) is True:
-                return [[td1, factors + [td], disjoints]]
+                return [(td1, factors + [td], disjoints)]
             elif a().inhabited() is False:
-                return [[td1, factors, disjoints + [td]]]
+                return [(td1, factors, disjoints + [td])]
             elif b().inhabited() is False:
-                return [[td1, factors + [td], disjoints]]
+                return [(td1, factors + [td], disjoints)]
             else:
-                return [[a(), factors + [td], disjoints],
-                        [b(), factors, disjoints + [td]]]
+                return [(a(), factors + [td], disjoints),
+                        (b(), factors, disjoints + [td])]
+
         decomposition = flat_map(f, decomposition)
     return decomposition

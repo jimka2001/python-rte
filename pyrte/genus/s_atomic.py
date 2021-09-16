@@ -19,19 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 1
-inhabited_down 1 
-disjoint_down 0
-subtypep 0 
-canonicalize_once 1 
-cmp_to_same_class_obj 3
-"""
-
-
 from genus.s_and import SAnd
 from genus.s_custom import SCustom
 from genus.s_empty import SEmptyImpl, SEmpty
@@ -40,11 +27,14 @@ from genus.s_or import SOr
 from genus.s_top import STopImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
 from genus.utils import get_all_subclasses
+from genus.genus_types import NormalForm
+from typing import Literal, Any, Optional
 
 
 class SAtomic(SimpleTypeD, TerminalType):
     """The atoms of our type system: a simple type built from a native python type."""
     __instances = {}
+
     # reminder: the types are:
     # numerical: "int", "float", "complex"
     # sequential: "list", "tuple", "range" (+ * binary sequences + * text sequences)
@@ -64,27 +54,26 @@ class SAtomic(SimpleTypeD, TerminalType):
             f"wrapped_class={wrapped_class} is not a class, its type is {type(wrapped_class)}"
         self.wrapped_class = wrapped_class
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "SAtomic(" + self.wrapped_class.__name__ + ")"
 
-    def __eq__(self, that):
+    def __eq__(self, that: Any) -> bool:
         return isinstance(that, SAtomic) \
                and self.wrapped_class is that.wrapped_class
 
     def __hash__(self):
         return hash(self.wrapped_class)
 
-    def typep(self, a):
+    def typep(self, a: Any) -> bool:
         # check that this does what we want (looks like it does but eh)
         return isinstance(a, self.wrapped_class)
 
-    def inhabited_down(self):
+    def inhabited_down(self) -> Optional[bool]:
         # consider all SAtomic types as being inhabited.
         # as far as I know Python does not support an empty type.
         return True
 
-    def disjoint_down(self, t):
-        assert isinstance(t, SimpleTypeD)
+    def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
         ct = self.wrapped_class
 
         if isinstance(t, SEmptyImpl):
@@ -118,7 +107,7 @@ class SAtomic(SimpleTypeD, TerminalType):
         else:
             return super().disjoint_down(t)
 
-    def subtypep_down(self, s):
+    def subtypep_down(self, s: SimpleTypeD) -> Optional[bool]:
         from genus.s_not import SNot
         if self.inhabited() is False:
             return True
@@ -162,10 +151,10 @@ class SAtomic(SimpleTypeD, TerminalType):
         else:
             return super().subtypep_down(s)
 
-    def canonicalize_once(self, nf=None):
+    def canonicalize_once(self, nf: Optional[NormalForm] = None) -> SimpleTypeD:
         return SAtomic(self.wrapped_class)
 
-    def cmp_to_same_class_obj(self, td):
+    def cmp_to_same_class_obj(self, td: 'SAtomic') -> Literal[-1, 0, 1]:
         if type(self) != type(td):
             return super().cmp_to_same_class_obj(td)
         elif self == td:
@@ -175,5 +164,6 @@ class SAtomic(SimpleTypeD, TerminalType):
         else:
             return 1
 
-def atomicp(this):
-	return isinstance(this, SAtomic)
+
+def atomicp(this: Any) -> bool:
+    return isinstance(this, SAtomic)

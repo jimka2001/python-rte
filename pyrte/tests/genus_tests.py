@@ -1074,7 +1074,7 @@ class GenusCase(unittest.TestCase):
             for length in range(1, 5):
                 for _ in range(num_random_tests):
                     tds = [random_type_designator(depth) for _ in range(length)]
-                    computed = mdtd(tds)
+                    computed = mdtd(set(tds))
                     for i in range(len(computed)):
                         td_i, factors_i, disjoints_i = computed[i]
                         for j in range(i + 1, len(computed)):
@@ -1088,7 +1088,7 @@ class GenusCase(unittest.TestCase):
                                             f"\n intersection = {intersection}")
 
                     for v in test_values:
-                        containing = [td for [td, factors, disjoint] in computed if td.typep(v)]
+                        containing = [td for (td, factors, disjoint) in computed if td.typep(v)]
                         self.assertEqual(len(containing), 1,
                                          f"expecting exactly one partition to contain v={v}" +
                                          f"\n tds={tds}\n mdtd={computed}\n containing={containing}")
@@ -1120,9 +1120,9 @@ class GenusCase(unittest.TestCase):
     def test_group_by(self):
         from genus.utils import group_by
         grouped = group_by(lambda n: n % 3, [1, 2, 3, 4, 10, 11, 12])
-        self.assertEqual(set(grouped[0]), set([3, 12]))
-        self.assertEqual(set(grouped[1]), set([1, 4, 10]))
-        self.assertEqual(set(grouped[2]), set([2, 11]))
+        self.assertEqual(set(grouped[0]), {3, 12})
+        self.assertEqual(set(grouped[1]), {1, 4, 10})
+        self.assertEqual(set(grouped[2]), {2, 11})
 
     def test_find_eqv_class(self):
         from genus.utils import find_eqv_class
@@ -1219,9 +1219,9 @@ class GenusCase(unittest.TestCase):
     def test_ite_3(self):
         from genus.ite import transitions_to_ite, eval_ite
         for depth in range(0, 4):
-            for _ in range(num_random_tests*5):
+            for _ in range(num_random_tests * 5):
                 td1 = random_type_designator(depth)
-                td2 = SAnd(random_type_designator(depth),SNot(td1))
+                td2 = SAnd(random_type_designator(depth), SNot(td1))
                 ite = transitions_to_ite([(td2, 2),
                                           (td1, 1)], 3)
                 for v in test_values:

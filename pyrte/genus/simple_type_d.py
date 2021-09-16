@@ -19,32 +19,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# TODO:
-#   maybe rewrite the static variable using methods as properties ?
-
-""" test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
-typep       3
-disjoint    2
-inhabited_down     3
-inhabited   3
-disjoint_down  3
-subtypep
-fixed_point 3
-find_simplifier     1
-compute_dnf    3
-to_dnf  3
-compute_cnf    3
-to_cnf  fully done
-maybe_dnf   2
-maybe_cnf   2
-canonicalize_once   3
-canonicalize    3
-supertypep  1
-cmp_to_same_class_obj   3
-"""
 
 from abc import ABCMeta, abstractmethod
-
+from typing import Literal, Optional
 
 # from utils import CallStack
 # subtypep_callstack = CallStack("subtypep",trace=True)
@@ -68,19 +45,20 @@ class SimpleTypeD:
         self.subtypep_cache = {}
         self.disjoint_cache = {}
         self.canonicalized_hash = {}
+        self.lazy_inhabited = generate_lazy_val(lambda: self.inhabited_down())
         self.nf_cache = {}
 
     def __repr__(self):
         return self.__str__()
 
     @abstractmethod
-    def typep(self, a):
+    def typep(self, a) -> Literal[True, False]:
         """Returns whether a given object belongs to this designated type.
         It is a set membership test.
             @param a the object we want to check the type
             @return a Boolean which is true is a is of this type"""
 
-    def disjoint(self, td):
+    def disjoint(self, td) -> Literal[True, False, None]:
         assert isinstance(td, SimpleTypeD)
         if td in self.disjoint_cache:
             return self.disjoint_cache[td]
@@ -113,15 +91,13 @@ class SimpleTypeD:
         return self.disjoint_cache[td]
 
     # for performance reasons, do not call directly, rather use the inhabited method as it stores the result
-    def inhabited_down(self):
+    def inhabited_down(self) -> Literal[True, False, None]:
         return None
 
-    def inhabited(self):
-        if not hasattr(self, "hold_inhabited"):
-            self.hold_inhabited = self.inhabited_down()
-        return self.hold_inhabited
+    def inhabited(self) -> Literal[True, False, None]:
+        return self.lazy_inhabited()
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t) -> Literal[True, False, None]:
         assert isinstance(t, SimpleTypeD)
         if self.inhabited() is False:
             return True
@@ -134,7 +110,7 @@ class SimpleTypeD:
     #   t – the type we want to check whether this type is included in
     # Returns:
     #   an optional Boolean (True/False/None) which is true if self is a subtype of t
-    def subtypep(self, t):
+    def subtypep(self, t) -> Optional[bool]:
         from genus.s_or import orp
         from genus.s_and import andp
         from genus.s_top import topp
@@ -164,7 +140,7 @@ class SimpleTypeD:
 
         return self.subtypep_cache[t]
 
-    def subtypep_down(self, t):
+    def subtypep_down(self, t) -> Optional[bool]:
         from genus.s_not import notp
         if notp(t) and self.disjoint(t.s) is True:
             return True
@@ -176,14 +152,14 @@ class SimpleTypeD:
             return None
 
     # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
-    def compute_dnf(self):
+    def compute_dnf(self) -> 'SimpleTypeD':
         return self
 
     # for performance reasons, do not call directly, rather use the to_dnf method as it stores the result
-    def compute_cnf(self):
+    def compute_cnf(self) -> 'SimpleTypeD':
         return self
 
-    def to_nf(self, nf):
+    def to_nf(self, nf: Optional[NormalForm]) -> 'SimpleTypeD':
         if nf in self.nf_cache:
             return self.nf_cache[nf]
         elif NormalForm.CNF is nf:
@@ -195,10 +171,10 @@ class SimpleTypeD:
         else:
             return self
 
-    def canonicalize_once(self, nf=None):
+    def canonicalize_once(self, nf: Optional[NormalForm] = None) -> 'SimpleTypeD':
         return self
 
-    def canonicalize(self, nf=None):
+    def canonicalize(self, nf: Optional[NormalForm] = None) -> 'SimpleTypeD':
         # td.canonicalize(NormalForm.DNF)
         # td.canonicalize(NormalForm.CNf)
         # td.canonicalize(None)
@@ -219,7 +195,7 @@ class SimpleTypeD:
 
         return self.canonicalized_hash[nf]
 
-    def supertypep(self, t):
+    def supertypep(self, t) -> Optional[bool]:
         """ Returns whether this type is a recognizable supertype of another given type.
           It is a superset test. This might be undecidable.
          
@@ -228,18 +204,18 @@ class SimpleTypeD:
         """
         return t.subtypep(self)
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t: 'SimpleTypeD') -> Literal[-1, 0, 1]:
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare type designators of type {type(self)}")
 
-    def replace_down(self, _search, _replace):
+    def replace_down(self, _search, _replace) -> 'SimpleTypeD':
         return self
 
-    def replace(self, td_search, td_replace):
+    def replace(self, td_search, td_replace) -> 'SimpleTypeD':
         if self == td_search:
             return td_replace
         else:
             return self.replace_down(td_search, td_replace)
 
-    def find_first_leaf_td(self):
+    def find_first_leaf_td(self) -> Optional['SimpleTypeD']:
         return self

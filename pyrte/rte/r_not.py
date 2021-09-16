@@ -23,7 +23,7 @@
 from rte.r_rte import Rte
 
 
-class Not (Rte):
+class Not(Rte):
     def __init__(self, operand):
         super(Not, self).__init__()
         assert isinstance(operand, Rte), \
@@ -106,9 +106,9 @@ class Not (Rte):
 def notp(op):
     return isinstance(op, Not)
 
+
 def createNot(operand):
     if notp(operand):
         return operand.operand
     else:
         return Not(operand)
-
