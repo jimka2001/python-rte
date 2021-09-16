@@ -459,7 +459,7 @@ class SCombination(SimpleTypeD):
     def replace_down(self, search: SimpleTypeD, replace: SimpleTypeD) -> SimpleTypeD:
         return self.create([td.replace(search, replace) for td in self.tds])
 
-    def find_first_leaf_td(self) -> SimpleTypeD:
+    def find_first_leaf_td(self) -> Optional[SimpleTypeD]:
         return next(td.find_first_leaf_td() for td in self.tds)
 
 

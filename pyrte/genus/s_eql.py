@@ -19,52 +19,42 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 1
-inhabited_down 1
-disjoint_down 1
-subtypep 1
-cmp_to_same_class_obj 3
-"""
-
 from genus.s_member import SMemberImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
+from typing import Any, Literal, Optional
 
 
 class SEql(SMemberImpl, TerminalType):
 	"""The equal type, a type that is equal to a given object.
 	It has holds an "a" which is the object defining the type
 	"""
-	def __init__(self, a):
+	def __init__(self, a: Any) -> None:
 		super(SEql, self).__init__(a)
 		self.a = a
 	
-	def __str__(self):
+	def __str__(self) -> str:
 		return "[= " + str(self.a) + "]"
 
-	def __eq__(self, that):
+	def __eq__(self, that: Any) -> bool:
 		return type(self) is type(that) and \
 			self.a == that.a
 
 	def __hash__(self):
 		return hash(self.a)
 
-	def typep(self, b):
+	def typep(self, b: Any) -> bool:
 		return self.a == b
 
-	def inhabited_down(self):
+	def inhabited_down(self) -> Literal[True]:
 		return True
 
-	def disjoint_down(self, t):
+	def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
 		assert isinstance(t, SimpleTypeD)
 		return not t.typep(self.a)
 
-	def subtypep(self, t):
+	def subtypep(self, t) -> Optional[bool]:
 		return t.typep(self.a)
 
 
-def eqlp(this):
+def eqlp(this: Any) -> bool:
 	return isinstance(this, SEql)

@@ -20,10 +20,10 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from genus.simple_type_d import SimpleTypeD
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 
-def mdtd(tds: List[SimpleTypeD]) -> List[Tuple[SimpleTypeD, List[SimpleTypeD], List[SimpleTypeD]]]:
+def mdtd(tds: Set[SimpleTypeD]) -> List[Tuple[SimpleTypeD, List[SimpleTypeD], List[SimpleTypeD]]]:
     from genus.s_not import SNot
     from genus.s_top import STop
     from genus.utils import flat_map, generate_lazy_val

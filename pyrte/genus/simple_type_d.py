@@ -21,7 +21,7 @@
 
 
 from abc import ABCMeta, abstractmethod
-from typing import Literal
+from typing import Literal, Optional
 
 # from utils import CallStack
 # subtypep_callstack = CallStack("subtypep",trace=True)
@@ -110,7 +110,7 @@ class SimpleTypeD:
     #   t – the type we want to check whether this type is included in
     # Returns:
     #   an optional Boolean (True/False/None) which is true if self is a subtype of t
-    def subtypep(self, t) -> Literal[True, False, None]:
+    def subtypep(self, t) -> Optional[bool]:
         from genus.s_or import orp
         from genus.s_and import andp
         from genus.s_top import topp
@@ -140,7 +140,7 @@ class SimpleTypeD:
 
         return self.subtypep_cache[t]
 
-    def subtypep_down(self, t) -> Literal[True, False, None]:
+    def subtypep_down(self, t) -> Optional[bool]:
         from genus.s_not import notp
         if notp(t) and self.disjoint(t.s) is True:
             return True
@@ -159,7 +159,7 @@ class SimpleTypeD:
     def compute_cnf(self) -> 'SimpleTypeD':
         return self
 
-    def to_nf(self, nf) -> 'SimpleTypeD':
+    def to_nf(self, nf: Optional[NormalForm]) -> 'SimpleTypeD':
         if nf in self.nf_cache:
             return self.nf_cache[nf]
         elif NormalForm.CNF is nf:
@@ -171,10 +171,10 @@ class SimpleTypeD:
         else:
             return self
 
-    def canonicalize_once(self, nf=None) -> 'SimpleTypeD':
+    def canonicalize_once(self, nf: Optional[NormalForm] = None) -> 'SimpleTypeD':
         return self
 
-    def canonicalize(self, nf=None) -> 'SimpleTypeD':
+    def canonicalize(self, nf: Optional[NormalForm] = None) -> 'SimpleTypeD':
         # td.canonicalize(NormalForm.DNF)
         # td.canonicalize(NormalForm.CNf)
         # td.canonicalize(None)
@@ -195,7 +195,7 @@ class SimpleTypeD:
 
         return self.canonicalized_hash[nf]
 
-    def supertypep(self, t) -> Literal[True, False, None]:
+    def supertypep(self, t) -> Optional[bool]:
         """ Returns whether this type is a recognizable supertype of another given type.
           It is a superset test. This might be undecidable.
          
@@ -204,7 +204,7 @@ class SimpleTypeD:
         """
         return t.subtypep(self)
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t: 'SimpleTypeD') -> Literal[-1, 0, 1]:
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare type designators of type {type(self)}")
 
@@ -217,5 +217,5 @@ class SimpleTypeD:
         else:
             return self.replace_down(td_search, td_replace)
 
-    def find_first_leaf_td(self) -> 'SimpleTypeD':
+    def find_first_leaf_td(self) -> Optional['SimpleTypeD']:
         return self

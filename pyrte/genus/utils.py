@@ -140,8 +140,8 @@ def find_first(pred: Callable[[T], bool],
 # return 0 if a == b
 #        -1 if a < b
 #        1 if a > b
-def cmp_objects(a: T, b: T) -> Literal[-1, 0, 1]:
-    if a == b:
+def cmp_objects(a: T, b: S) -> Literal[-1, 0, 1]:
+    if type(a) == type(b) and a == b:
         return 0
     elif type(a) == type(b):
         return a.cmp_to_same_class_obj(b)

@@ -19,48 +19,37 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
-[0-3] Advancement tracker
-__init__ 3
-typep 3
-__str__ 3
-disjoint_down 1
-inhabited_down 1
-subtypep 1
-cmp_to_same_class_obj 3
-apply 1
-"""
-
-
 from genus.simple_type_d import SimpleTypeD, TerminalType
+from typing import Literal, Any
 
 
 class SCustom(SimpleTypeD, TerminalType):
-	"""The super type, super type of all types."""
-	def __init__(self, f, printable):
-		assert callable(f)
-		self.f = f
-		self.printable = printable
-		super().__init__()
+    """The super type, super type of all types."""
 
-	def __eq__(self, that):
-		return type(self) is type(that) \
-				and self.f == that.f \
-				and self.printable == that.printable
+    def __init__(self, f, printable):
+        assert callable(f)
+        self.f = f
+        self.printable = printable
+        super().__init__()
 
-	def __hash__(self):
-		return hash((self.f, self.printable))
+    def __eq__(self, that: Any) -> bool:
+        return type(self) is type(that) \
+               and self.f == that.f \
+               and self.printable == that.printable
 
-	def typep(self, a):
-		return self.f(a)
+    def __hash__(self):
+        return hash((self.f, self.printable))
 
-	def __str__(self):
-		return str(self.printable) + "?"
+    def typep(self, a: Any) -> bool:
+        return self.f(a)
 
-	def cmp_to_same_class_obj(self, t):
-		if type(self) != type(t):
-			return super().cmp_to_same_class_obj(t)
-		elif str(self) < str(t):
-			return -1
-		else:
-			return 1
+    def __str__(self) -> str:
+        return str(self.printable) + "?"
+
+    def cmp_to_same_class_obj(self, t: 'SCustom') -> Literal[-1, 0, 1]:
+        if type(self) != type(t):
+            return super().cmp_to_same_class_obj(t)
+        elif str(self) < str(t):
+            return -1
+        else:
+            return 1

@@ -20,46 +20,34 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""
-[0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 1
-inhabited_down 1
-disjoint_down 1
-subtypep 1
-canonicalize_once 1
-compute_dnf 0
-compute_cnf 1
-cmp_to_same_class_obj 3
-"""
-
 from genus.simple_type_d import SimpleTypeD
+from genus.genus_types import NormalForm
+from typing import Optional, Literal, Any
 
 
 class SNot(SimpleTypeD):
     """A negation of a type.
-	@param s the type we want to get the complement"""
+	param s the type we want to get the complement"""
 
     def __init__(self, s):
         super(SNot, self).__init__()
         assert isinstance(s, SimpleTypeD)
         self.s = s
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "SNot(" + str(self.s) + ")"
 
-    def __eq__(self, that):
+    def __eq__(self, that: Any) -> bool:
         return type(self) is type(that) and \
                self.s == that.s
 
     def __hash__(self):
         return hash(self.s)
 
-    def typep(self, a):
+    def typep(self, a: Any) -> bool:
         return not self.s.typep(a)
 
-    def inhabited_down(self):
+    def inhabited_down(self) -> Optional[bool]:
         from genus.s_top import topp
         from genus.s_empty import emptyp
         from genus.s_atomic import atomicp
@@ -81,7 +69,7 @@ class SNot(SimpleTypeD):
         else:
             return None
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
         from genus.s_atomic import atomicp
         from genus.s_member import memberimplp
         assert isinstance(t, SimpleTypeD)
@@ -111,7 +99,7 @@ class SNot(SimpleTypeD):
         else:
             return super().disjoint_down(t)
 
-    def subtypep_down(self, t):
+    def subtypep_down(self, t: SimpleTypeD) -> Optional[bool]:
         from genus.utils import generate_lazy_val
         from genus.s_atomic import atomicp
         # SNot(a).subtypep(SNot(b)) iff b.subtypep(a)
@@ -141,7 +129,7 @@ class SNot(SimpleTypeD):
         else:
             return super().subtypep_down(t)
 
-    def canonicalize_once(self, nf=None):
+    def canonicalize_once(self, nf: Optional[NormalForm] = None) -> SimpleTypeD:
         from genus.s_top import topp, STop
         from genus.s_empty import SEmpty, emptyp
         if notp(self.s):
@@ -153,7 +141,7 @@ class SNot(SimpleTypeD):
         else:
             return SNot(self.s.canonicalize_once(nf)).to_nf(nf)
 
-    def compute_dnf(self):
+    def compute_dnf(self) -> SimpleTypeD:
         from genus.s_combination import combop
         # SNot(SAnd(x1, x2, x3))
         # --> SOr(SNot(x1), SNot(x2), SNot(x3)
@@ -165,12 +153,12 @@ class SNot(SimpleTypeD):
         else:
             return self
 
-    def compute_cnf(self):
+    def compute_cnf(self) -> SimpleTypeD:
         # we convert a not to DNF or CNF the same way, i.e., by pushing down the SNot
         #   and converting SAnd to SOr
         return self.compute_dnf()
 
-    def cmp_to_same_class_obj(self, td):
+    def cmp_to_same_class_obj(self, td: 'SNot') -> Literal[-1, 0, 1]:
         from genus.utils import cmp_objects
         if type(self) != type(td):
             return super().cmp_to_same_class_obj(td)
@@ -179,12 +167,12 @@ class SNot(SimpleTypeD):
         else:
             return cmp_objects(self.s, td.s)
 
-    def replace_down(self, search, replace):
+    def replace_down(self, search: SimpleTypeD, replace: SimpleTypeD) -> SimpleTypeD:
         return SNot(self.s.replace(search, replace))
 
-    def find_first_leaf_td(self):
+    def find_first_leaf_td(self) -> Optional[SimpleTypeD]:
         return self.s.find_first_leaf_td()
 
 
-def notp(this):
+def notp(this: Any) -> bool:
     return isinstance(this, SNot)

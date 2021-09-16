@@ -21,11 +21,11 @@
 
 
 from genus.s_combination import SCombination
-from genus.s_empty import SEmpty
-from genus.s_top import STop
+from genus.s_empty import SEmpty, SEmptyImpl
+from genus.s_top import STop, STopImpl
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
-from typing import List, Literal, TypeVar, Callable, Iterable, Optional
+from typing import List, Literal, TypeVar, Callable, Iterable, Optional, Any
 
 T = TypeVar('T')  # Declare type variable
 
@@ -39,16 +39,16 @@ class SAnd(SCombination):
     """An intersection type, which is the intersection of zero or more types.
     param tds list, zero or more type designators"""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "SAnd(" + ", ".join([str(td) for td in self.tds]) + ")"
 
-    def create(self, tds) -> SimpleTypeD:
+    def create(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         return createSAnd(tds)
 
-    def unit(self) -> SimpleTypeD:
+    def unit(self) -> STopImpl:
         return STop
 
-    def zero(self) -> SimpleTypeD:
+    def zero(self) -> SEmptyImpl:
         return SEmpty
 
     def annihilator(self, a, b) -> Optional[bool]:
@@ -61,7 +61,7 @@ class SAnd(SCombination):
     def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
         return uniquify(a + b)
 
-    def combinator(self, a: List[T], b: List[T]) -> List[T]:
+    def combinator(self, a: Iterable[T], b: Iterable[T]) -> List[T]:
         return [x for x in a if x in b]
 
     def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
@@ -71,10 +71,10 @@ class SAnd(SCombination):
         from genus.s_or import createSOr
         return createSOr(tds)
 
-    def typep(self, a) -> bool:
+    def typep(self, a: Any) -> bool:
         return all(td.typep(a) for td in self.tds)
 
-    def inhabited_down(self):
+    def inhabited_down(self) -> Optional[bool]:
         from genus.genus_types import NormalForm
         from genus.s_atomic import atomicp
         from genus.s_not import notp
@@ -108,7 +108,7 @@ class SAnd(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self, t: SimpleTypeD) -> Literal[True, False, None]:
+    def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
         assert isinstance(t, SimpleTypeD)
 
         if any(t.disjoint(t2) is True for t2 in self.tds):
@@ -127,7 +127,7 @@ class SAnd(SCombination):
         else:
             return super().disjoint_down(t)
 
-    def subtypep_down(self, t: SimpleTypeD) -> Literal[True, False, None]:
+    def subtypep_down(self, t: SimpleTypeD) -> Optional[bool]:
         if not self.tds:
             return STop.subtypep(t)
         elif 1 == len(self.tds):
@@ -178,14 +178,14 @@ class SAnd(SCombination):
         return self.compute_nf()
 
 
-def createSAnd(tds: List[SimpleTypeD]) -> SimpleTypeD:
+def createSAnd(tds: Iterable[SimpleTypeD]) -> SimpleTypeD:
     if not tds:
         return STop
-    elif len(tds) == 1:
+    elif len(list(tds)) == 1:
         return tds[0]
     else:
         return SAnd(*tds)
 
 
-def andp(this) -> bool:
+def andp(this: Any) -> bool:
     return isinstance(this, SAnd)

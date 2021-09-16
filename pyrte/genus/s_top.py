@@ -20,16 +20,8 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-""" test-coverage as (method name, state[0-3] {0 not implemented, 1 implemented, 2 partially tested,  3 fully done})
-__str__ 1
-typep   1
-inhabited_down 1
-disjoint_down  1
-subtypep    1
-cmp_to_same_class_obj   3
-"""
-
 from genus.simple_type_d import SimpleTypeD, TerminalType
+from typing import Any, Optional, Literal
 
 
 class STopImpl(SimpleTypeD, TerminalType):
@@ -39,28 +31,28 @@ class STopImpl(SimpleTypeD, TerminalType):
     # overriding the __new__ method enables us to implement a singleton
     #   class.  I.e., a class, STopImpl, for which the call STopImpl()
     #   always return the exact same object.  STopImpl() is STopImpl().
-    def __new__(cls, *a, **kw):
+    def __new__(cls, *a, **kw) -> 'STopImpl':
         if STopImpl.__instance is None:
             STopImpl.__instance = super(STopImpl, cls).__new__(cls, *a, **kw)
         return STopImpl.__instance
 
-    def __str__(self):
+    def __str__(self) -> Literal["STop"]:
         return "STop"
 
-    def typep(self, _any):
+    def typep(self, _any: Any) -> Literal[True]:
         return True
 
-    def inhabited(self):
+    def inhabited(self) -> Literal[True]:
         return True
 
-    def disjoint_down(self, t):
+    def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
         assert isinstance(t, SimpleTypeD)
         if t.inhabited() is None:
             return None
         else:
             return not t.inhabited()
 
-    def subtypep_down(self, t):
+    def subtypep_down(self, t: SimpleTypeD) -> Optional[bool]:
         from genus.s_not import SNot
         inh = SNot(t).inhabited()
         if inh is None:
@@ -70,18 +62,18 @@ class STopImpl(SimpleTypeD, TerminalType):
         else:
             return True
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t: 'STopImpl') -> Literal[-1, 0, 1]:
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         else:
             return 0
 
-    def find_first_leaf_td(self):
+    def find_first_leaf_td(self) -> Literal[None]:
         return None
 
 
 STop = STopImpl()
 
 
-def topp(this):
+def topp(this: SimpleTypeD) -> bool:
     return isinstance(this, STopImpl)

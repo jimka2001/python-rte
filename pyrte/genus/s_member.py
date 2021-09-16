@@ -20,102 +20,89 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""
-[0-3] Advancement tracker
-__init__ 1
-__str__ 1
-typep 3
-inhabited_down 1
-disjoint_down 1
-subtypep 3
-canonicalize_once 0
-cmp_to_same_class_obj 3
-
-<???> case class SMember </???>
-"""
-
-
 from genus.simple_type_d import SimpleTypeD, TerminalType
+from typing import Literal
 
 
 class SMemberImpl(SimpleTypeD):
-	"""docstring for SMemberImpl"""
-	def __init__(self, *arglist):
-		super(SMemberImpl, self).__init__()
-		self.arglist = list(arglist)
-	
-	def __str__(self):
-		return "SMember(" + ", ".join([str(x) for x in self.arglist]) + ")"
+    """docstring for SMemberImpl"""
 
-	def __eq__(self, that):
-		return type(self) is type(that) and \
-			self.arglist == that.arglist
+    def __init__(self, *arglist):
+        super(SMemberImpl, self).__init__()
+        self.arglist = list(arglist)
 
-	def __hash__(self):
-		return hash(tuple(self.arglist))
+    def __str__(self):
+        return "SMember(" + ", ".join([str(x) for x in self.arglist]) + ")"
 
-	def typep(self, a):
-		return a in self.arglist
+    def __eq__(self, that):
+        return type(self) is type(that) and \
+               self.arglist == that.arglist
 
-	def inhabited_down(self):
-		return [] != self.arglist
+    def __hash__(self):
+        return hash(tuple(self.arglist))
 
-	def disjoint_down(self, t2):
-		assert isinstance(t2, SimpleTypeD)
-		return not any(t2.typep(a) for a in self.arglist)
+    def typep(self, a):
+        return a in self.arglist
 
-	def subtypep_down(self, t2):
-		return all(t2.typep(a) for a in self.arglist)
+    def inhabited_down(self):
+        return [] != self.arglist
 
-	def canonicalize_once(self, _nf=None):
-		from genus.utils import uniquify
-		return createSMember(sorted(uniquify(self.arglist), key=lambda s: (type(s).__name__,s)))
+    def disjoint_down(self, t2):
+        assert isinstance(t2, SimpleTypeD)
+        return not any(t2.typep(a) for a in self.arglist)
 
-	def cmp_to_same_class_obj(self, t):
-		if type(self) != type(t):
-			return super().cmp_to_same_class_obj(t)
-		else:
-			a = self.arglist
-			b = t.arglist
+    def subtypep_down(self, t2):
+        return all(t2.typep(a) for a in self.arglist)
 
-			def comp(i):
-				if i >= len(a) and i >= len(b):
-					return 0
-				elif i >= len(a):
-					return -1 # short list < long list 
-				elif i >= len(b):
-					return 1
-				elif a[i] == b[i]:
-					return comp(i+1)
-				elif str(a[i]) < str(b[i]):
-					return -1
-				elif str(a[i]) > str(b[i]):
-					return 1
-				else:
-					raise Exception(f"{self} and {t} contain different values which print the same {a[i]} vs {b[i]}")
-			return comp(0)
+    def canonicalize_once(self, _nf=None):
+        from genus.utils import uniquify
+        return createSMember(sorted(uniquify(self.arglist), key=lambda s: (type(s).__name__, s)))
+
+    def cmp_to_same_class_obj(self, t: 'SMemberImpl') -> Literal[-1, 0, 1]:
+        if type(self) != type(t):
+            return super().cmp_to_same_class_obj(t)
+        else:
+            a = self.arglist
+            b = t.arglist
+
+            def comp(i):
+                if i >= len(a) and i >= len(b):
+                    return 0
+                elif i >= len(a):
+                    return -1  # short list < long list
+                elif i >= len(b):
+                    return 1
+                elif a[i] == b[i]:
+                    return comp(i + 1)
+                elif str(a[i]) < str(b[i]):
+                    return -1
+                elif str(a[i]) > str(b[i]):
+                    return 1
+                else:
+                    raise Exception(f"{self} and {t} contain different values which print the same {a[i]} vs {b[i]}")
+
+            return comp(0)
 
 
 class SMember(SMemberImpl, TerminalType):
-	pass
+    pass
 
 
 def createSMember(items):
-	from genus.s_empty import SEmpty
-	from genus.s_eql import SEql
+    from genus.s_empty import SEmpty
+    from genus.s_eql import SEql
 
-	if not items:
-		return SEmpty
-	elif len(items) == 1:
-		return SEql(items[0])
-	else:
-		return SMember(*items)
+    if not items:
+        return SEmpty
+    elif len(items) == 1:
+        return SEql(items[0])
+    else:
+        return SMember(*items)
 
 
 def memberimplp(this):
-	return isinstance(this, SMemberImpl)
+    return isinstance(this, SMemberImpl)
 
 
 def memberp(this):
-	return isinstance(this, SMember)
-
+    return isinstance(this, SMember)
