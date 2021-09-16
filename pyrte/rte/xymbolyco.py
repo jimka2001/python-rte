@@ -590,7 +590,7 @@ class Dfa:
 
         def compute_all_cross_transitions():
             triples = compute_cross_transitions(0, 0)
-            done_pairs = set([(0, 0)])
+            done_pairs = {(0, 0)}
             i = 0
             while i < len(triples):
                 _, label, (dst1, dst2) = triples[i]

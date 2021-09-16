@@ -49,7 +49,7 @@ def generate_lazy_val(func: Callable[[], T]) -> Callable[[], T]:
 
 def fixed_point(v: T,
                 f: Callable[[T], T],
-                good_enough: Callable[[T], bool],
+                good_enough: Callable[[T, T], bool],
                 invariant: Union[None, Callable[[T], bool]] = None) -> T:
     # if invariant is given, it should be a function we can call on the
     #   input v, and also on the computed result, f(v)
@@ -101,17 +101,13 @@ def uniquify(seq: List[T]) -> List[T]:
 
 
 def flat_map(f: Callable[[T], List[T]],
-             xs: List[T]) -> List[T]:
-    assert isinstance(xs, Iterable), f"expecting Iterable not {xs}"
-
+             xs: Iterable[T]) -> List[T]:
     return [y for z in xs for y in f(z)]
 
 
-def search_replace_splice(xs: List[T],
+def search_replace_splice(xs: Iterable[T],
                           search: T,
-                          replace: List[T]) -> List[T]:
-    assert isinstance(xs, Iterable)
-
+                          replace: Iterable[T]) -> List[T]:
     def select(x):
         if x == search:
             return replace
@@ -121,29 +117,23 @@ def search_replace_splice(xs: List[T],
     return flat_map(select, xs)
 
 
-def search_replace(xs: List[T],
+def search_replace(xs: Iterable[T],
                    search: T,
                    replace: T) -> List[T]:
-    assert isinstance(xs, Iterable)
-
     return search_replace_splice(xs, search, [replace])
 
 
 # remove a given element from a list every time it occurs
-def remove_element(xs: List[T],
+def remove_element(xs: Iterable[T],
                    search: T) -> List[T]:
-    assert isinstance(xs, Iterable)
-
     return search_replace_splice(xs, search, [])
 
 
 # find first element of list which makes the predicate true
 # if no such element is found, return the given default or None
 def find_first(pred: Callable[[T], bool],
-               xs: List[T],
+               xs: Iterable[T],
                default: S = None) -> Union[T, S]:
-    assert isinstance(xs, Iterable)
-
     return next(filter(pred, xs), default)
 
 
@@ -262,13 +252,12 @@ def trace_graph(v0: V,
 
 def stringify(vec: List[T],
               tabs: int) -> str:
-    i = 0
     return "[" + ("\n" + " " * (1 + tabs)).join([str(i) + ": " + str(vec[i]) for i in range(len(vec))]) + "]"
 
 
-def dot_view(dot_string,
-             verbose=False,
-             title="no-name"):
+def dot_view(dot_string: str,
+             verbose: bool = False,
+             title: str = "no-name"):
     import platform
     import subprocess
     import tempfile
@@ -295,7 +284,7 @@ def stack_depth() -> int:
 #   https://stackoverflow.com/users/1056941/ronen
 # thanks to ronen user:1056941 for the code sample
 def group_by(key: Callable[[T], S],
-             seq: List[T]) -> Dict[S, List[T]]:
+             seq: Iterable[T]) -> Dict[S, List[T]]:
     return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
 
@@ -308,8 +297,8 @@ def split_eqv_class(objects: List[T],
         return [grouped[k] for k in grouped]
 
 
-def find_eqv_class(partition: List[List[T]],
-                   target: T) -> Union[List[T], Literal[None]]:
+def find_eqv_class(partition: Iterable[Iterable[T]],
+                   target: T) -> Optional[Iterable[T]]:
     # given partition, a list of mutually disjoint lists
     # return the list which contains target, or None if not found
     for eqv_class in partition:

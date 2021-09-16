@@ -1120,9 +1120,9 @@ class GenusCase(unittest.TestCase):
     def test_group_by(self):
         from genus.utils import group_by
         grouped = group_by(lambda n: n % 3, [1, 2, 3, 4, 10, 11, 12])
-        self.assertEqual(set(grouped[0]), set([3, 12]))
-        self.assertEqual(set(grouped[1]), set([1, 4, 10]))
-        self.assertEqual(set(grouped[2]), set([2, 11]))
+        self.assertEqual(set(grouped[0]), {3, 12})
+        self.assertEqual(set(grouped[1]), {1, 4, 10})
+        self.assertEqual(set(grouped[2]), {2, 11})
 
     def test_find_eqv_class(self):
         from genus.utils import find_eqv_class

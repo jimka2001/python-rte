@@ -57,7 +57,7 @@ class SOr(SCombination):
     def dual_combinator(self, a: Iterable[T], b: Collection[T]) -> List[T]:
         return [x for x in a if x in b]
 
-    def combinator(self, a: List[T], b: List[T]) -> List[T]:
+    def combinator(self, a: Iterable[T], b: Iterable[T]) -> List[T]:
         assert isinstance(a, list), f"expecting list, got {type(a)} a={a}"
         assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
         return uniquify(a + b)
@@ -65,7 +65,7 @@ class SOr(SCombination):
     def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
         return [x for x in xs if not pred(x)]
 
-    def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
+    def create_dual(self, tds: Iterable[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_and import createSAnd
         return createSAnd(tds)
 

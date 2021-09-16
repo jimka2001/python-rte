@@ -21,7 +21,7 @@
 
 import functools
 from abc import abstractmethod
-from typing import List, Callable, TypeVar, Union, Literal
+from typing import List, Callable, TypeVar, Union, Literal, Optional, Iterable
 from genus.utils import compare_sequence
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map
@@ -64,7 +64,7 @@ class SCombination(SimpleTypeD):
         raise NotImplementedError
 
     @abstractmethod
-    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Literal[True, False, None]:
+    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Optional[bool]:
         # apparently this name may change, so keep track of it
         raise NotImplementedError
 
@@ -74,16 +74,16 @@ class SCombination(SimpleTypeD):
     def dual_combination(self, td: SimpleTypeD) -> bool:
         raise NotImplementedError
 
-    def combo_filter(self, pred: Callable[[T], bool], xs: List[T]) -> List:
+    def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
         raise NotImplementedError
 
-    def combinator(self, a: List[T], b: List[T]) -> List[T]:
+    def combinator(self, a: Iterable[T], b: Iterable[T]) -> List[T]:
         raise NotImplementedError
 
-    def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
+    def dual_combinator(self, a: Iterable[T], b: Iterable[T]) -> List[T]:
         raise NotImplementedError
 
-    def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
+    def create_dual(self, tds: Iterable[SimpleTypeD]) -> SimpleTypeD:
         raise NotImplementedError
 
     def conversion1(self) -> SimpleTypeD:
@@ -139,7 +139,7 @@ class SCombination(SimpleTypeD):
 
             return self.create(flat_map(f, self.tds))
 
-    def conversion7(self, nf: Union[NormalForm, None]) -> SimpleTypeD:
+    def conversion7(self, nf: Optional[NormalForm]) -> SimpleTypeD:
         return self.to_nf(nf)
 
     def conversion8(self) -> SimpleTypeD:
@@ -402,7 +402,7 @@ class SCombination(SimpleTypeD):
     def conversion99(self, nf) -> SimpleTypeD:
         return self.create([td.canonicalize(nf) for td in self.tds])
 
-    def canonicalize_once(self, nf: Union[NormalForm, None] = None) -> SimpleTypeD:
+    def canonicalize_once(self, nf: Optional[NormalForm] = None) -> SimpleTypeD:
         simplifiers = [lambda: self.conversion1(),  # should also work self.conversionC1, self.conversion2 ...
                        lambda: self.conversion2(),
                        lambda: self.conversion3(),

@@ -25,9 +25,10 @@ from genus.s_empty import SEmpty
 from genus.s_top import STop
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
-from typing import List, Literal, TypeVar, Callable
+from typing import List, Literal, TypeVar, Callable, Iterable, Optional
 
-T = TypeVar('T')      # Declare type variable
+T = TypeVar('T')  # Declare type variable
+
 
 # from utils import CallStack
 # subtypep_and_callstack = CallStack("subtypep.SAnd")
@@ -36,7 +37,7 @@ T = TypeVar('T')      # Declare type variable
 
 class SAnd(SCombination):
     """An intersection type, which is the intersection of zero or more types.
-    @param tds list, zero or more type designators"""
+    param tds list, zero or more type designators"""
 
     def __str__(self):
         return "SAnd(" + ", ".join([str(td) for td in self.tds]) + ")"
@@ -50,7 +51,7 @@ class SAnd(SCombination):
     def zero(self) -> SimpleTypeD:
         return SEmpty
 
-    def annihilator(self, a, b) -> Literal[True,False,None]:
+    def annihilator(self, a, b) -> Optional[bool]:
         return a.subtypep(b)
 
     def dual_combination(self, td) -> bool:
@@ -63,8 +64,8 @@ class SAnd(SCombination):
     def combinator(self, a: List[T], b: List[T]) -> List[T]:
         return [x for x in a if x in b]
 
-    def combo_filter(self, pred: Callable[[T], bool], xs:List[T]) -> List[T]:
-        return filter(pred, xs)  # calling filter from Python std library
+    def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
+        return [x for x in xs if pred(x)]  # cannot use filter from Python std library because of type incompatibility
 
     def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_or import createSOr
@@ -177,7 +178,7 @@ class SAnd(SCombination):
         return self.compute_nf()
 
 
-def createSAnd(tds) -> SimpleTypeD:
+def createSAnd(tds: List[SimpleTypeD]) -> SimpleTypeD:
     if not tds:
         return STop
     elif len(tds) == 1:
