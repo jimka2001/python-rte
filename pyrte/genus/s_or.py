@@ -18,23 +18,7 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
-[0-3] Advancement tracker
 
-__init__ 3
-__str__ 3
-create 3
-unit 3
-zero 3
-annihilator 3
-same_combination 3
-typep 3
-inhabited_down 3
-disjoint_down 2
-subtypep 0
-canonicalize_once 3
-compute_cnf 3
-"""
 
 from genus.s_combination import SCombination
 from genus.s_empty import SEmpty
@@ -42,9 +26,10 @@ from genus.s_top import STop
 from genus.utils import find_first
 from genus.utils import uniquify
 from genus.simple_type_d import SimpleTypeD
-from typing import List, Literal, TypeVar, Callable
+from typing import List, TypeVar, Callable, Optional, Iterable, Collection
 
 T = TypeVar('T')      # Declare type variable
+
 
 class SOr(SCombination):
     """Union type designator.  The operands are themselves type designators.
@@ -62,14 +47,14 @@ class SOr(SCombination):
     def zero(self) -> SimpleTypeD:
         return STop
 
-    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Literal[True, False, None]:
+    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Optional[bool]:
         return b.subtypep(a)
 
     def dual_combination(self, td: SimpleTypeD) -> bool:
         from genus.s_and import andp
         return andp(td)
 
-    def dual_combinator(self, a: List[T], b: List[T]) -> List[T]:
+    def dual_combinator(self, a: Iterable[T], b: Collection[T]) -> List[T]:
         return [x for x in a if x in b]
 
     def combinator(self, a: List[T], b: List[T]) -> List[T]:
@@ -77,17 +62,17 @@ class SOr(SCombination):
         assert isinstance(b, list), f"expecting list, got {type(b)} b={b}"
         return uniquify(a + b)
 
-    def combo_filter(self, pred: Callable[[T], bool], xs: List[T]) -> List[T]:
-        return filter(lambda x: not pred(x), xs)  # calling filter from Python std library
+    def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
+        return [x for x in xs if not pred(x)]
 
-    def create_dual(self, tds:List[SimpleTypeD]) -> SimpleTypeD:
+    def create_dual(self, tds: List[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_and import createSAnd
         return createSAnd(tds)
 
     def typep(self, a) -> bool:
         return any(td.typep(a) for td in self.tds)
 
-    def inhabited_down(self) -> Literal[True,False,None]:
+    def inhabited_down(self) -> Optional[bool]:
         if any(td.inhabited() is True for td in self.tds):
             return True
         elif all(td.inhabited() is False for td in self.tds):
@@ -95,7 +80,7 @@ class SOr(SCombination):
         else:
             return super().inhabited_down()
 
-    def disjoint_down(self, t: SimpleTypeD) -> Literal[True,False,None]:
+    def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
         if all(td.disjoint(t) is True for td in self.tds):
             return True
         elif any(td.disjoint(t) is False for td in self.tds):
@@ -104,7 +89,7 @@ class SOr(SCombination):
             s = super().disjoint_down(t)  # variable s useful for debugging
             return s
 
-    def subtypep_down(self, t: SimpleTypeD) -> Literal[True,False,None]:
+    def subtypep_down(self, t: SimpleTypeD) -> Optional[bool]:
         if not self.tds:
             return STop.subtypep(t)
         elif 1 == len(self.tds):
