@@ -1075,7 +1075,7 @@ class GenusCase(unittest.TestCase):
             for length in range(1, 5):
                 for _ in range(num_random_tests):
                     tds = [random_type_designator(depth) for _ in range(length)]
-                    computed = mdtd(set(tds))
+                    computed = mdtd(tds)
                     for i in range(len(computed)):
                         td_i, factors_i, disjoints_i = computed[i]
                         for j in range(i + 1, len(computed)):
