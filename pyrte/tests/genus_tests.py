@@ -21,6 +21,7 @@
 
 
 import os
+import random
 import unittest
 
 from genus.depthgenerator import random_type_designator, test_values, DepthGenerator
@@ -29,7 +30,7 @@ from genus.mdtd import mdtd
 from genus.s_and import SAnd, createSAnd, andp
 from genus.s_atomic import SAtomic
 from genus.s_combination import SCombination
-from genus.s_custom import SCustom
+from genus.s_satisfies import SSatisfies
 from genus.s_empty import SEmptyImpl, SEmpty
 from genus.s_eql import SEql
 from genus.s_member import SMemberImpl, SMember
@@ -112,11 +113,11 @@ class GenusCase(unittest.TestCase):
         self.assertTrue((STop.subtypep(SAtomic(object)) is True))
         self.assertTrue(STop.subtypep(STop) is True)
 
-    def test_scustom(self):
+    def test_ssatisfies(self):
         def l_odd(n):
             return isinstance(n, int) and n % 2 == 1
 
-        guinea_pig = SCustom(l_odd, "[odd numbers]")
+        guinea_pig = SSatisfies(l_odd, "[odd numbers]")
         self.assertTrue(guinea_pig.f == l_odd)
         self.assertTrue(guinea_pig.printable == "[odd numbers]")
         self.assertTrue(str(guinea_pig) == "[odd numbers]?")
@@ -128,16 +129,16 @@ class GenusCase(unittest.TestCase):
         assert (not guinea_pig.typep("hello"))
         assert (guinea_pig.subtypep(SAtomic(type(4))) is None)
 
-    def test_scustom2(self):
+    def test_ssatisfies2(self):
         def l_odd(n):
             return isinstance(n, int) and n % 2 == 1
 
-        self.assertTrue(SCustom(l_odd, "odd").disjoint(SMember(1, 2, 3)) is False)
+        self.assertTrue(SSatisfies(l_odd, "odd").disjoint(SMember(1, 2, 3)) is False)
 
     def test_sand1(self):
-        quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
+        quadruple = SSatisfies((lambda x: x % 4 == 0), "quadruple")
 
-        triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
+        triple = SSatisfies(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
 
         tri_n_quad = SAnd(triple, quadruple)
         create_tri_n_quad = createSAnd([triple, quadruple])
@@ -158,9 +159,9 @@ class GenusCase(unittest.TestCase):
 
     def test_sand2(self):
 
-        quadruple = SCustom((lambda x: x % 4 == 0), "quadruple")
+        quadruple = SSatisfies((lambda x: x % 4 == 0), "quadruple")
 
-        triple = SCustom(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
+        triple = SSatisfies(lambda x: isinstance(x, int) and (x % 3 == 0), "triple")
 
         tri_n_quad = SAnd(triple, quadruple)
         create_tri_n_quad = createSAnd([triple, quadruple])
@@ -181,8 +182,8 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(not tri_n_quad.same_combination(createSAnd([])))
 
     def test_sor(self):
-        quadruple = SCustom(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
-        triple = SCustom(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
+        quadruple = SSatisfies(lambda x: isinstance(x, int) and x % 4 == 0, "quadruple")
+        triple = SSatisfies(lambda x: isinstance(x, int) and x % 3 == 0, "triple")
 
         tri_o_quad = SOr(triple, quadruple)
         create_tri_o_quad = createSOr([triple, quadruple])
@@ -241,7 +242,7 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SAnd(x, y).typep(5) is False)
 
     def test_snot(self):
-        pair = SCustom(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
+        pair = SSatisfies(lambda x: isinstance(x, int) and x & 1 == 0, "pair")
 
         with self.assertRaises(Exception):
             SNot([])
@@ -362,7 +363,7 @@ class GenusCase(unittest.TestCase):
                                     f"\ntd1.disjoint(td2) = {d12}")
 
     def test_discovered_case_385(self):
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = STop
         td2 = SAnd(SEmpty, even)
         self.assertIs(SAnd(td1, td2).canonicalize(NormalForm.DNF), SEmpty)
@@ -370,7 +371,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_375(self):
         from genus.depthgenerator import TestB, Test1
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
                    SOr(SAtomic(Test1), even))
@@ -384,7 +385,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_375b(self):
         from genus.depthgenerator import TestB, Test1
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
                    SOr(SAtomic(Test1), even)).canonicalize()
@@ -397,7 +398,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_375c(self):
         from genus.depthgenerator import TestB, Test1
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
                    SOr(SAtomic(Test1), even)).canonicalize(NormalForm.DNF)
@@ -410,7 +411,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_375d(self):
         from genus.depthgenerator import TestB, Test1
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         td1 = SAnd(SNot(SAtomic(TestB)),
                    SNot(SAtomic(int)),
                    SOr(SAtomic(Test1), even)).canonicalize(NormalForm.CNF)
@@ -425,7 +426,7 @@ class GenusCase(unittest.TestCase):
     def test_discovered_case_297(self):
         from genus.depthgenerator import TestA, TestB
 
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         b = SAtomic(TestB)
         a = SAtomic(TestA)
         # [SAnd[SNot SAtomic(TestB)], [SNot[SOr[SAnd SAtomic(TestA), SAtomic(TestB)],
@@ -489,7 +490,7 @@ class GenusCase(unittest.TestCase):
     def test_discovered_case_445(self):
         # td1 = SAnd(SOr([ = 0], SAtomic(Test2)), SAnd(SAtomic(TestA), odd?))
         # td2 = SOr(SOr(SAtomic(Test1), SAtomic(int)), SAnd([ = 3.14], [ =]))
-        odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
         from genus.depthgenerator import Test2, Test1, TestA
         td1 = SAnd(SOr(SEql(0), SAtomic(Test2)),
                    SAnd(SAtomic(TestA), odd))
@@ -577,15 +578,15 @@ class GenusCase(unittest.TestCase):
         def f(_a):
             return False
 
-        self.assertTrue(SNot(SAtomic(int)).subtypep(SNot(SCustom(f, "f"))) is None)
-        self.assertTrue(SAtomic(int).disjoint(SCustom(f, "f")) is None)
-        self.assertTrue(SAtomic(int).disjoint(SNot(SCustom(f, "f"))) is None)
-        self.assertTrue(SNot(SAtomic(int)).disjoint(SCustom(f, "f")) is None)
-        self.assertTrue(SNot(SAtomic(int)).disjoint(SNot(SCustom(f, "f"))) is None)
+        self.assertTrue(SNot(SAtomic(int)).subtypep(SNot(SSatisfies(f, "f"))) is None)
+        self.assertTrue(SAtomic(int).disjoint(SSatisfies(f, "f")) is None)
+        self.assertTrue(SAtomic(int).disjoint(SNot(SSatisfies(f, "f"))) is None)
+        self.assertTrue(SNot(SAtomic(int)).disjoint(SSatisfies(f, "f")) is None)
+        self.assertTrue(SNot(SAtomic(int)).disjoint(SNot(SSatisfies(f, "f"))) is None)
 
-        self.assertTrue(SAtomic(int).subtypep(SCustom(f, "f")) is None)
-        self.assertTrue(SAtomic(int).subtypep(SNot(SCustom(f, "f"))) is None)
-        self.assertTrue(SNot(SAtomic(int)).subtypep(SCustom(f, "f")) is None)
+        self.assertTrue(SAtomic(int).subtypep(SSatisfies(f, "f")) is None)
+        self.assertTrue(SAtomic(int).subtypep(SNot(SSatisfies(f, "f"))) is None)
+        self.assertTrue(SNot(SAtomic(int)).subtypep(SSatisfies(f, "f")) is None)
 
     def test_or(self):
         self.assertTrue(len(SOr(SEql(1), SEql(2)).tds) == 2)
@@ -1063,8 +1064,8 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(cmp_objects(SAtomic(int), SAtomic(str)) < 0)
         self.assertTrue(cmp_objects(SAtomic(str), SAtomic(int)) > 0)
 
-        even = SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even")
-        odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
         self.assertTrue(cmp_objects(even, even) == 0)
         self.assertTrue(cmp_objects(even, odd) < 0, f"expecting {even} < {odd}")  # alphabetical by printable
         self.assertTrue(cmp_objects(odd, even) > 0)
@@ -1074,7 +1075,7 @@ class GenusCase(unittest.TestCase):
             for length in range(1, 5):
                 for _ in range(num_random_tests):
                     tds = [random_type_designator(depth) for _ in range(length)]
-                    computed = mdtd(set(tds))
+                    computed = mdtd(tds)
                     for i in range(len(computed)):
                         td_i, factors_i, disjoints_i = computed[i]
                         for j in range(i + 1, len(computed)):
@@ -1109,7 +1110,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_1018(self):
         from genus.depthgenerator import Test2
-        odd = SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
         self.assertIs(SOr(SAtomic(Test2), odd).subtypep(SOr(odd, SAtomic(Test2))), True)
 
     def test_discovered_case_134(self):  # test case copied from clojure code

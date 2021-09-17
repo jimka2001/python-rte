@@ -23,7 +23,7 @@ from genus.simple_type_d import SimpleTypeD, TerminalType
 from typing import Literal, Any
 
 
-class SCustom(SimpleTypeD, TerminalType):
+class SSatisfies(SimpleTypeD, TerminalType):
     """The super type, super type of all types."""
 
     def __init__(self, f, printable):
@@ -46,7 +46,7 @@ class SCustom(SimpleTypeD, TerminalType):
     def __str__(self) -> str:
         return str(self.printable) + "?"
 
-    def cmp_to_same_class_obj(self, t: 'SCustom') -> Literal[-1, 0, 1]:
+    def cmp_to_same_class_obj(self, t: 'SSatisfies') -> Literal[-1, 0, 1]:
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         elif str(self) < str(t):

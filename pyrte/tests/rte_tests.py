@@ -645,10 +645,10 @@ class RteCase(unittest.TestCase):
         # wrt=SAnd(SNot(odd?), SOr(SAtomic(Test1), [= -1]))
         from genus.depthgenerator import TestA, Test1
         from genus.s_not import SNot
-        from genus.s_custom import SCustom
+        from genus.s_satisfies import SSatisfies
         from genus.s_or import SOr
         r = Singleton(SAtomic(TestA))
-        wrt = SAnd(SNot(SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")),
+        wrt = SAnd(SNot(SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")),
                    SOr(SAtomic(Test1)), SEql(-1))
         self.assertIsNotNone(r.derivative1(wrt))
 
