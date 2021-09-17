@@ -26,7 +26,7 @@ import random
 
 from genus.s_and import SAnd, createSAnd
 from genus.s_atomic import SAtomic
-from genus.s_custom import SCustom
+from genus.s_satisfies import SSatisfies
 from genus.s_empty import SEmpty
 from genus.s_eql import SEql
 from genus.s_member import SMember
@@ -39,7 +39,7 @@ class DepthGenerator:
     """docstring for depth_generator"""
 
     depth_adders = ["SNot", "SAnd", "SOr"]
-    leaves = ["SCustom", "STop", "SEmpty"]
+    leaves = ["SSatisfies", "STop", "SEmpty"]
 
     def __init__(self, k):
         if k < 1:
@@ -55,9 +55,9 @@ class DepthGenerator:
         curr_depth = c - 1
         if curr_depth == 0:
             rand_choice = random.choice(self.leaves)
-            if rand_choice == "SCustom":
+            if rand_choice == "SSatisfies":
                 oracle, printable = self.rand_lambda_str_generator()
-                return SCustom(oracle, printable)
+                return SSatisfies(oracle, printable)
             elif rand_choice == "STop":
                 return STop
             else:
@@ -108,8 +108,8 @@ leaf_tds = [STop,
             SAtomic(Test2),
             SAtomic(TestA),
             SAtomic(TestB),
-            SCustom(lambda a: isinstance(a, int) and a % 2 == 0, "even"),
-            SCustom(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+            SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even"),
+            SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
             ]
 
 test_values = [True, False, None,

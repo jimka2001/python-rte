@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from genus.s_and import SAnd
-from genus.s_custom import SCustom
+from genus.s_satisfies import SSatisfies
 from genus.s_empty import SEmptyImpl, SEmpty
 from genus.s_member import SMemberImpl
 from genus.s_or import SOr
@@ -146,7 +146,7 @@ class SAtomic(SimpleTypeD, TerminalType):
                 return False
             else:
                 return super().subtypep_down(s)
-        elif isinstance(s, SCustom):
+        elif isinstance(s, SSatisfies):
             return super().subtypep_down(s)
         else:
             return super().subtypep_down(s)
