@@ -24,7 +24,7 @@ from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
-from typing import List, Union, Tuple, Any
+from typing import List, Union, Tuple, Any, Dict, Callable, Optional
 
 Triple = Tuple[str, Rte, Union[int, Tuple[str, Any]]]
 
@@ -62,7 +62,7 @@ class State:
         super().__init__()
 
 
-def createSinkState(index):
+def createSinkState(index: int) -> State:
     from genus.s_top import STop
 
     return State(index=index,
@@ -78,10 +78,10 @@ def default_combine_labels(_l1, _l2):
 
 class Dfa:
     def __init__(self,
-                 pattern=None,
-                 states=None,
-                 exit_map=None,
-                 combine_labels=default_combine_labels):
+                 pattern: Optional[Rte] = None,
+                 states: Optional[List[int]] = None,
+                 exit_map: Optional[Dict[int, Any]] = None,
+                 combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = default_combine_labels):
         if exit_map is None:
             exit_map = dict([])
         if not states:
@@ -166,10 +166,10 @@ class Dfa:
         text.write("}\n")
         return text.getvalue()
 
-    def delta(self, source_state, target_label):
+    def delta(self, source_state, target_label) -> List[State]:
         return self.states[source_state.transitions[target_label]]
 
-    def simulate(self, sequence):
+    def simulate(self, sequence: List[Any]) -> Any:
         state_id = 0
         for element in sequence:
             state_id = eval_ite(self.states[state_id].ite(), element)
@@ -196,14 +196,14 @@ class Dfa:
 
         return [self.pattern, transitions(), accepting(), exit_map(), self.combine_labels]
 
-    def find_sink_states(self):  # returns a list of integers
+    def find_sink_states(self) -> List[int]:  # returns a list of integers
         from genus.s_top import STop
         return [q.index for q in self.states
                 if not q.accepting
                 and 1 == len(q.transitions)
                 and q.transitions[STop] == q.index]
 
-    def complete(self):
+    def complete(self) -> 'Dfa':
         from rte.r_not import Not
         from rte.r_or import createOr
         from genus.s_top import STop
@@ -229,7 +229,7 @@ class Dfa:
                              exit_map=exit_map,
                              combine_labels=combine_labels)
 
-    def complement(self, exit_map):
+    def complement(self, exit_map: Dict[int, Any]) -> 'Dfa':
         from rte.r_not import createNot
         pattern_old, transitions, accepting, _, combine_labels = self.complete().serialize()
         if pattern_old is None:
@@ -242,7 +242,8 @@ class Dfa:
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
-    def find_accessibles(self):  # returns a pair of two lists of indices (accessibles, co-accessables)
+    def find_accessibles(self) -> Tuple[
+        List[int], List[int]]:  # returns a pair of two lists of indices (accessibles, co-accessables)
         def reachable(seen, triples):
             # returns pair (reachables,remaining_triples),
             # reachables is list of int, triples are remaining triples to consider on future iteration
@@ -265,7 +266,7 @@ class Dfa:
         coaccessibles = expand_reachable(accepting_ids, [(dst, label, src) for src, label, dst in transitions])
         return accessibles, coaccessibles
 
-    def trim(self, compact=True):
+    def trim(self, compact: bool = True) -> 'Dfa':
         pattern, transitions, accepting_ids, exit_map, combine_labels = self.serialize()
         accessibles, coaccessibles = self.find_accessibles()
         useful_states = set(accessibles + coaccessibles)
@@ -302,7 +303,10 @@ class Dfa:
 
         return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
 
-    def combine_parallel_triples(self, triples, combine_parallel_labels):
+    def combine_parallel_triples(self,
+                                 triples: List[Tuple[int, SimpleTypeD, int]],
+                                 combine_parallel_labels: Callable[[List[SimpleTypeD]], SimpleTypeD]
+                                 ) -> List[Tuple[int, SimpleTypeD, int]]:
         #  accepts a sequence of triples, each of the form [from label to]
         #   groups them by common from/to, these are parallel transitions
         #   combines the labels of the parallel transitions, into one single label
@@ -320,7 +324,7 @@ class Dfa:
                 for dst in list(set([d for _, _, d in from_src]))
                 ]
 
-    def extract_rte(self):
+    def extract_rte(self) -> Dict[Any, Rte]:
         from functools import reduce
         from rte.r_epsilon import Epsilon
         from rte.r_singleton import Singleton
@@ -415,12 +419,12 @@ class Dfa:
                                if f == "F"
                                if i == "I"]]]
 
-        d = [(exit_value, combine_parallel_labels(labels).canonicalize()
-              )
+        d = [(exit_value,
+              combine_parallel_labels(labels).canonicalize())
              for exit_value, labels in els]
         return dict(d)
 
-    def to_rte(self):
+    def to_rte(self) -> Dict[Any, Rte]:
         from rte.r_emptyset import EmptySet
         extracted = self.extract_rte()
         if extracted:
@@ -428,9 +432,9 @@ class Dfa:
         else:
             return dict([(True, EmptySet)])
 
-    def paths_to_accepting(self, allow_maybe_satisfiable=False):
+    def paths_to_accepting(self, allow_maybe_satisfiable=False) -> List[List[State]]:
         # returns a list of paths
-        # each paths is a list of states starting with self.states[0]
+        # each path is a list of states starting with self.states[0]
         # and ending in an accepting state.
         # no path contains the same state twice, i.e. no paths with loops
         # The parameter allow_maybe_satisfiable controls how strict the
@@ -448,7 +452,7 @@ class Dfa:
         #  the language of the Dfa is empty.
         from genus.utils import flat_map
 
-        def acceptable(td):
+        def acceptable(td: SimpleTypeD) -> bool:
             inh = td.inhabited()
             if inh is True:
                 return True
@@ -459,7 +463,7 @@ class Dfa:
             else:
                 return False
 
-        def extend_path_1(path):
+        def extend_path_1(path: List[State]) -> List[List[State]]:
             tail = path[-1]
             return [path + [self.states[qid]]
                     for td in tail.transitions
@@ -468,10 +472,10 @@ class Dfa:
                     if acceptable(td)
                     ]
 
-        def extend_paths_1(paths):
+        def extend_paths_1(paths: List[List[State]]) -> List[List[State]]:
             return flat_map(extend_path_1, paths)
 
-        def extend_paths(paths):
+        def extend_paths(paths: List[List[State]]) -> List[List[State]]:
             if not paths:
                 return paths
             else:
@@ -480,7 +484,7 @@ class Dfa:
         initials = [[self.states[0]]]
         return extend_paths(initials)
 
-    def vacuous(self):
+    def vacuous(self) -> Optional[bool]:
         # this function returns True, False, or None.
         #   True ==> there is no accepting path from initial state to final state
         #   False ==> There is an accepting path from initial state to final state
@@ -501,14 +505,14 @@ class Dfa:
         else:
             return False
 
-    def inhabited(self):
+    def inhabited(self) -> Optional[bool]:
         v = self.vacuous()
         if v is None:
             return None
         else:
             return not v
 
-    def find_hopcroft_partition(self):
+    def find_hopcroft_partition(self) -> List[Tuple[State, ...]]:
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
         from genus.s_empty import SEmpty
         finals = [q for q in self.states if q.accepting]
@@ -516,7 +520,7 @@ class Dfa:
         pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + [non_finals]
 
         def refine(partition):
-            def phi(source_state, label):
+            def phi(source_state: State, label: SimpleTypeD):
                 return find_eqv_class(partition, self.delta(source_state, label))
 
             def Phi_1(s):
@@ -537,7 +541,7 @@ class Dfa:
 
         return fixed_point(pi_0, refine, lambda a, b: a == b)
 
-    def minimize(self):
+    def minimize(self) -> 'Dfa':
         from genus.utils import find_eqv_class
         from genus.s_or import createSOr
 
@@ -574,7 +578,7 @@ class Dfa:
                          new_exit_map,
                          self.combine_labels)
 
-    def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value):
+    def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value) -> 'Dfa':
         from genus.s_and import SAnd
         from genus.genus_types import NormalForm
         dfa1 = self  # IDE warns if I name the parameter dfa1 rather than self. :-(
@@ -640,27 +644,27 @@ class Dfa:
                          exit_map=dict(exit_map),
                          combine_labels=dfa1.combine_labels)
 
-    def equivalent(self, dfa2):
+    def equivalent(self, dfa2) -> Optional[bool]:
         # returns True, False, or None
         return self.xor(dfa2).vacuous()
 
-    def union(self, dfa2):
+    def union(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: a or b,
                         lambda q1, _: self.exit_map[q1.index])
 
-    def intersection(self, dfa2):
+    def intersection(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: a and b,
                         lambda q1, _: self.exit_map[q1.index])
 
-    def xor(self, dfa2):
+    def xor(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: (a and not b) or (b and not a),
                         lambda q1, _: self.exit_map[q1.index])
 
 
-def reconstructLabels(path):
+def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
     # path is a list of states which form a path through (or partially through)
     # a Dfa
     def connecting_label(q1, q2):
@@ -676,7 +680,11 @@ def reconstructLabels(path):
         return [connecting_label(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
 
-def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
+def createDfa(pattern: Optional[Rte],
+              transition_triples: List[Tuple[int, SimpleTypeD, int]],
+              accepting_states: Optional[List[int]],
+              exit_map: Optional[Dict[int, Any]],
+              combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD]) -> 'Dfa':
     from functools import reduce
 
     assert isinstance(accepting_states, list)
