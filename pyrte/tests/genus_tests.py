@@ -1235,6 +1235,50 @@ class GenusCase(unittest.TestCase):
 
                     self.assertIs(eval_ite(ite, v), expected)
 
+    def test_typeEquivalent_random(self):
+        for i in range (0,1000):
+            d = random.randint(0,4)
+            t1 = random_type_designator(d)
+            t2 = random_type_designator(d)
+
+            self.assertTrue(t1.typeEquivalent(t1))
+            self.assertTrue(t1.typeEquivalent(SNot(t1)) != True)
+            self.assertTrue(SNot(SAnd(t1,t2)).typeEquivalent(SOr(SNot(t1),SNot(t2))) != False)
+
+    def test_typeEquivalent(self):
+        def f(a):
+            return True
+        def g(a):
+            return True
+
+        t1 = SSatisfies(f,"f")
+        t2 = SSatisfies(g,"g")
+        # 1. A < B = None B < A = None
+        self.assertTrue(t1.typeEquivalent(t1))
+
+        # 2. A < B = None   B < A = False
+        self.assertEqual(t2.typeEquivalent(t1), None)
+
+        # 3. A < B = True  B < A = None
+        self.assertEqual(STop.typeEquivalent(t1), None)
+
+        # 4. A < B = True  B < A = None
+        self.assertEqual(SEmpty.typeEquivalent(t1), None)
+
+        # 5. A < B = False B < A = None
+        self.assertEqual(t1.typeEquivalent(STop),None)
+
+        # 6. A < B = False   B < A = False
+        self.assertTrue(t2.typeEquivalent(SEmpty) is None)
+
+        # 7. A < B = True    B < A = False
+        self.assertFalse(SMember(1,2).typeEquivalent(SMember(1, 2, 3)))
+
+        # 8. A < B = False   B < A = True
+        self.assertTrue(SMember(1,2,3).typeEquivalent(SMember(1, 2)) is False)
+
+        # 9. A < B = True    B < A = True
+        self.assertTrue(SMember(1,2,3).typeEquivalent(SOr(SMember(1,2), SMember(3))))
 
 if __name__ == '__main__':
     unittest.main()
