@@ -695,7 +695,7 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
-    def test_serialize(self):
+    def test_serialize2(self):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
