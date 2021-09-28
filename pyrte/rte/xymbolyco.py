@@ -364,11 +364,13 @@ class Dfa:
 
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
-        old_transitions: List[Triple] = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
+        old_transitions: List[Triple] = [(src, Singleton(td), dst)
+                                         for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
         new_initial_transitions: List[Triple] = [("I", Epsilon, 0)]
         # step 4  # adding state whose index is NOT integer
-        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
+        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid]))
+                                               for qid in accepting]
 
         def combine_parallel_labels(rtes: List[Rte]) -> Rte:
             return createOr(rtes).canonicalize()
