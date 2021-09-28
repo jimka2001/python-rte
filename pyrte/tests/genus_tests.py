@@ -21,7 +21,6 @@
 
 
 import os
-import random
 import unittest
 
 from genus.depthgenerator import random_type_designator, test_values
