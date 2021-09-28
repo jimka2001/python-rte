@@ -65,7 +65,7 @@ class And(Combination):
         # union
         return a + [x for x in b if x not in a]
 
-    def annihilator(self, a:SimpleTypeD, b:SimpleTypeD) -> Optional[bool]:
+    def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Optional[bool]:
         return a.subtypep(b)
 
     def createTypeD(self, operands: List[SimpleTypeD]) -> SimpleTypeD:
