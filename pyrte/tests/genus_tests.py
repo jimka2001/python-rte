@@ -1125,7 +1125,7 @@ class GenusCase(unittest.TestCase):
 
     def test_find_eqv_class(self):
         from genus.utils import find_eqv_class
-        self.assertEqual([1, 2, 3], find_eqv_class([(1, 2, 3), (4, 5, 6)], 2))
+        self.assertEqual((1, 2, 3), find_eqv_class([(1, 2, 3), (4, 5, 6)], 2))
         self.assertIsNone(find_eqv_class([(1, 2, 3), (4, 5, 6)], 0))
 
     def test_split_eqv_class(self):
