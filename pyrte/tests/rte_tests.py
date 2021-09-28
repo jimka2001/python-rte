@@ -659,7 +659,6 @@ class RteCase(unittest.TestCase):
                 self.assertTrue(rt.derivatives())
 
     def test_derivative_643(self):
-        from genus.utils import stringify
         rt1 = Cat(Star(Sigma), Star(Singleton(SEql(1))))
         rt2 = Cat(Not(EmptySet), Star(Singleton(SEql(1))))
         v1, v2 = rt1.derivatives()

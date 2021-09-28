@@ -26,6 +26,8 @@ from typing_extensions import TypeGuard
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 
+verbose = False
+
 
 class Or(Combination):
     from rte.r_and import And
@@ -33,11 +35,13 @@ class Or(Combination):
     def __str__(self):
         return "Or(" + ", ".join([str(td) for td in self.operands]) + ")"
 
-    def create(self, operands) -> Rte:
+    def create(self, operands: List[Rte]) -> Rte:
         return createOr(operands)
 
-    def create_dual(self, operands) -> Rte:
+    def create_dual(self, operands: List[Rte]) -> Rte:
         from rte.r_and import createAnd
+        if verbose:
+            assert self
         return createAnd(operands)
 
     def nullable(self) -> bool:

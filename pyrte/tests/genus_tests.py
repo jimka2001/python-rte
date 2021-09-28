@@ -422,7 +422,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_297(self):
         from genus.depthgenerator import TestA, TestB
-
+        self.assertTrue(True)
         even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         b = SAtomic(TestB)
         a = SAtomic(TestA)
@@ -867,6 +867,7 @@ class GenusCase(unittest.TestCase):
 
     def test_depth_generator(self):
         from genus.depthgenerator import DepthGenerator
+        self.assertTrue(self)
         rand_lambda = DepthGenerator(2).rand_lambda_str_generator()
         for i in range(10):
             rand_lambda[0](i)

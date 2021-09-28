@@ -24,6 +24,8 @@ from rte.r_combination import Combination
 from typing import Literal, List, Any, Optional
 from typing_extensions import TypeGuard
 
+verbose = False
+
 
 class And(Combination):
     from rte.r_rte import Rte
@@ -37,6 +39,8 @@ class And(Combination):
 
     def create_dual(self, operands) -> Rte:
         from rte.r_or import createOr
+        if verbose:
+            assert self
         return createOr(operands)
 
     def nullable(self) -> bool:

@@ -30,6 +30,7 @@ from typing import Literal, Optional
 
 from genus.genus_types import NormalForm
 from genus.utils import generate_lazy_val, fixed_point
+from typing import NoReturn
 
 
 # is it useful, though ? all classes are types by default in python
@@ -204,7 +205,7 @@ class SimpleTypeD:
         """
         return t.subtypep(self)
 
-    def cmp_to_same_class_obj(self, t: 'SimpleTypeD') -> Literal[-1, 0, 1]:
+    def cmp_to_same_class_obj(self, t: 'SimpleTypeD') -> NoReturn:
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare type designators of type {type(self)}")
 
