@@ -210,7 +210,8 @@ def get_all_subclasses(cls):
 
 
 def trace_graph(v0: V,
-                edges: Callable[[V], List[Tuple[L, V]]]) -> Tuple[List[V], List[List[int]]]:
+                edges: Callable[[V], List[Tuple[L, V]]]) -> Tuple[List[V],
+                                                                  List[List[Tuple[L, int]]]]:
     # v0 type V
     # edges V => List[(L,V)]
     # if V is te type of vertex
@@ -288,17 +289,17 @@ def group_by(key: Callable[[T], S],
     return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
 
-def split_eqv_class(objects: List[T],
-                    f: Callable[[T], S]) -> List[List[T]]:
+def split_eqv_class(objects: Tuple[T, ...],
+                    f: Callable[[T], S]) -> List[Tuple[T, ...]]:
     if len(objects) == 1:
         return [objects]
     else:
         grouped = group_by(f, objects)
-        return [grouped[k] for k in grouped]
+        return [tuple(grouped[k]) for k in grouped]
 
 
-def find_eqv_class(partition: Iterable[Iterable[T]],
-                   target: T) -> Optional[Iterable[T]]:
+def find_eqv_class(partition: Iterable[Tuple[T, ...]],
+                   target: T) -> Optional[Tuple[T, ...]]:
     # given partition, a list of mutually disjoint lists
     # return the list which contains target, or None if not found
     for eqv_class in partition:

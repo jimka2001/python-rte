@@ -24,9 +24,13 @@ from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
-from typing import List, Union, Tuple, Any, Dict, Callable, Optional
+from typing import List, Union, Tuple, Any, Dict, Callable, Optional, TypeVar
 
-Triple = Tuple[str, Rte, Union[int, Tuple[str, Any]]]
+L = TypeVar('L', Rte, SimpleTypeD)
+Triple = Tuple[Union[int, str],
+               L,  # Union[Rte, SimpleTypeD],
+               Union[int, Tuple[str, Any]]]
+verbose = False
 
 
 class State:
@@ -79,7 +83,7 @@ def default_combine_labels(_l1, _l2):
 class Dfa:
     def __init__(self,
                  pattern: Optional[Rte] = None,
-                 states: Optional[List[int]] = None,
+                 states: Optional[List[State]] = None,
                  exit_map: Optional[Dict[int, Any]] = None,
                  combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = default_combine_labels):
         if exit_map is None:
@@ -103,7 +107,13 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
-    def to_dot(self, title, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
+    def to_dot(self,
+               title: Optional[str],
+               view: bool = False,
+               abbrev: bool = True,
+               draw_sink: bool = False,
+               state_legend: bool = True,
+               verbose: bool = False):
         from genus.utils import dot_view
         import io
         text = io.StringIO()
@@ -166,7 +176,7 @@ class Dfa:
         text.write("}\n")
         return text.getvalue()
 
-    def delta(self, source_state, target_label) -> List[State]:
+    def delta(self, source_state, target_label) -> State:
         return self.states[source_state.transitions[target_label]]
 
     def simulate(self, sequence: List[Any]) -> Any:
@@ -242,8 +252,9 @@ class Dfa:
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
-    def find_accessibles(self) -> Tuple[
-        List[int], List[int]]:  # returns a pair of two lists of indices (accessibles, co-accessables)
+    def find_accessibles(self) -> Tuple[List[int],
+                                        List[int]]:
+        # returns a pair of two lists of indices (accessibles, co-accessibles)
         def reachable(seen, triples):
             # returns pair (reachables,remaining_triples),
             # reachables is list of int, triples are remaining triples to consider on future iteration
@@ -304,9 +315,11 @@ class Dfa:
         return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
 
     def combine_parallel_triples(self,
-                                 triples: List[Tuple[int, SimpleTypeD, int]],
-                                 combine_parallel_labels: Callable[[List[SimpleTypeD]], SimpleTypeD]
-                                 ) -> List[Tuple[int, SimpleTypeD, int]]:
+                                 triples: List[Triple],
+                                 combine_parallel_labels: Callable[[List[L]], L]
+                                 ) -> List[Triple]:
+        if verbose:
+            print(f"combine_parallel_triples self={self}")
         #  accepts a sequence of triples, each of the form [from label to]
         #   groups them by common from/to, these are parallel transitions
         #   combines the labels of the parallel transitions, into one single label
@@ -357,14 +370,17 @@ class Dfa:
         # step 4  # adding state whose index is NOT integer
         new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
 
-        def combine_parallel_labels(rtes):
+        def combine_parallel_labels(rtes: List[Rte]) -> Rte:
             return createOr(rtes).canonicalize()
 
-        def extract_labels(triples):
+        def extract_labels(triples) -> List[Rte]:
             return [l for _, l, _ in triples]
 
-        def eliminate_state(triples, qid):
-            def f(acc, triple):
+        def eliminate_state(triples: List[Triple], qid: int) -> List[Triple]:
+            def f(acc, triple: Triple) -> Tuple[List[Triple],
+                                                List[Triple],
+                                                List[Triple],
+                                                List[Triple]]:
                 x_to_q, q_to_q, q_to_x, others = acc
                 src, _, dst = triple
                 if src == qid and dst == qid:
@@ -515,12 +531,12 @@ class Dfa:
     def find_hopcroft_partition(self) -> List[Tuple[State, ...]]:
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
         from genus.s_empty import SEmpty
-        finals = [q for q in self.states if q.accepting]
-        non_finals = [q for q in self.states if not q.accepting]
+        finals = tuple([q for q in self.states if q.accepting])
+        non_finals = tuple([q for q in self.states if not q.accepting])
         pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + [non_finals]
 
-        def refine(partition):
-            def phi(source_state: State, label: SimpleTypeD):
+        def refine(partition: List[Tuple[State, ...]]):
+            def phi(source_state: State, label: SimpleTypeD) -> Optional[Tuple[State, ...]]:
                 return find_eqv_class(partition, self.delta(source_state, label))
 
             def Phi_1(s):
@@ -545,12 +561,17 @@ class Dfa:
         from genus.utils import find_eqv_class
         from genus.s_or import createSOr
 
-        def min_state(eqv_class):
-            return reduce(min, [q.index for q in eqv_class])
+        def min_int(a: int, b: int) -> int:
+            return a if a < b else b
+
+        def min_state(eqv_class) -> int:
+            # using min_int with reduce, rather than int, because otherwise
+            # mypy cannot figure out the min_state returns int.
+            return reduce(min_int, [q.index for q in eqv_class])
 
         pi_minimized = self.find_hopcroft_partition()
-        ids = [min_state(eqv_class) for eqv_class in pi_minimized]
-        ids_map = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
+        ids: List[int] = [min_state(eqv_class) for eqv_class in pi_minimized]
+        ids_map: Dict[Tuple[State, ...], int] = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
 
         def merge_parallel(transitions):
             return self.combine_parallel_triples(transitions, lambda labels: createSOr(labels).canonicalize())
@@ -562,9 +583,8 @@ class Dfa:
             else:
                 return new_id(next(q for q in self.states if q.index == old_state))
 
-        new_fids = [idx for idx, eqv_class in zip(ids, pi_minimized)
-                    if any(q.accepting for q in eqv_class)]
-
+        new_fids: List[int] = [idx for idx, eqv_class in zip(ids, pi_minimized)
+                               if any(q.accepting for q in eqv_class)]
         new_exit_map = dict([(new_id(f), self.exit_map[f]) for f in self.exit_map])
         new_transitions = [(src, label, dst) for eqv_class in pi_minimized
                            for q in [eqv_class[0]]
