@@ -220,24 +220,26 @@ class SimpleTypeD:
     def find_first_leaf_td(self) -> Optional['SimpleTypeD']:
         return self
 
+
+
     def typeEquivalent(self, t):
-        can1 = self.canonicalize()
-        can2 = t.canonicalize()
+        can1 = generate_lazy_val(lambda: self.canonicalize())
+        can2 = generate_lazy_val(lambda: t.canonicalize())
 
         sp1 = self.subtypep(t)
         if sp1 is None or False:
-            sp1 = can1.subtypep(t)
+            sp1 = can1().subtypep(t)
             if sp1 is None or False:
-                sp1 = can1.subtypep(can2)
+                sp1 = can1().subtypep(can2())
 
         sp2 = t.subtypep(self)
         if sp2 is None or False:
-            sp2 = can2.subtypep(self)
+            sp2 = can2().subtypep(self)
             if sp2 is None or False:
-                can2.subtypep(can1)
+                can2().subtypep(can1())
 
-        if sp1 == False or sp2 == False:
+        if sp1 is False or sp2 is False:
             return False
-        elif sp1 == True and sp2 == True:
+        elif sp1 is True and sp2 is True:
             return True
         return None
