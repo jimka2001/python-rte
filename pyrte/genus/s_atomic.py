@@ -28,7 +28,7 @@ from genus.s_top import STopImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
 from genus.utils import get_all_subclasses
 from genus.genus_types import NormalForm
-from typing import Literal, Any, Optional
+from typing import Literal, Any, Optional, TypeGuard
 
 
 class SAtomic(SimpleTypeD, TerminalType):
@@ -165,5 +165,5 @@ class SAtomic(SimpleTypeD, TerminalType):
             return 1
 
 
-def atomicp(this: Any) -> bool:
+def atomicp(this: Any) -> TypeGuard[SAtomic]:
     return isinstance(this, SAtomic)
