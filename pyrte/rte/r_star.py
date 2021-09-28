@@ -24,6 +24,7 @@ from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_rte import Rte
 from rte.r_sigma import Sigma
+from typing_extensions import TypeGuard
 
 
 class Star(Rte):
@@ -77,10 +78,10 @@ class Star(Rte):
             return self
 
     def conversion2(self):
-        from rte.r_cat import catp
+        from rte.r_cat import catp, Cat
         if not catp(self.operand):
             return self
-        c = self.operand
+        c: Cat = self.operand
         if len(c.operands) != 2 and len(c.operands) != 3:
             return self
         # Star(Cat(x,Star(x))) -> Star(x)
@@ -99,7 +100,7 @@ class Star(Rte):
         from rte.r_cat import catp, Cat
         if not catp(self.operand):
             return self
-        c = self.operand
+        c: Cat = self.operand
         # Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
         #    -->    Star(Cat(X, Y, Z))
         right = c.operands[-1]
@@ -142,7 +143,7 @@ class Star(Rte):
         return Cat(self.operand.derivative(wrt, factors, disjoints), self)
 
 
-def starp(rte):
+def starp(rte) -> TypeGuard[Star]:
     return isinstance(rte, Star)
 
 
@@ -152,7 +153,7 @@ def Plus(r):
     return Cat(r, Star(r))
 
 
-def plusp(rte):
+def plusp(rte) -> TypeGuard['Cat']:
     from rte.r_cat import catp
     return catp(rte) \
            and 2 == len(rte.operands) \

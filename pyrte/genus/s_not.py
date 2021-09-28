@@ -28,7 +28,7 @@ from typing_extensions import TypeGuard
 
 class SNot(SimpleTypeD):
     """A negation of a type.
-	param s the type we want to get the complement"""
+    param s the type we want to get the complement"""
 
     def __init__(self, s):
         super(SNot, self).__init__()
@@ -83,7 +83,7 @@ class SNot(SimpleTypeD):
             return True
         elif self.s.disjoint(t) is True and t.inhabited() is True:
             return False
-        elif notp(t) and atomicp(self.s) and atomicp(t.s):
+        elif notp(t) and atomicp(self.s) and atomicp(cast(SNot, t).s):
             return False
         # if t2 < t1, then t2 disjoint from (not t1)   (strict subset)
         # (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
