@@ -26,7 +26,8 @@ from genus.s_empty import SEmpty, SEmptyImpl
 from genus.s_top import STop, STopImpl
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
-from typing import List, TypeGuard, TypeVar, Callable, Iterable, Optional, Any
+from typing import List, TypeVar, Callable, Iterable, Optional, Any
+from typing_extensions import TypeGuard
 
 T = TypeVar('T')  # Declare type variable
 

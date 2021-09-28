@@ -21,8 +21,8 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Any, Optional, Literal, TypeGuard
-
+from typing import Any, Optional, Literal
+from typing_extensions import TypeGuard
 
 class STopImpl(SimpleTypeD, TerminalType):
     """The super type, super type of all types."""

@@ -27,7 +27,8 @@ from genus.s_top import STop
 from genus.utils import find_first
 from genus.utils import uniquify
 from genus.simple_type_d import SimpleTypeD
-from typing import List, TypeVar, Callable, Optional, Iterable, Collection, TypeGuard
+from typing import List, TypeVar, Callable, Optional, Iterable, Collection
+from typing_extensions import TypeGuard
 
 T = TypeVar('T')      # Declare type variable
 
