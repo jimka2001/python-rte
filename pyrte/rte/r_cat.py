@@ -24,6 +24,8 @@ from rte.r_rte import Rte
 from typing import Literal, Set, List
 from typing_extensions import TypeGuard
 
+verbose = False
+
 
 class Cat(Rte):
     from genus.simple_type_d import SimpleTypeD
@@ -49,6 +51,8 @@ class Cat(Rte):
         return compare_sequence(self.operands, t.operands)
 
     def create(self, operands: List[Rte]) -> Rte:
+        if verbose:
+            print(f"create: self={self}")
         return createCat(operands)
 
     def first_types(self) -> Set[SimpleTypeD]:
