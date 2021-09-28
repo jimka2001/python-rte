@@ -21,7 +21,7 @@
 
 import functools
 from abc import abstractmethod
-from typing import List, Callable, TypeVar, Union, Literal, Optional, Iterable
+from typing import List, Callable, TypeVar, TypeGuard, Literal, Optional, Iterable, cast
 from genus.utils import compare_sequence
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map
@@ -71,7 +71,7 @@ class SCombination(SimpleTypeD):
     def same_combination(self, td: SimpleTypeD) -> bool:
         return type(self) == type(td)
 
-    def dual_combination(self, td: SimpleTypeD) -> bool:
+    def dual_combination(self, td: SimpleTypeD) -> TypeGuard['SCombination']:
         raise NotImplementedError
 
     def combo_filter(self, pred: Callable[[T], bool], xs: Iterable[T]) -> List[T]:
@@ -157,8 +157,8 @@ class SCombination(SimpleTypeD):
         # (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
         # (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
-        combos = list(filter(combop, self.tds))
-        duals = list(filter(lambda td: self.dual_combination(td), combos))
+        combos: List[SCombination] = list(filter(combop, self.tds))
+        duals: List[SCombination] = list(filter(lambda td: self.dual_combination(td), combos))
 
         def f(td):
             from genus.s_not import notp
@@ -209,8 +209,8 @@ class SCombination(SimpleTypeD):
         # A + !A B -> A + B
         # A + !A BX + Y = (A + BX + Y)
         # A + ABX + Y = (A + Y)
-        combos = list(filter(combop, self.tds))
-        duals = list(filter(self.dual_combination, combos))
+        combos: List[SCombination] = list(filter(combop, self.tds))
+        duals: List[SCombination] = list(filter(self.dual_combination, combos))
 
         def pred(a):
             n = SNot(a)
@@ -241,8 +241,8 @@ class SCombination(SimpleTypeD):
         from genus.s_not import notp
         # AXBC + !X = ABC + !X
         # find !X
-        combos = filter(combop, self.tds)
-        duals = filter(lambda td: self.dual_combination(td), combos)
+        combos: List[SCombination] = list(filter(combop, self.tds))
+        duals: List[SCombination] = list(filter(lambda td: self.dual_combination(td), combos))
         comp = next((n for n in self.tds if notp(n) and any(td for td in duals if n.s in td.tds)),
                     None)
         if comp is None:
@@ -431,7 +431,7 @@ class SCombination(SimpleTypeD):
         elif self == td:
             return 0
         else:
-            return compare_sequence(self.tds, td.tds)
+            return compare_sequence(self.tds, cast(SCombination, td).tds)
 
     def compute_nf(self) -> SimpleTypeD:
         # it turns out SAnd.compute_dnf and SOr.compute_cnf contain
@@ -448,7 +448,7 @@ class SCombination(SimpleTypeD):
         #          SAnd(x1,x2,  y2,  x3,x4),
         #          SAnd(x1,x2,  y3,  x3,x4),
         #     )
-        td = find_first(self.dual_combination, self.tds, None)
+        td: Optional[SCombination] = find_first(self.dual_combination, self.tds, None)
         if td is None:
             return self
         else:
@@ -463,5 +463,5 @@ class SCombination(SimpleTypeD):
         return next(td.find_first_leaf_td() for td in self.tds)
 
 
-def combop(this: SimpleTypeD) -> bool:
+def combop(this: SimpleTypeD) -> TypeGuard[SCombination]:
     return isinstance(this, SCombination)

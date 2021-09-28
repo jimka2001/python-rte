@@ -21,7 +21,7 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Literal
+from typing import Literal, TypeGuard
 
 
 class SMemberImpl(SimpleTypeD):
@@ -100,9 +100,9 @@ def createSMember(items):
         return SMember(*items)
 
 
-def memberimplp(this):
+def memberimplp(this) -> TypeGuard[SMemberImpl]:
     return isinstance(this, SMemberImpl)
 
 
-def memberp(this):
+def memberp(this) -> TypeGuard[SMember]:
     return isinstance(this, SMember)

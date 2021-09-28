@@ -21,7 +21,7 @@
 
 from genus.s_member import SMemberImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, TypeGuard
 
 
 class SEql(SMemberImpl, TerminalType):
@@ -56,5 +56,5 @@ class SEql(SMemberImpl, TerminalType):
 		return t.typep(self.a)
 
 
-def eqlp(this: Any) -> bool:
+def eqlp(this: Any) -> TypeGuard[SEql]:
 	return isinstance(this, SEql)

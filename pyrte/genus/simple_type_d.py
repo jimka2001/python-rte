@@ -110,7 +110,7 @@ class SimpleTypeD:
     #   t – the type we want to check whether this type is included in
     # Returns:
     #   an optional Boolean (True/False/None) which is true if self is a subtype of t
-    def subtypep(self, t) -> Optional[bool]:
+    def subtypep(self, t: 'SimpleTypeD') -> Optional[bool]:
         from genus.s_or import orp
         from genus.s_and import andp
         from genus.s_top import topp
@@ -140,7 +140,7 @@ class SimpleTypeD:
 
         return self.subtypep_cache[t]
 
-    def subtypep_down(self, t) -> Optional[bool]:
+    def subtypep_down(self, t: 'SimpleTypeD') -> Optional[bool]:
         from genus.s_not import notp
         if notp(t) and self.disjoint(t.s) is True:
             return True

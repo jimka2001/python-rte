@@ -22,7 +22,7 @@
 
 from genus.simple_type_d import SimpleTypeD
 from genus.genus_types import NormalForm
-from typing import Optional, Literal, Any
+from typing import Optional, Literal, Any, TypeGuard
 
 
 class SNot(SimpleTypeD):
@@ -174,5 +174,5 @@ class SNot(SimpleTypeD):
         return self.s.find_first_leaf_td()
 
 
-def notp(this: Any) -> bool:
+def notp(this: Any) -> TypeGuard[SNot]:
     return isinstance(this, SNot)

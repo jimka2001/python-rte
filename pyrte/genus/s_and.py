@@ -21,11 +21,12 @@
 
 
 from genus.s_combination import SCombination
+from genus.s_or import SOr
 from genus.s_empty import SEmpty, SEmptyImpl
 from genus.s_top import STop, STopImpl
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import find_first, generate_lazy_val, uniquify
-from typing import List, Literal, TypeVar, Callable, Iterable, Optional, Any
+from typing import List, TypeGuard, TypeVar, Callable, Iterable, Optional, Any
 
 T = TypeVar('T')  # Declare type variable
 
@@ -54,7 +55,7 @@ class SAnd(SCombination):
     def annihilator(self, a, b) -> Optional[bool]:
         return a.subtypep(b)
 
-    def dual_combination(self, td) -> bool:
+    def dual_combination(self, td) -> TypeGuard[SOr]:
         from genus.s_or import orp
         return orp(td)
 
