@@ -153,11 +153,11 @@ class Cat(Rte):
                 return term1()
 
 
-def catp(op) -> TypeGuard[Cat]:
+def catp(op: Rte) -> TypeGuard[Cat]:
     return isinstance(op, Cat)
 
 
-def catxyp(r) -> TypeGuard[Cat]:  # Cat(x,y,z,Star(Cat(x,y,z)))
+def catxyp(r: Rte) -> TypeGuard[Cat]:  # Cat(x,y,z,Star(Cat(x,y,z)))
     if not catp(r):
         return False
     elif len(r.operands) < 2:

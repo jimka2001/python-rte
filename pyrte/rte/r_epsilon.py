@@ -21,9 +21,12 @@
 
 
 from rte.r_rte import Rte
-
+from typing import Literal, Set
 
 class EpsilonImpl (Rte):
+    from rte.r_emptyset import EmptySetImpl
+    from genus.simple_type_d import SimpleTypeD
+
     __instance = None
 
     def __new__(cls, *a, **kw):
@@ -34,13 +37,13 @@ class EpsilonImpl (Rte):
     def __str__(self):
         return "ε"
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         return set()  # empty set
 
-    def nullable(self):
+    def nullable(self) -> Literal[True]:
         return True
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self, wrt, factors, disjoints) -> EmptySetImpl:
         from rte.r_emptyset import EmptySet
         return EmptySet
 

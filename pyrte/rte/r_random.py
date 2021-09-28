@@ -20,6 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import random
+from rte.r_rte import Rte
 from rte.r_and import And
 from rte.r_cat import Cat
 from rte.r_emptyset import EmptySet
@@ -36,7 +37,7 @@ leaf_rtes = [EmptySet,
              Sigma]
 
 
-def random_rte(depth):
+def random_rte(depth: int) -> Rte:
     def random_and():
         return And(random_rte(depth - 1),
                    random_rte(depth - 1))

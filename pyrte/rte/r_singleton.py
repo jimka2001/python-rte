@@ -22,7 +22,8 @@
 
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
-
+from typing import Literal, Set, Optional, List
+from typing_extensions import TypeGuard
 
 class Singleton(Rte):
     def __init__(self, operand):
@@ -40,17 +41,17 @@ class Singleton(Rte):
     def __hash__(self):
         return hash(self.operand)
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t) -> Literal[-1, 0, 1]:
         from genus.utils import cmp_objects
         return cmp_objects(self.operand, t.operand)
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         return {self.operand}
 
-    def nullable(self):
+    def nullable(self) -> Literal[False]:
         return False
 
-    def canonicalize_once(self):
+    def canonicalize_once(self) -> Rte:
         from genus.s_top import STop
         from genus.s_empty import SEmpty
         from genus.s_and import andp
@@ -75,7 +76,10 @@ class Singleton(Rte):
         else:
             return Singleton(td)
 
-    def derivative(self, wrt, factors, disjoints):
+    def derivative(self,
+                   wrt: Optional[SimpleTypeD],
+                   factors: List[SimpleTypeD],
+                   disjoints: List[SimpleTypeD]) -> Rte:
         from genus.s_empty import SEmpty
         from genus.s_top import STop
         from rte.r_emptyset import EmptySet
@@ -94,7 +98,10 @@ class Singleton(Rte):
         else:
             return super().derivative(wrt, factors, disjoints)
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self,
+                        wrt: Optional[SimpleTypeD],
+                        factors: List[SimpleTypeD],
+                        disjoints: List[SimpleTypeD]) -> Rte:
         from rte.r_epsilon import Epsilon
         from rte.r_emptyset import EmptySet
         from genus.s_top import STop
@@ -132,5 +139,5 @@ class Singleton(Rte):
                 disjoints=disjoints)
 
 
-def singletonp(op):
+def singletonp(op: Rte) -> TypeGuard[Singleton]:
     return isinstance(op, Singleton)

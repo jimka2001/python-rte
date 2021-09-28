@@ -21,7 +21,7 @@
 
 
 from rte.r_combination import Combination
-from typing import Literal, List
+from typing import Literal, List, Any, Optional
 from typing_extensions import TypeGuard
 
 
@@ -50,29 +50,29 @@ class And(Combination):
         from rte.r_constants import sigmaStar
         return sigmaStar
 
-    def same_combination(self, r) -> TypeGuard['And']:
+    def same_combination(self, r: Combination) -> TypeGuard['And']:
         return andp(r)
 
-    def dual_combination(self, r) -> TypeGuard['Or']:
+    def dual_combination(self, r: Combination) -> TypeGuard['Or']:
         from rte.r_or import orp
         return orp(r)
 
-    def set_operation(self, a, b):
+    def set_operation(self, a: List[Any], b: List[Any]) -> List[Any]:
         # intersection
         return [x for x in a if x in b]
 
-    def set_dual_operation(self, a, b):
+    def set_dual_operation(self, a: List[Any], b: List[Any]) -> List[Any]:
         # union
         return a + [x for x in b if x not in a]
 
-    def annihilator(self, a, b):
+    def annihilator(self, a:SimpleTypeD, b:SimpleTypeD) -> Optional[bool]:
         return a.subtypep(b)
 
-    def createTypeD(self, operands: List[SimpleTypeD]):
+    def createTypeD(self, operands: List[SimpleTypeD]) -> SimpleTypeD:
         from genus.s_and import createSAnd
         return createSAnd(operands)
 
-    def orInvert(self, x):
+    def orInvert(self, x: bool) -> bool:
         return x
 
     def conversionA7(self) -> Rte:
@@ -355,16 +355,15 @@ class And(Combination):
 
 
 def createAnd(operands: List['Rte']) -> 'Rte':
-    from rte.r_star import Star
-    from rte.r_sigma import Sigma
+    from rte.r_constants import sigmaStar
 
     if not operands:
-        return Star(Sigma)  # should use constant rather than creating a new object
+        return sigmaStar
     elif len(operands) == 1:
         return operands[0]
     else:
         return And(*operands)
 
 
-def andp(op) -> TypeGuard[And]:
+def andp(op: 'Rte') -> TypeGuard[And]:
     return isinstance(op, And)

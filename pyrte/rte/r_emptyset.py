@@ -21,10 +21,11 @@
 
 
 from rte.r_rte import Rte
-
+from typing import Set, Literal
 
 class EmptySetImpl (Rte):
     __instance = None
+    from genus.simple_type_d import SimpleTypeD
 
     def __new__(cls, *a, **kw):
         if EmptySetImpl.__instance is None:
@@ -34,13 +35,13 @@ class EmptySetImpl (Rte):
     def __str__(self):
         return "∅"
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         return set()  # empty set
 
-    def nullable(self):
+    def nullable(self) -> Literal[False]:
         return False
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self, wrt, factors, disjoints) -> 'EmptySetImpl':
         return EmptySet
 
 
