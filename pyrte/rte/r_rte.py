@@ -150,25 +150,9 @@ class Rte:
 
         return trace_graph(self, edges)
 
-    def to_dfa(self, exit_value: Any = True) -> 'Dfa':
-        from rte.xymbolyco import createDfa
-        from genus.s_or import createSOr
-        rtes, transitions = self.derivatives()
-        # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
-        transition_triples = [(src, td, dst)
-                              for src in range(len(transitions))
-                              for td, dst in transitions[src]
-                              ]
-
-        def combine_labels(td1, td2):
-            return createSOr([td1, td2]).canonicalize()
-
-        accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
-        return createDfa(pattern=self,
-                         transition_triples=transition_triples,
-                         accepting_states=accepting_states,
-                         exit_map=dict([(i, exit_value) for i in accepting_states]),
-                         combine_labels=combine_labels)
+    def to_dfa(self, exit_value: Any = True):
+        from rte.xymbolyco import rte_to_dfa
+        return rte_to_dfa(self, exit_value)
 
     def simulate(self, exit_value: Any, sequence: List[Any]) -> Any:
         return self.to_dfa(exit_value).simulate(sequence)

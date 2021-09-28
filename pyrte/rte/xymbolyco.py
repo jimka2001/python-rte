@@ -700,6 +700,26 @@ def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
         return [connecting_label(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
 
+def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
+    from genus.s_or import createSOr
+    rtes, transitions = rte.derivatives()
+    # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
+    transition_triples = [(src, td, dst)
+                          for src in range(len(transitions))
+                          for td, dst in transitions[src]
+                          ]
+
+    def combine_labels(td1, td2):
+        return createSOr([td1, td2]).canonicalize()
+
+    accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
+    return createDfa(pattern=rte,
+                     transition_triples=transition_triples,
+                     accepting_states=accepting_states,
+                     exit_map=dict([(i, exit_value) for i in accepting_states]),
+                     combine_labels=combine_labels)
+
+
 def createDfa(pattern: Optional[Rte],
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: Optional[List[int]],
