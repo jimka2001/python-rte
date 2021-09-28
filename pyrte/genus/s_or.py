@@ -21,7 +21,6 @@
 
 
 from genus.s_combination import SCombination
-from genus.s_and import SAnd
 from genus.s_empty import SEmpty
 from genus.s_top import STop
 from genus.utils import find_first
@@ -52,7 +51,7 @@ class SOr(SCombination):
     def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Optional[bool]:
         return b.subtypep(a)
 
-    def dual_combination(self, td: SimpleTypeD) -> TypeGuard[SAnd]:
+    def dual_combination(self, td: SimpleTypeD) -> TypeGuard['SAnd']:
         from genus.s_and import andp
         return andp(td)
 
