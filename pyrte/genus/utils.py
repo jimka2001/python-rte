@@ -72,8 +72,8 @@ def fixed_point(v: T,
             v = v2
 
 
-def find_simplifier(self: T, simplifiers: List[Callable[[], T]],
-                    verbose: bool = False) -> T:
+def find_simplifier(self: S, simplifiers: List[Callable[[], S]],
+                    verbose: bool = False) -> S:
     """simplifiers is a list of 0-ary functions.
     Calling such a function either returns `this` or something else.
     We call all the functions in turn, as long as they return `this`.
