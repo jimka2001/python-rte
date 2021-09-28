@@ -24,6 +24,7 @@ from genus.simple_type_d import SimpleTypeD, TerminalType
 from typing import Any, Literal, Optional
 from typing_extensions import TypeGuard
 
+
 class SEql(SMemberImpl, TerminalType):
 	"""The equal type, a type that is equal to a given object.
 	It has holds an "a" which is the object defining the type

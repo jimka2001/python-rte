@@ -23,6 +23,7 @@
 from rte.r_rte import Rte
 from typing import Literal, Set
 
+
 class EpsilonImpl (Rte):
     from rte.r_emptyset import EmptySetImpl
     from genus.simple_type_d import SimpleTypeD

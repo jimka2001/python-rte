@@ -31,6 +31,7 @@ from genus.genus_types import NormalForm
 from typing import Literal, Any, Optional
 from typing_extensions import TypeGuard
 
+
 class SAtomic(SimpleTypeD, TerminalType):
     """The atoms of our type system: a simple type built from a native python type."""
     __instances = {}

@@ -24,6 +24,7 @@ from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from typing import Literal, Set
 
+
 class SigmaImpl (Rte):
     __instance = None
 

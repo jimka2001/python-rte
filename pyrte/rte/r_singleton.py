@@ -25,6 +25,7 @@ from genus.simple_type_d import SimpleTypeD
 from typing import Literal, Set, Optional, List
 from typing_extensions import TypeGuard
 
+
 class Singleton(Rte):
     def __init__(self, operand):
         super(Singleton, self).__init__()

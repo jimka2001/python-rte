@@ -24,6 +24,7 @@ from genus.simple_type_d import SimpleTypeD, TerminalType
 from typing import Literal, Any
 from typing_extensions import TypeGuard
 
+
 class SEmptyImpl(SimpleTypeD, TerminalType):
     """The empty type, subtype of all types."""
     __instance = None

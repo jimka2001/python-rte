@@ -24,6 +24,7 @@ from genus.simple_type_d import SimpleTypeD
 from rte.r_rte import Rte
 from typing import Literal, Set
 
+
 class Combination(Rte):
     def __init__(self, *operands):
         self.operands = list(operands)

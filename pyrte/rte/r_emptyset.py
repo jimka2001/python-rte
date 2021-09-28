@@ -23,6 +23,7 @@
 from rte.r_rte import Rte
 from typing import Set, Literal
 
+
 class EmptySetImpl (Rte):
     __instance = None
     from genus.simple_type_d import SimpleTypeD
