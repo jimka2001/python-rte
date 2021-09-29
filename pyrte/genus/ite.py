@@ -59,8 +59,8 @@ def eval_ite(ite, element):
     # evaluate the semantics of an ite structure, given an element.
     # The ite structure represents an if-then-else tree where each internal node
     # is a type-designator, SimpleTypeD.
-    # If the node is an internal node (td, positive_ite, negative_ite).
-    # A test is made at the top node to determine whether the given element is a member
+    # If the node is an internal node (td, positive_ite, negative_ite),
+    # a test is made at the top node to determine whether the given element is a member
     # of the designated type td.typep(element).  If true, then recursively eval_ite
     # on the positive_ite (the then part), else eval_ite on the negative_ite (the else part).
     # If the node is a leaf node, (i.e., a 1-tuple), then return the 0'th element of that
