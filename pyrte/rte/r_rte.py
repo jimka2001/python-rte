@@ -143,7 +143,7 @@ class Rte:
                     else:
                         print(f"failed to compute derivative of {rt} wrt={wrt}," +
                               f" computing derivative of {rt.canonicalize()} instead")
-                        return rt.canonicalize().derivative(wrt).canonicalize()
+                        return rt.canonicalize().derivative(wrt, factors, disjoints).canonicalize()
 
             return [(td, d(td, factors, disjoints))
                     for [td, factors, disjoints] in wrts]
