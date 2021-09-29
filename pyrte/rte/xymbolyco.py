@@ -739,18 +739,18 @@ def createDfa(pattern: Optional[Rte],
     for src, td, dst in transition_triples:
         assert dst in srcs, f"invalid transition {(src,td,dst)} because {dst} is not a given state"
 
-    def f(acc, triple):
+    def f(acc: int, triple: Tuple[int, Any, int]) -> int:
         src, _, dst = triple
         return max(acc, src, dst)
 
     max_index = reduce(f, transition_triples, 0)
 
-    def merge_tds(dst1, transitions):
+    def merge_tds(dst1: int, transitions: List[Tuple[SimpleTypeD, int]]) -> SimpleTypeD:
         assert transitions, "merge_tds expected transitions to be non-empty"
         tds = [td for td, dst2 in transitions if dst1 == dst2]
         return reduce(combine_labels, tds)
 
-    def make_state(i):
+    def make_state(i: int) -> State:
         transitions_pre = [(td, dst) for src, td, dst in transition_triples if src == i]
         # error if a td appears more than once.
         #   we would like to error if the tds are not disjoint, but this is already

@@ -114,13 +114,16 @@ class Rte:
                                    List[List[Tuple[SimpleTypeD, int]]]]:
         from genus.utils import trace_graph
         from genus.mdtd import mdtd
+        from genus.simple_type_d import SimpleTypeD
 
-        def edges(rt):
+        def edges(rt: Rte) -> List[Tuple[SimpleTypeD, Rte]]:
             assert isinstance(rt, Rte)
             fts = rt.first_types()
             wrts = mdtd(fts)
 
-            def d(wrt, factors, disjoints):
+            def d(wrt: Optional[SimpleTypeD],
+                  factors: List[SimpleTypeD],
+                  disjoints: List[SimpleTypeD]) -> Rte:
                 try:
                     return rt.derivative(wrt, factors, disjoints).canonicalize()
                 except CannotComputeDerivative as e:
