@@ -733,6 +733,11 @@ def createDfa(pattern: Optional[Rte],
     for i in accepting_states:
         assert isinstance(i, int)
         assert i >= 0
+    # every destination in the given transition_triples, but be mentioned
+    #  in the sources, but a source need not be mentioned in the destinations
+    srcs = [src for src, _, _ in transition_triples]
+    for src, td, dst in transition_triples:
+        assert dst in srcs, f"invalid transition {(src,td,dst)} because {dst} is not a given state"
 
     def f(acc, triple):
         src, _, dst = triple
