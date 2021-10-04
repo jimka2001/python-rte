@@ -1245,14 +1245,14 @@ class GenusCase(unittest.TestCase):
             t2 = random_type_designator(d)
 
             self.assertTrue(t1.typeEquivalent(t1))
-            self.assertTrue(t1.typeEquivalent(SNot(t1)) != True)
-            self.assertTrue(SNot(SAnd(t1, t2)).typeEquivalent(SOr(SNot(t1), SNot(t2))) != False)
+            self.assertTrue(t1.typeEquivalent(SNot(t1)) is not True)
+            self.assertTrue(SNot(SAnd(t1, t2)).typeEquivalent(SOr(SNot(t1), SNot(t2))) is not False)
 
     def test_typeEquivalent(self):
-        def f(a):
+        def f():
             return True
 
-        def g(a):
+        def g():
             return True
 
         t1 = SSatisfies(f, "f")
