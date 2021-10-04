@@ -24,24 +24,27 @@ import os
 import random
 import unittest
 
-from genus.depthgenerator import random_type_designator, test_values, DepthGenerator
+from genus.depthgenerator import random_type_designator, test_values  # , DepthGenerator
 from genus.genus_types import NormalForm
 from genus.mdtd import mdtd
 from genus.s_and import SAnd, createSAnd, andp
 from genus.s_atomic import SAtomic
-from genus.s_combination import SCombination
+# from genus.s_combination import SCombination
 from genus.s_satisfies import SSatisfies
 from genus.s_empty import SEmptyImpl, SEmpty
 from genus.s_eql import SEql
-from genus.s_member import SMemberImpl, SMember
+from genus.s_member import SMember  # ,SMemberImpl
 from genus.s_not import SNot, notp
 from genus.s_or import SOr, createSOr, orp
 from genus.s_top import STopImpl, STop
-from genus.simple_type_d import SimpleTypeD, TerminalType
-from genus.utils import compare_sequence, get_all_subclasses, cmp_objects
-from genus.utils import find_simplifier, find_first
-from genus.utils import flat_map, generate_lazy_val, fixed_point
-from genus.utils import remove_element, search_replace, uniquify, trace_graph
+from genus.simple_type_d import TerminalType  # ,SimpleTypeD
+from genus.utils import compare_sequence, cmp_objects  # ,get_all_subclasses
+# from genus.utils import find_simplifier, find_first
+from genus.utils import generate_lazy_val, fixed_point  # , flat_map
+from genus.utils import uniquify, trace_graph  # , remove_element, search_replace
+# from genus.depthgenerator import random_type_designator_filter
+# from genus import simple_type_d
+from genus.Statistics import measureSubtypeComputability
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -1236,23 +1239,24 @@ class GenusCase(unittest.TestCase):
                     self.assertIs(eval_ite(ite, v), expected)
 
     def test_typeEquivalent_random(self):
-        for i in range (0,1000):
-            d = random.randint(0,4)
+        for i in range(0, 1000):
+            d = random.randint(0, 4)
             t1 = random_type_designator(d)
             t2 = random_type_designator(d)
 
             self.assertTrue(t1.typeEquivalent(t1))
             self.assertTrue(t1.typeEquivalent(SNot(t1)) != True)
-            self.assertTrue(SNot(SAnd(t1,t2)).typeEquivalent(SOr(SNot(t1),SNot(t2))) != False)
+            self.assertTrue(SNot(SAnd(t1, t2)).typeEquivalent(SOr(SNot(t1), SNot(t2))) != False)
 
     def test_typeEquivalent(self):
         def f(a):
             return True
+
         def g(a):
             return True
 
-        t1 = SSatisfies(f,"f")
-        t2 = SSatisfies(g,"g")
+        t1 = SSatisfies(f, "f")
+        t2 = SSatisfies(g, "g")
         # 1. A < B = None B < A = None
         self.assertTrue(t1.typeEquivalent(t1))
 
@@ -1266,19 +1270,20 @@ class GenusCase(unittest.TestCase):
         self.assertEqual(SEmpty.typeEquivalent(t1), None)
 
         # 5. A < B = False B < A = None
-        self.assertEqual(t1.typeEquivalent(STop),None)
+        self.assertEqual(t1.typeEquivalent(STop), None)
 
         # 6. A < B = False   B < A = False
         self.assertTrue(t2.typeEquivalent(SEmpty) is None)
 
         # 7. A < B = True    B < A = False
-        self.assertFalse(SMember(1,2).typeEquivalent(SMember(1, 2, 3)))
+        self.assertFalse(SMember(1, 2).typeEquivalent(SMember(1, 2, 3)))
 
         # 8. A < B = False   B < A = True
-        self.assertTrue(SMember(1,2,3).typeEquivalent(SMember(1, 2)) is False)
+        self.assertTrue(SMember(1, 2, 3).typeEquivalent(SMember(1, 2)) is False)
 
         # 9. A < B = True    B < A = True
-        self.assertTrue(SMember(1,2,3).typeEquivalent(SOr(SMember(1,2), SMember(3))))
+        self.assertTrue(SMember(1, 2, 3).typeEquivalent(SOr(SMember(1, 2), SMember(3))))
+
 
 if __name__ == '__main__':
     unittest.main()

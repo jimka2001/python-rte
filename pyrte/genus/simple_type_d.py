@@ -41,6 +41,7 @@ class TerminalType(metaclass=ABCMeta):
 class SimpleTypeD:
     """SimpleTypeD is the super class of all of the
     representations of type in Genus"""
+
     def __init__(self):
         self.subtypep_cache = {}
         self.disjoint_cache = {}
@@ -187,7 +188,7 @@ class SimpleTypeD:
                 assert isinstance(a, SimpleTypeD), f"expecting SimpleTypeD not {a}"
                 assert isinstance(b, SimpleTypeD), f"expecting SimpleTypeD not {b}"
                 return type(a) == type(b) and a == b
-            
+
             res = fixed_point(self, processor, good_enough)
             self.canonicalized_hash |= {nf: res}
             # tell the perhaps new object it is already canonicalized
@@ -219,8 +220,6 @@ class SimpleTypeD:
 
     def find_first_leaf_td(self) -> Optional['SimpleTypeD']:
         return self
-
-
 
     def typeEquivalent(self, t):
         can1 = generate_lazy_val(lambda: self.canonicalize())

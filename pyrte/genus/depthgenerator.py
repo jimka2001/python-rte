@@ -23,7 +23,6 @@
 import math
 import random
 
-
 from genus.s_and import SAnd, createSAnd
 from genus.s_atomic import SAtomic
 from genus.s_satisfies import SSatisfies
@@ -140,3 +139,10 @@ def random_type_designator(depth):
     else:
         randomizer = random.choice([random_and, random_or, random_not, random_fixed])
         return randomizer()
+
+
+def random_type_designator_filter(depth, filter):
+    td = random_type_designator(depth)
+    while not filter(td):
+        td = random_type_designator(depth)
+    return td
