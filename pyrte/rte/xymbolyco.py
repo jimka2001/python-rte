@@ -66,6 +66,9 @@ class State:
         super().__init__()
 
 
+EqvClass = Tuple[State, ...]
+
+
 def createSinkState(index: int) -> State:
     from genus.s_top import STop
 
@@ -530,29 +533,30 @@ class Dfa:
         else:
             return not v
 
-    def find_hopcroft_partition(self) -> List[Tuple[State, ...]]:
+    def find_hopcroft_partition(self) -> List[EqvClass]:
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
         from genus.s_empty import SEmpty
         finals = tuple([q for q in self.states if q.accepting])
         non_finals = tuple([q for q in self.states if not q.accepting])
         pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + [non_finals]
 
-        def refine(partition: List[Tuple[State, ...]]):
-            def phi(source_state: State, label: SimpleTypeD) -> Optional[Tuple[State, ...]]:
+        def refine(partition: List[EqvClass]) -> List[EqvClass]:
+            def phi(source_state: State, label: SimpleTypeD) -> Optional[EqvClass]:
                 return find_eqv_class(partition, self.delta(source_state, label))
 
-            def Phi_1(s):
+            def Phi_1(s) -> List[Tuple[SimpleTypeD, Optional[EqvClass]]]:
                 return [(label, phi(s, label)) for label in s.transitions]
 
-            def Phi(s):
+            def Phi(s) -> Tuple[Tuple[SimpleTypeD, EqvClass], ...]:
                 grouped = group_by(lambda v: tuple(v[1]), Phi_1(s))
                 vec = [(label, k) for k in grouped
+                       # k is a Tuple[State]
                        for pairs in [grouped[k]]
                        for labels in [[a for a, _ in pairs]]
-                       for label in [reduce(lambda a, b: self.combine_labels(a, b), labels, SEmpty)]]
+                       for label in [reduce(self.combine_labels, labels, SEmpty)]]
                 return tuple(vec)
 
-            def repartition(eqv_class):
+            def repartition(eqv_class: EqvClass) -> List[EqvClass]:
                 return split_eqv_class(eqv_class, Phi)
 
             return [tuple(eqv_class) for eqv_class in flat_map(repartition, partition)]
@@ -573,7 +577,7 @@ class Dfa:
 
         pi_minimized = self.find_hopcroft_partition()
         ids: List[int] = [min_state(eqv_class) for eqv_class in pi_minimized]
-        ids_map: Dict[Tuple[State, ...], int] = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
+        ids_map: Dict[EqvClass, int] = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
 
         def merge_parallel(transitions):
             return self.combine_parallel_triples(transitions, lambda labels: createSOr(labels).canonicalize())
