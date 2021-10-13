@@ -782,6 +782,41 @@ class RteCase(unittest.TestCase):
 
         fixed_point(rt, lambda r: r.canonicalize_once(), lambda a, b: a == b, invariant)
 
+    def test_discovered_785(self):
+        # rt=And(Or(Or(∅, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
+        # can=Cat(Σ, Σ)
+        from rte.r_epsilon import Epsilon
+        from genus.utils import fixed_point
+        problematic = And(Or(Sigma, Not(Sigma)),
+                          Cat(Not(Epsilon), Not(Epsilon)))
+
+        def good_enough(a, b):
+            return type(a) == type(b) and a == b
+
+        def try_example(rt,seq):
+            expecting = problematic.simulate(True, seq)
+            got = rt.simulate(True, seq)
+            if got is not expecting:
+                print(f" seq= {seq}")
+                print(f"  rt={rt}")
+                print(f" expecting = {expecting}")
+                print(f"       got = {got}")
+            return got is expecting
+
+        def invariant(rt: 'Rte') -> bool:
+            print(f"testing {rt}")
+
+            return all(try_example(rt,seq)
+                       for seq in [[1,1],
+                                   [1],
+                                   [],
+                                   [1, 1, 1]])
+
+        self.assertTrue(fixed_point(problematic,
+                                    lambda r: r.canonicalize_once(),
+                                    good_enough,
+                                    invariant))
+
 
 if __name__ == '__main__':
     unittest.main()
