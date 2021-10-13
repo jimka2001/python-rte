@@ -21,10 +21,15 @@
 
 
 from rte.r_rte import Rte
-from typing import Callable, Optional
+from typing import Literal, Set, List, Callable, Optional
+from typing_extensions import TypeGuard
+
+verbose = False
 
 
 class Cat(Rte):
+    from genus.simple_type_d import SimpleTypeD
+
     def __init__(self, *operands):
         self.operands = list(operands)
         assert all(isinstance(operand, Rte) for operand in operands), \
@@ -41,14 +46,16 @@ class Cat(Rte):
     def __hash__(self):
         return hash(tuple(self.operands))
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t) -> Literal[-1, 0, 1]:
         from genus.utils import compare_sequence
         return compare_sequence(self.operands, t.operands)
 
-    def create(self, operands):
+    def create(self, operands: List[Rte]) -> Rte:
+        if verbose:
+            print(f"create: self={self}")
         return createCat(operands)
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         from rte.r_epsilon import Epsilon
         if not self.operands:
             return Epsilon.first_types()
@@ -59,17 +66,17 @@ class Cat(Rte):
         else:
             return self.operands[0].first_types()
 
-    def nullable(self):
+    def nullable(self) -> bool:
         return all(r.nullable() for r in self.operands)
 
-    def conversion3(self):
+    def conversion3(self) -> Rte:
         from rte.r_emptyset import EmptySet
         if EmptySet in self.operands:
             return EmptySet
         else:
             return self
 
-    def conversion4(self):
+    def conversion4(self) -> Rte:
         # remove  EmptyWord and flatten  Cat(Cat(...)...)
         from genus.utils import flat_map
         from rte.r_epsilon import Epsilon
@@ -84,7 +91,7 @@ class Cat(Rte):
 
         return self.create(flat_map(f, self.operands))
 
-    def conversion5(self):
+    def conversion5(self) -> Rte:
         # Cat(..., x*, x, x* ...) --> Cat(..., x*, x, ...)
         from rte.r_star import starp
         for i in range(len(self.operands) - 2):
@@ -98,7 +105,7 @@ class Cat(Rte):
                 return self.create(self.operands[0:i] + self.operands[i + 1:])
         return self
 
-    def conversion6(self):
+    def conversion6(self) -> Rte:
         from rte.r_star import starp
         # Cat(A, B, X *, X, C, D) --> Cat(A, B, X, X *, C, D)
 
@@ -112,13 +119,13 @@ class Cat(Rte):
 
         return self.create(recur(self.operands, []))
 
-    def conversion1(self):
+    def conversion1(self) -> Rte:
         return self.create(self.operands)
 
-    def conversion99(self):
+    def conversion99(self) -> Rte:
         return self.create([rt.canonicalize_once() for rt in self.operands])
 
-    def canonicalize_once(self):
+    def canonicalize_once(self) -> Rte:
         from genus.utils import find_simplifier
         return find_simplifier(self, [self.conversion1,
                                       self.conversion3,
@@ -128,7 +135,10 @@ class Cat(Rte):
                                       self.conversion99,
                                       lambda: super(Cat, self).canonicalize_once()])
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self,
+                        wrt,
+                        factors,
+                        disjoints) -> Rte:
         from rte.r_epsilon import Epsilon
         from genus.utils import generate_lazy_val
         from rte.r_or import Or
@@ -153,11 +163,11 @@ class Cat(Rte):
         return super(Cat, self).search(test)
 
 
-def catp(op):
+def catp(op: Rte) -> TypeGuard[Cat]:
     return isinstance(op, Cat)
 
 
-def catxyp(r):  # Cat(x,y,z,Star(Cat(x,y,z)))
+def catxyp(r: Rte) -> TypeGuard[Cat]:  # Cat(x,y,z,Star(Cat(x,y,z)))
     if not catp(r):
         return False
     elif len(r.operands) < 2:
@@ -169,7 +179,7 @@ def catxyp(r):  # Cat(x,y,z,Star(Cat(x,y,z)))
         return starp(right) and catp(right.operand) and left == right.operand.operands
 
 
-def createCat(operands):
+def createCat(operands) -> Rte:
     from rte.r_epsilon import Epsilon
     assert all(isinstance(op, Rte) for op in operands)
 

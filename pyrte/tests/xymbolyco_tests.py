@@ -31,7 +31,6 @@ from rte.r_cat import Cat
 from rte.r_random import random_rte
 from genus.s_eql import SEql
 from genus.s_top import STop
-from genus.s_empty import SEmpty
 from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_or import SOr
@@ -71,7 +70,7 @@ class XymbolycoCase(unittest.TestCase):
         extracted = rt1.to_dfa(True).to_rte()
         if extracted[True]:
             rt2 = extracted[True]
-            # compute xor, should be emptyset if rt1 is equivalent to rt2
+            # compute xor, should be empty set if rt1 is equivalent to rt2
             empty1 = Xor(rt1, rt2)
             empty_dfa = empty1.to_dfa(True)
 
@@ -105,7 +104,6 @@ class XymbolycoCase(unittest.TestCase):
         # rt=And(Or(Or(∅, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
         # can=Cat(Σ, Σ)
         from rte.r_epsilon import Epsilon
-        from genus.utils import fixed_point
         Σ = Sigma
         ε = Epsilon
 
@@ -231,19 +229,19 @@ class XymbolycoCase(unittest.TestCase):
                 self.assertTrue(u.equivalent(Or(rt1, rt2).to_dfa(True)),
                                 f"rt1={rt1}\n" +
                                 f"rt2={rt2}\n" +
-                                "union of dfas does not correspond to dfa of union")
+                                "union of Dfas does not correspond to dfa of union")
 
                 i = dfa1.intersection(dfa2)
                 self.assertTrue(i.equivalent(And(rt1, rt2).to_dfa(True)),
                                 f"rt1={rt1}\n" +
                                 f"rt2={rt2}\n" +
-                                "intersection of dfas does not correspond to dfa of intersection")
+                                "intersection of Dfas does not correspond to dfa of intersection")
 
                 x = dfa1.xor(dfa2)
                 self.assertTrue(x.equivalent(Xor(rt1, rt2).to_dfa(True)),
                                 f"rt1={rt1}\n" +
                                 f"rt2={rt2}\n" +
-                                "xor of dfas does not correspond to dfa of xor")
+                                "xor of Dfas does not correspond to dfa of xor")
 
 
 if __name__ == '__main__':

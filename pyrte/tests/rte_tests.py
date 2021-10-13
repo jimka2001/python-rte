@@ -676,7 +676,6 @@ class RteCase(unittest.TestCase):
                 self.assertTrue(rt.derivatives())
 
     def test_derivative_643(self):
-        from genus.utils import stringify
         rt1 = Cat(Star(Sigma), Star(Singleton(SEql(1))))
         rt2 = Cat(Not(EmptySet), Star(Singleton(SEql(1))))
         v1, v2 = rt1.derivatives()
@@ -712,7 +711,7 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
-    def test_serialize(self):
+    def test_serialize2(self):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)

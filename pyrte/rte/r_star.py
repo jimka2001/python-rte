@@ -20,11 +20,13 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from genus.simple_type_d import SimpleTypeD
 from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_rte import Rte
 from rte.r_sigma import Sigma
-from typing import Callable, Optional
+from typing import Literal, Set, Optional, List, Callable
+from typing_extensions import TypeGuard
 
 
 class Star(Rte):
@@ -56,17 +58,17 @@ class Star(Rte):
     def __hash__(self):
         return hash(self.operand)
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t) -> Literal[-1, 0, 1]:
         from genus.utils import cmp_objects
         return cmp_objects(self.operand, t.operand)
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         return self.operand.first_types()
 
-    def nullable(self):
+    def nullable(self) -> Literal[True]:
         return True
 
-    def conversion1(self):
+    def conversion1(self) -> Rte:
         from rte.r_epsilon import Epsilon
         if self.operand is Epsilon:
             return Epsilon
@@ -77,11 +79,11 @@ class Star(Rte):
         else:
             return self
 
-    def conversion2(self):
-        from rte.r_cat import catp
+    def conversion2(self) -> Rte:
+        from rte.r_cat import catp, Cat
         if not catp(self.operand):
             return self
-        c = self.operand
+        c: Cat = self.operand
         if len(c.operands) != 2 and len(c.operands) != 3:
             return self
         # Star(Cat(x,Star(x))) -> Star(x)
@@ -96,11 +98,11 @@ class Star(Rte):
         else:
             return self
 
-    def conversion3(self):
+    def conversion3(self) -> Rte:
         from rte.r_cat import catp, Cat
         if not catp(self.operand):
             return self
-        c = self.operand
+        c: Cat = self.operand
         # Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
         #    -->    Star(Cat(X, Y, Z))
         right = c.operands[-1]
@@ -128,17 +130,20 @@ class Star(Rte):
             else:
                 return self
 
-    def conversion99(self):
+    def conversion99(self) -> Rte:
         return Star(self.operand.canonicalize_once())
 
-    def canonicalize_once(self):
+    def canonicalize_once(self) -> Rte:
         from genus.utils import find_simplifier
         return find_simplifier(self, [lambda: self.conversion1(),
                                       lambda: self.conversion2(),
                                       lambda: self.conversion3(),
                                       lambda: self.conversion99()])
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self,
+                        wrt: Optional[SimpleTypeD],
+                        factors: List[SimpleTypeD],
+                        disjoints: List[SimpleTypeD]) -> Rte:
         from rte.r_cat import Cat
         return Cat(self.operand.derivative(wrt, factors, disjoints), self)
 
@@ -146,17 +151,17 @@ class Star(Rte):
         return self.operand.search(test) or super(Star, self).search(test)
 
 
-def starp(rte):
+def starp(rte: Rte) -> TypeGuard[Star]:
     return isinstance(rte, Star)
 
 
-def Plus(r):
+def Plus(r: Rte) -> TypeGuard['Cat']:
     from rte.r_cat import Cat
     assert isinstance(r, Rte)
     return Cat(r, Star(r))
 
 
-def plusp(rte):
+def plusp(rte: Rte) -> TypeGuard['Cat']:
     from rte.r_cat import catp
     return catp(rte) \
            and 2 == len(rte.operands) \

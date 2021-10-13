@@ -21,6 +21,8 @@
 
 
 from rte.r_rte import Rte
+from genus.simple_type_d import SimpleTypeD
+from typing import Literal, Set
 
 
 class SigmaImpl (Rte):
@@ -34,14 +36,14 @@ class SigmaImpl (Rte):
     def __str__(self):
         return "Σ"
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         from genus.s_top import STop
         return {STop}
 
-    def nullable(self):
+    def nullable(self) -> Literal[False]:
         return False
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self, wrt, factors, disjoints) -> Rte:
         from rte.r_epsilon import Epsilon
         return Epsilon
 
