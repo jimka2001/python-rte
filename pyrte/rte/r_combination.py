@@ -22,7 +22,7 @@
 
 from genus.simple_type_d import SimpleTypeD
 from rte.r_rte import Rte
-from typing import Literal, Set
+from typing import Literal, Set, Callable, Optional
 
 
 class Combination(Rte):
@@ -344,3 +344,9 @@ class Combination(Rte):
 
     def derivative_down(self, wrt, factors, disjoints) -> Rte:
         return self.create([ob.derivative(wrt, factors, disjoints) for ob in self.operands])
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        for rt in self.operands:
+            if s := rt.search(test):
+                return s
+        return super(Combination, self).search(test)

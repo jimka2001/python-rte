@@ -187,7 +187,10 @@ class And(Combination):
         cats = [c.operands
                 for c in self.operands
                 if catp(c)
-                and all(not td.nullable() for td in c.operands)]
+                and all(not td.search(catp) for td in c.operands)
+                and all(not td.nullable() for td in c.operands)
+                ]
+
         if not cats:
             return self
         elif 1 == len(cats):
@@ -210,6 +213,7 @@ class And(Combination):
         cats = [c.operands
                 for c in self.operands
                 if catp(c)
+                and all(not td.search(catp) for td in c.operands)
                 and all(not td.nullable() for td in c.operands)]
         if not cats:
             return self
@@ -231,7 +235,9 @@ class And(Combination):
         from rte.r_cat import catp
         from rte.r_emptyset import EmptySet
         from genus.utils import find_first
-        cats = [r for r in self.operands if catp(r)]
+        cats = [r for r in self.operands
+                if catp(r)
+                and all(not td.search(catp) for td in r.operands)]
         non_nullable_cat = find_first(lambda c: all(not o.nullable() for o in c.operands),
                                       cats,
                                       None)
@@ -264,6 +270,7 @@ class And(Combination):
 
         cat_non_nullable = generate_lazy_val(lambda: next((c for c in self.operands
                                                            if catp(c)
+                                                           and all(not td.search(catp) for td in c.operands)
                                                            and all(not o.nullable() for o in c.operands)),
                                                           None))
         if find_first(catp, self.operands, None) is None:

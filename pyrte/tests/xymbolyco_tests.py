@@ -103,16 +103,30 @@ class XymbolycoCase(unittest.TestCase):
     def test_discovered_103(self):
         # rt=And(Or(Or(∅, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
         # can=Cat(Σ, Σ)
-        from rte.r_emptyset import EmptySet
         from rte.r_epsilon import Epsilon
         Σ = Sigma
         ε = Epsilon
-        rt = And(Or(Or(EmptySet, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
-        can = rt.canonicalize()
-        self.assertTrue(Or(And(rt, Not(can)),
-                           And(Not(rt), can)).to_dfa(True).vacuous(),
-                        f"\nrt={rt}\n" +
-                        f"can={can}")
+
+        for rt in [Or(Σ, Not(Σ)),
+                   And(Star(Σ),
+                       Cat(Not(ε), Not(ε))),
+                   Or(And(Σ, Cat(Not(ε), Not(ε))),
+                      And(Not(Σ), Cat(Not(ε), Not(ε)))),
+                   Or(EmptySet, And(Or(Cat(Σ, Σ, Star(Σ)), ε), Cat(Cat(Σ, Star(Σ)), Cat(Σ, Star(Σ))))),
+                   And(Or(Cat(Σ, Σ, Star(Σ)), ε),
+                       Cat(Cat(Σ, Star(Σ)), Cat(Σ, Star(Σ)))),
+                   Or(And(Cat(Σ, Σ, Star(Σ)), Cat(Cat(Σ, Star(Σ)), Cat(Σ, Star(Σ)))),
+                      And(ε, Cat(Cat(Σ, Star(Σ)), Cat(Σ, Star(Σ))))),
+                   And(Or(Σ, Not(Σ)), Cat(Not(ε), Not(ε))),
+                   And(Or(Or(EmptySet, Σ),
+                          Not(Σ)),
+                       Cat(Not(ε), Not(ε)))
+                   ]:
+            can = rt.canonicalize()
+            self.assertTrue(Or(And(rt, Not(can)),
+                               And(Not(rt), can)).to_dfa(True).vacuous(),
+                            f"\nrt={rt}\n" +
+                            f"can={can}")
 
     def test_discovered_113(self):
         from rte.xymbolyco import reconstructLabels
