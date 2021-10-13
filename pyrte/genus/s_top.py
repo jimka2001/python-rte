@@ -21,8 +21,7 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Any, Optional, Literal
-from typing_extensions import TypeGuard
+from typing import Any, Optional, Literal, TypeGuard
 
 
 class STopImpl(SimpleTypeD, TerminalType):

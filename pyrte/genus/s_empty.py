@@ -21,8 +21,7 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Literal, Any
-from typing_extensions import TypeGuard
+from typing import Literal, Any, TypeGuard
 
 
 class SEmptyImpl(SimpleTypeD, TerminalType):

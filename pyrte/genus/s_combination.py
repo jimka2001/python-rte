@@ -21,8 +21,7 @@
 
 import functools
 from abc import abstractmethod
-from typing import List, Callable, TypeVar, Literal, Optional, Iterable, cast
-from typing_extensions import TypeGuard
+from typing import List, Callable, TypeVar, Literal, Optional, Iterable, cast, TypeGuard
 from genus.utils import compare_sequence
 from genus.utils import find_simplifier, find_first
 from genus.utils import flat_map

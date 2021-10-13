@@ -22,8 +22,7 @@
 
 from genus.simple_type_d import SimpleTypeD
 from genus.genus_types import NormalForm
-from typing import Optional, Literal, Any, cast
-from typing_extensions import TypeGuard
+from typing import Optional, Literal, Any, cast, TypeGuard
 
 
 class SNot(SimpleTypeD):
