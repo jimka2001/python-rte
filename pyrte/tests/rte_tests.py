@@ -804,10 +804,8 @@ class RteCase(unittest.TestCase):
             return got is expecting
 
         def invariant(rt: 'Rte') -> bool:
-            print(f"testing {rt}")
-
-            return all(try_example(rt,seq)
-                       for seq in [[1,1],
+            return all(try_example(rt, seq)
+                       for seq in [[1, 1],
                                    [1],
                                    [],
                                    [1, 1, 1]])
