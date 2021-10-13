@@ -21,7 +21,8 @@
 
 
 from rte.r_combination import Combination
-from typing import List, Any, Optional, TypeGuard
+from typing import List, Any, Optional
+from typing_extensions import TypeGuard
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 

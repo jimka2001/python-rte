@@ -28,7 +28,8 @@ from genus.s_top import STopImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
 from genus.utils import get_all_subclasses
 from genus.genus_types import NormalForm
-from typing import Literal, Any, Optional, TypeGuard
+from typing import Literal, Any, Optional
+from typing_extensions import TypeGuard
 
 
 class SAtomic(SimpleTypeD, TerminalType):

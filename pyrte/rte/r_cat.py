@@ -21,8 +21,8 @@
 
 
 from rte.r_rte import Rte
-from typing import Literal, Set, List, TypeGuard, Callable, Optional
-
+from typing import Literal, Set, List, Callable, Optional
+from typing_extensions import TypeGuard
 
 verbose = False
 

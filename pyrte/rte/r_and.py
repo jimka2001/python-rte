@@ -21,7 +21,8 @@
 
 
 from rte.r_combination import Combination
-from typing import Literal, List, Any, Optional, TypeGuard
+from typing import Literal, List, Any, Optional
+from typing_extensions import TypeGuard
 
 verbose = False
 

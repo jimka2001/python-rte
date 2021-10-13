@@ -21,7 +21,8 @@
 
 
 from rte.r_rte import Rte
-from typing import Literal, Set, TypeGuard, Callable, Optional
+from typing import Literal, Set, Callable, Optional
+from typing_extensions import TypeGuard
 
 
 class Not(Rte):

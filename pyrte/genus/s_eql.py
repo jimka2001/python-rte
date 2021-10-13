@@ -21,7 +21,8 @@
 
 from genus.s_member import SMemberImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Any, Literal, Optional, TypeGuard
+from typing import Any, Literal, Optional
+from typing_extensions import TypeGuard
 
 
 class SEql(SMemberImpl, TerminalType):
