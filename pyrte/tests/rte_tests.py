@@ -787,8 +787,8 @@ class RteCase(unittest.TestCase):
         # can=Cat(Σ, Σ)
         from rte.r_epsilon import Epsilon
         from genus.utils import fixed_point
-        problematic = And(Or(Sigma, Not(Sigma)),
-                          Cat(Not(Epsilon), Not(Epsilon)))
+        problematic = Or(And(Cat(Sigma, Sigma, Star(Sigma)),
+                             Cat(Cat(Sigma, Star(Sigma)))))
 
         def good_enough(a, b):
             return type(a) == type(b) and a == b
