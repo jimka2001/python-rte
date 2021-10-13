@@ -19,6 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.r_rte.py
 
+from typing import Callable, Optional
+
 class CannotComputeDerivative(Exception):
     def __init__(self, msg, rte, wrt, factors, disjoints):
         self.msg = msg
@@ -171,6 +173,14 @@ class Rte:
     def equivalent(self, rte2):
         rte1 = self
         return rte1.to_dfa(True).equivalent(rte2.to_dfa(True))
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        # search the Rte for any node satisfying the given predicate, test
+        # return that node (of type Rte) else return None
+        if test(self):
+            return self
+        else:
+            return None
 
 
 def random_rte(depth):
