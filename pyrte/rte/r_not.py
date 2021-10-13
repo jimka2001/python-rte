@@ -21,7 +21,7 @@
 
 
 from rte.r_rte import Rte
-
+from typing import Callable, Optional
 
 class Not(Rte):
     def __init__(self, operand):
@@ -101,6 +101,9 @@ class Not(Rte):
 
     def derivative_down(self, wrt, factors, disjoints):
         return Not(self.operand.derivative(wrt, factors, disjoints))
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        return self.operand.search(test) or super(Not, self).search(test)
 
 
 def notp(op):

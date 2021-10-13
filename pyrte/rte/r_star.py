@@ -24,6 +24,7 @@ from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_rte import Rte
 from rte.r_sigma import Sigma
+from typing import Callable, Optional
 
 
 class Star(Rte):
@@ -140,6 +141,9 @@ class Star(Rte):
     def derivative_down(self, wrt, factors, disjoints):
         from rte.r_cat import Cat
         return Cat(self.operand.derivative(wrt, factors, disjoints), self)
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        return self.operand.search(test) or super(Star, self).search(test)
 
 
 def starp(rte):

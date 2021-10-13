@@ -21,7 +21,7 @@
 
 
 from rte.r_rte import Rte
-
+from typing import Callable, Optional
 
 class Combination(Rte):
     def __init__(self, *operands):
@@ -342,3 +342,9 @@ class Combination(Rte):
 
     def derivative_down(self, wrt, factors, disjoints):
         return self.create([ob.derivative(wrt, factors, disjoints) for ob in self.operands])
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        for rt in self.operands:
+            if s := rt.search(test):
+                return s
+        return super(Combination, self).search(test)

@@ -21,6 +21,7 @@
 
 
 from rte.r_rte import Rte
+from typing import Callable, Optional
 
 
 class Cat(Rte):
@@ -144,6 +145,12 @@ class Cat(Rte):
                 return Or(term1(), term2())
             else:
                 return term1()
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        for rt in self.operands:
+            if s := rt.search(test):
+                return s
+        return super(Cat, self).search(test)
 
 
 def catp(op):
