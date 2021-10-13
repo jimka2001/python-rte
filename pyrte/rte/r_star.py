@@ -25,8 +25,7 @@ from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_rte import Rte
 from rte.r_sigma import Sigma
-from typing import Literal, Set, Optional, List
-from typing_extensions import TypeGuard
+from typing import Literal, Set, Optional, List, TypeGuard
 
 
 class Star(Rte):

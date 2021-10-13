@@ -21,8 +21,7 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Literal
-from typing_extensions import TypeGuard
+from typing import Literal, TypeGuard
 
 
 class SMemberImpl(SimpleTypeD):
