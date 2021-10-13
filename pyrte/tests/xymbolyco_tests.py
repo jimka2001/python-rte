@@ -102,6 +102,20 @@ class XymbolycoCase(unittest.TestCase):
                                 f"\nrt={rt}\n" +
                                 f"can={can}")
 
+    def test_discovered_103(self):
+        # rt=And(Or(Or(∅, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
+        # can=Cat(Σ, Σ)
+        from rte.r_emptyset import EmptySet
+        from rte.r_epsilon import Epsilon
+        Σ = Sigma
+        ε = Epsilon
+        rt = And(Or(Or(EmptySet, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
+        can = rt.canonicalize()
+        self.assertTrue(Or(And(rt, Not(can)),
+                           And(Not(rt), can)).to_dfa(True).vacuous(),
+                        f"\nrt={rt}\n" +
+                        f"can={can}")
+
     def test_discovered_113(self):
         from rte.xymbolyco import reconstructLabels
         so = Singleton(SEql(1))
