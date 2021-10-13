@@ -21,30 +21,27 @@
 
 
 import os
-import random
 import unittest
 
-from genus.depthgenerator import random_type_designator, test_values  # , DepthGenerator
+from genus.depthgenerator import random_type_designator, test_values
 from genus.genus_types import NormalForm
 from genus.mdtd import mdtd
 from genus.s_and import SAnd, createSAnd, andp
 from genus.s_atomic import SAtomic
-# from genus.s_combination import SCombination
 from genus.s_satisfies import SSatisfies
 from genus.s_empty import SEmptyImpl, SEmpty
 from genus.s_eql import SEql
-from genus.s_member import SMember  # ,SMemberImpl
+from genus.s_member import SMember
 from genus.s_not import SNot, notp
 from genus.s_or import SOr, createSOr, orp
 from genus.s_top import STopImpl, STop
-from genus.simple_type_d import TerminalType  # ,SimpleTypeD
-from genus.utils import compare_sequence, cmp_objects  # ,get_all_subclasses
-# from genus.utils import find_simplifier, find_first
-from genus.utils import generate_lazy_val, fixed_point  # , flat_map
-from genus.utils import uniquify, trace_graph  # , remove_element, search_replace
-# from genus.depthgenerator import random_type_designator_filter
-# from genus import simple_type_d
-from genus.Statistics import measureSubtypeComputability
+from genus.simple_type_d import TerminalType
+from genus.utils import compare_sequence, cmp_objects
+from genus.utils import uniquify, trace_graph
+from genus.utils import generate_lazy_val, fixed_point
+#from genus.Statistics import measureSubtypeComputability
+
+
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -428,7 +425,7 @@ class GenusCase(unittest.TestCase):
 
     def test_discovered_case_297(self):
         from genus.depthgenerator import TestA, TestB
-
+        self.assertTrue(True)
         even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
         b = SAtomic(TestB)
         a = SAtomic(TestA)
@@ -873,6 +870,7 @@ class GenusCase(unittest.TestCase):
 
     def test_depth_generator(self):
         from genus.depthgenerator import DepthGenerator
+        self.assertTrue(self)
         rand_lambda = DepthGenerator(2).rand_lambda_str_generator()
         for i in range(10):
             rand_lambda[0](i)
@@ -1130,15 +1128,15 @@ class GenusCase(unittest.TestCase):
 
     def test_find_eqv_class(self):
         from genus.utils import find_eqv_class
-        self.assertEqual([1, 2, 3], find_eqv_class([[1, 2, 3], [4, 5, 6]], 2))
-        self.assertIsNone(find_eqv_class([[1, 2, 3], [4, 5, 6]], 0))
+        self.assertEqual((1, 2, 3), find_eqv_class([(1, 2, 3), (4, 5, 6)], 2))
+        self.assertIsNone(find_eqv_class([(1, 2, 3), (4, 5, 6)], 0))
 
     def test_split_eqv_class(self):
         from genus.utils import split_eqv_class
-        partition = split_eqv_class([1, 2, 3, 10, 11, 12], lambda n: n % 3)
-        self.assertTrue([1, 10] in partition)
-        self.assertTrue([2, 11] in partition)
-        self.assertTrue([3, 12] in partition)
+        partition = split_eqv_class((1, 2, 3, 10, 11, 12), lambda n: n % 3)
+        self.assertTrue((1, 10) in partition)
+        self.assertTrue((2, 11) in partition)
+        self.assertTrue((3, 12) in partition)
 
     def test_transition_to_ite(self):
         from genus.ite import transitions_to_ite
@@ -1239,6 +1237,7 @@ class GenusCase(unittest.TestCase):
                     self.assertIs(eval_ite(ite, v), expected)
 
     def test_typeEquivalent_random(self):
+        import random
         for i in range(0, 1000):
             d = random.randint(0, 4)
             t1 = random_type_designator(d)

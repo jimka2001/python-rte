@@ -22,6 +22,7 @@
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
 from typing import Any, Optional, Literal
+from typing_extensions import TypeGuard
 
 
 class STopImpl(SimpleTypeD, TerminalType):
@@ -75,5 +76,5 @@ class STopImpl(SimpleTypeD, TerminalType):
 STop = STopImpl()
 
 
-def topp(this: SimpleTypeD) -> bool:
+def topp(this: SimpleTypeD) -> TypeGuard[STopImpl]:
     return isinstance(this, STopImpl)

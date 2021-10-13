@@ -20,7 +20,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from genus.simple_type_d import SimpleTypeD
 from rte.r_rte import Rte
+from typing import Literal, Set
 
 
 class Combination(Rte):
@@ -40,11 +42,11 @@ class Combination(Rte):
     def create(self, operands):
         raise Exception(f"create not implemented for {type(self)}")
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t) -> Literal[-1, 0, 1]:
         from genus.utils import compare_sequence
         return compare_sequence(self.operands, t.operands)
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         import functools
         return functools.reduce(lambda acc, tds: acc.union(tds),
                                 [td.first_types() for td in self.operands],
@@ -77,10 +79,10 @@ class Combination(Rte):
     def orInvert(self, x):
         raise Exception(f"orInvert not implemented for {type(self)}")
 
-    def conversionC1(self):
+    def conversionC1(self) -> Rte:
         return self.create(self.operands)
 
-    def conversionC3(self):
+    def conversionC3(self) -> Rte:
         # Or(... Sigma * ....) -> Sigma *
         # And(... EmptySet....) -> EmptySet
         if self.zero() in self.operands:
@@ -88,18 +90,18 @@ class Combination(Rte):
         else:
             return self
 
-    def conversionC4(self):
+    def conversionC4(self) -> Rte:
         from genus.utils import uniquify
         return self.create(uniquify(self.operands))
 
-    def conversionC5(self):
+    def conversionC5(self) -> Rte:
         from genus.utils import cmp_objects
         import functools
 
         ordered = sorted(self.operands, key=functools.cmp_to_key(cmp_objects))
         return self.create(ordered)
 
-    def conversionC6(self):
+    def conversionC6(self) -> Rte:
         # remove Sigma * and flatten And(And(...)...)
         # remove EmptySet and flatten Or(Or(...)...)
         from genus.utils import flat_map
@@ -114,7 +116,7 @@ class Combination(Rte):
 
         return self.create(flat_map(f, self.operands))
 
-    def conversionC7(self):
+    def conversionC7(self) -> Rte:
         # (:or A B (:* B) C)
         # --> (:or A (:* B) C)
         # (:and A B (:* B) C)
@@ -137,7 +139,7 @@ class Combination(Rte):
 
             return self.create(flat_map(f, self.operands))
 
-    def conversionC11(self):
+    def conversionC11(self) -> Rte:
         # And(...,x,Not(x)...) --> EmptySet
         # Or(...x,Not(x)...) --> SigmaStar
         from rte.r_not import notp
@@ -146,7 +148,7 @@ class Combination(Rte):
         else:
             return self
 
-    def conversionC14(self):
+    def conversionC14(self) -> Rte:
         # generalization of conversionC11
         # Or(A,Not(B),X) -> Sigma* if B is subtype of A
         # And(A,Not(B),X) -> EmptySet if A is subtype of B
@@ -159,7 +161,7 @@ class Combination(Rte):
         else:
             return self
 
-    def conversionC12(self):
+    def conversionC12(self) -> Rte:
         # sigmaSigmaStarSigma = Cat(Sigma, Sigma, sigmaStar)
         # Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
         #   --> Or( A, B, ... Not(Singleton(X))
@@ -195,7 +197,7 @@ class Combination(Rte):
         else:
             raise Exception(f"expecting Or or And, got {self}")
 
-    def conversionC15(self):
+    def conversionC15(self) -> Rte:
         # simplify to maximum of one SMember(...) and maximum of one Not(SMember(...))
         # Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
         #   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
@@ -237,7 +239,7 @@ class Combination(Rte):
 
         return self.create(uniquify([f(op) for op in self.operands]))
 
-    def conversionC16(self):
+    def conversionC16(self) -> Rte:
         # WARNING, this function assumes there are no repeated elements
         #     according to ==
         #     If there are repeated elements, both will be removed.
@@ -274,10 +276,10 @@ class Combination(Rte):
 
         return self.create(filtered)
 
-    def conversionD16b(self):
+    def conversionD16b(self) -> Rte:
         raise Exception(f"conversionC16b not implemented for {type(self)}")
 
-    def conversionC17(self):
+    def conversionC17(self) -> Rte:
         # And({1,2,3},Singleton(X),Not(Singleton(Y)))
         #  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
         # --> And({...},Singleton(X),Not(Singleton(Y)))
@@ -314,7 +316,7 @@ class Combination(Rte):
         rt = Singleton(createSMember([a for a in member.arglist if self.orInvert(td.typep(a))]))
         return self.create(search_replace(self.operands, singleton, rt))
 
-    def conversionC21(self):
+    def conversionC21(self) -> Rte:
         from genus.utils import flat_map
         from rte.r_and import andp
         from rte.r_or import orp
@@ -337,8 +339,8 @@ class Combination(Rte):
         else:
             return self
 
-    def conversionC99(self):
+    def conversionC99(self) -> Rte:
         return self.create([r.canonicalize_once() for r in self.operands])
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self, wrt, factors, disjoints) -> Rte:
         return self.create([ob.derivative(wrt, factors, disjoints) for ob in self.operands])

@@ -30,6 +30,7 @@ from typing import Literal, Optional
 
 from genus.genus_types import NormalForm
 from genus.utils import generate_lazy_val, fixed_point
+from typing import NoReturn
 
 
 # is it useful, though ? all classes are types by default in python
@@ -111,7 +112,7 @@ class SimpleTypeD:
     #   t – the type we want to check whether this type is included in
     # Returns:
     #   an optional Boolean (True/False/None) which is true if self is a subtype of t
-    def subtypep(self, t) -> Optional[bool]:
+    def subtypep(self, t: 'SimpleTypeD') -> Optional[bool]:
         from genus.s_or import orp
         from genus.s_and import andp
         from genus.s_top import topp
@@ -141,7 +142,7 @@ class SimpleTypeD:
 
         return self.subtypep_cache[t]
 
-    def subtypep_down(self, t) -> Optional[bool]:
+    def subtypep_down(self, t: 'SimpleTypeD') -> Optional[bool]:
         from genus.s_not import notp
         if notp(t) and self.disjoint(t.s) is True:
             return True
@@ -205,7 +206,7 @@ class SimpleTypeD:
         """
         return t.subtypep(self)
 
-    def cmp_to_same_class_obj(self, t: 'SimpleTypeD') -> Literal[-1, 0, 1]:
+    def cmp_to_same_class_obj(self, t: 'SimpleTypeD') -> NoReturn:
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare type designators of type {type(self)}")
 

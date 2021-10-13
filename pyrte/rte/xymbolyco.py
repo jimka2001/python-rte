@@ -24,9 +24,13 @@ from functools import reduce
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
-from typing import List, Union, Tuple, Any
+from typing import List, Union, Tuple, Any, Dict, Callable, Optional, TypeVar
 
-Triple = Tuple[str, Rte, Union[int, Tuple[str, Any]]]
+L = TypeVar('L', Rte, SimpleTypeD)
+Triple = Tuple[Union[int, str],
+               L,  # Union[Rte, SimpleTypeD],
+               Union[int, Tuple[str, Any]]]
+verbose = False
 
 
 class State:
@@ -62,7 +66,10 @@ class State:
         super().__init__()
 
 
-def createSinkState(index):
+EqvClass = Tuple[State, ...]
+
+
+def createSinkState(index: int) -> State:
     from genus.s_top import STop
 
     return State(index=index,
@@ -78,10 +85,10 @@ def default_combine_labels(_l1, _l2):
 
 class Dfa:
     def __init__(self,
-                 pattern=None,
-                 states=None,
-                 exit_map=None,
-                 combine_labels=default_combine_labels):
+                 pattern: Optional[Rte] = None,
+                 states: Optional[List[State]] = None,
+                 exit_map: Optional[Dict[int, Any]] = None,
+                 combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = default_combine_labels):
         if exit_map is None:
             exit_map = dict([])
         if not states:
@@ -103,7 +110,13 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
-    def to_dot(self, title, view=False, abbrev=True, draw_sink=False, state_legend=True, verbose=False):
+    def to_dot(self,
+               title: Optional[str],
+               view: bool = False,
+               abbrev: bool = True,
+               draw_sink: bool = False,
+               state_legend: bool = True,
+               verbose: bool = False):
         from genus.utils import dot_view
         import io
         text = io.StringIO()
@@ -166,10 +179,10 @@ class Dfa:
         text.write("}\n")
         return text.getvalue()
 
-    def delta(self, source_state, target_label):
+    def delta(self, source_state, target_label) -> State:
         return self.states[source_state.transitions[target_label]]
 
-    def simulate(self, sequence):
+    def simulate(self, sequence: List[Any]) -> Any:
         state_id = 0
         for element in sequence:
             state_id = eval_ite(self.states[state_id].ite(), element)
@@ -196,14 +209,14 @@ class Dfa:
 
         return [self.pattern, transitions(), accepting(), exit_map(), self.combine_labels]
 
-    def find_sink_states(self):  # returns a list of integers
+    def find_sink_states(self) -> List[int]:  # returns a list of integers
         from genus.s_top import STop
         return [q.index for q in self.states
                 if not q.accepting
                 and 1 == len(q.transitions)
                 and q.transitions[STop] == q.index]
 
-    def complete(self):
+    def complete(self) -> 'Dfa':
         from rte.r_not import Not
         from rte.r_or import createOr
         from genus.s_top import STop
@@ -229,7 +242,7 @@ class Dfa:
                              exit_map=exit_map,
                              combine_labels=combine_labels)
 
-    def complement(self, exit_map):
+    def complement(self, exit_map: Dict[int, Any]) -> 'Dfa':
         from rte.r_not import createNot
         pattern_old, transitions, accepting, _, combine_labels = self.complete().serialize()
         if pattern_old is None:
@@ -242,7 +255,9 @@ class Dfa:
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
-    def find_accessibles(self):  # returns a pair of two lists of indices (accessibles, co-accessables)
+    def find_accessibles(self) -> Tuple[List[int],
+                                        List[int]]:
+        # returns a pair of two lists of indices (accessibles, co-accessibles)
         def reachable(seen, triples):
             # returns pair (reachables,remaining_triples),
             # reachables is list of int, triples are remaining triples to consider on future iteration
@@ -265,7 +280,7 @@ class Dfa:
         coaccessibles = expand_reachable(accepting_ids, [(dst, label, src) for src, label, dst in transitions])
         return accessibles, coaccessibles
 
-    def trim(self, compact=True):
+    def trim(self, compact: bool = True) -> 'Dfa':
         pattern, transitions, accepting_ids, exit_map, combine_labels = self.serialize()
         accessibles, coaccessibles = self.find_accessibles()
         useful_states = set(accessibles + coaccessibles)
@@ -302,7 +317,12 @@ class Dfa:
 
         return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
 
-    def combine_parallel_triples(self, triples, combine_parallel_labels):
+    def combine_parallel_triples(self,
+                                 triples: List[Triple],
+                                 combine_parallel_labels: Callable[[List[L]], L]
+                                 ) -> List[Triple]:
+        if verbose:
+            print(f"combine_parallel_triples self={self}")
         #  accepts a sequence of triples, each of the form [from label to]
         #   groups them by common from/to, these are parallel transitions
         #   combines the labels of the parallel transitions, into one single label
@@ -320,7 +340,7 @@ class Dfa:
                 for dst in list(set([d for _, _, d in from_src]))
                 ]
 
-    def extract_rte(self):
+    def extract_rte(self) -> Dict[Any, Rte]:
         from functools import reduce
         from rte.r_epsilon import Epsilon
         from rte.r_singleton import Singleton
@@ -347,20 +367,25 @@ class Dfa:
 
         # step 2
         _, old_transition_triples, accepting, _, _ = dfa.serialize()
-        old_transitions: List[Triple] = [(src, Singleton(td), dst) for src, td, dst in old_transition_triples]
+        old_transitions: List[Triple] = [(src, Singleton(td), dst)
+                                         for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
         new_initial_transitions: List[Triple] = [("I", Epsilon, 0)]
         # step 4  # adding state whose index is NOT integer
-        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid])) for qid in accepting]
+        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid]))
+                                               for qid in accepting]
 
-        def combine_parallel_labels(rtes):
+        def combine_parallel_labels(rtes: List[Rte]) -> Rte:
             return createOr(rtes).canonicalize()
 
-        def extract_labels(triples):
+        def extract_labels(triples) -> List[Rte]:
             return [l for _, l, _ in triples]
 
-        def eliminate_state(triples, qid):
-            def f(acc, triple):
+        def eliminate_state(triples: List[Triple], qid: int) -> List[Triple]:
+            def f(acc, triple: Triple) -> Tuple[List[Triple],
+                                                List[Triple],
+                                                List[Triple],
+                                                List[Triple]]:
                 x_to_q, q_to_q, q_to_x, others = acc
                 src, _, dst = triple
                 if src == qid and dst == qid:
@@ -415,12 +440,12 @@ class Dfa:
                                if f == "F"
                                if i == "I"]]]
 
-        d = [(exit_value, combine_parallel_labels(labels).canonicalize()
-              )
+        d = [(exit_value,
+              combine_parallel_labels(labels).canonicalize())
              for exit_value, labels in els]
         return dict(d)
 
-    def to_rte(self):
+    def to_rte(self) -> Dict[Any, Rte]:
         from rte.r_emptyset import EmptySet
         extracted = self.extract_rte()
         if extracted:
@@ -428,9 +453,9 @@ class Dfa:
         else:
             return dict([(True, EmptySet)])
 
-    def paths_to_accepting(self, allow_maybe_satisfiable=False):
+    def paths_to_accepting(self, allow_maybe_satisfiable=False) -> List[List[State]]:
         # returns a list of paths
-        # each paths is a list of states starting with self.states[0]
+        # each path is a list of states starting with self.states[0]
         # and ending in an accepting state.
         # no path contains the same state twice, i.e. no paths with loops
         # The parameter allow_maybe_satisfiable controls how strict the
@@ -448,7 +473,7 @@ class Dfa:
         #  the language of the Dfa is empty.
         from genus.utils import flat_map
 
-        def acceptable(td):
+        def acceptable(td: SimpleTypeD) -> bool:
             inh = td.inhabited()
             if inh is True:
                 return True
@@ -459,7 +484,7 @@ class Dfa:
             else:
                 return False
 
-        def extend_path_1(path):
+        def extend_path_1(path: List[State]) -> List[List[State]]:
             tail = path[-1]
             return [path + [self.states[qid]]
                     for td in tail.transitions
@@ -468,10 +493,10 @@ class Dfa:
                     if acceptable(td)
                     ]
 
-        def extend_paths_1(paths):
+        def extend_paths_1(paths: List[List[State]]) -> List[List[State]]:
             return flat_map(extend_path_1, paths)
 
-        def extend_paths(paths):
+        def extend_paths(paths: List[List[State]]) -> List[List[State]]:
             if not paths:
                 return paths
             else:
@@ -480,7 +505,7 @@ class Dfa:
         initials = [[self.states[0]]]
         return extend_paths(initials)
 
-    def vacuous(self):
+    def vacuous(self) -> Optional[bool]:
         # this function returns True, False, or None.
         #   True ==> there is no accepting path from initial state to final state
         #   False ==> There is an accepting path from initial state to final state
@@ -501,52 +526,58 @@ class Dfa:
         else:
             return False
 
-    def inhabited(self):
+    def inhabited(self) -> Optional[bool]:
         v = self.vacuous()
         if v is None:
             return None
         else:
             return not v
 
-    def find_hopcroft_partition(self):
+    def find_hopcroft_partition(self) -> List[EqvClass]:
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
         from genus.s_empty import SEmpty
-        finals = [q for q in self.states if q.accepting]
-        non_finals = [q for q in self.states if not q.accepting]
+        finals = tuple([q for q in self.states if q.accepting])
+        non_finals = tuple([q for q in self.states if not q.accepting])
         pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + [non_finals]
 
-        def refine(partition):
-            def phi(source_state, label):
+        def refine(partition: List[EqvClass]) -> List[EqvClass]:
+            def phi(source_state: State, label: SimpleTypeD) -> Optional[EqvClass]:
                 return find_eqv_class(partition, self.delta(source_state, label))
 
-            def Phi_1(s):
+            def Phi_1(s) -> List[Tuple[SimpleTypeD, Optional[EqvClass]]]:
                 return [(label, phi(s, label)) for label in s.transitions]
 
-            def Phi(s):
+            def Phi(s) -> Tuple[Tuple[SimpleTypeD, EqvClass], ...]:
                 grouped = group_by(lambda v: tuple(v[1]), Phi_1(s))
                 vec = [(label, k) for k in grouped
+                       # k is a Tuple[State]
                        for pairs in [grouped[k]]
                        for labels in [[a for a, _ in pairs]]
-                       for label in [reduce(lambda a, b: self.combine_labels(a, b), labels, SEmpty)]]
+                       for label in [reduce(self.combine_labels, labels, SEmpty)]]
                 return tuple(vec)
 
-            def repartition(eqv_class):
+            def repartition(eqv_class: EqvClass) -> List[EqvClass]:
                 return split_eqv_class(eqv_class, Phi)
 
             return [tuple(eqv_class) for eqv_class in flat_map(repartition, partition)]
 
         return fixed_point(pi_0, refine, lambda a, b: a == b)
 
-    def minimize(self):
+    def minimize(self) -> 'Dfa':
         from genus.utils import find_eqv_class
         from genus.s_or import createSOr
 
-        def min_state(eqv_class):
-            return reduce(min, [q.index for q in eqv_class])
+        def min_int(a: int, b: int) -> int:
+            return a if a < b else b
+
+        def min_state(eqv_class) -> int:
+            # using min_int with reduce, rather than int, because otherwise
+            # mypy cannot figure out the min_state returns int.
+            return reduce(min_int, [q.index for q in eqv_class])
 
         pi_minimized = self.find_hopcroft_partition()
-        ids = [min_state(eqv_class) for eqv_class in pi_minimized]
-        ids_map = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
+        ids: List[int] = [min_state(eqv_class) for eqv_class in pi_minimized]
+        ids_map: Dict[EqvClass, int] = dict(zip(pi_minimized, ids))  # map eqv_class -> old_state_id
 
         def merge_parallel(transitions):
             return self.combine_parallel_triples(transitions, lambda labels: createSOr(labels).canonicalize())
@@ -558,9 +589,8 @@ class Dfa:
             else:
                 return new_id(next(q for q in self.states if q.index == old_state))
 
-        new_fids = [idx for idx, eqv_class in zip(ids, pi_minimized)
-                    if any(q.accepting for q in eqv_class)]
-
+        new_fids: List[int] = [idx for idx, eqv_class in zip(ids, pi_minimized)
+                               if any(q.accepting for q in eqv_class)]
         new_exit_map = dict([(new_id(f), self.exit_map[f]) for f in self.exit_map])
         new_transitions = [(src, label, dst) for eqv_class in pi_minimized
                            for q in [eqv_class[0]]
@@ -574,7 +604,7 @@ class Dfa:
                          new_exit_map,
                          self.combine_labels)
 
-    def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value):
+    def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value) -> 'Dfa':
         from genus.s_and import SAnd
         from genus.genus_types import NormalForm
         dfa1 = self  # IDE warns if I name the parameter dfa1 rather than self. :-(
@@ -640,27 +670,27 @@ class Dfa:
                          exit_map=dict(exit_map),
                          combine_labels=dfa1.combine_labels)
 
-    def equivalent(self, dfa2):
+    def equivalent(self, dfa2) -> Optional[bool]:
         # returns True, False, or None
         return self.xor(dfa2).vacuous()
 
-    def union(self, dfa2):
+    def union(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: a or b,
                         lambda q1, _: self.exit_map[q1.index])
 
-    def intersection(self, dfa2):
+    def intersection(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: a and b,
                         lambda q1, _: self.exit_map[q1.index])
 
-    def xor(self, dfa2):
+    def xor(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: (a and not b) or (b and not a),
                         lambda q1, _: self.exit_map[q1.index])
 
 
-def reconstructLabels(path):
+def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
     # path is a list of states which form a path through (or partially through)
     # a Dfa
     def connecting_label(q1, q2):
@@ -676,26 +706,55 @@ def reconstructLabels(path):
         return [connecting_label(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
 
-def createDfa(pattern, transition_triples, accepting_states, exit_map, combine_labels):
+def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
+    from genus.s_or import createSOr
+    rtes, transitions = rte.derivatives()
+    # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
+    transition_triples = [(src, td, dst)
+                          for src in range(len(transitions))
+                          for td, dst in transitions[src]
+                          ]
+
+    def combine_labels(td1, td2):
+        return createSOr([td1, td2]).canonicalize()
+
+    accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
+    return createDfa(pattern=rte,
+                     transition_triples=transition_triples,
+                     accepting_states=accepting_states,
+                     exit_map=dict([(i, exit_value) for i in accepting_states]),
+                     combine_labels=combine_labels)
+
+
+def createDfa(pattern: Optional[Rte],
+              transition_triples: List[Tuple[int, SimpleTypeD, int]],
+              accepting_states: Optional[List[int]],
+              exit_map: Optional[Dict[int, Any]],
+              combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD]) -> 'Dfa':
     from functools import reduce
 
     assert isinstance(accepting_states, list)
     for i in accepting_states:
         assert isinstance(i, int)
         assert i >= 0
+    # every destination in the given transition_triples, but be mentioned
+    #  in the sources, but a source need not be mentioned in the destinations
+    srcs = [src for src, _, _ in transition_triples]
+    for src, td, dst in transition_triples:
+        assert dst in srcs, f"invalid transition {(src,td,dst)} because {dst} is not a given state"
 
-    def f(acc, triple):
+    def f(acc: int, triple: Tuple[int, Any, int]) -> int:
         src, _, dst = triple
         return max(acc, src, dst)
 
     max_index = reduce(f, transition_triples, 0)
 
-    def merge_tds(dst1, transitions):
+    def merge_tds(dst1: int, transitions: List[Tuple[SimpleTypeD, int]]) -> SimpleTypeD:
         assert transitions, "merge_tds expected transitions to be non-empty"
         tds = [td for td, dst2 in transitions if dst1 == dst2]
         return reduce(combine_labels, tds)
 
-    def make_state(i):
+    def make_state(i: int) -> State:
         transitions_pre = [(td, dst) for src, td, dst in transition_triples if src == i]
         # error if a td appears more than once.
         #   we would like to error if the tds are not disjoint, but this is already
