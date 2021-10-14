@@ -524,6 +524,9 @@ class RteCase(unittest.TestCase):
                          And(Cat(a, b, c), Star(d), Cat(a, b, c)))
         self.assertEqual(And(Cat(a, b, c), Star(d), Cat(Star(a), b, c, d, Star(c))).conversionA17c(),
                          And(Cat(a, b, c), Star(d), Cat(b, c, d)))
+        problematic = And(Cat(Sigma,Sigma,Sigma),
+                          Cat(Sigma,Star(Sigma),Sigma,Cat(Sigma,Sigma)))
+        self.assertEqual(problematic,problematic.conversionA17c())
 
     def test_and_conversionA19(self):
         ab = Singleton(SMember("a", "b"))

@@ -288,6 +288,8 @@ class And(Combination):
         def f(c):
             if not catp(c):
                 return c
+            elif any(rt.search(catp) for rt in c.operands):
+                return c
             elif count_non_nullable(c) == num_non_nullables:
                 # remove nullables.
                 return createCat([o for o in c.operands if not o.nullable()])
