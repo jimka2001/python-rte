@@ -809,7 +809,7 @@ class RteCase(unittest.TestCase):
         def good_enough(a, b):
             return type(a) == type(b) and a == b
 
-        def try_example(rt, seq):
+        def try_example(rt, seq) -> bool:
             expecting = problematic.simulate(True, seq)
             got = rt.simulate(True, seq)
             if got is not expecting:
