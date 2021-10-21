@@ -39,12 +39,13 @@ from genus.s_or import SOr, createSOr, orp
 from genus.s_top import STopImpl, STop
 from genus.simple_type_d import TerminalType  # ,SimpleTypeD
 from genus.utils import compare_sequence, cmp_objects  # ,get_all_subclasses
-# from genus.utils import find_simplifier, find_first
+from genus.utils import find_simplifier, find_first
 from genus.utils import generate_lazy_val, fixed_point  # , flat_map
-from genus.utils import uniquify, trace_graph  # , remove_element, search_replace
+from genus.utils import uniquify, trace_graph, remove_element, search_replace, search_replace_splice
+
 # from genus.depthgenerator import random_type_designator_filter
 # from genus import simple_type_d
-from genus.Statistics import measureSubtypeComputability
+# from genus.Statistics import measureSubtypeComputability
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -1257,32 +1258,123 @@ class GenusCase(unittest.TestCase):
 
         t1 = SSatisfies(f, "f")
         t2 = SSatisfies(g, "g")
-        # 1. A < B = None B < A = None
-        self.assertTrue(t1.typeEquivalent(t1))
 
-        # 2. A < B = None   B < A = False
-        self.assertEqual(t2.typeEquivalent(t1), None)
+        def oddp(a):
+            return a % 2 == 1 if type(a) is int else False
 
-        # 3. A < B = True  B < A = None
-        self.assertEqual(STop.typeEquivalent(t1), None)
+        sodd = SSatisfies(oddp, "odd")
 
-        # 4. A < B = True  B < A = None
-        self.assertEqual(SEmpty.typeEquivalent(t1), None)
+        L = [
+            # A < B = None    B < A = None
+            (t1, t2, None, None, None),
+            # A < B = None   B < A = False
+            (sodd, SEql(2), None, False, False),
+            # A < B = None   B < A = True
+            (t1, SEmpty, None, True, None),
 
-        # 5. A < B = False B < A = None
-        self.assertEqual(t1.typeEquivalent(STop), None)
+            # A < B = True   B < A = None
+            (SEmpty, t1, True, None, None),
+            # A < B = True   B < A = False
+            (SMember(1, 2), SMember(1, 2, 3), True, False, False),
+            # A < B = True   B < A = True
+            (SMember(1, 2, 3), SMember(2, 1, 3), True, True, True),
 
-        # 6. A < B = False   B < A = False
-        self.assertTrue(t2.typeEquivalent(SEmpty) is None)
+            # A < B = False  B < A = None
+            (SMember(2, 4), sodd, False, None, False),
+            # A < B = False  B < A = False
+            (SMember(1, 2, 3), SMember(2, 3, 4), False, False, False),
+            # A < B = False  B < A = True
+            (SMember(1, 2, 3), SMember(2, 3), False, True, False)
+        ]
 
-        # 7. A < B = True    B < A = False
-        self.assertFalse(SMember(1, 2).typeEquivalent(SMember(1, 2, 3)))
+        for (a, b, lt, gt, eq) in L:
+            self.assertTrue(a.subtypep(b) == lt, f"\na={a}\nb={b}\nexpecting a < b = {lt}, got {a.subtypep(b)}")
+            self.assertTrue(b.subtypep(a) == gt, f"\na={a}\nb={b}\nexpecting a > b = {gt}, got {b.subtypep(a)}")
+            self.assertTrue(a.typeEquivalent(b) == eq,
+                            f"\na={a}\nb={b}\nexpecting a = b = {eq}, got {a.typeEquivalent(b)}")
 
-        # 8. A < B = False   B < A = True
-        self.assertTrue(SMember(1, 2, 3).typeEquivalent(SMember(1, 2)) is False)
+    def test_find_simplifier(self):
+        t = SMember(1, 2, 3)
+        simplifiers = []
+        self.assertEqual(find_simplifier(t, simplifiers), t)
+        simplifiers.append(lambda: t)
+        self.assertEqual(find_simplifier(t, simplifiers), t)
+        simplifiers.append(lambda: SMember(2, 1, 3))
+        self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
+        simplifiers.append(lambda: SMember(3, 2, 1))
+        self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
 
-        # 9. A < B = True    B < A = True
-        self.assertTrue(SMember(1, 2, 3).typeEquivalent(SOr(SMember(1, 2), SMember(3))))
+    def test_search_replace(self):
+        li = [SMember(1, 2, 3), SMember(2, 1, 3), SMember(3, 1, 2)]
+        replace = [SMember(4, 5, 6), SMember(5, 4, 6), SMember(6, 4, 5)]
+
+        # Searching something that doesn't exist won't change the list
+        li = search_replace(li, SMember(8, 9, 2), replace[2])
+        self.assertEqual(li[0], SMember(1, 2, 3))
+        self.assertEqual(li[1], SMember(2, 1, 3))
+        self.assertEqual(li[2], SMember(3, 1, 2))
+        self.assertTrue(len(li) == 3)
+
+        # Searching every elements and replacing it with Replace elements
+        li = search_replace(li, SMember(1, 2, 3), replace[0])
+        li = search_replace(li, SMember(2, 1, 3), replace[1])
+        li = search_replace(li, SMember(3, 1, 2), replace[2])
+        self.assertEqual(li, replace)
+        self.assertTrue(len(li) == 3)
+
+        # Empty list
+        self.assertEqual(search_replace([], li[0], SMember(4, 6, 0)), [])
+
+    def test_search_replace_splice(self):
+        li = [1, 2, 3, 4, 5, 6, 7]
+        self.assertEqual(search_replace_splice(li, 7, [7, 8, 9, 10]), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+    def test_remove_element(self):
+        # Empty list
+        self.assertEqual(remove_element([], "h"), [])
+
+        # Removing element that occurs 1 time
+        li = ["s", "j", "v", "h", "t", "j", "f", "o", "j", "e", "h"]
+        self.assertEqual(remove_element(li, "s"), ["j", "v", "h", "t", "j", "f", "o", "j", "e", "h"])
+
+        # Removing element that occurs 2+ times
+        li = ["s", "j", "v", "h", "t", "j", "f", "o", "j", "e", "h"]
+        self.assertEqual(remove_element(li, "h"), ["s", "j", "v", "t", "j", "f", "o", "j", "e"])
+        self.assertEqual(remove_element(li, "j"), ["s", "v", "h", "t", "f", "o", "e", "h"])
+
+        # Removing element that isn't included
+        self.assertEqual(remove_element(li, "r"), li)
+
+    def test_find_first(self):
+        # Empty list testing the default argument also
+        self.assertEqual(find_first(lambda: True, []), None)
+        self.assertEqual(find_first(lambda: True, [], "Test"), "Test")
+
+        # No elements makes the predicate true
+        li = [1, 2, 3, 4, 5, 6, 7]
+        self.assertEqual(find_first(lambda x: x + 1 == 9, li), None)
+        # first element is the last
+        self.assertEqual(find_first(lambda x: x + 1 == 8, li), 7)
+        # first element is the first
+        self.assertEqual(find_first(lambda x: x + 1 == 2, li), 1)
+        # first element is one of them
+        self.assertEqual(find_first(lambda x: x + 1 == 5, li), 4)
+
+    def test_cmp_objects(self):
+        t = 1
+        s = 1
+        # objects are the same
+        self.assertEqual(cmp_objects(t, s), 0)
+        # objects are not the same type
+        t = SMember(1, 2, 3)
+        self.assertEqual(cmp_objects(t, s), -1)
+        # objects are same type not equal
+        # t < s
+        s = SMember(2, 1, 3)
+        self.assertEqual(cmp_objects(t, s), -1)
+        # t > s
+        t = SMember(3, 1, 2)
+        self.assertEqual(cmp_objects(t, s), 1)
 
 
 if __name__ == '__main__':
