@@ -28,7 +28,7 @@ from rte.r_and import And, createAnd
 from rte.r_or import Or, createOr
 from rte.r_singleton import Singleton
 from rte.r_not import Not
-from rte.r_cat import Cat, createCat, catxyp
+from rte.r_cat import Cat, createCat, catxyp, catp
 from rte.r_random import random_rte
 from rte.r_constants import notSigma, sigmaSigmaStarSigma, notEpsilon, sigmaStar
 from genus.s_eql import SEql
@@ -463,6 +463,15 @@ class RteCase(unittest.TestCase):
                          And(Cat(a, b, c, Star(d)), Cat(x, y, z)))
         self.assertEqual(And(Cat(a, b, c), x).conversionA17a(),
                          And(Cat(a, b, c), x))
+        self.assertEqual(And(Cat(Sigma, Sigma, Star(Sigma)),
+                             Cat(Cat(Sigma, Star(Sigma)))).conversionA17a(),
+                         And(Cat(Sigma, Sigma, Star(Sigma)),
+                             Cat(Cat(Sigma, Star(Sigma)))))
+
+        self.assertTrue(And(Cat(a, b, c).search(catp)))
+
+        self.assertIsNot(And(Cat(Cat(a, b, c)),
+                             Cat(a, b, c)).conversionA17a(), EmptySet)
 
     def test_and_conversionA17a2(self):
         a = Singleton(SEql("a"))
@@ -478,6 +487,10 @@ class RteCase(unittest.TestCase):
                          And(Cat(a, b, c), x))
         self.assertEqual(And(Cat(a, b, c), d, Cat(x, y, z)).conversionA17a2(),
                          And(d, Cat(And(a, x), And(b, y), And(c, z))))
+        self.assertEqual(And(Cat(Cat(a, b, c)),
+                             Cat(a, b, c)).conversionA17a2(),
+                         And(Cat(Cat(a, b, c)),
+                             Cat(a, b, c)))
 
     def test_and_conversionA17b(self):
         # after 17a we know that if there are multiple Cats(...) without a nullable,
@@ -493,6 +506,10 @@ class RteCase(unittest.TestCase):
                          And(Cat(a, b, c), Cat(a, b, c, Star(c))))
         self.assertEqual(And(Cat(a, b, c), Cat(a, b, Star(c))).conversionA17b(),
                          And(Cat(a, b, c), Cat(a, b, Star(c))))
+        # And(Cat(Σ, Σ, Star(Σ)), Cat(Cat(Σ, Star(Σ))))
+        self.assertIsNot(And(Cat(Sigma, Sigma, Star(Sigma)),
+                             Cat(Cat(Sigma, Star(Sigma)))).conversionA17b(),
+                         EmptySet)
 
     def test_and_conversionA17c(self):
         # if And(...) contains a Cat with no nullables, (or explicit Sigma or Singleton)
@@ -507,6 +524,9 @@ class RteCase(unittest.TestCase):
                          And(Cat(a, b, c), Star(d), Cat(a, b, c)))
         self.assertEqual(And(Cat(a, b, c), Star(d), Cat(Star(a), b, c, d, Star(c))).conversionA17c(),
                          And(Cat(a, b, c), Star(d), Cat(b, c, d)))
+        problematic = And(Cat(Sigma,Sigma,Sigma),
+                          Cat(Sigma,Star(Sigma),Sigma,Cat(Sigma,Sigma)))
+        self.assertEqual(problematic,problematic.conversionA17c())
 
     def test_and_conversionA19(self):
         ab = Singleton(SMember("a", "b"))
@@ -659,7 +679,6 @@ class RteCase(unittest.TestCase):
                 self.assertTrue(rt.derivatives())
 
     def test_derivative_643(self):
-        from genus.utils import stringify
         rt1 = Cat(Star(Sigma), Star(Singleton(SEql(1))))
         rt2 = Cat(Not(EmptySet), Star(Singleton(SEql(1))))
         v1, v2 = rt1.derivatives()
@@ -695,7 +714,7 @@ class RteCase(unittest.TestCase):
                 rt = random_rte(depth)
                 self.assertTrue(rt.to_dfa(depth * 10).serialize())
 
-    def test_serialize(self):
+    def test_serialize2(self):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
@@ -781,6 +800,39 @@ class RteCase(unittest.TestCase):
             return r.simulate(True, [2, 1])
 
         fixed_point(rt, lambda r: r.canonicalize_once(), lambda a, b: a == b, invariant)
+
+    def test_discovered_785(self):
+        # rt=And(Or(Or(∅, Σ), Not(Σ)), Cat(Not(ε), Not(ε)))
+        # can=Cat(Σ, Σ)
+        from rte.r_epsilon import Epsilon
+        from genus.utils import fixed_point
+        problematic = Or(And(Cat(Sigma, Sigma, Star(Sigma)),
+                             Cat(Cat(Sigma, Star(Sigma)))))
+
+        def good_enough(a, b):
+            return type(a) == type(b) and a == b
+
+        def try_example(rt, seq) -> bool:
+            expecting = problematic.simulate(True, seq)
+            got = rt.simulate(True, seq)
+            if got is not expecting:
+                print(f" seq= {seq}")
+                print(f"  rt={rt}")
+                print(f" expecting = {expecting}")
+                print(f"       got = {got}")
+            return got is expecting
+
+        def invariant(rt: 'Rte') -> bool:
+            return all(try_example(rt, seq)
+                       for seq in [[1, 1],
+                                   [1],
+                                   [],
+                                   [1, 1, 1]])
+
+        self.assertTrue(fixed_point(problematic,
+                                    lambda r: r.canonicalize_once(),
+                                    good_enough,
+                                    invariant))
 
 
 if __name__ == '__main__':

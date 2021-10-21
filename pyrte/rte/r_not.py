@@ -21,9 +21,13 @@
 
 
 from rte.r_rte import Rte
+from typing import Literal, Set, Callable, Optional
+from typing_extensions import TypeGuard
 
 
 class Not(Rte):
+    from genus.simple_type_d import SimpleTypeD
+
     def __init__(self, operand):
         super(Not, self).__init__()
         assert isinstance(operand, Rte), \
@@ -40,17 +44,17 @@ class Not(Rte):
     def __hash__(self):
         return hash(self.operand)
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t) -> Literal[-1, 0, 1]:
         from genus.utils import cmp_objects
         return cmp_objects(self.operand, t.operand)
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         return self.operand.first_types()
 
-    def nullable(self):
+    def nullable(self) -> bool:
         return not self.operand.nullable()
 
-    def conversion1(self):
+    def conversion1(self) -> Rte:
         from rte.r_sigma import Sigma
         from rte.r_emptyset import EmptySet
         from rte.r_epsilon import Epsilon
@@ -70,14 +74,14 @@ class Not(Rte):
         else:
             return self
 
-    def conversion2(self):
+    def conversion2(self) -> Rte:
         if notp(self.operand):
             # Not(Not(op)) --> op
             return self.operand.operand
         else:
             return self
 
-    def conversion3(self):
+    def conversion3(self) -> Rte:
         from rte.r_and import andp, createAnd
         from rte.r_or import createOr, orp
         if andp(self.operand):
@@ -89,25 +93,28 @@ class Not(Rte):
         else:
             return self
 
-    def conversion99(self):
+    def conversion99(self) -> Rte:
         return Not(self.operand.canonicalize_once())
 
-    def canonicalize_once(self):
+    def canonicalize_once(self) -> Rte:
         from genus.utils import find_simplifier
-        return find_simplifier(self, [lambda: self.conversion1(),
-                                      lambda: self.conversion2(),
-                                      lambda: self.conversion3(),
-                                      lambda: self.conversion99()])
+        return find_simplifier(self, [self.conversion1,
+                                      self.conversion2,
+                                      self.conversion3,
+                                      self.conversion99])
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self, wrt, factors, disjoints) -> 'Not':
         return Not(self.operand.derivative(wrt, factors, disjoints))
 
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        return self.operand.search(test) or super(Not, self).search(test)
 
-def notp(op):
+
+def notp(op: Rte) -> TypeGuard[Not]:
     return isinstance(op, Not)
 
 
-def createNot(operand):
+def createNot(operand: Rte) -> Rte:
     if notp(operand):
         return operand.operand
     else:

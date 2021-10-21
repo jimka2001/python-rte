@@ -19,6 +19,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.r_rte.py
 
+from typing import Optional, List, Set, Tuple, Any,  Callable, Optional
+
+
 class CannotComputeDerivative(Exception):
     def __init__(self, msg, rte, wrt, factors, disjoints):
         self.msg = msg
@@ -42,16 +45,19 @@ class CannotComputeDerivatives(Exception):
 
 
 class Rte:
+    from genus.simple_type_d import SimpleTypeD
+    #  from rte.xymbolyco import Dfa
+
     def __repr__(self):
         return self.__str__()
 
-    def first_types(self):
+    def first_types(self) -> Set[SimpleTypeD]:
         return set()  # empty set
 
     def nullable(self):
         raise Exception(f"nullable not implemented for {self} of type {type(self)}")
 
-    def canonicalize(self):
+    def canonicalize(self) -> 'Rte':
         from genus.utils import fixed_point
 
         def good_enough(a, b):
@@ -59,14 +65,17 @@ class Rte:
 
         return fixed_point(self, lambda r: r.canonicalize_once(), good_enough)
 
-    def canonicalize_once(self):
+    def canonicalize_once(self) -> 'Rte':
         return self
 
-    def cmp_to_same_class_obj(self, t):
+    def cmp_to_same_class_obj(self, t: 'Rte'):
         assert type(self) == type(t), f"expecting same type {self} is {type(self)}, while {t} is {type(t)}"
         raise TypeError(f"cannot compare rtes of type {type(self)}")
 
-    def derivative(self, wrt, factors, disjoints):
+    def derivative(self,
+                   wrt: Optional[SimpleTypeD],
+                   factors: List[SimpleTypeD],
+                   disjoints: List[SimpleTypeD]) -> 'Rte':
         from rte.r_emptyset import EmptySet
         if wrt is None:
             return self
@@ -75,10 +84,13 @@ class Rte:
         else:
             return self.derivative_down(wrt, factors, disjoints)
 
-    def derivative1(self, wrt):
+    def derivative1(self, wrt: Optional[SimpleTypeD]):
         return self.derivative(wrt, [], [])
 
-    def derivative_down(self, wrt, factors, disjoints):
+    def derivative_down(self,
+                        wrt: Optional[SimpleTypeD],
+                        factors: List[SimpleTypeD],
+                        disjoints: List[SimpleTypeD]) -> 'Rte':
         raise TypeError(f"derivative_down not implemented for {self} of type {type(self)}")
 
     # Computes a pair of Vectors: (Vector[Rte], Vector[Seq[(SimpleTypeD,Int)]])
@@ -88,16 +100,30 @@ class Rte:
     #      the i'th component designates a Seq of transitions, each of the form
     #      (td:SimpleTypeD, j:Int), indicating that in state i, an object of type
     #      td transitions to state j.
-    def derivatives(self):
+    #   E.g., ([And(Cat(And(∅, ε), Cat(ε, ε)), ∅), ∅],
+    #          [[(STop, 1)],
+    #           [(STop, 1)]])
+    #   E.g., ([Cat(Singleton(SOr(SAtomic(Test2), SEmpty)), Or(Cat(∅, ε), Or(∅, ε))),
+    #          ε,
+    #          ∅],
+    #   [[(SAtomic(Test2), 1), (SNot(SAtomic(Test2)), 2)],
+    #    [(STop, 2)],
+    #    [(STop, 2)]])
+
+    def derivatives(self) -> Tuple[List['Rte'],
+                                   List[List[Tuple[SimpleTypeD, int]]]]:
         from genus.utils import trace_graph
         from genus.mdtd import mdtd
+        from genus.simple_type_d import SimpleTypeD
 
-        def edges(rt):
+        def edges(rt: Rte) -> List[Tuple[SimpleTypeD, Rte]]:
             assert isinstance(rt, Rte)
             fts = rt.first_types()
             wrts = mdtd(fts)
 
-            def d(wrt, factors, disjoints):
+            def d(wrt: Optional[SimpleTypeD],
+                  factors: List[SimpleTypeD],
+                  disjoints: List[SimpleTypeD]) -> Rte:
                 try:
                     return rt.derivative(wrt, factors, disjoints).canonicalize()
                 except CannotComputeDerivative as e:
@@ -119,37 +145,28 @@ class Rte:
                                                        mdtd=wrts) from None
                     else:
                         print(f"failed to compute derivative of {rt} wrt={wrt}," +
-                              f" computing derivative of {rt.canonicalize()} instead")
-                        return rt.canonicalize().derivative(wrt).canonicalize()
+                              f"\n  computing derivative of {rt.canonicalize()} instead")
+                        return rt.canonicalize().derivative(wrt, factors, disjoints).canonicalize()
 
-            return [(td, d(td, factors, disjoints)) for [td, factors, disjoints] in wrts]
+            return [(td, d(td, factors, disjoints))
+                    for [td, factors, disjoints] in wrts]
 
         return trace_graph(self, edges)
 
-    def to_dfa(self, exit_value=True):
-        from rte.xymbolyco import createDfa
-        from genus.s_or import createSOr
-        rtes, transitions = self.derivatives()
-        # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
-        transition_triples = [(src, td, dst)
-                              for src in range(len(transitions))
-                              for td, dst in transitions[src]
-                              ]
+    def to_dfa(self, exit_value: Any = True):
+        from rte.xymbolyco import rte_to_dfa
+        return rte_to_dfa(self, exit_value)
 
-        def combine_labels(td1, td2):
-            return createSOr([td1, td2]).canonicalize()
-
-        accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
-        return createDfa(pattern=self,
-                         transition_triples=transition_triples,
-                         accepting_states=accepting_states,
-                         exit_map=dict([(i, exit_value) for i in accepting_states]),
-                         combine_labels=combine_labels)
-
-    def simulate(self, exit_value, sequence):
+    def simulate(self, exit_value: Any, sequence: List[Any]) -> Any:
         return self.to_dfa(exit_value).simulate(sequence)
 
-    def to_dot(self, title, exit_value=True, view=False, abbrev=True, draw_sink=False, state_legend=True,
+    def to_dot(self,
+               title,
+               exit_value: Any = True,
+               view=False,
+               abbrev=True,
+               draw_sink=False,
+               state_legend=True,
                verbose=False):
         return self.to_dfa(exit_value).to_dot(title=title,
                                               view=view,
@@ -171,6 +188,14 @@ class Rte:
     def equivalent(self, rte2):
         rte1 = self
         return rte1.to_dfa(True).equivalent(rte2.to_dfa(True))
+
+    def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
+        # search the Rte for any node satisfying the given predicate, test
+        # return that node (of type Rte) else return None
+        if test(self):
+            return self
+        else:
+            return None
 
 
 def random_rte(depth):

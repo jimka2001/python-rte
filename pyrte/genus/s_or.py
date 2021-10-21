@@ -27,13 +27,15 @@ from genus.utils import find_first
 from genus.utils import uniquify
 from genus.simple_type_d import SimpleTypeD
 from typing import List, TypeVar, Callable, Optional, Iterable, Collection
+from typing_extensions import TypeGuard
+
 
 T = TypeVar('T')      # Declare type variable
 
 
 class SOr(SCombination):
     """Union type designator.  The operands are themselves type designators.
-    @param tds list, zero or more type designators"""
+    param tds list, zero or more type designators"""
 
     def __str__(self):
         return "SOr(" + ", ".join([str(td) for td in self.tds]) + ")"
@@ -50,7 +52,7 @@ class SOr(SCombination):
     def annihilator(self, a: SimpleTypeD, b: SimpleTypeD) -> Optional[bool]:
         return b.subtypep(a)
 
-    def dual_combination(self, td: SimpleTypeD) -> bool:
+    def dual_combination(self, td: SimpleTypeD) -> TypeGuard['SAnd']:
         from genus.s_and import andp
         return andp(td)
 
@@ -147,5 +149,5 @@ def createSOr(tds: List[SimpleTypeD]) -> SimpleTypeD:
         return SOr(*tds)
 
 
-def orp(this: SimpleTypeD) -> bool:
+def orp(this: SimpleTypeD) -> TypeGuard[SOr]:
     return isinstance(this, SOr)

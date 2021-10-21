@@ -21,7 +21,8 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Optional, Literal, Any
+from typing import Literal, Any
+from typing_extensions import TypeGuard
 
 
 class SEmptyImpl(SimpleTypeD, TerminalType):
@@ -52,7 +53,7 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
     def subtypep(self, t: SimpleTypeD) -> Literal[True]:
         return True
 
-    def cmp_to_same_class_obj(self, t: 'EmptyImpl') -> Literal[-1, 0, 1]:
+    def cmp_to_same_class_obj(self, t: 'SEmptyImpl') -> Literal[-1, 0, 1]:
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         else:
@@ -65,5 +66,5 @@ class SEmptyImpl(SimpleTypeD, TerminalType):
 SEmpty = SEmptyImpl()
 
 
-def emptyp(this: Any) -> bool:
+def emptyp(this: Any) -> TypeGuard[SEmptyImpl]:
     return isinstance(this, SEmptyImpl)
