@@ -31,17 +31,17 @@ class SEql(SMemberImpl, TerminalType):
 	"""
 	def __init__(self, a: Any) -> None:
 		super(SEql, self).__init__(a)
-		self.a = a
+		self.pair = self.argpairs[0]
 	
 	def __str__(self) -> str:
 		return "[= " + str(self.a) + "]"
 
 	def __eq__(self, that: Any) -> bool:
 		return type(self) is type(that) and \
-			self.a == that.a
+			self.pair == that.pair
 
 	def __hash__(self):
-		return hash(self.a)
+		return hash(self.pair)
 
 	def typep(self, b: Any) -> bool:
 		return self.a == b

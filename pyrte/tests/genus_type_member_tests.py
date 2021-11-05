@@ -111,6 +111,8 @@ class GenusMemberTypeCase(unittest.TestCase):
 
     def test_eql_1(self):
         self.assertNotEqual(SEql(1),SEql(1.0))
+        self.assertEqual(SEql(1), SEql(1))
+        self.assertEqual(SEql(1.0), SEql(1.0))
 
 
 if __name__ == '__main__':
