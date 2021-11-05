@@ -91,6 +91,24 @@ class GenusMemberTypeCase(unittest.TestCase):
         self.assertNotEqual(SMember(1, 1.0).canonicalize(),
                             SEql(1.0))
 
+    def test_member_13(self):
+        self.assertFalse(SMember(1, 1.0).subtypep(SEql(1)))
+        self.assertFalse(SMember(1, 1.0).subtypep(SEql(1.0)))
+
+    def test_member_14(self):
+        self.assertFalse(SEql(1).subtypep(SMember(1, 1.0)))
+        self.assertFalse(SEql(1.0).subtypep(SMember(1, 1.0)))
+
+    def test_disjoint_1(self):
+        self.assertFalse(SMember(1, 1.0, 2, 2.0).disjoint(SMember(1, 2, 3)))
+        self.assertFalse(SMember(1, 1.0, 2, 2.0).disjoint(SMember(1.0, 2.0, 3.0)))
+        self.assertFalse(SMember(1, 1.0, 2, 2.0).disjoint(SMember(1.0, 1)))
+
+    def test_disjoint_2(self):
+        self.assertFalse(SMember(1, 1.0, 2, 2.0).canonicalize().disjoint(SMember(1, 2, 3)))
+        self.assertFalse(SMember(1, 1.0, 2, 2.0).canonicalize().disjoint(SMember(1.0, 2.0, 3.0)))
+        self.assertFalse(SMember(1, 1.0, 2, 2.0).canonicalize().disjoint(SMember(1.0, 1)))
+
 
 if __name__ == '__main__':
     unittest.main()
