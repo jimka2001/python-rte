@@ -109,6 +109,9 @@ class GenusMemberTypeCase(unittest.TestCase):
         self.assertFalse(SMember(1, 1.0, 2, 2.0).canonicalize().disjoint(SMember(1.0, 2.0, 3.0)))
         self.assertFalse(SMember(1, 1.0, 2, 2.0).canonicalize().disjoint(SMember(1.0, 1)))
 
+    def test_eql_1(self):
+        self.assertNotEqual(SEql(1),SEql(1.0))
+
 
 if __name__ == '__main__':
     unittest.main()
