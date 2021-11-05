@@ -29,21 +29,23 @@ class SMemberImpl(SimpleTypeD):
     """docstring for SMemberImpl"""
 
     def __init__(self, *arglist):
+        from genus.s_atomic import SAtomic
         super(SMemberImpl, self).__init__()
-        self.arglist = list(arglist)
+        self.argpairs = [(SAtomic(type(x)), x) for x in arglist]
 
     def __str__(self):
-        return "SMember(" + ", ".join([str(x) for x in self.arglist]) + ")"
+        return "SMember(" + ", ".join([str(x) for x in self.argparis]) + ")"
 
     def __eq__(self, that):
         return type(self) is type(that) and \
-               self.arglist == that.arglist
+               self.argpairs == that.argpairs
 
     def __hash__(self):
-        return hash(tuple(self.arglist))
+        return hash(tuple(self.argpairs))
 
     def typep(self, a):
-        return a in self.arglist
+        from genus.s_atomic import SAtomic
+        return (SAtomic(type(a)), a) in self.argpairs
 
     def inhabited_down(self):
         return [] != self.arglist
@@ -63,8 +65,8 @@ class SMemberImpl(SimpleTypeD):
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         else:
-            a = self.arglist
-            b = t.arglist
+            a = self.argpairs
+            b = t.argpairs
 
             def comp(i):
                 if i >= len(a) and i >= len(b):
