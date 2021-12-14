@@ -82,8 +82,12 @@ class GenusMemberTypeCase(unittest.TestCase):
                             SMember(1, 2, 3))
 
     def test_member_11(self):
+        # We assert that SMember canonicalize by alphabetic order of type
+        # So float before int
         self.assertEqual(SMember(1, 1.0).canonicalize(),
-                         SMember(1, 1.0))
+                         SMember(1.0, 1))
+        self.assertEqual(SMember(1.0, 1).canonicalize(),
+                         SMember(1.0, 1))
 
     def test_member_12(self):
         self.assertNotEqual(SMember(1, 1.0).canonicalize(),
