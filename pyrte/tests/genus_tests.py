@@ -609,8 +609,8 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(SOr().tds == [])
 
     def test_member(self):
-        self.assertEqual(SMember(1, 2, 3).arglist, [1, 2, 3])
-        self.assertEqual(SMember().arglist, [])
+        self.assertEqual(SMember(1, 2, 3).argpairs, [(SAtomic(int), 1), (SAtomic(int), 2), (SAtomic(int), 3)])
+        self.assertEqual(SMember().argpairs, [])
         self.assertIs(SMember(1, 2, 3).subtypep(SMember(1, 2, 3, 4, 5)), True)
         self.assertIs(SMember(1, 2, 3).subtypep(SMember(1, 2)), False)
         self.assertIs(SMember(1, 2, 3).subtypep(SOr(SAtomic(str), SMember(1, 2, 3, 4, 5))), True)
@@ -620,8 +620,8 @@ class GenusCase(unittest.TestCase):
         self.assertEqual(SMember(3, 2, 1).canonicalize(), SMember(1, 2, 3))
 
     def test_eql(self):
-        self.assertTrue(SEql(1).a == 1)
-        self.assertTrue(SEql(1).arglist == [1], f"expecting arglist=[1], got {SEql(1).arglist}")
+        self.assertTrue(SEql(1).pair[1] == 1)
+        self.assertTrue(SEql(1).argpairs == [(SAtomic(int), 1)], f"expecting argpairs=[(SAtomic(int), 1)], got {SEql(1).argpairs}")
 
     def test_discovered_cases2(self):
         td = SAnd(SEql(3.14), SMember("a", "b", "c"))

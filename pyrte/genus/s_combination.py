@@ -172,7 +172,7 @@ class SCombination(SimpleTypeD):
                 def pred(n):
                     return notp(n) and any(d.tds == search_replace(td.tds, n, n.s) for d in duals)
 
-                # find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
+                # find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the argpairs
                 to_remove = find_first(pred, td.tds)
                 if to_remove is not None:
                     # if we found such a !B, then return (A+C)
@@ -180,8 +180,8 @@ class SCombination(SimpleTypeD):
                 else:
                     return td
 
-        # if the arglist contains both (A+!B+C) and (A+B+C)
-        #    then replace (A+!B+C) with (A+C) in the arglist
+        # if the argpairs contains both (A+!B+C) and (A+B+C)
+        #    then replace (A+!B+C) with (A+C) in the argpairs
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
@@ -277,7 +277,7 @@ class SCombination(SimpleTypeD):
             import functools
             # find all the items in all the SNot(SMember(...)) elements
             #    this is a list of lists
-            items = [n.s.arglist for n in not_members]
+            items = [n.s.argpairs for n in not_members]
             # flatten the list of lists into a single list, either by
             #   union or intersection depending on SOr or SAnd
             combined = functools.reduce(lambda x, y: self.dual_combinator(x, y),
@@ -351,13 +351,13 @@ class SCombination(SimpleTypeD):
                 if andp(self) and td == not_member:
                     return []
                 elif andp(self) and td == member:
-                    return [createSMember(diff(member.arglist, not_member.s.arglist))]
+                    return [createSMember(diff(member.argpairs, not_member.s.argpairs))]
 
                 # in the SOr case we remove the member and filter the not-member args
                 elif orp(self) and td == member:
                     return []
                 elif orp(self) and td == not_member:
-                    return [SNot(createSMember(diff(not_member.s.arglist, member.arglist)))]
+                    return [SNot(createSMember(diff(not_member.s.argpairs, member.argpairs)))]
 
                 else:
                     return [td]
@@ -381,7 +381,7 @@ class SCombination(SimpleTypeD):
             if memberimplp(td):
                 return createSMember(list(self.combo_filter(stricter.typep, td.argpairs)))
             elif notp(td) and memberimplp(td.s):
-                return SNot(createSMember(list(self.combo_filter(stricter.typep, td.s.arglist))))
+                return SNot(createSMember(list(self.combo_filter(stricter.typep, td.s.argpairs))))
             else:
                 return td
 

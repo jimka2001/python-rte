@@ -115,7 +115,7 @@ class SOr(SCombination):
         if not_member is None:
             return self
         else:
-            return SNot(createSMember([x for x in not_member.s.arglist if not self.typep(x)]))
+            return SNot(createSMember([x for x in not_member.s.argpairs if not self.typep(x[1])]))
 
     def conversionD3(self) -> SimpleTypeD:
         from genus.s_not import notp

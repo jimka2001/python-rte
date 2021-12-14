@@ -52,7 +52,7 @@ class SEql(SMemberImpl, TerminalType):
 
 	def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
 		assert isinstance(t, SimpleTypeD)
-		return not t.typep(self.pair)
+		return not t.typep(self.pair[1])
 
 	def subtypep(self, t) -> Optional[bool]:
 		return t.typep(self.pair[1])
