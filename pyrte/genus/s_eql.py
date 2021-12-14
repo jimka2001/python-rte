@@ -21,6 +21,7 @@
 
 from genus.s_member import SMemberImpl
 from genus.simple_type_d import SimpleTypeD, TerminalType
+from genus.s_atomic import SAtomic
 from typing import Any, Literal, Optional
 from typing_extensions import TypeGuard
 
@@ -34,7 +35,7 @@ class SEql(SMemberImpl, TerminalType):
 		self.pair = self.argpairs[0]
 	
 	def __str__(self) -> str:
-		return "[= " + str(self.a) + "]"
+		return "[= " + str(self.pair) + "]"
 
 	def __eq__(self, that: Any) -> bool:
 		return type(self) is type(that) and \
@@ -44,17 +45,17 @@ class SEql(SMemberImpl, TerminalType):
 		return hash(self.pair)
 
 	def typep(self, b: Any) -> bool:
-		return self.a == b
+		return self.pair == (SAtomic(type(b)), b)
 
 	def inhabited_down(self) -> Literal[True]:
 		return True
 
 	def disjoint_down(self, t: SimpleTypeD) -> Optional[bool]:
 		assert isinstance(t, SimpleTypeD)
-		return not t.typep(self.a)
+		return not t.typep(self.pair)
 
 	def subtypep(self, t) -> Optional[bool]:
-		return t.typep(self.a)
+		return t.typep(self.pair)
 
 
 def eqlp(this: Any) -> TypeGuard[SEql]:

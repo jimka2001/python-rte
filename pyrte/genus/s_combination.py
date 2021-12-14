@@ -305,7 +305,7 @@ class SCombination(SimpleTypeD):
         if len(members) <= 1:
             return self
         else:
-            items = [m.arglist for m in members]
+            items = [m.argpairs for m in members]
             combined = functools.reduce(lambda x, y: self.combinator(x, y),
                                         items)
             new_member = createSMember(combined)
@@ -379,7 +379,7 @@ class SCombination(SimpleTypeD):
 
         def f(td):
             if memberimplp(td):
-                return createSMember(list(self.combo_filter(stricter.typep, td.arglist)))
+                return createSMember(list(self.combo_filter(stricter.typep, td.argpairs)))
             elif notp(td) and memberimplp(td.s):
                 return SNot(createSMember(list(self.combo_filter(stricter.typep, td.s.arglist))))
             else:

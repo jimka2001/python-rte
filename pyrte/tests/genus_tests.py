@@ -86,6 +86,24 @@ class GenusCase(unittest.TestCase):
         self.assertTrue(fixed_point(5, increment, evaluator) == 5)
         self.assertTrue(fixed_point(5, lambda x: x + 1, lambda x, y: x == 6 and y == 7) == 6)
 
+    def test_fixed_point3(self):
+
+        def invariant(x):
+            return x == 2
+
+        self.assertTrue(fixed_point(2, lambda x: x, lambda x, y: x == y, invariant) == 2)
+
+        def f(x):
+            if x % 2 == 0:
+                return x+1
+            return x-1
+
+        with self.assertRaises(AssertionError):
+            fixed_point(1, lambda x: x, lambda x, y: x == y, invariant)
+            fixed_point(1, lambda x: x + 1, lambda x, y: x == y, invariant)
+            fixed_point(2, f, lambda x, y: x == y + 4, invariant)
+
+
     def test_STop(self):
 
         # STop has to be unique
@@ -1136,6 +1154,7 @@ class GenusCase(unittest.TestCase):
         self.assertTrue((2, 11) in partition)
         self.assertTrue((3, 12) in partition)
 
+
     def test_transition_to_ite(self):
         from genus.ite import transitions_to_ite
         self.assertEqual(transitions_to_ite([], default=None), (None,))
@@ -1289,16 +1308,6 @@ class GenusCase(unittest.TestCase):
             self.assertTrue(a.typeEquivalent(b) == eq,
                             f"\na={a}\nb={b}\nexpecting a = b = {eq}, got {a.typeEquivalent(b)}")
 
-    def test_find_simplifier(self):
-        t = SMember(1, 2, 3)
-        simplifiers = []
-        self.assertEqual(find_simplifier(t, simplifiers), t)
-        simplifiers.append(lambda: t)
-        self.assertEqual(find_simplifier(t, simplifiers), t)
-        simplifiers.append(lambda: SMember(2, 1, 3))
-        self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
-        simplifiers.append(lambda: SMember(3, 2, 1))
-        self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
 
     def test_search_replace(self):
         li = [SMember(1, 2, 3), SMember(2, 1, 3), SMember(3, 1, 2)]
@@ -1325,6 +1334,19 @@ class GenusCase(unittest.TestCase):
         li = [1, 2, 3, 4, 5, 6, 7]
         self.assertEqual(search_replace_splice(li, 7, [7, 8, 9, 10]), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
+    def test_find_simplifier(self):
+        t = SMember(1, 2, 3)
+        simplifiers = []
+        self.assertEqual(find_simplifier(t, simplifiers), t)
+        simplifiers.append(lambda: t)
+        self.assertEqual(find_simplifier(t, simplifiers), t)
+        simplifiers.append(lambda: SMember(2, 1, 3))
+        self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
+        simplifiers.append(lambda: SMember(3, 2, 1))
+        self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
+
+
+
     def test_remove_element(self):
         # Empty list
         self.assertEqual(remove_element([], "h"), [])
@@ -1341,21 +1363,6 @@ class GenusCase(unittest.TestCase):
         # Removing element that isn't included
         self.assertEqual(remove_element(li, "r"), li)
 
-    def test_find_first(self):
-        # Empty list testing the default argument also
-        self.assertEqual(find_first(lambda: True, []), None)
-        self.assertEqual(find_first(lambda: True, [], "Test"), "Test")
-
-        # No elements makes the predicate true
-        li = [1, 2, 3, 4, 5, 6, 7]
-        self.assertEqual(find_first(lambda x: x + 1 == 9, li), None)
-        # first element is the last
-        self.assertEqual(find_first(lambda x: x + 1 == 8, li), 7)
-        # first element is the first
-        self.assertEqual(find_first(lambda x: x + 1 == 2, li), 1)
-        # first element is one of them
-        self.assertEqual(find_first(lambda x: x + 1 == 5, li), 4)
-
     def test_cmp_objects(self):
         t = 1
         s = 1
@@ -1371,6 +1378,24 @@ class GenusCase(unittest.TestCase):
         # t > s
         t = SMember(3, 1, 2)
         self.assertEqual(cmp_objects(t, s), 1)
+
+
+    def test_find_first(self):
+       # Empty list testing the default argument also
+        self.assertEqual(find_first(lambda: True, []), None)
+        self.assertEqual(find_first(lambda: True, [], "Test"), "Test")
+
+        # No elements makes the predicate true
+        li = [1, 2, 3, 4, 5, 6, 7]
+        self.assertEqual(find_first(lambda x: x + 1 == 9, li), None)
+        # first element is the last
+        self.assertEqual(find_first(lambda x: x + 1 == 8, li), 7)
+        # first element is the first
+        self.assertEqual(find_first(lambda x: x + 1 == 2, li), 1)
+        # first element is one of them
+        self.assertEqual(find_first(lambda x: x + 1 == 5, li), 4)
+
+
 
 
 if __name__ == '__main__':
