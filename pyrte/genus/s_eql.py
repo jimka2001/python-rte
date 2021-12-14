@@ -55,7 +55,7 @@ class SEql(SMemberImpl, TerminalType):
 		return not t.typep(self.pair)
 
 	def subtypep(self, t) -> Optional[bool]:
-		return t.typep(self.pair)
+		return t.typep(self.pair[1])
 
 
 def eqlp(this: Any) -> TypeGuard[SEql]:
