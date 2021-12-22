@@ -96,7 +96,7 @@ class SMember(SMemberImpl, TerminalType):
 def createSMember(items):
     from genus.s_empty import SEmpty
     from genus.s_eql import SEql
-
+    # items is a list of object like : {1, 2, 3} not a pairs like : ((SAtomic(int), 1), (SAtomic(int), 2), (SAtomic(int), 3))
     if not items:
         return SEmpty
     elif len(items) == 1:

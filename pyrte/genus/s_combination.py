@@ -379,9 +379,11 @@ class SCombination(SimpleTypeD):
 
         def f(td):
             if memberimplp(td):
-                return createSMember(list(self.combo_filter(stricter.typep, td.argpairs)))
+                args = [x[1] for x in td.argpairs]
+                return createSMember(list(self.combo_filter(stricter.typep, args)))
             elif notp(td) and memberimplp(td.s):
-                return SNot(createSMember(list(self.combo_filter(stricter.typep, td.s.argpairs))))
+                args = [x[1] for x in td.s.argpairs]
+                return SNot(createSMember(list(self.combo_filter(stricter.typep, args))))
             else:
                 return td
 
