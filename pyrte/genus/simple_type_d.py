@@ -144,6 +144,7 @@ class SimpleTypeD:
 
     def subtypep_down(self, t: 'SimpleTypeD') -> Optional[bool]:
         from genus.s_not import notp
+        # The s of t.s is a reference to SNot
         if notp(t) and self.disjoint(t.s) is True:
             return True
         elif self.inhabited() is False:

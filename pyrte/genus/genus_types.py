@@ -21,11 +21,10 @@
 
 from enum import Enum
 
-
 class NormalForm(Enum):
-	DNF = 1
-	CNF = 2
+    DNF = 1
+    CNF = 2
 
 
 def is_even(x):
-	return isinstance(x, int) and not (x & 1)
+    return isinstance(x, int) and not (x & 1)
