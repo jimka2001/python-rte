@@ -376,6 +376,7 @@ class GenusCase(unittest.TestCase):
                                     "found types with empty intersection but not disjoint" +
                                     f"\ntd1={td1}" +
                                     f"\ntd2={td2}" +
+                                    f"\n intersection = {SAnd(td1, td2).canonicalize(NormalForm.DNF)}"+
                                     f"\ntd1.disjoint(td2) = {d12}")
 
     def test_discovered_case_385(self):
@@ -554,7 +555,7 @@ class GenusCase(unittest.TestCase):
 
                 self.assertIsNot(td.subtypep(tdc1), False)
                 self.assertIsNot(td.subtypep(tdc2), False)
-                self.assertIsNot(td.subtypep(tdc2), False)
+                self.assertIsNot(td.subtypep(tdc3), False)
                 self.assertIsNot(tdc1.subtypep(td), False,
                                  f"expecting tdc1={tdc1} subtype of {td} got {tdc1.subtypep(td)}")
                 self.assertIsNot(tdc2.subtypep(td), False,
