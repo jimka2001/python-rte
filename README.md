@@ -57,6 +57,11 @@ There are several outstanding issues.
 
 ## Package dependencies overview
 
+##Coverage tool
+To run the coverage tool you need to use the "coverage run -m unittest tests\genus_tests.py" 
+command on the terminal and then "coverage report" for the result. You can
+also use "coverage html" to have more readable results.
+
 ## Contributors
 
 [Jim Newton](https://www.lrde.epita.fr/wiki/User:Jnewton)

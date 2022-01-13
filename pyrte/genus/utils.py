@@ -80,14 +80,16 @@ def find_simplifier(self: S, simplifiers: List[Callable[[], S]],
     As soon as such a function returns something other than `this`,
     then that new value is returned from find_simplifier.
     As a last resort, `this` is returned."""
-
+    a = 0
     for s in simplifiers:
         out = s()
         if self != out:
             if verbose:
-                print(f"Simplifier: {stack_depth()}")
+                # a variable index the function used from 0
+                print(f"a = {a}  Simplifier: {stack_depth()}")
                 print(f" {s}\n      {self}\n  --> {out}")
             return out
+        a += 1
     return self
 
 

@@ -161,7 +161,7 @@ class SAnd(SCombination):
         if member is None:
             return self
         else:
-            return createSMember([x for x in member.arglist if self.typep(x)])
+            return createSMember([x[1] for x in member.argpairs if self.typep(x[1])])
 
     def conversionD3(self) -> SimpleTypeD:
         # discover disjoint pair

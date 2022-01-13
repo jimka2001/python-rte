@@ -29,42 +29,46 @@ class SMemberImpl(SimpleTypeD):
     """docstring for SMemberImpl"""
 
     def __init__(self, *arglist):
+        from genus.s_atomic import SAtomic
         super(SMemberImpl, self).__init__()
-        self.arglist = list(arglist)
+        self.argpairs = [(SAtomic(type(x)), x) if type(x) != tuple else (SAtomic(type(x[1])), x[1]) for x in arglist]
 
     def __str__(self):
-        return "SMember(" + ", ".join([str(x) for x in self.arglist]) + ")"
+        return "SMember(" + ", ".join([str(x) for x in self.argpairs]) + ")"
 
     def __eq__(self, that):
         return type(self) is type(that) and \
-               self.arglist == that.arglist
+               self.argpairs == that.argpairs
 
     def __hash__(self):
-        return hash(tuple(self.arglist))
+        return hash(tuple(self.argpairs))
 
     def typep(self, a):
-        return a in self.arglist
+        from genus.s_atomic import SAtomic
+        return (SAtomic(type(a)), a) in self.argpairs
 
     def inhabited_down(self):
-        return [] != self.arglist
+        return [] != self.argpairs
 
     def disjoint_down(self, t2):
         assert isinstance(t2, SimpleTypeD)
-        return not any(t2.typep(a) for a in self.arglist)
+        return not any(t2.typep(a) for (t, a) in self.argpairs)
 
     def subtypep_down(self, t2):
-        return all(t2.typep(a) for a in self.arglist)
+        return all(t2.typep(a) for (t, a) in self.argpairs)
 
     def canonicalize_once(self, _nf=None):
         from genus.utils import uniquify
-        return createSMember(sorted(uniquify(self.arglist), key=lambda s: (type(s).__name__, s)))
+        # Sort by type then by value so the equality of to list can show by index
+        # In this implementation we have chosen this order.
+        return createSMember(sorted(uniquify(self.argpairs), key=lambda s: (type(s[1]).__name__, s[1])))
 
     def cmp_to_same_class_obj(self, t: 'SMemberImpl') -> Literal[-1, 0, 1]:
         if type(self) != type(t):
             return super().cmp_to_same_class_obj(t)
         else:
-            a = self.arglist
-            b = t.arglist
+            a = self.argpairs
+            b = t.argpairs
 
             def comp(i):
                 if i >= len(a) and i >= len(b):
@@ -92,7 +96,7 @@ class SMember(SMemberImpl, TerminalType):
 def createSMember(items):
     from genus.s_empty import SEmpty
     from genus.s_eql import SEql
-
+    # items is a list of object like : {1, 2, 3} not a pairs like : ((SAtomic(int), 1), (SAtomic(int), 2), (SAtomic(int), 3))
     if not items:
         return SEmpty
     elif len(items) == 1:
