@@ -50,4 +50,8 @@ Here are some of the methods which a programmer might find useful.
 * `td.compute_cnf()` --- compute a type designator to Conjunctive Normal Form.
 * `td.canonicalize()` --- reduce a type designator to a canonical form.
 * `td1.typeEquivalent(td2)` --- determine whether two types are equivalent,  returns `True`, `False`, or `None`.
-* `mdtd(list_of_tds)` --- or Set of tds --- computes the Maximal Disjoint Type Decomposition, which is a set of disjoint type designators whose union is `STop`, each of which is a subtype of at least one of the given types.
+* `mdtd(list_of_tds)` --- or Set of tds --- computes the Maximal
+  Disjoint Type Decomposition, which is a set of disjoint type
+  designators whose union is `STop`, each of which is a subtype of at
+  least one of the given types.
+
