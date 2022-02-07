@@ -62,9 +62,6 @@ class XymbolycoCase(unittest.TestCase):
         from genus.simple_type_d import SimpleTypeD
         from genus.s_or import createSOr
 
-        def combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
-            return createSOr([td1, td2]).canonicalize()
-
         try:
             createDfa(pattern=None,
                       transition_triples=[(0, SOr(SAtomic(int), SAtomic(float)), 1),
@@ -73,12 +70,25 @@ class XymbolycoCase(unittest.TestCase):
                                           (2, STop, 3),
                                           (3, STop, 3)],
                       accepting_states=[3],
-                      exit_map={3: True},
-                      combine_labels=combine_labels)
+                      exit_map={3: True})
         except AssertionError:
             pass
         else:
             self.fail('Expected exception because of non-disjoint transitions')
+
+        try:
+            createDfa(pattern=None,
+                      transition_triples=[(0, SAtomic(float), 1),
+                                          (0, SAtomic(int), 2),
+                                          (1, STop, 3),
+                                          (2, STop, 3),
+                                          (3, STop, 3)],
+                      accepting_states=[3],
+                      exit_map={3: True})
+        except AssertionError:
+            self.fail('Expected no exception because of non-disjoint transitions')
+        else:
+            pass
 
     def test_extract_discovered_case_57(self):
         from genus.depthgenerator import Test2

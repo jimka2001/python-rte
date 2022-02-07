@@ -796,15 +796,17 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
                           for td, dst in transitions[src]
                           ]
 
-    def combine_labels(td1: SimpleTypeD, td2:SimpleTypeD) -> SimpleTypeD:
-        return createSOr([td1, td2]).canonicalize()
-
     accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
     return createDfa(pattern=rte,
                      transition_triples=transition_triples,
                      accepting_states=accepting_states,
-                     exit_map=dict([(i, exit_value) for i in accepting_states]),
-                     combine_labels=combine_labels)
+                     exit_map=dict([(i, exit_value) for i in accepting_states]))
+
+
+# default value for the combine_labels parameter of combine_labels
+def createDfa_combine_labels(td1: SimpleTypeD, td2:SimpleTypeD) -> SimpleTypeD:
+    from genus.s_or import createSOr
+    return createSOr([td1, td2]).canonicalize()
 
 
 # Create a Dfa given the list of transitions, accepting state ids,
@@ -818,7 +820,8 @@ def createDfa(pattern: Optional[Rte],
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: List[int],
               exit_map: Dict[int, Any],
-              combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD]) -> 'Dfa':
+              combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = createDfa_combine_labels
+              ) -> 'Dfa':
     from functools import reduce
 
     assert isinstance(accepting_states, list)
