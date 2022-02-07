@@ -811,8 +811,8 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
 #  an exit map and a function to merge parallel labels.
 def createDfa(pattern: Optional[Rte],
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
-              accepting_states: Optional[List[int]],
-              exit_map: Optional[Dict[int, Any]],
+              accepting_states: List[int],
+              exit_map: Dict[int, Any],
               combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD]) -> 'Dfa':
     from functools import reduce
 
