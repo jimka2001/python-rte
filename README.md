@@ -45,7 +45,8 @@ git clone https://gitlab.lrde.epita.fr/jnewton/python-rte.git
 ## RTE in more depth
 
 * [Genus: A Simple Extensible Type System](doc/genus.md)
-
+* [Rte: Rational Type Expressions](doc/rte.md)
+* [Xymbolyco: Symbolic Finite Automata](doc/xymbolyco.md)
 
 ## Usage
 
@@ -71,7 +72,7 @@ also use "coverage html" to have more readable results.
 
 ## License
 ```
-Copyright (c) 2021 EPITA Research and Development Laboratory
+Copyright (c) 2021,22 EPITA Research and Development Laboratory
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation

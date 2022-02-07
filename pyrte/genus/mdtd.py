@@ -23,6 +23,15 @@ from genus.simple_type_d import SimpleTypeD
 from typing import List, Tuple, Set, Union
 
 
+# Compute the Maximal Disjoint Type Decomposition in the form of a list of tuples
+#    Each tuple is of the form (td, List[factor], List[disjoint])
+#    The td indicates one type in the mdtd.
+#    Each of the given type designators in tds are either in List[factor] or List[disjoint]
+#      indicating whether is overlapping or disjoint with that type.
+#      Whereas the td.disjoint() method might return None, we know by construction
+#      whether each of the given types is disjoint or not with each type in its
+#      decomposition.  However, in some cases we do not know whether the type is actually
+#      inhabited.
 def mdtd(tds: Union[List[SimpleTypeD], Set[SimpleTypeD]]) -> List[Tuple[SimpleTypeD,
                                                                         List[SimpleTypeD],
                                                                         List[SimpleTypeD]]]:
