@@ -110,6 +110,8 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
+    # output the state machine as a graphical image.
+    # if view=True, then display the image using the dod_view function.
     def to_dot(self,
                title: Optional[str],
                view: bool = False,
@@ -229,13 +231,18 @@ class Dfa:
 
         return [self.pattern, transitions(), accepting(), exit_map(), self.combine_labels]
 
-    def find_sink_states(self) -> List[int]:  # returns a list of integers
+    def find_sink_states(self) -> List[int]:  # returns a list of integers representing sink states
         from genus.s_top import STop
         return [q.index for q in self.states
                 if not q.accepting
                 and 1 == len(q.transitions)
                 and q.transitions[STop] == q.index]
 
+    # return a new Dfa which is guaranteed to be complete.
+    # We do this be adding transitions to some states for which it cannot
+    # be proven that they are locally complete.
+    # The result is guaranteed to be complete, but might have
+    # vacuous transitions which we cannot prove or inhabited or not inhabited.
     def complete(self) -> 'Dfa':
         from rte.r_not import Not
         from rte.r_or import createOr
@@ -246,6 +253,14 @@ class Dfa:
             sink_id = sink_states[0]
         else:
             sink_id = len(self.states)
+        # look at the group of transitions of each state
+        #   if we find one for which the complement of the union of the
+        #   SimpleTypeD's labeling the transitions is found to not be
+        #   inhabited, then create a transition to encompass type type
+        #   of all possible object not covered by the transitions.
+        #   Warning, it might be that that type is in fact vacuous,
+        #   but the .inhabited() method returns dont-know.  So in this
+        #   case we are unfortunately creating a useless transition.
         extra_transitions = [(q.index, td, sink_id)
                              for q in self.states
                              for tds in [[td for td, _ in q.transitions]]
@@ -262,6 +277,10 @@ class Dfa:
                              exit_map=exit_map,
                              combine_labels=combine_labels)
 
+    # Create a Dfa which matches the complement language of the given Dfa.
+    # this is done by inverting all accepting states to non-accepting
+    # Warning, the same exit_map is returned, which now might be missing
+    # exit values for states which are now accepting, but were not previously.
     def complement(self, exit_map: Dict[int, Any]) -> 'Dfa':
         from rte.r_not import createNot
         pattern_old, transitions, accepting, _, combine_labels = self.complete().serialize()
@@ -275,6 +294,7 @@ class Dfa:
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
+    # returns two lists of ints indicating accessible and co-accessible states.
     def find_accessibles(self) -> Tuple[List[int],
                                         List[int]]:
         # returns a pair of two lists of indices (accessibles, co-accessibles)
@@ -300,6 +320,7 @@ class Dfa:
         coaccessibles = expand_reachable(accepting_ids, [(dst, label, src) for src, label, dst in transitions])
         return accessibles, coaccessibles
 
+    # remove states which are not accessible and not co-accessible.
     def trim(self, compact: bool = True) -> 'Dfa':
         pattern, transitions, accepting_ids, exit_map, combine_labels = self.serialize()
         accessibles, coaccessibles = self.find_accessibles()
@@ -360,6 +381,8 @@ class Dfa:
                 for dst in list(set([d for _, _, d in from_src]))
                 ]
 
+    # return a Dict indicating for each possible exit value (in exit_map)
+    #   what the Rte is for obtaining that exit value.
     def extract_rte(self) -> Dict[Any, Rte]:
         from functools import reduce
         from rte.r_epsilon import Epsilon
@@ -465,6 +488,8 @@ class Dfa:
              for exit_value, labels in els]
         return dict(d)
 
+    # wrapper around extract_rte which assures we don't return
+    # an empty Dict in the case that the Rte matches the empty language.
     def to_rte(self) -> Dict[Any, Rte]:
         from rte.r_emptyset import EmptySet
         extracted = self.extract_rte()
@@ -474,10 +499,10 @@ class Dfa:
             return dict([(True, EmptySet)])
 
     def paths_to_accepting(self, allow_maybe_satisfiable=False) -> List[List[State]]:
-        # returns a list of paths
+        # returns a list of paths.
         # each path is a list of states starting with self.states[0]
         # and ending in an accepting state.
-        # no path contains the same state twice, i.e. no paths with loops
+        # no path contains the same state twice, i.e. no paths with loops.
         # The parameter allow_maybe_satisfiable controls how strict the
         #  the satisfiability criteria is honored.
         #  If allow_maybe_satisfiable is False (the default)
@@ -525,13 +550,13 @@ class Dfa:
         initials = [[self.states[0]]]
         return extend_paths(initials)
 
+    # this function returns True, False, or None.
+    #   True ==> there is no accepting path from initial state to final state.
+    #   False ==> There is an accepting path from initial state to final state.
+    #   None ==> There may be an accepting path, but we can neither verify nor falsify,
+    #            because every path between initial and final contains at least one
+    #            label, td, for which td.inhabited() returns None (i.e., dont-know).
     def vacuous(self) -> Optional[bool]:
-        # this function returns True, False, or None.
-        #   True ==> there is no accepting path from initial state to final state
-        #   False ==> There is an accepting path from initial state to final state
-        #   None ==> There may be an accepting path, but we can neither verify nor falsify
-        #            because every path between initial and final contains at least one
-        #            label, td, for which td.inhabited() returns None (i.e., dont-know).
         if not self.states:
             return True
         # if every state is non-accepting then the dfa is vacuous
@@ -546,6 +571,12 @@ class Dfa:
         else:
             return False
 
+    # this function returns True, False, or None.
+    #   False ==> there is no accepting path from initial state to final state.
+    #   True ==> There is an accepting path from initial state to final state.
+    #   None ==> There may be an accepting path, but we can neither verify nor falsify,
+    #            because every path between initial and final contains at least one
+    #            label, td, for which td.inhabited() returns None (i.e., dont-know).
     def inhabited(self) -> Optional[bool]:
         v = self.vacuous()
         if v is None:
@@ -553,6 +584,10 @@ class Dfa:
         else:
             return not v
 
+    # Return a list of equivalence classes, where each equivalence class
+    # is a tuple of States.   Why Tuple rather than List?  Because the
+    # Python Map/Set etc types cannot handle mutable objects.  A tuple, once
+    # created, is immutable.
     def find_hopcroft_partition(self) -> List[EqvClass]:
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
         from genus.s_empty import SEmpty
@@ -583,6 +618,10 @@ class Dfa:
 
         return fixed_point(pi_0, refine, lambda a, b: a == b)
 
+    # Return a new Dfa which uses the Hopcroft partitioning algorithm to minimize
+    # a Dfa.  Note, that at this point in our research we do not know to which
+    # extent this is really the minimized Dfa.  The exact claim of minimization
+    # still needs to be theoretically determined and justified.
     def minimize(self) -> 'Dfa':
         from genus.utils import find_eqv_class
         from genus.s_or import createSOr
@@ -624,12 +663,20 @@ class Dfa:
                          new_exit_map,
                          self.combine_labels)
 
+    # Compute the synchronized-cross-product ot two Dfas, (self, and the given dfa2).
+    # This function realizes the intersection, union, xor etc of two Dfas,
+    # by generating a Dfa which recognizes the intersection, union, xor etc
+    # of the languages of the respective Dfas.
+    # This function is the work-horse used by the functions intersection, union,
+    # and xor below.
     def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value) -> 'Dfa':
         from genus.s_and import SAnd
         from genus.genus_types import NormalForm
         dfa1 = self  # IDE warns if I name the parameter dfa1 rather than self. :-(
 
-        def compute_cross_transitions(src1, src2):
+        CrossTransition = Tuple[Tuple[State, State], SimpleTypeD, Tuple[State, State]]
+
+        def compute_cross_transitions(src1, src2) -> List[CrossTransition]:
             state1 = next(q for q in dfa1.states if src1 == q.index)
             state2 = next(q for q in dfa2.states if src2 == q.index)
             return [((src1, src2), label_sxp, (dst1, dst2))
@@ -637,12 +684,16 @@ class Dfa:
                     for dst1 in [state1.transitions[label1]]
                     for label2 in state2.transitions
                     for dst2 in [state2.transitions[label2]]
-                    if label1.disjoint(label2) is not True  # continue if not-disjoint or if dont-know
+                    if label1.disjoint(label2) is not True  # skip this iteration if provably disjoint
                     for label_sxp in [SAnd(label1, label2).canonicalize(NormalForm.DNF)]
-                    if label_sxp.inhabited is not False  # continue if is inhabited or if dont-know
+                    if label_sxp.inhabited is not False  # skip if intersection is provably empty
                     ]
 
-        def compute_all_cross_transitions():
+        # start with the cross transitions from self.states[0] and df2.states[0]
+        #    and iteratively extend the transitions until they are complete.
+        #  We only generate transitions to accessible state, more precisely, we omit
+        #    transitions to states which are provably non-accessible.
+        def compute_all_cross_transitions() -> List[CrossTransition]:
             triples = compute_cross_transitions(0, 0)
             done_pairs = {(0, 0)}
             i = 0
@@ -690,20 +741,28 @@ class Dfa:
                          exit_map=dict(exit_map),
                          combine_labels=dfa1.combine_labels)
 
+    # returns True, False, or None
+    # True => the Dfas are provably equivalent, i.e., they both accept the
+    #   same language
+    # False => The Dfas are provably not equivalent.
+    # None => It cannot be proven whether the Dfas are equivalent.  For example
+    #   because it contains a transition which is not known to be inhabited.
     def equivalent(self, dfa2) -> Optional[bool]:
-        # returns True, False, or None
         return self.xor(dfa2).vacuous()
 
+    # compute a Dfa recognizing the union of the languages of the given Dfas
     def union(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: a or b,
                         lambda q1, _: self.exit_map[q1.index])
 
+    # compute a Dfa recognizing the union of the languages of the given Dfas
     def intersection(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: a and b,
                         lambda q1, _: self.exit_map[q1.index])
 
+    # compute a Dfa recognizing the XOR of the languages of the given Dfas
     def xor(self, dfa2) -> 'Dfa':
         return self.sxp(dfa2,
                         lambda a, b: (a and not b) or (b and not a),
@@ -726,6 +785,8 @@ def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
         return [connecting_label(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
 
+# Construct a deterministic symbolic finite automaton, given an Rte and exit value.
+# The Brzozowski derivative method is used in this construction.
 def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
     from genus.s_or import createSOr
     rtes, transitions = rte.derivatives()
@@ -746,6 +807,8 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
                      combine_labels=combine_labels)
 
 
+# Create a Dfa given the list of transitions, accepting state ids,
+#  an exit map and a function to merge parallel labels.
 def createDfa(pattern: Optional[Rte],
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: Optional[List[int]],
@@ -761,7 +824,7 @@ def createDfa(pattern: Optional[Rte],
     #  in the sources, but a source need not be mentioned in the destinations
     srcs = [src for src, _, _ in transition_triples]
     for src, td, dst in transition_triples:
-        assert dst in srcs, f"invalid transition {(src,td,dst)} because {dst} is not a given state"
+        assert dst in srcs, f"invalid transition {(src, td, dst)} because {dst} is not a given state"
 
     def f(acc: int, triple: Tuple[int, Any, int]) -> int:
         src, _, dst = triple
