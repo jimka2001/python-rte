@@ -1,4 +1,4 @@
-# Copyright (©) 2021 EPITA Research and Development Laboratory
+# Copyright (©) 2021,22 EPITA Research and Development Laboratory
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation
