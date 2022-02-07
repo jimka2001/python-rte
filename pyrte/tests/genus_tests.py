@@ -95,14 +95,13 @@ class GenusCase(unittest.TestCase):
 
         def f(x):
             if x % 2 == 0:
-                return x+1
-            return x-1
+                return x + 1
+            return x - 1
 
         with self.assertRaises(AssertionError):
             fixed_point(1, lambda x: x, lambda x, y: x == y, invariant)
             fixed_point(1, lambda x: x + 1, lambda x, y: x == y, invariant)
             fixed_point(2, f, lambda x, y: x == y + 4, invariant)
-
 
     def test_STop(self):
 
@@ -376,7 +375,7 @@ class GenusCase(unittest.TestCase):
                                     "found types with empty intersection but not disjoint" +
                                     f"\ntd1={td1}" +
                                     f"\ntd2={td2}" +
-                                    f"\n intersection = {SAnd(td1, td2).canonicalize(NormalForm.DNF)}"+
+                                    f"\n intersection = {SAnd(td1, td2).canonicalize(NormalForm.DNF)}" +
                                     f"\ntd1.disjoint(td2) = {d12}")
 
     def test_discovered_case_385(self):
@@ -622,7 +621,8 @@ class GenusCase(unittest.TestCase):
 
     def test_eql(self):
         self.assertTrue(SEql(1).pair[1] == 1)
-        self.assertTrue(SEql(1).argpairs == [(SAtomic(int), 1)], f"expecting argpairs=[(SAtomic(int), 1)], got {SEql(1).argpairs}")
+        self.assertTrue(SEql(1).argpairs == [(SAtomic(int), 1)],
+                        f"expecting argpairs=[(SAtomic(int), 1)], got {SEql(1).argpairs}")
 
     def test_discovered_cases2(self):
         td = SAnd(SEql(3.14), SMember("a", "b", "c"))
@@ -1225,7 +1225,6 @@ class GenusCase(unittest.TestCase):
         self.assertTrue((2, 11) in partition)
         self.assertTrue((3, 12) in partition)
 
-
     def test_transition_to_ite(self):
         from genus.ite import transitions_to_ite
         self.assertEqual(transitions_to_ite([], default=None), (None,))
@@ -1379,7 +1378,6 @@ class GenusCase(unittest.TestCase):
             self.assertTrue(a.typeEquivalent(b) == eq,
                             f"\na={a}\nb={b}\nexpecting a = b = {eq}, got {a.typeEquivalent(b)}")
 
-
     def test_search_replace(self):
         li = [SMember(1, 2, 3), SMember(2, 1, 3), SMember(3, 1, 2)]
         replace = [SMember(4, 5, 6), SMember(5, 4, 6), SMember(6, 4, 5)]
@@ -1416,8 +1414,6 @@ class GenusCase(unittest.TestCase):
         simplifiers.append(lambda: SMember(3, 2, 1))
         self.assertEqual(find_simplifier(t, simplifiers), SMember(2, 1, 3))
 
-
-
     def test_remove_element(self):
         # Empty list
         self.assertEqual(remove_element([], "h"), [])
@@ -1450,9 +1446,8 @@ class GenusCase(unittest.TestCase):
         t = SMember(3, 1, 2)
         self.assertEqual(cmp_objects(t, s), 1)
 
-
     def test_find_first(self):
-       # Empty list testing the default argument also
+        # Empty list testing the default argument also
         self.assertEqual(find_first(lambda: True, []), None)
         self.assertEqual(find_first(lambda: True, [], "Test"), "Test")
 
@@ -1465,8 +1460,6 @@ class GenusCase(unittest.TestCase):
         self.assertEqual(find_first(lambda x: x + 1 == 2, li), 1)
         # first element is one of them
         self.assertEqual(find_first(lambda x: x + 1 == 5, li), 4)
-
-
 
 
 if __name__ == '__main__':

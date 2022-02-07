@@ -282,7 +282,7 @@ class SCombination(SimpleTypeD):
             #   union or intersection depending on SOr or SAnd
             combined = functools.reduce(lambda x, y: self.dual_combinator(x, y),
                                         items)
-            new_not_member = SNot(createSMember([a for _,a in combined]))
+            new_not_member = SNot(createSMember([a for _, a in combined]))
 
             def f(td):
                 if td in not_members:
