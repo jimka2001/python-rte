@@ -49,7 +49,36 @@ class XymbolycoCase(unittest.TestCase):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
                 pattern, transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
-                self.assertTrue(createDfa(pattern, transitions, accepting, exit_map, combine_labels))
+                self.assertTrue(createDfa(pattern=pattern,
+                                          transition_triples=transitions,
+                                          accepting_states=accepting,
+                                          exit_map=exit_map,
+                                          combine_labels=combine_labels))
+
+    def test_createDfaDeterminist(self):
+        # test to make sure an exception is thrown if we try to create a Dfa
+        # using createDfa with non-disjoint transitions.
+        from rte.xymbolyco import createDfa
+        from genus.simple_type_d import SimpleTypeD
+        from genus.s_or import createSOr
+
+        def combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
+            return createSOr([td1, td2]).canonicalize()
+
+        try:
+            createDfa(pattern=None,
+                      transition_triples=[(0, SOr(SAtomic(int), SAtomic(float)), 1),
+                                          (0, SAtomic(int), 2),
+                                          (1, STop, 3),
+                                          (2, STop, 3),
+                                          (3, STop, 3)],
+                      accepting_states=[3],
+                      exit_map={3: True},
+                      combine_labels=combine_labels)
+        except AssertionError:
+            pass
+        else:
+            self.fail('Expected exception because of non-disjoint transitions')
 
     def test_extract_discovered_case_57(self):
         from genus.depthgenerator import Test2

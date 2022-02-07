@@ -796,7 +796,7 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
                           for td, dst in transitions[src]
                           ]
 
-    def combine_labels(td1, td2):
+    def combine_labels(td1: SimpleTypeD, td2:SimpleTypeD) -> SimpleTypeD:
         return createSOr([td1, td2]).canonicalize()
 
     accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
@@ -809,6 +809,11 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
 
 # Create a Dfa given the list of transitions, accepting state ids,
 #  an exit map and a function to merge parallel labels.
+# The given list of transitions must be locally deterministic.  ie.
+#  for each state, the set of labels of its out-going transitions
+#  must be mutually disjoint.  More precisely, it must not be provably
+#  that some pair of transitions of any one state has an inhabited
+#  intersection.
 def createDfa(pattern: Optional[Rte],
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: List[int],
@@ -820,8 +825,12 @@ def createDfa(pattern: Optional[Rte],
     for i in accepting_states:
         assert isinstance(i, int)
         assert i >= 0
-    # every destination in the given transition_triples, but be mentioned
+    # every destination in the given transition_triples, must be mentioned
     #  in the sources, but a source need not be mentioned in the destinations
+    # TODO, I don't remember why this requirement is here.   The reason should
+    #  either be documented, or we need to remove the restriction.
+    # For example, if we find a state which has no exiting transitions,
+    #   we could simply create a transition STop to a sink state.
     srcs = [src for src, _, _ in transition_triples]
     for src, td, dst in transition_triples:
         assert dst in srcs, f"invalid transition {(src, td, dst)} because {dst} is not a given state"
