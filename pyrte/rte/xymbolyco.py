@@ -804,7 +804,7 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
 
 
 # default value for the combine_labels parameter of combine_labels
-def createDfa_combine_labels(td1: SimpleTypeD, td2:SimpleTypeD) -> SimpleTypeD:
+def createDfa_combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
     from genus.s_or import createSOr
     return createSOr([td1, td2]).canonicalize()
 
@@ -828,21 +828,27 @@ def createDfa(pattern: Optional[Rte],
     for i in accepting_states:
         assert isinstance(i, int)
         assert i >= 0
-    # every destination in the given transition_triples, must be mentioned
-    #  in the sources, but a source need not be mentioned in the destinations
-    # TODO, I don't remember why this requirement is here.   The reason should
-    #  either be documented, or we need to remove the restriction.
-    # For example, if we find a state which has no exiting transitions,
-    #   we could simply create a transition STop to a sink state.
-    srcs = [src for src, _, _ in transition_triples]
-    for src, td, dst in transition_triples:
-        assert dst in srcs, f"invalid transition {(src, td, dst)} because {dst} is not a given state"
 
     def f(acc: int, triple: Tuple[int, Any, int]) -> int:
         src, _, dst = triple
         return max(acc, src, dst)
 
     max_index = reduce(f, transition_triples, 0)
+
+    srcs = [src for src, _, _ in transition_triples]
+    # if we find a dst which is not used as a source, then create a transition from that dst
+    # to a sink state.  Do this with a recursive call.
+    needs_dst = [dst for src, td, dst in transition_triples if dst not in srcs]
+    if needs_dst:
+        from genus.s_top import STop
+        sink_id = max_index + 1
+        return createDfa(pattern=pattern,
+                         transition_triples=transition_triples
+                                            + [(dst, STop, sink_id) for dst in needs_dst]
+                                            + [(sink_id, STop, sink_id)],
+                         accepting_states=accepting_states,
+                         exit_map=exit_map,
+                         combine_labels=combine_labels)
 
     def merge_tds(dst1: int, transitions: List[Tuple[SimpleTypeD, int]]) -> SimpleTypeD:
         assert transitions, "merge_tds expected transitions to be non-empty"

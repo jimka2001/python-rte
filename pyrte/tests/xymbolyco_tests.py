@@ -55,12 +55,23 @@ class XymbolycoCase(unittest.TestCase):
                                           exit_map=exit_map,
                                           combine_labels=combine_labels))
 
+    def test_createDfaMissingDst(self):
+        from rte.xymbolyco import createDfa
+        dfa = createDfa(pattern=None,
+                        # testing the fact that using 3 as dst, but never
+                        #   as src, creates a valid Dfa
+                        transition_triples=[(0, SAtomic(float), 1),
+                                            (0, SAtomic(int), 2),
+                                            (1, STop, 3),
+                                            ],
+                        accepting_states=[1,2],
+                        exit_map={1: 1, 2: 2})
+        self.assertTrue(dfa)
+
     def test_createDfaDeterminist(self):
         # test to make sure an exception is thrown if we try to create a Dfa
         # using createDfa with non-disjoint transitions.
         from rte.xymbolyco import createDfa
-        from genus.simple_type_d import SimpleTypeD
-        from genus.s_or import createSOr
 
         try:
             createDfa(pattern=None,
