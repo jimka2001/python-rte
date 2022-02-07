@@ -217,16 +217,16 @@ class Combination(Rte):
         if len(members) <= 1 and len(not_members) <= 1:
             return self
         # find union/intersection of Singleton(SMember(...))  arglists
-        new_member_arglist = functools.reduce(self.set_operation,
-                                              [sm.operand.arglist for sm in members],
-                                              members[0].operand.arglist) if members else None
-        new_member = Singleton(createSMember(new_member_arglist)) if new_member_arglist \
+        new_member_argpairs = functools.reduce(self.set_operation,
+                                              [sm.operand.argpairs for sm in members],
+                                              members[0].operand.argpairs) if members else None
+        new_member = Singleton(createSMember([a for _,a in new_member_argpairs])) if new_member_argpairs \
             else self.one()
         # find union/intersection of Not(Singleton(SMember(...))) arglists
-        new_not_member_arglist = functools.reduce(self.set_dual_operation,
-                                                  [nsm.operand.operand.arglist for nsm in not_members],
-                                                  not_members[0].operand.operand.arglist) if not_members else None
-        new_not_member = Not(Singleton(createSMember(new_not_member_arglist))) if new_not_member_arglist \
+        new_not_member_argpairs = functools.reduce(self.set_dual_operation,
+                                                  [nsm.operand.operand.argpairs for nsm in not_members],
+                                                  not_members[0].operand.operand.argpairs) if not_members else None
+        new_not_member = Not(Singleton(createSMember([a for _, a in new_not_member_argpairs]))) if new_not_member_argpairs \
             else self.one()
 
         def f(op):
@@ -313,7 +313,7 @@ class Combination(Rte):
         if not looser:
             return self
         td = self.createTypeD(looser)
-        rt = Singleton(createSMember([a for a in member.arglist if self.orInvert(td.typep(a))]))
+        rt = Singleton(createSMember([a for _, a in member.argpairs if self.orInvert(td.typep(a))]))
         return self.create(search_replace(self.operands, singleton, rt))
 
     def conversionC21(self) -> Rte:

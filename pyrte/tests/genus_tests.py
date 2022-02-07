@@ -848,6 +848,76 @@ class GenusCase(unittest.TestCase):
     def test_combo_conversion16(self):
         self.assertTrue(SAnd(SEql("a"), SAtomic(int)).conversion16() == SAnd(SEmpty, SAtomic(int)))
         self.assertTrue(SOr(SEql("a"), SAtomic(int)).conversion16() == SOr(SEql("a"), SAtomic(int)))
+        # SAnd check for confusing of float and integer
+        self.assertEqual(
+            SAnd(SAtomic(float), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SAnd(SAtomic(float), SMember(1.0, 2.0)))
+        self.assertNotEqual(
+            SAnd(SAtomic(float), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SAnd(SAtomic(float), SMember(1, 2)))
+
+        self.assertEqual(
+            SAnd(SAtomic(int), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SAnd(SAtomic(int), SMember(1, 2)))
+        self.assertNotEqual(
+            SAnd(SAtomic(int), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SAnd(SAtomic(int), SMember(1.0, 2.0)))
+
+        self.assertEqual(
+            SAnd(SAtomic(float), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SAnd(SAtomic(float), SNot(SMember(1.0, 2.0))))
+        self.assertNotEqual(
+            SAnd(SAtomic(float), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SAnd(SAtomic(float), SNot(SMember(1, 2))))
+
+        self.assertEqual(
+            SAnd(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SAnd(SAtomic(int), SNot(SMember(1, 2))))
+        self.assertNotEqual(
+            SAnd(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SAnd(SAtomic(int), SNot(SMember(1.0, 2.0))))
+
+        # SOr check for confusing of float and integer
+        self.assertEqual(
+            SOr(SAtomic(float), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SOr(SAtomic(float), SMember(1, 2)))
+        self.assertNotEqual(
+            SOr(SAtomic(float), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SOr(SAtomic(float), SMember(1.0, 2.0)))
+
+        self.assertEqual(
+            SOr(SAtomic(int), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SOr(SAtomic(int), SMember(1.0, 2.0)))
+        self.assertEqual(
+            SOr(SAtomic(int), SMember(1, 1.0, 2, 2.0), SMember(3, 3.0, 4, 4.0)).conversion16(),
+            SOr(SAtomic(int), SMember(1.0, 2.0), SMember(3.0, 4.0)))
+        self.assertNotEqual(
+            SOr(SAtomic(int), SMember(1, 1.0, 2, 2.0)).conversion16(),
+            SOr(SAtomic(int), SMember(1, 2)))
+        self.assertNotEqual(
+            SOr(SAtomic(int), SMember(1, 1.0, 2, 2.0), SMember(3, 3.0, 4, 4.0)).conversion16(),
+            SOr(SAtomic(int), SMember(1, 2), SMember(3, 4)))
+
+        self.assertEqual(
+            SOr(SAtomic(float), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SOr(SAtomic(float), SNot(SMember(1, 2))))
+        self.assertNotEqual(
+            SOr(SAtomic(float), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SOr(SAtomic(float), SNot(SMember(1.0, 2.0))))
+
+        self.assertEqual(
+            SOr(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SOr(SAtomic(int), SNot(SMember(1.0, 2.0))))
+        self.assertNotEqual(
+            SOr(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SOr(SAtomic(int), SNot(SMember(1, 2))))
+
+        self.assertEqual(
+            SOr(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0)), SNot(SMember(3, 3.0, 4, 4.0))).conversion16(),
+            SOr(SAtomic(int), SNot(SMember(1.0, 2.0)), SNot(SMember(3.0, 4.0))))
+        self.assertNotEqual(
+            SOr(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
+            SOr(SAtomic(int), SNot(SMember(1, 2))))
 
     def test_combo_conversionD1(self):
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)

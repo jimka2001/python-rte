@@ -61,7 +61,7 @@ class SMemberImpl(SimpleTypeD):
         from genus.utils import uniquify
         # Sort by type then by value so the equality of to list can show by index
         # In this implementation we have chosen this order.
-        return createSMember(sorted(uniquify(self.argpairs), key=lambda s: (type(s[1]).__name__, s[1])))
+        return createSMember([a for _,a in sorted(uniquify(self.argpairs), key=lambda s: (type(s[1]).__name__, s[1]))])
 
     def cmp_to_same_class_obj(self, t: 'SMemberImpl') -> Literal[-1, 0, 1]:
         if type(self) != type(t):

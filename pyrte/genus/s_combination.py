@@ -282,7 +282,7 @@ class SCombination(SimpleTypeD):
             #   union or intersection depending on SOr or SAnd
             combined = functools.reduce(lambda x, y: self.dual_combinator(x, y),
                                         items)
-            new_not_member = SNot(createSMember(combined))
+            new_not_member = SNot(createSMember([a for _,a in combined]))
 
             def f(td):
                 if td in not_members:
@@ -308,7 +308,7 @@ class SCombination(SimpleTypeD):
             items = [m.argpairs for m in members]
             combined = functools.reduce(lambda x, y: self.combinator(x, y),
                                         items)
-            new_member = createSMember(combined)
+            new_member = createSMember([a for _, a in combined])
 
             def f(td):
                 if td in members:
@@ -351,13 +351,13 @@ class SCombination(SimpleTypeD):
                 if andp(self) and td == not_member:
                     return []
                 elif andp(self) and td == member:
-                    return [createSMember(diff(member.argpairs, not_member.s.argpairs))]
+                    return [createSMember([a for _, a in diff(member.argpairs, not_member.s.argpairs)])]
 
                 # in the SOr case we remove the member and filter the not-member args
                 elif orp(self) and td == member:
                     return []
                 elif orp(self) and td == not_member:
-                    return [SNot(createSMember(diff(not_member.s.argpairs, member.argpairs)))]
+                    return [SNot(createSMember([a for _, a in diff(not_member.s.argpairs, member.argpairs)]))]
 
                 else:
                     return [td]
