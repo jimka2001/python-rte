@@ -182,6 +182,26 @@ class Dfa:
     def delta(self, source_state, target_label) -> State:
         return self.states[source_state.transitions[target_label]]
 
+    # given an input sequence, execute the state machine, starting
+    #   at state index=0, by iterating through the sequence,
+    #   and following the transitions
+    #   according to which SimpleTypeD the object matches.
+    #   Each transitions is labeled with a SimpleTypeD.
+    #   Finding the matching transition is done efficiently
+    #   via the ite object returned from state.ite().
+    #   Warning, the first time ite() is called on a state,
+    #   it might be slow, as the data structure is computed lazily.
+    #   Basically the ite allows us to determine the appropriate
+    #   transition by evaluating the object against simple
+    #   SimpleTypeD object but without checking the same object
+    #   multiple times against the same type.  i.e., never asking twice
+    #   whether a given element of the input sequence matches SSatisfies(f).
+    #   If we encounter a situation where no SimpleTypeD label matches,
+    #   and thus no transition can be found, we immediately return None.
+    #   If we manage to finish iterating through the sequence
+    #   and find ourself in a non-final state, then we return None.
+    #   If we are in a final state at that point, we look up
+    #   the value to return in the exit_map indexed by the state_id.
     def simulate(self, sequence: List[Any]) -> Any:
         state_id = 0
         for element in sequence:
