@@ -98,6 +98,20 @@ def createSMember(items):
     from genus.s_eql import SEql
     # items is a list of object like : {1, 2, 3}
     #     not a pairs like : ((SAtomic(int), 1), (SAtomic(int), 2), (SAtomic(int), 3))
+    assert type(items) is list
+    # TODO, the following check is not really correct.
+    #   it is attempting to trigger an error if someone called
+    #   createSMember with arguments coming from obj.arglists which is of the form
+    #   [(SimpleTypeD, obj), (...)]
+    #   The reason this is not really correct is that you could theoretically
+    #   use SMember to check for these literal pairs, but that would be very
+    #   unusual and is in fact something that happens/happened often accidentally
+    #   after a recent refactoring.
+    for item in items:
+        if type(item) is tuple and len(item) == 2:
+            td, obj = item
+            assert not isinstance(td, SimpleTypeD), \
+                f"createSMember called with list of pairs, expecting list of objects: {items}"
     if not items:
         return SEmpty
     elif len(items) == 1:
