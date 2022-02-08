@@ -27,6 +27,7 @@ from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_or import Or
 from rte.r_and import And
+from rte.r_random import random_rte
 from rte.r_sigma import Sigma
 from rte.r_singleton import Singleton
 from rte.r_star import Star
@@ -34,55 +35,60 @@ from rte.r_not import Not
 from rte.thompson import createThompsonDfa
 from rte.xymbolyco import Dfa
 
+# default value of num_random_tests is 1000, but you can temporarily edit this file
+#   and set it to a smaller number for a quicker run of the tests.
+num_random_tests = 1000
+
 
 class MyTestCase(unittest.TestCase):
     def test_Epsilon(self):
-        dfa = createThompsonDfa(42, Epsilon)
+        dfa = createThompsonDfa(Epsilon, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_Sigma(self):
-        dfa = createThompsonDfa(42, Sigma)
+        dfa = createThompsonDfa(Sigma, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate(["hello"]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_SigmaStar(self):
-        dfa = createThompsonDfa(42, Star(Sigma))
+        dfa = createThompsonDfa(Star(Sigma), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate(["hello"]))
         self.assertEqual(42, dfa.simulate([1, 2, 3]))
 
     def test_EmptytSet(self):
-        dfa = createThompsonDfa(42, EmptySet)
+        dfa = createThompsonDfa(EmptySet, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertFalse(dfa.inhabited())
 
     def test_EmptySetStar(self):
-        dfa = createThompsonDfa(42, Star(EmptySet))
+        dfa = createThompsonDfa(Star(EmptySet), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_Singleton(self):
-        dfa = createThompsonDfa(42, Singleton(SAtomic(int)))
+        dfa = createThompsonDfa(Singleton(SAtomic(int)), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_Star(self):
-        dfa = createThompsonDfa(42, Star(Singleton(SAtomic(int))))
+        dfa = createThompsonDfa(Star(Singleton(SAtomic(int))), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate([1, 2, 3]))
         self.assertIsNone(dfa.simulate([1, 2.0, 3]))
 
     def test_Cat(self):
-        dfa = createThompsonDfa(42, Cat(Singleton(SAtomic(int)),
-                                        Singleton(SAtomic(str))))
+        dfa = createThompsonDfa(Cat(Singleton(SAtomic(int)),
+                                    Singleton(SAtomic(str))),
+                                42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1, "hello"]))
         self.assertIsNone(dfa.simulate([]))
@@ -90,8 +96,9 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNone(dfa.simulate([1, 2.0, 3]))
 
     def test_Or(self):
-        dfa = createThompsonDfa(42, Or(Singleton(SAtomic(int)),
-                                       Singleton(SAtomic(str))))
+        dfa = createThompsonDfa(Or(Singleton(SAtomic(int)),
+                                   Singleton(SAtomic(str))),
+                                42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate(["hello"]))
@@ -100,8 +107,9 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNone(dfa.simulate([1, 2.0, 3]))
 
     def test_Not(self):
-        dfa = createThompsonDfa(42, Not(Or(Singleton(SAtomic(int)),
-                                           Singleton(SAtomic(str)))))
+        dfa = createThompsonDfa(Not(Or(Singleton(SAtomic(int)),
+                                       Singleton(SAtomic(str)))),
+                                42)
         self.assertTrue(Dfa == type(dfa))
         self.assertIsNone(dfa.simulate([1]))
         self.assertIsNone(dfa.simulate(["hello"]))
@@ -111,14 +119,24 @@ class MyTestCase(unittest.TestCase):
 
     def test_And(self):
         # begins with int and ends with str
-        dfa = createThompsonDfa(42, And(Cat(Singleton(SAtomic(int)), Star(Sigma)),
-                                        Cat(Star(Sigma),Singleton(SAtomic(str)))))
+        dfa = createThompsonDfa(And(Cat(Singleton(SAtomic(int)), Star(Sigma)),
+                                    Cat(Star(Sigma), Singleton(SAtomic(str)))),
+                                42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1, "hello", "hello"]))
         self.assertEqual(42, dfa.simulate([1, 2.2, 2.2, "hello", "hello"]))
         self.assertIsNone(dfa.simulate([1, 2.2, 2.2]))
         self.assertIsNone(dfa.simulate([2.2, 2.2, "hello", "hello"]))
         self.assertIsNone(dfa.simulate([]))
+
+    def test_randomCreate(self):
+        for depth in range(4):
+            for r in range(num_random_tests):
+                pattern = random_rte(depth)
+                dfa_thompson = createThompsonDfa(pattern, 42)
+                dfa_brzozowski = pattern.to_dfa(42)
+                # equivalent might return None or True, but need to fail if returns False
+                self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False)
 
 
 if __name__ == '__main__':
