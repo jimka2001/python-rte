@@ -93,7 +93,7 @@ class SMember(SMemberImpl, TerminalType):
     pass
 
 
-def createSMember(items):
+def createSMember(items) -> Union[Literal[SEmpty],SMemberImpl]:
     from genus.s_empty import SEmpty
     from genus.s_eql import SEql
     # items is a list of object like : {1, 2, 3}
