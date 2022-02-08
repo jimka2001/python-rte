@@ -21,7 +21,8 @@
 
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
-from typing import Literal
+from genus.s_empty import SEmptyImpl
+from typing import Literal, Union
 from typing_extensions import TypeGuard
 
 
@@ -93,7 +94,7 @@ class SMember(SMemberImpl, TerminalType):
     pass
 
 
-def createSMember(items) -> Union[Literal[SEmpty],SMemberImpl]:
+def createSMember(items) -> Union[SEmptyImpl, SMemberImpl]:
     from genus.s_empty import SEmpty
     from genus.s_eql import SEql
     # items is a list of object like : {1, 2, 3}
