@@ -61,7 +61,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(42, dfa.simulate(["hello"]))
         self.assertEqual(42, dfa.simulate([1, 2, 3]))
 
-    def test_EmptytSet(self):
+    def test_EmptySet(self):
         dfa = createThompsonDfa(EmptySet, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertFalse(dfa.inhabited())
