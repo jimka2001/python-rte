@@ -37,18 +37,25 @@ leaf_rtes = [EmptySet,
              Sigma]
 
 
+def random_list(length: int, f) -> list:
+    return [f() for i in range(length)]
+
+
 def random_rte(depth: int) -> Rte:
     def random_and():
-        return And(random_rte(depth - 1),
-                   random_rte(depth - 1))
+        args = random_list(random.randint(0, 4),
+                           lambda: random_rte(depth - 1))
+        return And(*args)
 
     def random_or():
-        return Or(random_rte(depth - 1),
-                  random_rte(depth - 1))
+        args = random_list(random.randint(0, 4),
+                           lambda: random_rte(depth - 1))
+        return Or(*args)
 
     def random_cat():
-        return Cat(random_rte(depth - 1),
-                   random_rte(depth - 1))
+        args = random_list(random.randint(0, 4),
+                           lambda: random_rte(depth - 1))
+        return Cat(*args)
 
     def random_not():
         return Not(random_rte(depth - 1))
