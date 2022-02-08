@@ -105,17 +105,18 @@ class Star(Rte):
         c: Cat = self.operand
         # Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
         #    -->    Star(Cat(X, Y, Z))
-        right = c.operands[-1]
-        left = c.operands[0:-1]
-        if c.operands == left + [Star(Cat(*left))]:
-            return right
+        if len(c.operands) > 1:
+            right = c.operands[-1]
+            left = c.operands[0:-1]
+            if c.operands == left + [Star(Cat(*left))]:
+                return right
 
-        # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
-        #    -->    Star(Cat(X, Y, Z))
-        left = c.operands[0]
-        right = c.operands[1:]
-        if c.operands == [Star(Cat(*right))] + right:
-            return left
+            # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
+            #    -->    Star(Cat(X, Y, Z))
+            left = c.operands[0]
+            right = c.operands[1:]
+            if c.operands == [Star(Cat(*right))] + right:
+                return left
 
         # Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
         #    -->    Star(Cat(X, Y, Z))

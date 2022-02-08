@@ -151,6 +151,10 @@ class RteCase(unittest.TestCase):
         #    -->    Star(Cat(X, Y, Z))
         self.assertEqual(Star(Cat(Star(Cat(x, y, z)), x, y, z, Star(Cat(x, y, z)))).conversion3(),
                          Star(Cat(x, y, z)))
+        self.assertEqual(Star(Cat()).conversion3(),
+                         Star(Cat()))
+        self.assertEqual(Star(Cat(x)).conversion3(),
+                         Star(Cat(x)))
 
     def test_not_conversion1(self):
         self.assertEqual(Not(Sigma).conversion1(), Or(Cat(Sigma, Sigma, Star(Sigma)), Epsilon))
