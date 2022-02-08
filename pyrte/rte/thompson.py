@@ -25,9 +25,7 @@ from rte.r_rte import Rte
 from rte.xymbolyco import Dfa
 
 
-def createThompsonDfa(pattern:Rte, ret:Any = True) -> Dfa:
+def createThompsonDfa(pattern: Rte, ret: Any = True) -> Dfa:
     # TODO, currently this calls the Brzozowski algorithm.
     #   need to remove this call to rte_to_dfa and replace with the Thompson algorithm
     return pattern.to_dfa(ret)
-
-
