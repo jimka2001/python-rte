@@ -239,7 +239,7 @@ class And(Combination):
         cats = [r for r in self.operands
                 if catp(r)
                 and all(not td.search(catp) for td in r.operands)]
-        non_nullable_cat = find_first(lambda c: all(not o.nullable() for o in c.operands),
+        non_nullable_cat = find_first(lambda cc: all(not o.nullable() for o in cc.operands),
                                       cats,
                                       None)
         if non_nullable_cat is None:
@@ -247,8 +247,8 @@ class And(Combination):
         else:
             num_non_nullable = len(non_nullable_cat.operands)
 
-            def count_non_nullable(c):
-                return sum(1 for o in c.operands if not o.nullable())
+            def count_non_nullable(cc):
+                return sum(1 for o in cc.operands if not o.nullable())
 
             for c in cats:
                 if count_non_nullable(c) > num_non_nullable:

@@ -49,7 +49,8 @@ def measureSubtypeComputability(n, depth, inh):
         for i in range(0, n):
             if inh:
                 rt1 = random_type_designator_filter(depth, lambda td: td.inhabited() is True)
-                rt2 = random_type_designator_filter(depth, lambda td: td.inhabited() is True and td.typeEquivalent(rt1) is False)
+                rt2 = random_type_designator_filter(depth, lambda td: td.inhabited() is True
+                                                                      and td.typeEquivalent(rt1) is False)
             else:
                 rt1 = random_type_designator(depth)
                 rt2 = random_type_designator(depth)

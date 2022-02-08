@@ -141,8 +141,8 @@ def random_type_designator(depth):
         return randomizer()
 
 
-def random_type_designator_filter(depth, filter):
+def random_type_designator_filter(depth, ffilter):
     td = random_type_designator(depth)
-    while not filter(td):
+    while not ffilter(td):
         td = random_type_designator(depth)
     return td

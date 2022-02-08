@@ -786,7 +786,7 @@ def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
 
 
 # Construct a deterministic symbolic finite automaton, given an Rte and exit value.
-# The Brzozowski derivative method is used in this construction.
+# The Bronowski derivative method is used in this construction.
 def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
     from genus.s_or import createSOr
     rtes, transitions = rte.derivatives()
@@ -855,24 +855,24 @@ def createDfa(pattern: Optional[Rte],
         tds = [td for td, dst2 in transitions if dst1 == dst2]
         return reduce(combine_labels, tds)
 
-    def make_state(i: int) -> State:
-        transitions_pre = [(td, dst) for src, td, dst in transition_triples if src == i]
+    def make_state(q: int) -> State:
+        transitions_pre = [(td, dst) for src, td, dst in transition_triples if src == q]
         # error if a td appears more than once.
         #   we would like to error if the tds are not disjoint, but this is already
         #   checked in State initialization
         tds = [td for td, _ in transitions_pre]
-        assert len(tds) == len(set(tds)), f"transitions from state {i} are ambiguous: {transition_triples}"
+        assert len(tds) == len(set(tds)), f"transitions from state {q} are ambiguous: {transition_triples}"
         destinations = list(set([dst for _, dst in transitions_pre]))
 
         if transitions_pre:
             transitions = dict([(merge_tds(dst, transitions_pre), dst) for dst in destinations])
-            return State(index=i,
-                         initial=i == 0,
-                         accepting=i in accepting_states,
+            return State(index=q,
+                         initial=q == 0,
+                         accepting=q in accepting_states,
                          pattern=None,
                          transitions=transitions)
         else:
-            return createSinkState(i)
+            return createSinkState(q)
 
     states = [make_state(i) for i in range(1 + max_index)]
     return Dfa(pattern=pattern,

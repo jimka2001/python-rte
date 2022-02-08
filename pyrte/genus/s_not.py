@@ -66,6 +66,7 @@ class SNot(SimpleTypeD):
         elif memberimplp(self.s):
             return True
         elif notp(self.s):
+            # self.s is class SNot, so self.s.s extracts x from SNot(x)
             return self.s.s.inhabited()
         else:
             return None

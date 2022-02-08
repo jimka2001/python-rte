@@ -31,12 +31,12 @@ def transitions_to_ite(td_id_pairs, default=None):
     from genus.s_not import SNot
     from genus.genus_types import NormalForm
     if not td_id_pairs:
-        return (default,)
+        return default,  # returns 1-tuple
     else:
         pivot_pre, idx = td_id_pairs[0]
         pivot = pivot_pre.canonicalize(NormalForm.DNF)
         if pivot == STop:
-            return (idx,)
+            return idx,   # returns 1-tuple
         elif pivot == SEmpty:
             return transitions_to_ite(td_id_pairs[1:], default)
         else:

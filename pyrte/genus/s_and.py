@@ -185,7 +185,7 @@ def createSAnd(tds: Iterable[SimpleTypeD]) -> SimpleTypeD:
     if not tds:
         return STop
     elif len(list(tds)) == 1:
-        return tds[0]
+        return list(tds)[0]
     else:
         return SAnd(*tds)
 

@@ -21,6 +21,7 @@
 
 from enum import Enum
 
+
 class NormalForm(Enum):
     DNF = 1
     CNF = 2
