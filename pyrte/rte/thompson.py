@@ -102,37 +102,12 @@ def constructDeterminizedTransitions(rte: Rte
 
 
 def constructThompsonDfa(pattern: Rte, ret: Any = True) -> Dfa:
-    next_state = 0
-
-    def count() -> int:
-        nonlocal next_state
-        next_state = next_state + 1
-        return next_state
-
-    # createDfa requires the initial state to be 0
-    def renumber(ini1: int,
-                 outs1: List[int],
-                 transitions1: List[Tuple[int, SimpleTypeD, int]]
-                 ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
-        mapping = {ini1: 0}
-        for x, td, y in transitions1:
-            for q in (x, y):
-                if q not in mapping:
-                    mapping[x] = count()
-        for f in outs1:
-            if f not in mapping:
-                mapping[f] = count()
-        return (mapping[ini1],
-                [mapping[f] for f in outs1],
-                [(mapping[x], td, mapping[y]) for x, td, y in transitions1])
-
     ini, outs, determinized = constructDeterminizedTransitions(pattern)
-    ini2, outs2, determinized2 = renumber(ini, outs, determinized)
-    assert ini2 == 0
-    fmap = dict([(f, ret) for f in outs2])
+    fmap = dict([(f, ret) for f in outs])
 
     return createDfa(pattern=pattern,
-                     transition_triples=determinized2,
-                     accepting_states=outs2,
+                     ini=ini,
+                     transition_triples=determinized,
+                     accepting_states=outs,
                      exit_map=fmap,
                      )

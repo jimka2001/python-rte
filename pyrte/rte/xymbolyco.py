@@ -808,6 +808,40 @@ def createDfa_combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
     return createSOr([td1, td2]).canonicalize()
 
 
+def renumber_transitions_for_dfa(ini: int,
+                                 outs: List[int],
+                                 transitions: List[Tuple[int, SimpleTypeD, int]]
+                                 ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+    next_state = 0
+
+    def count() -> int:
+        nonlocal next_state
+        next_state = next_state + 1
+        return next_state
+
+    # createDfa requires the initial state to be 0
+    def renumber(ini1: int,
+                 outs1: List[int],
+                 transitions1: List[Tuple[int, SimpleTypeD, int]]
+                 ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+        mapping = {ini1: 0}
+        for x, td, y in transitions1:
+            for q in (x, y):
+                if q not in mapping:
+                    mapping[x] = count()
+        for f in outs1:
+            if f not in mapping:
+                mapping[f] = count()
+        return (mapping[ini1],
+                [mapping[f] for f in outs1],
+                [(mapping[x], td, mapping[y]) for x, td, y in transitions1])
+
+    if ini == 0:
+        return (ini, outs, transitions)
+    else:
+        return renumber(ini, outs, transitions)
+
+
 # Create a Dfa given the list of transitions, accepting state ids,
 #  an exit map and a function to merge parallel labels.
 # The given list of transitions must be locally deterministic.  ie.
@@ -816,6 +850,7 @@ def createDfa_combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
 #  that some pair of transitions of any one state has an inhabited
 #  intersection.
 def createDfa(pattern: Optional[Rte],
+              ini: int,
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: List[int],
               exit_map: Dict[int, Any],
