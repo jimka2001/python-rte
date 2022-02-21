@@ -22,6 +22,7 @@
 import unittest
 
 from genus.s_atomic import SAtomic
+from genus.s_top import STop
 from rte.r_cat import Cat
 from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
@@ -138,6 +139,19 @@ class ThompsonCase(unittest.TestCase):
                 dfa_brzozowski = pattern.to_dfa(42)
                 # equivalent might return None or True, but need to fail if returns False
                 self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False)
+
+    def test_accessible(self):
+        ini, outs, transitions = accessible(0,
+                                            [97, 98, 99],
+                                            [(0, STop, 1),
+                                             (1, STop, 97),
+                                             (1, STop, 98),
+                                             (2, STop, 99)])
+        self.assertEqual(ini, 0)
+        self.assertEqual(set(outs), {97, 98})
+        self.assertEqual(set(transitions), {(0, STop, 1),
+                                            (1, STop, 97),
+                                            (1, STop, 98)})
 
 
 if __name__ == '__main__':
