@@ -356,7 +356,7 @@ class Dfa:
                                                                            accepting_ids,
                                                                            exit_map)
 
-        return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
+        return createDfa(pattern, 0, useful_transitions, accepting_ids, exit_map, combine_labels)
 
     def combine_parallel_triples(self,
                                  triples: List[Triple],
@@ -658,6 +658,7 @@ class Dfa:
                            for dst in [new_id(q.transitions[label])]
                            ]
         return createDfa(self.pattern,
+                         0,
                          merge_parallel(new_transitions),
                          new_fids,
                          new_exit_map,
@@ -736,6 +737,7 @@ class Dfa:
                     for q2 in [next(q for q in dfa2.states if id2 == q.index)]
                     ]
         return createDfa(pattern=None,
+                         ini=0,
                          transition_triples=transition_triples,
                          accepting_states=accepting_states,
                          exit_map=dict(exit_map),
@@ -797,6 +799,7 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
 
     accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
     return createDfa(pattern=rte,
+                     ini=0,
                      transition_triples=transition_triples,
                      accepting_states=accepting_states,
                      exit_map=dict([(i, exit_value) for i in accepting_states]))
@@ -857,7 +860,7 @@ def createDfa(pattern: Optional[Rte],
               combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = createDfa_combine_labels
               ) -> 'Dfa':
     from functools import reduce
-
+    assert ini==0
     assert isinstance(accepting_states, list)
     for i in accepting_states:
         assert isinstance(i, int)
@@ -877,6 +880,7 @@ def createDfa(pattern: Optional[Rte],
         from genus.s_top import STop
         sink_id = max_index + 1
         return createDfa(pattern=pattern,
+                         ini=0,
                          transition_triples=transition_triples
                                             + [(dst, STop, sink_id) for dst in needs_dst]
                                             + [(sink_id, STop, sink_id)],
