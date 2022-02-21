@@ -291,6 +291,40 @@ def group_by(key: Callable[[T], S],
     return reduce(lambda grp, val: grp[key(val)].append(val) or grp, seq, defaultdict(list))
 
 
+# build a Dict which maps keys to value.
+# for each element of the input sequence, we call the key function on
+#   the element.  That gives us the key for the dictionary.
+#   The value is a list of values, one for each element of the input sequence
+#   for which key returns that key.  The values in the list are not necessarily
+#   the value from the sequence, but return value of the store function.
+#  E.g., to transform [(1,"a"), (2, "b"), (1, "c"), (3, "d")]
+#    to { 1: [(1,"a"), (1, "c")],
+#         2: [(2, "b")],
+#         3: [(3, "d")]}
+#  use group_by, group_by(lambda x: x[0],
+#                         sequence)
+#
+#  but to transform [(1,"a"), (2, "b"), (1, "c"), (3, "d")]
+#    to { 1: ["a" "c"],
+#         2: ["b"],
+#         3: ["d"]}
+# use group_map(lambda x: x[0],
+#               sequence,
+#               lambda x: x[1])
+def group_map(key: Callable[[T], S],
+              seq: Iterable[T],
+              store: Callable[[T], V]
+              ) -> Dict[S, List[V]]:
+    grouped = {}
+    for q in seq:
+        k = key(q)
+        if k in grouped:
+            grouped[k].append(store(q))
+        else:
+            grouped[k] = [store(q)]
+    return grouped
+
+
 def split_eqv_class(objects: Tuple[T, ...],
                     f: Callable[[T], S]) -> List[Tuple[T, ...]]:
     if len(objects) == 1:

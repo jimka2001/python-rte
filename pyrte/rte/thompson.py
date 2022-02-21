@@ -23,9 +23,8 @@
 from typing import Any, List, Tuple, Optional, TypeVar, Callable
 
 from genus.simple_type_d import SimpleTypeD
-from genus.utils import trace_graph
+from genus.utils import trace_graph, group_map
 from rte.r_rte import Rte
-
 
 
 def constructEpsilonFreeTransitions(rte: Rte) -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
@@ -91,17 +90,13 @@ def traceTransitionGraph(q0: V,
 
 
 # remove non-accessible transitions, and non-accessible final states
-def accessible(ini:int,
+def accessible(ini: int,
                outs: List[int],
                transitions: List[Tuple[int, SimpleTypeD, int]]
-                   ) -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
-
-    grouped = {}
-    for x, td, y in transitions:
-        if x in grouped:
-            grouped[x].append((td,y))
-        else:
-            grouped[x] = [(td,y)]
+               ) -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
+    grouped = group_map(lambda triple: triple[0],
+                        transitions,
+                        lambda triple: (triple[1], triple[2]))
 
     accessibleOuts, accessibleTransitions = \
         traceTransitionGraph(ini,
