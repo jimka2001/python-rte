@@ -33,10 +33,10 @@ def constructEpsilonFreeTransitions(rte: Rte) -> (int, List[int], List[(int, Sim
     return removeEpsilonTransitions(ini, out, transitions)
 
 
-def removeEpsilonTransitions(ini:int,
-                             out:int,
-                             transitions:List[Tuple[int,Optional[SimpleTypeD],int]]
-                             ) -> Tuple[int, int, List[Tuple[int, SimpleTypeD, int]]]:
+def removeEpsilonTransitions(ini: int,
+                             out: int,
+                             transitions: List[Tuple[int, Optional[SimpleTypeD], int]]
+                             ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     assert False, "not yet implemented"
 
 
@@ -46,16 +46,16 @@ def constructDeterminizedTransitions(rte: Rte) -> (int, List[int], List[(int, Si
     return determinize(in2, outs2, completed)
 
 
-def complete(ini:int,
-             outs:List[int],
-             transitions:List[Tuple[int, SimpleTypeD, int]]
-             ) -> List[Tuple[int,SimpleTypeD,int]]:
+def complete(ini: int,
+             outs: List[int],
+             transitions: List[Tuple[int, SimpleTypeD, int]]
+             ) -> List[Tuple[int, SimpleTypeD, int]]:
     assert False, "not yet implemented"
 
 
-def determinize(ini:int,
-                outs:List[int],
-                transitions:List[Tuple[int, SimpleTypeD, int]]
+def determinize(ini: int,
+                outs: List[int],
+                transitions: List[Tuple[int, SimpleTypeD, int]]
                 ) -> (int, List[int], List[(int, SimpleTypeD, int)]):
     # This can be done with a call to traceTransitionGraph.
     #   to generate a graph (list of transitions) whose vertices are
