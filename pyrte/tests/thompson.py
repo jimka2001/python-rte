@@ -42,7 +42,7 @@ num_random_tests = 1000
 
 
 class ThompsonCase(unittest.TestCase):
-    pass
+
     def test_Epsilon(self):
         dfa = constructThompsonDfa(Epsilon, 42)
         self.assertTrue(Dfa == type(dfa))
