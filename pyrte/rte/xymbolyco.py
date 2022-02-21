@@ -788,7 +788,6 @@ def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
 # Construct a deterministic symbolic finite automaton, given an Rte and exit value.
 # The Brzozowski derivative method is used in this construction.
 def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
-    from genus.s_or import createSOr
     rtes, transitions = rte.derivatives()
     # transitions is a vector of sequences, each sequence contains pairs (SimpleTypeD,int)
     transition_triples = [(src, td, dst)
