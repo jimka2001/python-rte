@@ -22,6 +22,7 @@
 import unittest
 
 from genus.s_atomic import SAtomic
+from genus.s_top import STop
 from rte.r_cat import Cat
 from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
@@ -32,7 +33,7 @@ from rte.r_sigma import Sigma
 from rte.r_singleton import Singleton
 from rte.r_star import Star
 from rte.r_not import Not
-from rte.thompson import createThompsonDfa
+from rte.thompson import constructThompsonDfa, accessible
 from rte.xymbolyco import Dfa
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
@@ -40,55 +41,56 @@ from rte.xymbolyco import Dfa
 num_random_tests = 1000
 
 
-class MyTestCase(unittest.TestCase):
+class ThompsonCase(unittest.TestCase):
+    pass
     def test_Epsilon(self):
-        dfa = createThompsonDfa(Epsilon, 42)
+        dfa = constructThompsonDfa(Epsilon, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_Sigma(self):
-        dfa = createThompsonDfa(Sigma, 42)
+        dfa = constructThompsonDfa(Sigma, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate(["hello"]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_SigmaStar(self):
-        dfa = createThompsonDfa(Star(Sigma), 42)
+        dfa = constructThompsonDfa(Star(Sigma), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate(["hello"]))
         self.assertEqual(42, dfa.simulate([1, 2, 3]))
 
     def test_EmptySet(self):
-        dfa = createThompsonDfa(EmptySet, 42)
+        dfa = constructThompsonDfa(EmptySet, 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertFalse(dfa.inhabited())
 
     def test_EmptySetStar(self):
-        dfa = createThompsonDfa(Star(EmptySet), 42)
+        dfa = constructThompsonDfa(Star(EmptySet), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_Singleton(self):
-        dfa = createThompsonDfa(Singleton(SAtomic(int)), 42)
+        dfa = constructThompsonDfa(Singleton(SAtomic(int)), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertIsNone(dfa.simulate([1, 2, 3]))
 
     def test_Star(self):
-        dfa = createThompsonDfa(Star(Singleton(SAtomic(int))), 42)
+        dfa = constructThompsonDfa(Star(Singleton(SAtomic(int))), 42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate([1, 2, 3]))
         self.assertIsNone(dfa.simulate([1, 2.0, 3]))
 
     def test_Cat(self):
-        dfa = createThompsonDfa(Cat(Singleton(SAtomic(int)),
-                                    Singleton(SAtomic(str))),
-                                42)
+        dfa = constructThompsonDfa(Cat(Singleton(SAtomic(int)),
+                                       Singleton(SAtomic(str))),
+                                   42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1, "hello"]))
         self.assertIsNone(dfa.simulate([]))
@@ -96,9 +98,9 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNone(dfa.simulate([1, 2.0, 3]))
 
     def test_Or(self):
-        dfa = createThompsonDfa(Or(Singleton(SAtomic(int)),
-                                   Singleton(SAtomic(str))),
-                                42)
+        dfa = constructThompsonDfa(Or(Singleton(SAtomic(int)),
+                                      Singleton(SAtomic(str))),
+                                   42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1]))
         self.assertEqual(42, dfa.simulate(["hello"]))
@@ -107,9 +109,9 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNone(dfa.simulate([1, 2.0, 3]))
 
     def test_Not(self):
-        dfa = createThompsonDfa(Not(Or(Singleton(SAtomic(int)),
-                                       Singleton(SAtomic(str)))),
-                                42)
+        dfa = constructThompsonDfa(Not(Or(Singleton(SAtomic(int)),
+                                          Singleton(SAtomic(str)))),
+                                   42)
         self.assertTrue(Dfa == type(dfa))
         self.assertIsNone(dfa.simulate([1]))
         self.assertIsNone(dfa.simulate(["hello"]))
@@ -119,9 +121,9 @@ class MyTestCase(unittest.TestCase):
 
     def test_And(self):
         # begins with int and ends with str
-        dfa = createThompsonDfa(And(Cat(Singleton(SAtomic(int)), Star(Sigma)),
-                                    Cat(Star(Sigma), Singleton(SAtomic(str)))),
-                                42)
+        dfa = constructThompsonDfa(And(Cat(Singleton(SAtomic(int)), Star(Sigma)),
+                                       Cat(Star(Sigma), Singleton(SAtomic(str)))),
+                                   42)
         self.assertTrue(Dfa == type(dfa))
         self.assertEqual(42, dfa.simulate([1, "hello", "hello"]))
         self.assertEqual(42, dfa.simulate([1, 2.2, 2.2, "hello", "hello"]))
@@ -133,10 +135,23 @@ class MyTestCase(unittest.TestCase):
         for depth in range(4):
             for r in range(num_random_tests):
                 pattern = random_rte(depth)
-                dfa_thompson = createThompsonDfa(pattern, 42)
+                dfa_thompson = constructThompsonDfa(pattern, 42)
                 dfa_brzozowski = pattern.to_dfa(42)
                 # equivalent might return None or True, but need to fail if returns False
                 self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False)
+
+    def test_accessible(self):
+        ini, outs, transitions = accessible(0,
+                                            [97, 98, 99],
+                                            [(0, STop, 1),
+                                             (1, STop, 97),
+                                             (1, STop, 98),
+                                             (2, STop, 99)])
+        self.assertEqual(ini, 0)
+        self.assertEqual(set(outs), {97, 98})
+        self.assertEqual(set(transitions), {(0, STop, 1),
+                                            (1, STop, 97),
+                                            (1, STop, 98)})
 
 
 if __name__ == '__main__':

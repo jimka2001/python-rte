@@ -356,7 +356,7 @@ class Dfa:
                                                                            accepting_ids,
                                                                            exit_map)
 
-        return createDfa(pattern, useful_transitions, accepting_ids, exit_map, combine_labels)
+        return createDfa(pattern, 0, useful_transitions, accepting_ids, exit_map, combine_labels)
 
     def combine_parallel_triples(self,
                                  triples: List[Triple],
@@ -658,6 +658,7 @@ class Dfa:
                            for dst in [new_id(q.transitions[label])]
                            ]
         return createDfa(self.pattern,
+                         0,
                          merge_parallel(new_transitions),
                          new_fids,
                          new_exit_map,
@@ -736,6 +737,7 @@ class Dfa:
                     for q2 in [next(q for q in dfa2.states if id2 == q.index)]
                     ]
         return createDfa(pattern=None,
+                         ini=0,
                          transition_triples=transition_triples,
                          accepting_states=accepting_states,
                          exit_map=dict(exit_map),
@@ -797,6 +799,7 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
 
     accepting_states = [i for i in range(len(rtes)) if rtes[i].nullable()]
     return createDfa(pattern=rte,
+                     ini=0,
                      transition_triples=transition_triples,
                      accepting_states=accepting_states,
                      exit_map=dict([(i, exit_value) for i in accepting_states]))
@@ -808,6 +811,40 @@ def createDfa_combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
     return createSOr([td1, td2]).canonicalize()
 
 
+def renumber_transitions_for_dfa(ini: int,
+                                 outs: List[int],
+                                 transitions: List[Tuple[int, SimpleTypeD, int]]
+                                 ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+    next_state = 0
+
+    def count() -> int:
+        nonlocal next_state
+        next_state = next_state + 1
+        return next_state
+
+    # createDfa requires the initial state to be 0
+    def renumber(ini1: int,
+                 outs1: List[int],
+                 transitions1: List[Tuple[int, SimpleTypeD, int]]
+                 ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+        mapping = {ini1: 0}
+        for x, td, y in transitions1:
+            for q in (x, y):
+                if q not in mapping:
+                    mapping[x] = count()
+        for f in outs1:
+            if f not in mapping:
+                mapping[f] = count()
+        return (mapping[ini1],
+                [mapping[f] for f in outs1],
+                [(mapping[x], td, mapping[y]) for x, td, y in transitions1])
+
+    if ini == 0:
+        return (ini, outs, transitions)
+    else:
+        return renumber(ini, outs, transitions)
+
+
 # Create a Dfa given the list of transitions, accepting state ids,
 #  an exit map and a function to merge parallel labels.
 # The given list of transitions must be locally deterministic.  ie.
@@ -816,13 +853,14 @@ def createDfa_combine_labels(td1: SimpleTypeD, td2: SimpleTypeD) -> SimpleTypeD:
 #  that some pair of transitions of any one state has an inhabited
 #  intersection.
 def createDfa(pattern: Optional[Rte],
+              ini: int,
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: List[int],
               exit_map: Dict[int, Any],
               combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = createDfa_combine_labels
               ) -> 'Dfa':
     from functools import reduce
-
+    assert ini==0
     assert isinstance(accepting_states, list)
     for i in accepting_states:
         assert isinstance(i, int)
@@ -842,6 +880,7 @@ def createDfa(pattern: Optional[Rte],
         from genus.s_top import STop
         sink_id = max_index + 1
         return createDfa(pattern=pattern,
+                         ini=0,
                          transition_triples=transition_triples
                                             + [(dst, STop, sink_id) for dst in needs_dst]
                                             + [(sink_id, STop, sink_id)],

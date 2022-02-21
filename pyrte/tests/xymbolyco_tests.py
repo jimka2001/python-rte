@@ -50,6 +50,7 @@ class XymbolycoCase(unittest.TestCase):
                 rt = random_rte(depth)
                 pattern, transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
                 self.assertTrue(createDfa(pattern=pattern,
+                                          ini=0,
                                           transition_triples=transitions,
                                           accepting_states=accepting,
                                           exit_map=exit_map,
@@ -58,13 +59,14 @@ class XymbolycoCase(unittest.TestCase):
     def test_createDfaMissingDst(self):
         from rte.xymbolyco import createDfa
         dfa = createDfa(pattern=None,
+                        ini=0,
                         # testing the fact that using 3 as dst, but never
                         #   as src, creates a valid Dfa
                         transition_triples=[(0, SAtomic(float), 1),
                                             (0, SAtomic(int), 2),
                                             (1, STop, 3),
                                             ],
-                        accepting_states=[1,2],
+                        accepting_states=[1, 2],
                         exit_map={1: 1, 2: 2})
         self.assertTrue(dfa)
 
@@ -75,6 +77,7 @@ class XymbolycoCase(unittest.TestCase):
 
         try:
             createDfa(pattern=None,
+                      ini=0,
                       transition_triples=[(0, SOr(SAtomic(int), SAtomic(float)), 1),
                                           (0, SAtomic(int), 2),
                                           (1, STop, 3),
@@ -89,6 +92,7 @@ class XymbolycoCase(unittest.TestCase):
 
         try:
             createDfa(pattern=None,
+                      ini=0,
                       transition_triples=[(0, SAtomic(float), 1),
                                           (0, SAtomic(int), 2),
                                           (1, STop, 3),
