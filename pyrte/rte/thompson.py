@@ -25,10 +25,10 @@ from typing import Any, List, Tuple, Optional, TypeVar, Callable
 from genus.simple_type_d import SimpleTypeD
 from genus.utils import trace_graph
 from rte.r_rte import Rte
-from rte.xymbolyco import Dfa, createDfa
 
 
-def constructEpsilonFreeTransitions(rte: Rte) -> (int, List[int], List[(int, SimpleTypeD, int)]):
+
+def constructEpsilonFreeTransitions(rte: Rte) -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
     ini, out, transitions = constructTransitions(rte)
     return removeEpsilonTransitions(ini, out, transitions)
 
@@ -40,7 +40,7 @@ def removeEpsilonTransitions(ini: int,
     assert False, "not yet implemented"
 
 
-def constructDeterminizedTransitions(rte: Rte) -> (int, List[int], List[(int, SimpleTypeD, int)]):
+def constructDeterminizedTransitions(rte: Rte) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     in2, outs2, clean = constructEpsilonFreeTransitions(rte)
     completed = complete(in2, outs2, clean)
     return determinize(in2, outs2, completed)
@@ -56,7 +56,7 @@ def complete(ini: int,
 def determinize(ini: int,
                 outs: List[int],
                 transitions: List[Tuple[int, SimpleTypeD, int]]
-                ) -> (int, List[int], List[(int, SimpleTypeD, int)]):
+                ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     # This can be done with a call to traceTransitionGraph.
     #   to generate a graph (list of transitions) whose vertices are
     #   each a Set[int].  Then you'll have to renumber back to
@@ -90,9 +90,30 @@ def traceTransitionGraph(q0: V,
              for label, y in pairs])
 
 
+# remove non-accessible transitions, and non-accessible final states
+def accessible(ini:int,
+               outs: List[int],
+               transitions: List[Tuple[int, SimpleTypeD, int]]
+                   ) -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
+
+    grouped = {}
+    for x, td, y in transitions:
+        if x in grouped:
+            grouped[x].append((td,y))
+        else:
+            grouped[x] = [(td,y)]
+
+    accessibleOuts, accessibleTransitions = \
+        traceTransitionGraph(ini,
+                             lambda q: grouped[q] if q in grouped else [],
+                             lambda q: q in outs)
+
+    return (ini, accessibleOuts, accessibleTransitions)
+
+
 # Construct a sequence of transitions specifying an epsilon - nondeterministic - finite - automaton.
 # Also return the initial and final state.
-def constructTransitions(rte: Rte) -> Tuple[int, int, List[(int, Optional[SimpleTypeD], int)]]:
+def constructTransitions(rte: Rte) -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
     assert False, "not yet implemented"
 
 
@@ -101,7 +122,8 @@ def constructDeterminizedTransitions(rte: Rte
     assert False, "not yet implemented"
 
 
-def constructThompsonDfa(pattern: Rte, ret: Any = True) -> Dfa:
+def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
+    from rte.xymbolyco import Dfa, createDfa
     ini, outs, determinized = constructDeterminizedTransitions(pattern)
     fmap = dict([(f, ret) for f in outs])
 
