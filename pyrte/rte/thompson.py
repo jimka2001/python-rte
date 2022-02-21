@@ -45,6 +45,7 @@ def constructDeterminizedTransitions(rte: Rte) -> (int, List[int], List[(int, Si
     completed = complete(in2, outs2, clean)
     return determinize(in2, outs2, completed)
 
+
 def complete(ini:int,
              outs:List[int],
              transitions:List[Tuple[int, SimpleTypeD, int]]
@@ -56,12 +57,15 @@ def determinize(ini:int,
                 outs:List[int],
                 transitions:List[Tuple[int, SimpleTypeD, int]]
                 ) -> (int, List[int], List[(int, SimpleTypeD, int)]):
-    # this can be done with a call to traceTransitionGraph.
+    # This can be done with a call to traceTransitionGraph.
     #   to generate a graph (list of transitions) whose vertices are
     #   each a Set[int].  Then you'll have to renumber back to
     #   states as int.
-    # use the mdtd function to partition a set/list of types into
-    # a set of disjoint types.
+    #   BTW, you can also use traceTransitionGraph to implement
+    #   the cartesian product needed for And, as well as to remove
+    #   non-accessible, and non-coaccessible vertices.
+    # Use the mdtd function to partition a set/list of types into
+    #   a set of disjoint types.
     assert False, "not yet implemented"
 
 
