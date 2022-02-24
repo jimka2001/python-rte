@@ -122,6 +122,33 @@ def constructTransitions(rte: Rte) \
     assert False, "not yet implemented"
 
 
+E = TypeVar('E')  # exit value
+
+
+# this function can be used for debugging,
+# use the FA described by the transitions which might be deterministic or otherwise,
+#   but without epsilon transitions, to test whether the FA recognizes the input sequence.
+#   return the given exit_value if yes, and return None otherwise.
+def simulateTransitions(sequence: List[Any], exit_value: E,
+                        ini: int, outs: List[int], transitions: List[Tuple[int, SimpleTypeD, int]]
+                        ) -> Optional[E]:
+    groups = group_by(lambda trans: trans[0], transitions)
+    states = {ini}
+    for e in sequence:
+        # if we reach zero number of next states, but haven't yet reached the end of
+        #   the sequence, then return None
+        if not states:
+            return None
+        # compute the set of next states for the next iteration
+        states = set([y for x in states
+                      for _, td, y in (groups[x] if x in groups else set())
+                      if td.typep(e)])
+    for f in states:
+        if f in outs:
+            return exit_value
+    return None
+
+
 def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
     from rte.xymbolyco import Dfa, createDfa
     ini, outs, determinized = constructDeterminizedTransitions(pattern)

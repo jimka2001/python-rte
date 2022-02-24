@@ -23,6 +23,7 @@ import unittest
 
 from genus.s_atomic import SAtomic
 from genus.s_top import STop
+from genus.s_or import SOr
 from rte.r_cat import Cat
 from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
@@ -33,7 +34,7 @@ from rte.r_sigma import Sigma
 from rte.r_singleton import Singleton
 from rte.r_star import Star
 from rte.r_not import Not
-from rte.thompson import constructThompsonDfa, accessible
+from rte.thompson import constructThompsonDfa, accessible, simulateTransitions
 from rte.xymbolyco import Dfa
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
@@ -152,6 +153,21 @@ class ThompsonCase(unittest.TestCase):
         self.assertEqual(set(transitions), {(0, STop, 1),
                                             (1, STop, 97),
                                             (1, STop, 98)})
+
+    def test_simulate(self):
+        ini = 0
+        outs = [1, 2]
+        transitions = [(0, STop, 1),
+                       (1, SAtomic(int), 2),
+                       (1, SOr(SAtomic(str),
+                               SAtomic(int)), 3),
+                       (3, STop, 0)]
+        self.assertEqual(simulateTransitions([1, 2], 42,
+                                             ini, outs, transitions), 42)
+        self.assertIs(simulateTransitions([1, 2, 3], 42,
+                                          ini, outs, transitions), None)
+        self.assertEqual(simulateTransitions([1, 2, 3, 4], 42,
+                                             ini, outs, transitions), 42)
 
 
 if __name__ == '__main__':
