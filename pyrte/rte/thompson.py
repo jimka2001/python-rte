@@ -23,7 +23,7 @@
 from typing import Any, List, Tuple, Optional, TypeVar, Callable
 
 from genus.simple_type_d import SimpleTypeD
-from genus.utils import trace_graph, group_map
+from genus.utils import trace_graph, group_map, group_by
 from rte.r_rte import Rte
 
 
@@ -40,11 +40,12 @@ def removeEpsilonTransitions(ini: int,
     assert False, "not yet implemented"
 
 
-def constructDeterminizedTransitions(rte: Rte)\
+def constructDeterminizedTransitions(rte: Rte) \
         -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     in2, outs2, clean = constructEpsilonFreeTransitions(rte)
     completed = complete(in2, outs2, clean)
     return determinize(in2, outs2, completed)
+
 
 # Transform a sequence of transitions (either deterministic or otherwise)
 # into a set of completed transitions.  I.e., the union of the types labeling
@@ -57,6 +58,7 @@ def complete(ini: int,
              transitions: List[Tuple[int, SimpleTypeD, int]]
              ) -> List[Tuple[int, SimpleTypeD, int]]:
     assert False, "not yet implemented"
+
 
 # Given a description of a non-deterministic FA, with epsilon transitions
 #   already removed, use a graph-tracing algorithm to compute the reachable
