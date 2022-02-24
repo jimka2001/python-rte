@@ -27,7 +27,8 @@ from genus.utils import trace_graph, group_map
 from rte.r_rte import Rte
 
 
-def constructEpsilonFreeTransitions(rte: Rte) -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
+def constructEpsilonFreeTransitions(rte: Rte) \
+        -> (int, List[int], List[Tuple[int, SimpleTypeD, int]]):
     ini, out, transitions = constructTransitions(rte)
     return removeEpsilonTransitions(ini, out, transitions)
 
@@ -39,19 +40,27 @@ def removeEpsilonTransitions(ini: int,
     assert False, "not yet implemented"
 
 
-def constructDeterminizedTransitions(rte: Rte) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+def constructDeterminizedTransitions(rte: Rte)\
+        -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     in2, outs2, clean = constructEpsilonFreeTransitions(rte)
     completed = complete(in2, outs2, clean)
     return determinize(in2, outs2, completed)
 
-
+# Transform a sequence of transitions (either deterministic or otherwise)
+# into a set of completed transitions.  I.e., the union of the types labeling
+# any arbitrary transition is STop.  In the case when it cannot be determined
+# whether the transitions are already locally complete, an additional transition
+# is added with is the complement of the existing transitions.  This may be
+# empty but if it is empty, .inhabited returns None (dont-know).
 def complete(ini: int,
              outs: List[int],
              transitions: List[Tuple[int, SimpleTypeD, int]]
              ) -> List[Tuple[int, SimpleTypeD, int]]:
     assert False, "not yet implemented"
 
-
+# Given a description of a non-deterministic FA, with epsilon transitions
+#   already removed, use a graph-tracing algorithm to compute the reachable
+#   states in the determinized automaton.
 def determinize(ini: int,
                 outs: List[int],
                 transitions: List[Tuple[int, SimpleTypeD, int]]
@@ -108,12 +117,8 @@ def accessible(ini: int,
 
 # Construct a sequence of transitions specifying an epsilon - nondeterministic - finite - automaton.
 # Also return the initial and final state.
-def constructTransitions(rte: Rte) -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
-    assert False, "not yet implemented"
-
-
-def constructDeterminizedTransitions(rte: Rte
-                                     ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+def constructTransitions(rte: Rte) \
+        -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
     assert False, "not yet implemented"
 
 
