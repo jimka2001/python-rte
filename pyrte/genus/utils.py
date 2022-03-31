@@ -343,6 +343,15 @@ def find_eqv_class(partition: Iterable[Tuple[T, ...]],
             return eqv_class
     return None
 
+def makeCounter(init=0, delta=1) -> Callable[[],int]:
+    c = init - delta
+    def count() -> int:
+        nonlocal c
+        c = c + delta
+        return c
+
+    return count
+
 
 def pip_install(package):
     # running pip install from the shell will install libraries according to the

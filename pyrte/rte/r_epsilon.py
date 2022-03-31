@@ -21,7 +21,7 @@
 
 
 from rte.r_rte import Rte
-from typing import Literal, Set
+from typing import Literal, Set, Tuple, Callable, List, Optional
 
 
 class EpsilonImpl (Rte):
@@ -48,5 +48,8 @@ class EpsilonImpl (Rte):
         from rte.r_emptyset import EmptySet
         return EmptySet
 
+    def constructThompson(self,ini:Callable[[],int],out:Callable[[],int]) \
+            -> Tuple[int,int,List[Tuple[int,Optional[SimpleTypeD],int]]]:
+        return (ini(), out(), [(ini(), None, out())])
 
 Epsilon = EpsilonImpl()

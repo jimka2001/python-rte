@@ -22,7 +22,7 @@
 
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
-from typing import Literal, Set, Optional, List
+from typing import Literal, Set, Optional, List, Callable, Tuple
 from typing_extensions import TypeGuard
 
 
@@ -138,6 +138,10 @@ class Singleton(Rte):
                 wrt=wrt,
                 factors=factors,
                 disjoints=disjoints)
+
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        return (ini(), out(), [(ini(), self.operand, out())])
 
 
 def singletonp(op: Rte) -> TypeGuard[Singleton]:

@@ -25,7 +25,7 @@ from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_rte import Rte
 from rte.r_sigma import Sigma
-from typing import Literal, Set, Optional, List, Callable
+from typing import Literal, Set, Optional, List, Callable, Tuple
 from typing_extensions import TypeGuard
 
 
@@ -151,6 +151,15 @@ class Star(Rte):
     def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
         return self.operand.search(test) or super(Star, self).search(test)
 
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructTransitions
+        inInner, outInner, transitions = constructTransitions(self.operand)
+        return (ini(), out(), transitions \
+                + [(ini(), None, inInner),
+                    (outInner, None, out()),
+                    (ini(), None, out()),
+                    (outInner, None, inInner)])
 
 def starp(rte: Rte) -> TypeGuard[Star]:
     return isinstance(rte, Star)

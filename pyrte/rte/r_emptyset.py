@@ -21,7 +21,7 @@
 
 
 from rte.r_rte import Rte
-from typing import Set, Literal
+from typing import Set, Literal, Callable, Tuple, List, Optional
 
 
 class EmptySetImpl (Rte):
@@ -44,6 +44,10 @@ class EmptySetImpl (Rte):
 
     def derivative_down(self, wrt, factors, disjoints) -> 'EmptySetImpl':
         return EmptySet
+
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        return (ini(), out(), [])
 
 
 EmptySet = EmptySetImpl()
