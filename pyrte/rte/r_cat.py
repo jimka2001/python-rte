@@ -162,8 +162,10 @@ class Cat(Rte):
                 return s
         return super(Cat, self).search(test)
 
-    def generateThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructVarArgsTransitions, constructTransitions
+        from rte.r_epsilon import Epsilon
         def continuation():
             cat1In, cat1Out, transitions1 = constructTransitions(self.operands[0])
             cat2In, cat2Out, transitions2 = constructTransitions(self.operands[1])

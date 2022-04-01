@@ -65,7 +65,7 @@ def accessible(ini: int,
         -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     grouped = group_map(lambda trans: trans[0],
                         transitions,
-                        lambda _x, y, z: (y, z))
+                        lambda _x, td, t: (td, y))
     accessibleOuts, accessibleTransitions = traceTransitionGraph(ini,
                                                                  lambda q: grouped.get(q, []),
                                                                  lambda q: q in outs)
@@ -76,12 +76,13 @@ def coaccessible(ini: int,
                  outs: List[int],
                  transitions: List[Tuple[int, SimpleTypeD, int]]) \
         -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
+    from genus.s_top import STop
     proxy = makeNewState(ini, outs, transitions, count)
     augmentedTransitions = transitions + [(q, STop, proxy)
                                           for q in outs]
     grouped = group_map(lambda trans: trans[2],  # lambda _x,_tr, y: y,
                         augmentedTransitions,
-                        lambda trans: (trans[1], trans[0])  # lambda x,tr,_z: (tr,x)
+                        lambda trans: (trans[1], trans[0])# lambda x, td, _y: (td, x)
                         )
     _co, reversedTransitions = traceTransitionGraph(proxy,
                                                     lambda q: grouped.get(q, []),
@@ -115,15 +116,15 @@ def removeEpsilonTransitions(ini: int,
                 if x == q}
 
     def extendClosure(m: List[Set[int]]) -> List[Set[int]]:
-        return [set().union(*los)  # compute the union of a list of sets
-                for qs in m  # qs:Set[int]
-                for los in [[reachableFrom(q) for q in qs]]  # los is a List[Set[int]]
-                ]
+        extended = [{q2 for q1 in qs
+                     for q2 in reachableFrom(q1)}.union(qs)
+                    for qs in m
+                    ]
+        return extended
 
     epsilonClosure = fixed_point([{q} for q in allStates],
                                  extendClosure,
-                                 lambda set1, set2: set1 == set2)
-
+                                 lambda seq1, seq2: seq1 == seq2)
     transitions2 = [(q, label, y)
                     for q, closure in zip(allStates, epsilonClosure)
                     for c in closure
@@ -192,10 +193,12 @@ def complete(ini: int,
              clean: List[Tuple[int, SimpleTypeD, int]]
              ) -> List[Tuple[int, SimpleTypeD, int]]:
     from genus.s_top import STop
+    from genus.s_not import SNot
+    from genus.s_or import createSOr
 
     allStates = findAllStates(clean)
     sink = generate_lazy_val(lambda: makeNewState(ini, outs, clean, count))
-    grouped = group_by(lambda trans: a[0],
+    grouped = group_by(lambda trans: trans[0],
                        clean)
     completingTransitions = [(q, remaining, sink())
                              for q in allStates
@@ -259,14 +262,10 @@ def determinize(ini: int,
                                              for q in qs
                                              for _x, td1, y in grouped.get(q, [])
                                              if td1 in factors}
-        print(f"  tr2={tr2}")
 
         newTransitions = [(td, tuple(sorted(list(nextStates))))
-                          for g in [group_by(lambda trans: trans[0],
-                                             tr2)]
-                          for td in g
-                          for pairs in [g[td]]
-                          for _1 in [print(f"pairs = {pairs}")]
+                          for td, pairs in group_by(lambda trans: trans[0],
+                                                    tr2).items()
                           for nextStates in [[y for _x, y in pairs]]]
 
         return newTransitions
@@ -334,20 +333,72 @@ def constructVarArgsTransitions(rte: Rte,
     if not rte.operands:
         return constructTransitions(identity)
     elif 1 == len(rte.operands):
-        return constructTransitions(self.operands[0])
+        return constructTransitions(rte.operands[0])
     elif 2 < len(rte.operands):
-        return constructTransitions(binop(self.operands[0],
-                                          varArgsOP(self.operands[1:])))
+        return constructTransitions(binop(rte.operands[0],
+                                          varArgsOp(rte.operands[1:])))
     else:
         return continuation()
 
+def sxp(in1:int, outs1:List[int], transitions1:List[Tuple[int,SimpleTypeD,int]],
+        in2:int, outs2:List[int], transitions2:List[Tuple[int,SimpleTypeD,int]],
+        arbitrate:Callable[[bool,bool],bool]) \
+    -> Tuple[Tuple[int,int], List[Tuple[int,int]], List[Tuple[Tuple[int,int],SimpleTypeD,Tuple[int,int]]]]:
+    from genus.s_and import SAnd
 
-def constructTransitionsAnd(rte1: Rte, rte2: Rte) -> (int, int, List[Tuple[int, Optional[SimpleTypeD], int]]):
-    pass
+    grouped1 = group_by(lambda trans: trans[0], transitions1)
+    grouped2 = group_by(lambda trans: trans[0], transitions2)
+
+    def stateTransitions(qq:Tuple[int,int]) -> List[Tuple[SimpleTypeD,Tuple[int,int]]]:
+        q1, q2 = qq
+        return [(td.canonicalize(), (y1, y2))
+                for _x1, td1, y1 in grouped1.get(q1,[])
+                for _x2, td2, y2 in grouped2.get(q2,[])
+                for td in [SAnd(td1,td2)]
+                if not td.inhabited() is False]
+
+    inX = (in1,in2)
+    finalsX, transitionsX = traceTransitionGraph(inX,
+                                                 stateTransitions,
+                                                 lambda pair: arbitrate(pair[0] in outs1,
+                                                                        pair[1] in outs2))
+    return (inX, finalsX, transitionsX)
 
 
-def constructTransitionsNot(rte: Rte) -> (int, int, List[Tuple[int, Optional[SimpleTypeD], int]]):
-    pass
+def constructTransitionsAnd(rte1: Rte, rte2: Rte) \
+        -> (int, int, List[Tuple[int, Optional[SimpleTypeD], int]]):
+    and1in, and1outs, transitions1 = constructEpsilonFreeTransitions(rte1)
+    and2in, and2outs, transitions2 = constructEpsilonFreeTransitions(rte2)
+    sxpIn, sxpOuts, sxpTransitions = sxp(and1in, and1outs, transitions1,
+                                         and2in, and2outs, transitions2,
+                                         lambda a,b: a and b)
+    renumIn, renumOuts, renumTransitions = renumberTransitions(sxpIn,
+                                                               sxpOuts,
+                                                               sxpTransitions,
+                                                               count)
+    return confluxify(renumIn, renumOuts, renumTransitions)
+
+def invertFinals(outs:List[int], completed:List[Tuple[int,SimpleTypeD,int]]) -> List[int]:
+    return [q for q in findAllStates(completed)
+            if q not in outs]
+
+def confluxify(ini:int,
+               outs:List[int],
+               transitions:List[Tuple[int,SimpleTypeD,int]]) \
+    -> Tuple[int, int, List[Tuple[int,Optional[SimpleTypeD],int]]]:
+    inj = makeNewState(ini, outs, transitions, count)
+    fin = makeNewState(ini, outs, transitions, count)
+    # don't need wrapped as in Scala code because SimpleTypeD is already Optional[SimpleTypeD]
+    prefix = [(inj, None, ini)] + [(f, None, fin) for f in outs]
+    return (inj,
+            fin,
+            prefix + transitions)
+
+def constructTransitionsNot(rte: Rte) \
+        -> (int, int, List[Tuple[int, Optional[SimpleTypeD], int]]):
+    ini, outs, determinized = constructDeterminizedTransitions(rte)
+    inverted = invertFinals(outs, determinized)
+    return confluxify(ini, inverted, determinized)
 
 
 # this function can be used for debugging,
@@ -380,7 +431,6 @@ def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
     ini, outs, determinized = renumberTransitions(ini0, outs0, determinized0,
                                                   makeCounter(0,1))
     fmap = dict([(f, ret) for f in outs])
-    print(f"CTD ini={ini}")
     return createDfa(pattern=pattern,
                      ini=ini,
                      transition_triples=determinized,

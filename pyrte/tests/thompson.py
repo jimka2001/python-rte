@@ -139,7 +139,8 @@ class ThompsonCase(unittest.TestCase):
                 dfa_thompson = constructThompsonDfa(pattern, 42)
                 dfa_brzozowski = pattern.to_dfa(42)
                 # equivalent might return None or True, but need to fail if returns False
-                self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False)
+                self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False,
+                                f"problem detected with depth={depth} {pattern}")
 
     def test_accessible(self):
         ini, outs, transitions = accessible(0,
@@ -172,3 +173,4 @@ class ThompsonCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

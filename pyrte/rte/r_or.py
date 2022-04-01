@@ -214,7 +214,8 @@ class Or(Combination):
 
     def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
-        from rte.thompson import constructVarArgsTransitions
+        from rte.thompson import constructVarArgsTransitions, constructTransitions
+        from rte.r_emptyset import EmptySet
         def continuation():
             or1In, or1Out, transitions1 = constructTransitions(self.operands[0])
             or2In, or2Out, transitions2 = constructTransitions(self.operands[1])
@@ -223,13 +224,13 @@ class Or(Combination):
                     + [(ini(), None, or1In),
                          (ini(), None, or2In),
                          (or1Out, None, out()),
-                         (ou2Out, None, out())])
+                         (or2Out, None, out())])
 
-        constructVarArgsTransitions(self,
-                                    EmptySet,
-                                    Or,
-                                    createOr,
-                                    continuation)
+        return constructVarArgsTransitions(self,
+                                           EmptySet,
+                                           Or,
+                                           createOr,
+                                           continuation)
 
 
 

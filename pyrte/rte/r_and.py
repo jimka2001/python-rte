@@ -366,15 +366,15 @@ class And(Combination):
                                       self.conversionC5,
                                       lambda: super(And, self).canonicalize_once()])
 
-    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+    def constructThompson(self, _ini: Callable[[], int], _out: Callable[[], int]) \
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructVarArgsTransitions, constructTransitionsAnd
+        from rte.r_constants import sigmaStar
         return constructVarArgsTransitions(self,
                                            sigmaStar,
                                            And,
                                            createAnd,
-                                           lambda: constructTransitionsAnd(ini,
-                                                                           out,
-                                                                           self.operands[0],
+                                           lambda: constructTransitionsAnd(self.operands[0],
                                                                            self.operands[1]))
 
 
