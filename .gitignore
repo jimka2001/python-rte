@@ -9,3 +9,4 @@ pyrte/pyrte.egg-info
 pyrte/genus/__pycache__
 pyrte/rte/__pycache__
 .DS_Store
+pyrte/tests/__pycache__
