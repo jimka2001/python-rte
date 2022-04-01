@@ -21,7 +21,7 @@
 
 
 from rte.r_combination import Combination
-from typing import Literal, List, Any, Optional
+from typing import Literal, List, Any, Optional, Callable, Tuple
 from typing_extensions import TypeGuard
 
 verbose = False
@@ -365,6 +365,16 @@ class And(Combination):
                                       self.conversionC99,
                                       self.conversionC5,
                                       lambda: super(And, self).canonicalize_once()])
+
+    def constructThompson(self, _ini: Callable[[], int], _out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructVarArgsTransitions, constructTransitionsAnd
+        from rte.r_constants import sigmaStar
+        return constructVarArgsTransitions(self.operands,
+                                           sigmaStar,
+                                           And,
+                                           createAnd,
+                                           constructTransitionsAnd)
 
 
 def createAnd(operands: List['Rte']) -> 'Rte':

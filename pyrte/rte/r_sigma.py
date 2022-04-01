@@ -22,7 +22,7 @@
 
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
-from typing import Literal, Set
+from typing import Literal, Set, Callable, Tuple, List, Optional
 
 
 class SigmaImpl (Rte):
@@ -46,6 +46,12 @@ class SigmaImpl (Rte):
     def derivative_down(self, wrt, factors, disjoints) -> Rte:
         from rte.r_epsilon import Epsilon
         return Epsilon
+
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from genus.s_top import STop
+        return (ini(), out(), [(ini(), STop, out())])
+
 
 
 Sigma = SigmaImpl()

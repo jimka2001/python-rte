@@ -21,7 +21,7 @@
 
 
 from rte.r_rte import Rte
-from typing import Literal, Set, List, Callable, Optional
+from typing import Literal, Set, List, Callable, Optional, Tuple
 from typing_extensions import TypeGuard
 
 verbose = False
@@ -161,6 +161,23 @@ class Cat(Rte):
             if s := rt.search(test):
                 return s
         return super(Cat, self).search(test)
+
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructVarArgsTransitions, constructTransitions
+        from rte.r_epsilon import Epsilon
+        def continuation(rte1:Rte,rte2:Rte):
+            cat1In, cat1Out, transitions1 = constructTransitions(rte1)
+            cat2In, cat2Out, transitions2 = constructTransitions(rte2)
+            return (cat1In, cat2Out, transitions1 \
+                    + transitions2
+                    + [(cat1Out, None, cat2In)])
+
+        return constructVarArgsTransitions(self.operands,
+                                           Epsilon,
+                                           Cat,
+                                           createCat,
+                                           continuation)
 
 
 def catp(op: Rte) -> TypeGuard[Cat]:

@@ -21,7 +21,7 @@
 
 
 from rte.r_combination import Combination
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Tuple, Callable
 from typing_extensions import TypeGuard
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
@@ -211,6 +211,27 @@ class Or(Combination):
                                       self.conversionC99,
                                       self.conversionC5,
                                       lambda: super(Or, self).canonicalize_once()])
+
+    def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructVarArgsTransitions, constructTransitions
+        from rte.r_emptyset import EmptySet
+        def continuation(rte1,rte2):
+            or1In, or1Out, transitions1 = constructTransitions(rte1)
+            or2In, or2Out, transitions2 = constructTransitions(rte2)
+            return (ini(), out(), transitions1 \
+                    + transitions2
+                    + [(ini(), None, or1In),
+                         (ini(), None, or2In),
+                         (or1Out, None, out()),
+                         (or2Out, None, out())])
+
+        return constructVarArgsTransitions(self.operands,
+                                           EmptySet,
+                                           Or,
+                                           createOr,
+                                           continuation)
+
 
 
 def createOr(operands) -> Rte:

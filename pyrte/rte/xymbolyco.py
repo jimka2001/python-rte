@@ -860,7 +860,7 @@ def createDfa(pattern: Optional[Rte],
               combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = createDfa_combine_labels
               ) -> 'Dfa':
     from functools import reduce
-    assert ini==0
+    assert ini == 0, f"expecting ini=0, got {ini}"
     assert isinstance(accepting_states, list)
     for i in accepting_states:
         assert isinstance(i, int)

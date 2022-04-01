@@ -197,6 +197,10 @@ class Rte:
         else:
             return None
 
+    def constructThompson(self,ini:Callable[[],int],out:Callable[[],int]) \
+            -> (int, int, List[Tuple[int,Optional[SimpleTypeD],int]]):
+        raise TypeError(f"generateThompson not implemented for {self} of type {type(self)}")
+
 
 def random_rte(depth):
     import random

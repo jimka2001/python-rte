@@ -21,7 +21,7 @@
 
 
 from rte.r_rte import Rte
-from typing import Literal, Set, Callable, Optional
+from typing import Literal, Set, Callable, Optional, Tuple, List
 from typing_extensions import TypeGuard
 
 
@@ -109,6 +109,10 @@ class Not(Rte):
     def search(self, test: Callable[['Rte'], bool]) -> Optional['Rte']:
         return self.operand.search(test) or super(Not, self).search(test)
 
+    def constructThompson(self, _ini: Callable[[], int], _out: Callable[[], int]) \
+            -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
+        from rte.thompson import constructTransitionsNot
+        return constructTransitionsNot(self.operand)
 
 def notp(op: Rte) -> TypeGuard[Not]:
     return isinstance(op, Not)
