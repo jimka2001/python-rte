@@ -82,7 +82,7 @@ def coaccessible(ini: int,
                                           for q in outs]
     grouped = group_map(lambda trans: trans[2],  # lambda _x,_tr, y: y,
                         augmentedTransitions,
-                        lambda trans: (trans[1], trans[0])# lambda x, td, _y: (td, x)
+                        lambda trans: (trans[1], trans[0])  # lambda x, td, _y: (td, x)
                         )
     _co, reversedTransitions = traceTransitionGraph(proxy,
                                                     lambda q: grouped.get(q, []),
@@ -90,7 +90,7 @@ def coaccessible(ini: int,
     coaccessibleTransitions = [(x, td, y)
                                for y, td, x in reversedTransitions
                                if y != proxy]
-    return (ini, outs, coaccessibleTransitions)
+    return ini, outs, coaccessibleTransitions
 
 
 def trim(ini: int,
@@ -216,21 +216,23 @@ def complete(ini: int,
     else:
         return clean + completingTransitions + [(sink(), STop, sink())]
 
-def renumberTransitions(ini:int,
-                        outs:List[int],
-                        transitions:List[Tuple[int,SimpleTypeD,int]],
-                        count:Callable[[],int]) \
-    -> Tuple[int,List[int],List[Tuple[int,SimpleTypeD,int]]]:
+
+def renumberTransitions(ini: int,
+                        outs: List[int],
+                        transitions: List[Tuple[int, SimpleTypeD, int]],
+                        count: Callable[[], int]) \
+        -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     mapping_list = [ini] + [q for q in outs
                             if not q == ini] + list({q for x, tr, y in transitions
-                                                     for q in [x,y]
+                                                     for q in [x, y]
                                                      if q != ini
                                                      if not q in outs})
-    mapping = dict((qq,count()) for qq in mapping_list)
+    mapping = dict((qq, count()) for qq in mapping_list)
 
     return (mapping[ini],
             [mapping[q] for q in outs],
-            [(mapping[xx],td,mapping[yy]) for xx, td, yy in transitions])
+            [(mapping[xx], td, mapping[yy]) for xx, td, yy in transitions])
+
 
 # Given a description of a non-deterministic FA, with epsilon transitions
 #   already removed, use a graph-tracing algorithm to compute the reachable
@@ -340,24 +342,25 @@ def constructVarArgsTransitions(rte: Rte,
     else:
         return continuation()
 
-def sxp(in1:int, outs1:List[int], transitions1:List[Tuple[int,SimpleTypeD,int]],
-        in2:int, outs2:List[int], transitions2:List[Tuple[int,SimpleTypeD,int]],
-        arbitrate:Callable[[bool,bool],bool]) \
-    -> Tuple[Tuple[int,int], List[Tuple[int,int]], List[Tuple[Tuple[int,int],SimpleTypeD,Tuple[int,int]]]]:
+
+def sxp(in1: int, outs1: List[int], transitions1: List[Tuple[int, SimpleTypeD, int]],
+        in2: int, outs2: List[int], transitions2: List[Tuple[int, SimpleTypeD, int]],
+        arbitrate: Callable[[bool, bool], bool]) \
+        -> Tuple[Tuple[int, int], List[Tuple[int, int]], List[Tuple[Tuple[int, int], SimpleTypeD, Tuple[int, int]]]]:
     from genus.s_and import SAnd
 
     grouped1 = group_by(lambda trans: trans[0], transitions1)
     grouped2 = group_by(lambda trans: trans[0], transitions2)
 
-    def stateTransitions(qq:Tuple[int,int]) -> List[Tuple[SimpleTypeD,Tuple[int,int]]]:
+    def stateTransitions(qq: Tuple[int, int]) -> List[Tuple[SimpleTypeD, Tuple[int, int]]]:
         q1, q2 = qq
         return [(td.canonicalize(), (y1, y2))
-                for _x1, td1, y1 in grouped1.get(q1,[])
-                for _x2, td2, y2 in grouped2.get(q2,[])
-                for td in [SAnd(td1,td2)]
+                for _x1, td1, y1 in grouped1.get(q1, [])
+                for _x2, td2, y2 in grouped2.get(q2, [])
+                for td in [SAnd(td1, td2)]
                 if not td.inhabited() is False]
 
-    inX = (in1,in2)
+    inX = (in1, in2)
     finalsX, transitionsX = traceTransitionGraph(inX,
                                                  stateTransitions,
                                                  lambda pair: arbitrate(pair[0] in outs1,
@@ -371,21 +374,23 @@ def constructTransitionsAnd(rte1: Rte, rte2: Rte) \
     and2in, and2outs, transitions2 = constructEpsilonFreeTransitions(rte2)
     sxpIn, sxpOuts, sxpTransitions = sxp(and1in, and1outs, transitions1,
                                          and2in, and2outs, transitions2,
-                                         lambda a,b: a and b)
+                                         lambda a, b: a and b)
     renumIn, renumOuts, renumTransitions = renumberTransitions(sxpIn,
                                                                sxpOuts,
                                                                sxpTransitions,
                                                                count)
     return confluxify(renumIn, renumOuts, renumTransitions)
 
-def invertFinals(outs:List[int], completed:List[Tuple[int,SimpleTypeD,int]]) -> List[int]:
+
+def invertFinals(outs: List[int], completed: List[Tuple[int, SimpleTypeD, int]]) -> List[int]:
     return [q for q in findAllStates(completed)
             if q not in outs]
 
-def confluxify(ini:int,
-               outs:List[int],
-               transitions:List[Tuple[int,SimpleTypeD,int]]) \
-    -> Tuple[int, int, List[Tuple[int,Optional[SimpleTypeD],int]]]:
+
+def confluxify(ini: int,
+               outs: List[int],
+               transitions: List[Tuple[int, SimpleTypeD, int]]) \
+        -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
     inj = makeNewState(ini, outs, transitions, count)
     fin = makeNewState(ini, outs, transitions, count)
     # don't need wrapped as in Scala code because SimpleTypeD is already Optional[SimpleTypeD]
@@ -393,6 +398,7 @@ def confluxify(ini:int,
     return (inj,
             fin,
             prefix + transitions)
+
 
 def constructTransitionsNot(rte: Rte) \
         -> (int, int, List[Tuple[int, Optional[SimpleTypeD], int]]):
@@ -429,7 +435,7 @@ def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
     from rte.xymbolyco import Dfa, createDfa
     ini0, outs0, determinized0 = constructDeterminizedTransitions(pattern)
     ini, outs, determinized = renumberTransitions(ini0, outs0, determinized0,
-                                                  makeCounter(0,1))
+                                                  makeCounter(0, 1))
     fmap = dict([(f, ret) for f in outs])
     return createDfa(pattern=pattern,
                      ini=ini,
