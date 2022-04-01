@@ -65,11 +65,11 @@ def accessible(ini: int,
         -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     grouped = group_map(lambda trans: trans[0],
                         transitions,
-                        lambda _x, td, t: (td, y))
+                        lambda _x, td, y: (td, y))
     accessibleOuts, accessibleTransitions = traceTransitionGraph(ini,
                                                                  lambda q: grouped.get(q, []),
                                                                  lambda q: q in outs)
-    return (ini, accessibleOuts, accessibleTransitions)
+    return ini, accessibleOuts, accessibleTransitions
 
 
 def coaccessible(ini: int,
@@ -109,7 +109,7 @@ def removeEpsilonTransitions(ini: int,
                           if tr is None}
     normalTransitions = [trans for trans in transitions
                          if trans[1] is not None]
-    allStates: List[int] = findAllStates(transitions)
+    allStates: List[int] = list(findAllStates(transitions))
 
     def reachableFrom(q: int) -> Set[int]:
         return {y for x, y in epsilonTransitions
@@ -137,42 +137,7 @@ def removeEpsilonTransitions(ini: int,
     finals = [q for q, closure in zip(allStates, epsilonClosure)
               if q in remainingStates or q == ini
               if out in closure]
-    return (trim(ini, finals, updatedTransitions))
-
-
-def simulateRte(sequence: List[Any],
-                exitValue: E,
-                rte: Rte) -> Optional[E]:
-    ini, outs, transitions = constructEpsilonFreeTransitions(rte)
-    return simulateTransitions(sequence, exitValue,
-                               ini, outs, transitions)
-
-
-def simulateTransitions(sequence: List[Any],
-                        exitValue: E,
-                        ini: int,
-                        outs: List[int],
-                        transitions: List[Tuple[int, SimpleTypeD, int]]) -> Optional[E]:
-    groups = group_by(lambda trans: trans[0],
-                      transitions)
-
-    def simulate() -> Optional[E]:
-        qs = set(ini)
-        for v in sequence:
-            if not qs:
-                return None
-            qs = {y for q in qs
-                  for _x, td, y in groups.get(q, [])
-                  if td.typep(v)}
-        return qs
-
-    computation = simulate()
-    if computation is None:
-        return None
-    for f in computation:
-        if f in outs:
-            return exitValue
-    return None
+    return trim(ini, finals, updatedTransitions)
 
 
 def constructDeterminizedTransitions(rte: Rte) \
@@ -226,7 +191,7 @@ def renumberTransitions(ini: int,
                             if not q == ini] + list({q for x, tr, y in transitions
                                                      for q in [x, y]
                                                      if q != ini
-                                                     if not q in outs})
+                                                     if q not in outs})
     mapping = dict((qq, count()) for qq in mapping_list)
 
     return (mapping[ini],
@@ -312,7 +277,7 @@ def accessible(ini: int,
                              lambda q: grouped[q] if q in grouped else [],
                              lambda q: q in outs)
 
-    return (ini, accessibleOuts, accessibleTransitions)
+    return ini, accessibleOuts, accessibleTransitions
 
 
 # Construct a sequence of transitions specifying an epsilon - nondeterministic - finite - automaton.
@@ -325,22 +290,25 @@ def constructTransitions(rte: Rte) \
     return rte.constructThompson(ini, out)
 
 
-def constructVarArgsTransitions(rte: Rte,
+def constructVarArgsTransitions(operands: List[Rte],
                                 identity: Rte,
                                 binop: Callable[[Rte, Rte], Rte],
                                 varArgsOp: Callable[[List[Rte]], Rte],
                                 continuation: Callable[
-                                    [], Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]]) \
+                                    [Rte, Rte], Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]]) \
         -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
-    if not rte.operands:
+    if not operands:
         return constructTransitions(identity)
-    elif 1 == len(rte.operands):
-        return constructTransitions(rte.operands[0])
-    elif 2 < len(rte.operands):
-        return constructTransitions(binop(rte.operands[0],
-                                          varArgsOp(rte.operands[1:])))
-    else:
-        return continuation()
+    elif 1 == len(operands):
+        return constructTransitions(operands[0])
+    elif 2 == len(operands):
+        return continuation(operands[0], operands[1])
+    elif 0 == len(operands) % 2:
+        fewer = [binop(operands[i], operands[i + 1]) for i in range(0, len(operands)-1, 2)]
+        return constructTransitions(varArgsOp(fewer))
+    else:  # len(operands) > 2
+        return constructTransitions(binop(operands[0],
+                                          varArgsOp(operands[1:])))
 
 
 def sxp(in1: int, outs1: List[int], transitions1: List[Tuple[int, SimpleTypeD, int]],
@@ -365,7 +333,7 @@ def sxp(in1: int, outs1: List[int], transitions1: List[Tuple[int, SimpleTypeD, i
                                                  stateTransitions,
                                                  lambda pair: arbitrate(pair[0] in outs1,
                                                                         pair[1] in outs2))
-    return (inX, finalsX, transitionsX)
+    return inX, finalsX, transitionsX
 
 
 def constructTransitionsAnd(rte1: Rte, rte2: Rte) \
@@ -407,32 +375,8 @@ def constructTransitionsNot(rte: Rte) \
     return confluxify(ini, inverted, determinized)
 
 
-# this function can be used for debugging,
-# use the FA described by the transitions which might be deterministic or otherwise,
-#   but without epsilon transitions, to test whether the FA recognizes the input sequence.
-#   return the given exit_value if yes, and return None otherwise.
-def simulateTransitions(sequence: List[Any], exit_value: E,
-                        ini: int, outs: List[int], transitions: List[Tuple[int, SimpleTypeD, int]]
-                        ) -> Optional[E]:
-    groups = group_by(lambda trans: trans[0], transitions)
-    states = {ini}
-    for e in sequence:
-        # if we reach zero number of next states, but haven't yet reached the end of
-        #   the sequence, then return None
-        if not states:
-            return None
-        # compute the set of next states for the next iteration
-        states = {y for x in states
-                  for _, td, y in (groups[x] if x in groups else set())
-                  if td.typep(e)}
-    for f in states:
-        if f in outs:
-            return exit_value
-    return None
-
-
 def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
-    from rte.xymbolyco import Dfa, createDfa
+    from rte.xymbolyco import createDfa
     ini0, outs0, determinized0 = constructDeterminizedTransitions(pattern)
     ini, outs, determinized = renumberTransitions(ini0, outs0, determinized0,
                                                   makeCounter(0, 1))
@@ -443,3 +387,42 @@ def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
                      accepting_states=outs,
                      exit_map=fmap,
                      )
+
+
+def simulateRte(sequence: List[Any],
+                exitValue: E,
+                rte: Rte) -> Optional[E]:
+    ini, outs, transitions = constructEpsilonFreeTransitions(rte)
+    return simulateTransitions(sequence, exitValue,
+                               ini, outs, transitions)
+
+
+# this function can be used for debugging,
+# use the FA described by the transitions which might be deterministic or otherwise,
+#   but without epsilon transitions, to test whether the FA recognizes the input sequence.
+#   return the given exit_value if yes, and return None otherwise.
+def simulateTransitions(sequence: List[Any],
+                        exitValue: E,
+                        ini: int,
+                        outs: List[int],
+                        transitions: List[Tuple[int, SimpleTypeD, int]]) -> Optional[E]:
+    groups = group_by(lambda trans: trans[0],
+                      transitions)
+
+    def simulate() -> Optional[E]:
+        qs = {ini}
+        for v in sequence:
+            if not qs:
+                return None
+            qs = {y for q in qs
+                  for _x, td, y in groups.get(q, [])
+                  if td.typep(v)}
+        return qs
+
+    computation = simulate()
+    if computation is None:
+        return None
+    for f in computation:
+        if f in outs:
+            return exitValue
+    return None

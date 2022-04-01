@@ -216,9 +216,9 @@ class Or(Combination):
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
         from rte.thompson import constructVarArgsTransitions, constructTransitions
         from rte.r_emptyset import EmptySet
-        def continuation():
-            or1In, or1Out, transitions1 = constructTransitions(self.operands[0])
-            or2In, or2Out, transitions2 = constructTransitions(self.operands[1])
+        def continuation(rte1,rte2):
+            or1In, or1Out, transitions1 = constructTransitions(rte1)
+            or2In, or2Out, transitions2 = constructTransitions(rte2)
             return (ini(), out(), transitions1 \
                     + transitions2
                     + [(ini(), None, or1In),
@@ -226,7 +226,7 @@ class Or(Combination):
                          (or1Out, None, out()),
                          (or2Out, None, out())])
 
-        return constructVarArgsTransitions(self,
+        return constructVarArgsTransitions(self.operands,
                                            EmptySet,
                                            Or,
                                            createOr,

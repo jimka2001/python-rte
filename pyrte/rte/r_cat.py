@@ -166,14 +166,14 @@ class Cat(Rte):
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
         from rte.thompson import constructVarArgsTransitions, constructTransitions
         from rte.r_epsilon import Epsilon
-        def continuation():
-            cat1In, cat1Out, transitions1 = constructTransitions(self.operands[0])
-            cat2In, cat2Out, transitions2 = constructTransitions(self.operands[1])
+        def continuation(rte1:Rte,rte2:Rte):
+            cat1In, cat1Out, transitions1 = constructTransitions(rte1)
+            cat2In, cat2Out, transitions2 = constructTransitions(rte2)
             return (cat1In, cat2Out, transitions1 \
                     + transitions2
                     + [(cat1Out, None, cat2In)])
 
-        return constructVarArgsTransitions(self,
+        return constructVarArgsTransitions(self.operands,
                                            Epsilon,
                                            Cat,
                                            createCat,

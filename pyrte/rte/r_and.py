@@ -370,12 +370,11 @@ class And(Combination):
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
         from rte.thompson import constructVarArgsTransitions, constructTransitionsAnd
         from rte.r_constants import sigmaStar
-        return constructVarArgsTransitions(self,
+        return constructVarArgsTransitions(self.operands,
                                            sigmaStar,
                                            And,
                                            createAnd,
-                                           lambda: constructTransitionsAnd(self.operands[0],
-                                                                           self.operands[1]))
+                                           constructTransitionsAnd)
 
 
 def createAnd(operands: List['Rte']) -> 'Rte':
