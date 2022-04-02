@@ -894,7 +894,7 @@ def createDfa(pattern: Optional[Rte],
         return createDfa(pattern=pattern,
                          ini=0,
                          transition_triples=transition_triples
-                                            + [(dst, STop, sink_id) for dst in needs_dst]
+                                            + [(dst, STop, sink_id) for dst in set(needs_dst)]
                                             + [(sink_id, STop, sink_id)],
                          accepting_states=accepting_states,
                          exit_map=exit_map,
