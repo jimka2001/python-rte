@@ -428,6 +428,48 @@ def simulateTransitions(sequence: List[Any],
     return None
 
 
+def profile(pattern: Rte, depth: int, r: int, view: bool = True, verbose: bool=False):
+    dfa_thompson = constructThompsonDfa(pattern, 42).trim()
+    min_thompson = dfa_thompson.minimize().trim()
+    dfa_brzozowski = pattern.to_dfa(42).trim()
+    min_brzozowski = dfa_brzozowski.minimize().trim()
+    if len(min_brzozowski.states) != len(min_thompson.states):
+        if verbose:
+            print(f"brz states = {len(min_brzozowski.states)}  thompson states = {len(min_thompson.states)}")
+            print(f"brz {min_brzozowski.serialize()}")
+            print(f"tho {min_thompson.serialize()}")
+        serialized = dict(zip(["pattern", "transitions", "accepting", "exit_map", "combine_labels"],
+                              dfa_thompson.serialize()))
+
+        if verbose:
+            print(f"serialize: {serialized}")
+            print(f"depth={depth} pattern={pattern}")
+            print(f"  thompson size = {len(dfa_thompson.states)}")
+            print(f"  thompson min  = {len(min_thompson.states)}")
+            print(f"  brzozowski size = {len(dfa_brzozowski.states)}")
+            print(f"  brzozowski min  = {len(min_brzozowski.states)}")
+        if view:
+            min_thompson.to_dot(title="thompson",
+                                abbrev=True,
+                                view=True,
+                                label=f"{depth}.{r} {pattern}")
+            min_brzozowski.to_dot(title="brzozowski",
+                                  abbrev=True,
+                                  view=True,
+                                  label=f"{depth}.{r} {pattern}")
+            xor = min_thompson.xor(min_brzozowski).trim()
+            if verbose:
+                print(xor.serialize())
+            if xor.inhabited() is not False:
+                xor.to_dot(title="xor",
+                           view=True,
+                           abbrev=True,
+                           label=f"trim {depth}.{r} {pattern}")
+                return False
+        return False
+    return True
+
+
 def profiling(view: bool = True):
     """here we generate some random Rte patterns, then construct
       both the Thompson and Brzozowski automata, trim and minimize
@@ -435,36 +477,12 @@ def profiling(view: bool = True):
       is different in terms of state count."""
     from rte.r_rte import random_rte
 
-    numRandomTests = 300
-    for depth in range(5, 7):
+    numRandomTests = 1000
+    for depth in range(2, 3):
         for r in range(numRandomTests):
             pattern = random_rte(depth)
-            dfa_thompson = constructThompsonDfa(pattern, 42).trim()
+            profile(pattern, depth, r, view=view)
 
-            min_thompson = dfa_thompson.minimize()
-            dfa_brzozowski = pattern.to_dfa(42).trim()
-            min_brzozowski = dfa_brzozowski.minimize()
-            if len(min_brzozowski.states) != len(min_thompson.states):
-                serialized = dict(zip(["pattern","transitions","accepting","exit_map","combine_labels"], dfa_thompson.serialize()))
-
-                print(f"serialize: {serialized}")
-                print(f"depth={depth} pattern={pattern}")
-                print(f"  thompson size = {len(dfa_thompson.states)}")
-                print(f"  thompson min  = {len(min_thompson.states)}")
-                print(f"  brzozowski size = {len(dfa_brzozowski.states)}")
-                print(f"  brzozowski min  = {len(min_brzozowski.states)}")
-                if view:
-                    min_thompson.to_dot(title="thompson",
-                                        abbrev=True,
-                                        label=f"{depth}.{r} {pattern}")
-                    min_brzozowski.to_dot(title="brzozowski",
-                                          abbrev=True,
-                                          label=f"{depth}.{r} {pattern}")
-                    xor = min_thompson.xor(min_brzozowski)
-                    xor.to_dot(title="xor",
-                               view=True,
-                               abbrev=True,
-                               label=f"{depth}.{r} {pattern}")
 
 if __name__ == '__main__':
     profiling()
