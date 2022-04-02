@@ -24,6 +24,8 @@ import unittest
 from genus.s_atomic import SAtomic
 from genus.s_top import STop
 from genus.s_or import SOr
+from genus.s_eql import SEql
+from genus.s_satisfies import SSatisfies
 from rte.r_cat import Cat
 from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
@@ -36,6 +38,7 @@ from rte.r_star import Star
 from rte.r_not import Not
 from rte.thompson import constructThompsonDfa, accessible, simulateTransitions
 from rte.xymbolyco import Dfa
+from genus.depthgenerator import Test2
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -132,15 +135,30 @@ class ThompsonCase(unittest.TestCase):
         self.assertIsNone(dfa.simulate([2.2, 2.2, "hello", "hello"]))
         self.assertIsNone(dfa.simulate([]))
 
+    def check(self,depth,pattern):
+        dfa_thompson = constructThompsonDfa(pattern, 42)
+        dfa_brzozowski = pattern.to_dfa(42)
+        dfa_thompson.xor(dfa_brzozowski)
+        # equivalent might return None or True, but need to fail if returns False
+        self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False,
+                        f"problem detected with depth={depth} {pattern}")
+
     def test_randomCreate(self):
         for depth in range(4):
             for r in range(num_random_tests):
                 pattern = random_rte(depth)
-                dfa_thompson = constructThompsonDfa(pattern, 42)
-                dfa_brzozowski = pattern.to_dfa(42)
-                # equivalent might return None or True, but need to fail if returns False
-                self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False,
-                                f"problem detected with depth={depth} {pattern}")
+                self.check(depth,pattern)
+
+    def test_discovered(self):
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        pattern = Not(And(Not(Cat(Not(Singleton(SAtomic(int))),
+                                  Cat(Singleton(SEql(1)),
+                                      Singleton(SEql(0))))),
+                          Or(Star(Or(Singleton(SAtomic(Test2)),
+                                     Singleton(odd))),
+                             Sigma)))
+
+        self.check(5,pattern)
 
     def test_accessible(self):
         ini, outs, transitions = accessible(0,
