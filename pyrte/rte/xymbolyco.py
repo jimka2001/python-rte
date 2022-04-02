@@ -328,9 +328,10 @@ class Dfa:
     def trim(self, compact: bool = True) -> 'Dfa':
         pattern, transitions, accepting_ids, exit_map, combine_labels = self.serialize()
         accessibles, coaccessibles = self.find_accessibles()
-        useful_states = set(accessibles + coaccessibles)
+        useful_states = set(accessibles).intersection(set(coaccessibles))
         useful_transitions = [(src, label, dst) for src, label, dst in transitions
-                              if src in useful_states or dst in useful_states]
+                              if src in useful_states and dst in useful_states]
+        accepting_ids = [q for q in accepting_ids if q in useful_states]
         if compact:
             # after removing useless transitions, thus effectively removing useless states
             # there may now be gaps.  ie. a Dfa is constructed with an array/list of states
@@ -691,7 +692,7 @@ class Dfa:
                     for dst2 in [state2.transitions[label2]]
                     if label1.disjoint(label2) is not True  # skip this iteration if provably disjoint
                     for label_sxp in [SAnd(label1, label2).canonicalize(NormalForm.DNF)]
-                    if label_sxp.inhabited is not False  # skip if intersection is provably empty
+                    if label_sxp.inhabited() is not False  # skip if intersection is provably empty
                     ]
 
         # start with the cross transitions from self.states[0] and df2.states[0]

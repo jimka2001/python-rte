@@ -171,7 +171,7 @@ def complete(ini: int,
                              if transitions is not None
                              for tds in [[b for a, b, c in transitions]]
                              for remaining in [SNot(createSOr(tds))]
-                             if remaining.inhabited is not False
+                             if remaining.inhabited() is not False
                              ]
     if not clean:
         return [(ini, STop, sink()),

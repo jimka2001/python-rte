@@ -25,6 +25,7 @@ from genus.s_atomic import SAtomic
 from genus.s_top import STop
 from genus.s_or import SOr
 from genus.s_eql import SEql
+from genus.s_member import SMember
 from genus.s_satisfies import SSatisfies
 from rte.r_cat import Cat
 from rte.r_emptyset import EmptySet
@@ -135,11 +136,24 @@ class ThompsonCase(unittest.TestCase):
         self.assertIsNone(dfa.simulate([2.2, 2.2, "hello", "hello"]))
         self.assertIsNone(dfa.simulate([]))
 
-    def check(self,depth,pattern):
+    def check(self, depth, pattern):
         dfa_thompson = constructThompsonDfa(pattern, 42)
         dfa_brzozowski = pattern.to_dfa(42)
-        dfa_thompson.xor(dfa_brzozowski)
+        dfa_xor = dfa_thompson.xor(dfa_brzozowski)
         # equivalent might return None or True, but need to fail if returns False
+        if dfa_brzozowski.equivalent(dfa_thompson) is False:
+            dfa_brzozowski.to_dot(title="brzozowski",
+                                  view=True,
+                                  abbrev=True,
+                                  label=f"{depth} {pattern}")
+            dfa_thompson.to_dot(title="thompson",
+                                abbrev=True,
+                                view=True,
+                                label=f"{depth} {pattern}")
+            dfa_xor.to_dot(title="xor",
+                           abbrev=True,
+                           view=True,
+                           label=f"XOR{depth} {pattern}")
         self.assertTrue(dfa_brzozowski.equivalent(dfa_thompson) is not False,
                         f"problem detected with depth={depth} {pattern}")
 
@@ -147,9 +161,9 @@ class ThompsonCase(unittest.TestCase):
         for depth in range(4):
             for r in range(num_random_tests):
                 pattern = random_rte(depth)
-                self.check(depth,pattern)
+                self.check(depth, pattern)
 
-    def test_discovered(self):
+    def test_discovered1(self):
         odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
         pattern = Not(And(Not(Cat(Not(Singleton(SAtomic(int))),
                                   Cat(Singleton(SEql(1)),
@@ -158,7 +172,23 @@ class ThompsonCase(unittest.TestCase):
                                      Singleton(odd))),
                              Sigma)))
 
-        self.check(5,pattern)
+        self.check(5, pattern)
+
+    def test_discovered2(self):
+        pattern = Cat(Or(Singleton(SMember('a', 'b', 'c')),
+                         Singleton(SAtomic(float))),
+                      Or(Singleton(SMember('a', 'b', 'c')),
+                         Singleton(SEql(3.14))))
+        self.check(2, pattern)
+
+    # diffs
+    # Or(Or(Singleton(SMember((SAtomic(int), 1), (SAtomic(int), 2), (SAtomic(int), 3))), Singleton([= (SAtomic(str), 'a')])), Or(Singleton(SAtomic(int)), Singleton(STop)))
+    # Or(Star(Singleton(SMember())), Not(Singleton(odd?)))
+    # Cat(Or(Singleton(SAtomic(Test1)), Singleton([= (SAtomic(str), '')])), Cat(Singleton([= (SAtomic(int), 1)]), Singleton([= (SAtomic(str), 'a')])))
+    # Cat(Not(Singleton([= (SAtomic(str), '')])), Star(Singleton([= (SAtomic(int), 0)])))
+    # Singleton(SNot(SNot(SOr(SAnd(odd?, SNot([= (SAtomic(str), 'a')])), SAnd(SAnd(SAtomic(TestB), [= (SAtomic(str), 'a')]), SNot(SMember()))))))
+    # pattern=Or(Singleton(SOr(even?, SAnd(SOr([= (SAtomic(float), 3.14)], SAnd([= (SAtomic(str), '')], [= (SAtomic(str), '')])), SAnd(SOr(SMember((SAtomic(str), 'a'), (SAtomic(str), 'b'), (SAtomic(str), 'c')), SAtomic(TestA)), [= (SAtomic(float), 3.14)])))), Or(Singleton(SOr(SAtomic(TestB), SAnd(SOr(SAtomic(Test1), SAtomic(Test2)), SAnd([= (SAtomic(int), 0)], SAtomic(TestB))))), Not(Or(Cat(Singleton(SAtomic(Test1)), Singleton([= (SAtomic(float), 3.14)])), Not(Singleton([= (SAtomic(int), 0)]))))))
+    # pattern=Not(Star(And(Cat(Singleton(SNot(SAtomic(Test2))), And(Singleton(SAtomic(TestB)), Singleton(SMember()))), Or(Cat(Singleton([= (SAtomic(int), -1)]), Singleton([= (SAtomic(str), 'a')])), Star(Singleton([= (SAtomic(int), 0)]))))))
 
     def test_accessible(self):
         ini, outs, transitions = accessible(0,
@@ -191,4 +221,3 @@ class ThompsonCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
