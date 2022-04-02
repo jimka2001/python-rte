@@ -118,7 +118,8 @@ class Dfa:
                abbrev: bool = True,
                draw_sink: bool = False,
                state_legend: bool = True,
-               verbose: bool = False):
+               verbose: bool = False,
+               label: Optional[str] = None):
         from genus.utils import dot_view
         import io
         text = io.StringIO()
@@ -129,9 +130,12 @@ class Dfa:
                                      view=False,
                                      abbrev=abbrev,
                                      draw_sink=draw_sink,
-                                     state_legend=state_legend)
+                                     state_legend=state_legend,
+                                     label=label)
             # print(f"{dot_string}")
             return dot_view(dot_string, verbose=verbose, title=title)
+        title = "" if title is None else title
+        long_title = title if label is None else f"{title}\\l-- {label}"
         sink_state_indices = self.find_sink_states()
         if draw_sink:
             visible_states = self.states
@@ -145,12 +149,12 @@ class Dfa:
         abbrevs = dict(zip(transition_labels, range(len(transition_labels))))
         labels = dict([(abbrevs[td], td) for td in abbrevs])
         text.write("digraph G {\n")
-        if title:
-            text.write(f"  // {title}\n")
+        text.write(f"  // {title}\n")
+        text.write(f"  // {label}\n")
         text.write("  rankdir=LR;\n")
         text.write("  fontname=courier;\n")
         if abbrev:
-            text.write(f"   label=\"{title} ")
+            text.write(f"   label=\"{long_title} ")
             for index in labels:
                 text.write(f"\\lt{index}= {labels[index]}")
             text.write("\\l\"\n")
