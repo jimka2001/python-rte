@@ -240,7 +240,7 @@ class Dfa:
         return [q.index for q in self.states
                 if not q.accepting
                 and 1 == len(q.transitions)
-                and q.transitions[STop] == q.index]
+                and q.transitions.get(STop,None) == q.index]
 
     # return a new Dfa which is guaranteed to be complete.
     # We do this be adding transitions to some states for which it cannot
