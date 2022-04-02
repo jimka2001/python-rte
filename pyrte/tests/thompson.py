@@ -23,6 +23,8 @@ import unittest
 
 from genus.s_atomic import SAtomic
 from genus.s_top import STop
+from genus.s_not import SNot
+from genus.s_and import SAnd
 from genus.s_or import SOr
 from genus.s_eql import SEql
 from genus.s_member import SMember
@@ -39,7 +41,7 @@ from rte.r_star import Star
 from rte.r_not import Not
 from rte.thompson import constructThompsonDfa, accessible, simulateTransitions
 from rte.xymbolyco import Dfa
-from genus.depthgenerator import Test2
+from genus.depthgenerator import Test2, Test1, TestB, TestA
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
@@ -181,14 +183,32 @@ class ThompsonCase(unittest.TestCase):
                          Singleton(SEql(3.14))))
         self.check(2, pattern)
 
-    # diffs
-    # Or(Or(Singleton(SMember((SAtomic(int), 1), (SAtomic(int), 2), (SAtomic(int), 3))), Singleton([= (SAtomic(str), 'a')])), Or(Singleton(SAtomic(int)), Singleton(STop)))
-    # Or(Star(Singleton(SMember())), Not(Singleton(odd?)))
-    # Cat(Or(Singleton(SAtomic(Test1)), Singleton([= (SAtomic(str), '')])), Cat(Singleton([= (SAtomic(int), 1)]), Singleton([= (SAtomic(str), 'a')])))
-    # Cat(Not(Singleton([= (SAtomic(str), '')])), Star(Singleton([= (SAtomic(int), 0)])))
-    # Singleton(SNot(SNot(SOr(SAnd(odd?, SNot([= (SAtomic(str), 'a')])), SAnd(SAnd(SAtomic(TestB), [= (SAtomic(str), 'a')]), SNot(SMember()))))))
-    # pattern=Or(Singleton(SOr(even?, SAnd(SOr([= (SAtomic(float), 3.14)], SAnd([= (SAtomic(str), '')], [= (SAtomic(str), '')])), SAnd(SOr(SMember((SAtomic(str), 'a'), (SAtomic(str), 'b'), (SAtomic(str), 'c')), SAtomic(TestA)), [= (SAtomic(float), 3.14)])))), Or(Singleton(SOr(SAtomic(TestB), SAnd(SOr(SAtomic(Test1), SAtomic(Test2)), SAnd([= (SAtomic(int), 0)], SAtomic(TestB))))), Not(Or(Cat(Singleton(SAtomic(Test1)), Singleton([= (SAtomic(float), 3.14)])), Not(Singleton([= (SAtomic(int), 0)]))))))
-    # pattern=Not(Star(And(Cat(Singleton(SNot(SAtomic(Test2))), And(Singleton(SAtomic(TestB)), Singleton(SMember()))), Or(Cat(Singleton([= (SAtomic(int), -1)]), Singleton([= (SAtomic(str), 'a')])), Star(Singleton([= (SAtomic(int), 0)]))))))
+    def test_discovered3(self):
+        from rte.thompson import profile
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+
+        for pattern in [
+            Cat(Star(Singleton(SAtomic(TestA))), And(Singleton(SEql(3.14)), Singleton(STop))),
+            Or(Or(Singleton(SMember(1,2,3)),
+                  Singleton(SEql('a'))), Or(Singleton(SAtomic(int)), Singleton(STop))),
+            Or(Star(Singleton(SMember())), Not(Singleton(odd))),
+            Cat(Or(Singleton(SAtomic(Test1)), Singleton(SEql(''))), Cat(Singleton(SEql(1)),
+                                                                        Singleton(SEql('a')))),
+            Cat(Not(Singleton(SEql(''))), Star(Singleton(SEql(0)))),
+            Singleton(
+                SNot(SNot(SOr(SAnd(odd, SNot(SEql('a'))), SAnd(SAnd(SAtomic(TestB), SEql('a')), SNot(SMember())))))),
+            Or(Singleton(SOr(even, SAnd(SOr(SEql(3.14), SAnd(SEql(''), SEql(''))),
+                                        SAnd(SOr(SMember('a', 'b', 'c'), SAtomic(TestA)), SEql(3.14))))),
+               Or(Singleton(SOr(SAtomic(TestB), SAnd(SOr(SAtomic(Test1), SAtomic(Test2)),
+                                                     SAnd(SEql(0), SAtomic(TestB))))),
+                  Not(Or(Cat(Singleton(SAtomic(Test1)), Singleton(SEql(3.14))), Not(Singleton(SEql(0))))))),
+            Not(Star(And(Cat(Singleton(SNot(SAtomic(Test2))),
+                             And(Singleton(SAtomic(TestB)), Singleton(SMember()))),
+                         Or(Cat(Singleton(SEql(-1)), Singleton(SEql('a'))),
+                            Star(Singleton(SEql(0)))))))
+        ]:
+            self.assertTrue(profile(pattern, 2, 1))
 
     def test_accessible(self):
         ini, outs, transitions = accessible(0,
