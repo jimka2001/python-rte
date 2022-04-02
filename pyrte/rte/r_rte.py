@@ -230,7 +230,8 @@ def random_rte(depth):
 
     def random_singleton():
         from genus.depthgenerator import random_type_designator
-        return random_type_designator(depth)
+        from rte.r_singleton import Singleton
+        return Singleton(random_type_designator(depth))
 
     def random_leaf():
         from rte.r_sigma import Sigma
