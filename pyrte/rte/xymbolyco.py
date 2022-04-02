@@ -871,6 +871,13 @@ def createDfa(pattern: Optional[Rte],
         assert isinstance(i, int)
         assert i >= 0
 
+    # check against duplicate transitions
+    if len(transition_triples) != len(set(transition_triples)):
+        seen = set()
+        for trans in transition_triples:
+            assert trans not in seen, f"duplicate transition {trans} in {transition_triples}"
+            seen.add(trans)
+
     def f(acc: int, triple: Tuple[int, Any, int]) -> int:
         src, _, dst = triple
         return max(acc, src, dst)
