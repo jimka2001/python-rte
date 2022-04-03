@@ -21,6 +21,7 @@
 
 import unittest
 from rte.r_sigma import Sigma
+from rte.r_epsilon import Epsilon
 from rte.r_emptyset import EmptySet
 from rte.r_star import Star
 from rte.r_and import And
@@ -138,6 +139,16 @@ class XymbolycoCase(unittest.TestCase):
                             f"empty={empty1}\n" +
                             f"path={label_path}"
                             )
+        return True
+
+    def test_discovered_143(self):
+        self.assertNotEqual(Epsilon.to_dfa(True).to_rte()[True], EmptySet)
+
+    def test_discovered_142(self):
+        self.check_extraction_cycle(Epsilon)
+        self.check_extraction_cycle(Star(Epsilon))
+        self.check_extraction_cycle(Sigma)
+        self.check_extraction_cycle(Star(Sigma))
 
     def test_extract_rte(self):
         for depth in range(3, 4):

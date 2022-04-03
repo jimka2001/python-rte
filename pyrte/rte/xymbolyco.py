@@ -240,7 +240,7 @@ class Dfa:
         return [q.index for q in self.states
                 if not q.accepting
                 and 1 == len(q.transitions)
-                and q.transitions.get(STop,None) == q.index]
+                and q.transitions.get(STop, None) == q.index]
 
     # return a new Dfa which is guaranteed to be complete.
     # We do this be adding transitions to some states for which it cannot
@@ -883,11 +883,16 @@ def createDfa(pattern: Optional[Rte],
         return max(acc, src, dst)
 
     max_index = reduce(f, transition_triples, 0)
-
     srcs = [src for src, _, _ in transition_triples]
+
     # if we find a dst which is not used as a source, then create a transition from that dst
     # to a sink state.  Do this with a recursive call.
     needs_dst = [dst for src, td, dst in transition_triples if dst not in srcs]
+    # in the case that the initial state is a final state,
+    #   and it has no outgoing transitions, then the Dfa matches the empty-word.
+    #   so make sure we don't accidentally match empty-set instead.
+    if 0 in accepting_states and 0 not in srcs:
+        needs_dst = needs_dst + [0]
     if needs_dst:
         from genus.s_top import STop
         sink_id = max_index + 1

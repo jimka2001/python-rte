@@ -173,6 +173,7 @@ def complete(ini: int,
                              for remaining in [SNot(createSOr(tds))]
                              if remaining.inhabited() is not False
                              ]
+
     if not clean:
         return [(ini, STop, sink()),
                 (sink(), STop, sink())]
