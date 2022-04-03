@@ -429,7 +429,7 @@ def simulateTransitions(sequence: List[Any],
     return None
 
 
-def profile(pattern: Rte, depth: int, r: int, view: bool = True, verbose: bool=False):
+def profile(pattern: Rte, depth: int, r: int, view: bool = True, verbose: bool = False):
     dfa_thompson = constructThompsonDfa(pattern, 42).trim()
     min_thompson = dfa_thompson.minimize().trim()
     dfa_brzozowski = pattern.to_dfa(42).trim()

@@ -192,7 +192,7 @@ class Dfa:
     #   at state index=0, by iterating through the sequence,
     #   and following the transitions
     #   according to which SimpleTypeD the object matches.
-    #   Each transitions is labeled with a SimpleTypeD.
+    #   Each transition is labeled with a SimpleTypeD.
     #   Finding the matching transition is done efficiently
     #   via the ite object returned from state.ite().
     #   Warning, the first time ite() is called on a state,
@@ -205,7 +205,7 @@ class Dfa:
     #   If we encounter a situation where no SimpleTypeD label matches,
     #   and thus no transition can be found, we immediately return None.
     #   If we manage to finish iterating through the sequence
-    #   and find ourself in a non-final state, then we return None.
+    #   and find ourselves in a non-final state, then we return None.
     #   If we are in a final state at that point, we look up
     #   the value to return in the exit_map indexed by the state_id.
     def simulate(self, sequence: List[Any]) -> Any:
@@ -260,7 +260,7 @@ class Dfa:
         # look at the group of transitions of each state
         #   if we find one for which the complement of the union of the
         #   SimpleTypeD's labeling the transitions is found to not be
-        #   inhabited, then create a transition to encompass type type
+        #   inhabited, then create a transition to encompass the type
         #   of all possible object not covered by the transitions.
         #   Warning, it might be that that type is in fact vacuous,
         #   but the .inhabited() method returns dont-know.  So in this
@@ -334,9 +334,9 @@ class Dfa:
         accepting_ids = [q for q in accepting_ids if q in useful_states]
         if compact:
             # after removing useless transitions, thus effectively removing useless states
-            # there may now be gaps.  ie. a Dfa is constructed with an array/list of states
+            # there may now be gaps.  i.e. a Dfa is constructed with an array/list of states
             # where the index in the array is the same as the index of the state.
-            # so we may need to decrease some of the higher indices to fill the gaps.
+            # so we may need to decrease some higher indices to fill the gaps.
             def rename_index(old, new, idx):
                 if idx == old:
                     return new
@@ -508,7 +508,7 @@ class Dfa:
         # each path is a list of states starting with self.states[0]
         # and ending in an accepting state.
         # no path contains the same state twice, i.e. no paths with loops.
-        # The parameter allow_maybe_satisfiable controls how strict the
+        # The parameter allow_maybe_satisfiable controls how strict
         #  the satisfiability criteria is honored.
         #  If allow_maybe_satisfiable is False (the default)
         #  then only transitions which are definitely satisfiable
@@ -567,7 +567,7 @@ class Dfa:
         # if every state is non-accepting then the dfa is vacuous
         elif all(not q.accepting for q in self.states):
             return True
-        # otherwise if there is not satisfiable path to an accepting state
+        # otherwise, if there is not a satisfiable path to an accepting state
         #   then it is vacuous.
         elif self.paths_to_accepting(allow_maybe_satisfiable=False):
             return False  # there is an accepting path, so not vacuous
@@ -636,7 +636,7 @@ class Dfa:
 
         def min_state(eqv_class) -> int:
             # using min_int with reduce, rather than int, because otherwise
-            # mypy cannot figure out the min_state returns int.
+            # mypy cannot figure out that min_state returns int.
             return reduce(min_int, [q.index for q in eqv_class])
 
         pi_minimized = self.find_hopcroft_partition()
@@ -670,8 +670,8 @@ class Dfa:
                          self.combine_labels)
 
     # Compute the synchronized-cross-product ot two Dfas, (self, and the given dfa2).
-    # This function realizes the intersection, union, xor etc of two Dfas,
-    # by generating a Dfa which recognizes the intersection, union, xor etc
+    # This function realizes the intersection, union, xor etc. of two Dfas,
+    # by generating a Dfa which recognizes the intersection, union, xor etc.
     # of the languages of the respective Dfas.
     # This function is the work-horse used by the functions intersection, union,
     # and xor below.
@@ -845,14 +845,14 @@ def renumber_transitions_for_dfa(ini: int,
                 [(mapping[x], td, mapping[y]) for x, td, y in transitions1])
 
     if ini == 0:
-        return (ini, outs, transitions)
+        return ini, outs, transitions
     else:
         return renumber(ini, outs, transitions)
 
 
 # Create a Dfa given the list of transitions, accepting state ids,
 #  an exit map and a function to merge parallel labels.
-# The given list of transitions must be locally deterministic.  ie.
+# The given list of transitions must be locally deterministic.  i.e.
 #  for each state, the set of labels of its out-going transitions
 #  must be mutually disjoint.  More precisely, it must not be provably
 #  that some pair of transitions of any one state has an inhabited
