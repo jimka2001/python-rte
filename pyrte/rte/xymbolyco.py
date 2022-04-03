@@ -276,6 +276,7 @@ class Dfa:
             return self
         else:
             return createDfa(pattern=pattern,
+                             ini=0,
                              transition_triples=transitions + extra_transitions + [[sink_id, STop, sink_id]],
                              accepting_states=accepting,
                              exit_map=exit_map,
@@ -293,6 +294,7 @@ class Dfa:
         else:
             pattern = createNot(self.pattern)
         return createDfa(pattern=pattern,
+                         ini=0,
                          transition_triples=transitions,
                          accepting_states=[i for i in range(len(self.states)) if i not in accepting],
                          exit_map=exit_map,
