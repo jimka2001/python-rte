@@ -119,11 +119,13 @@ class ThompsonCase(unittest.TestCase):
         dfa = constructThompsonDfa(Not(Or(Singleton(SAtomic(int)),
                                           Singleton(SAtomic(str)))),
                                    42)
+        #dfa.to_dot(view=True,title="xor", label="neither int nor str", draw_sink=True)
         self.assertTrue(Dfa == type(dfa))
         self.assertIsNone(dfa.simulate([1]))
         self.assertIsNone(dfa.simulate(["hello"]))
         self.assertEqual(42, dfa.simulate([]))
-        self.assertEqual(42, dfa.simulate([1, "hello", "hello"]))
+        self.assertEqual(42, dfa.simulate([1, "hello", "hello"]),
+                         f"[1 'hello', 'hello'] is int or str")
         self.assertEqual(42, dfa.simulate([1, 2.0, 3]))
 
     def test_And(self):
