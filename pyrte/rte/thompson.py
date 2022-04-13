@@ -111,7 +111,7 @@ def removeEpsilonTransitions(ini: int,
 
     normalTransitions = [(x, tr, y) for x, tr, y in transitions
                          if tr is not None]
-    allStates: List[int] = list(findAllStates(transitions))
+    allStates: List[int] = sorted(list(findAllStates(transitions)))
 
     def reachableFrom(q: int) -> Set[int]:
         return {y for x, y in epsilonTransitions
