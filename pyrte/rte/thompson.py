@@ -95,7 +95,7 @@ def coaccessible(ini: int,
 
 def trim(ini: int,
          finals: List[int],
-         transitions: List[Tuple[(int, SimpleTypeD, int)]]) \
+         transitions: List[Tuple[int, SimpleTypeD, int]]) \
         -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     aIn, aFinals, aTransitions = accessible(ini, finals, transitions)
     return coaccessible(aIn, aFinals, aTransitions)
