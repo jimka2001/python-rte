@@ -107,8 +107,10 @@ def removeEpsilonTransitions(ini: int,
                              ) -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
     epsilonTransitions = {(x, y) for x, tr, y in transitions
                           if tr is None}
-    normalTransitions = [trans for trans in transitions
-                         if trans[1] is not None]
+
+
+    normalTransitions = [(x, tr, y) for x, tr, y in transitions
+                         if tr is not None]
     allStates: List[int] = list(findAllStates(transitions))
 
     def reachableFrom(q: int) -> Set[int]:
