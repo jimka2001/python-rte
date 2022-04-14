@@ -919,6 +919,29 @@ class GenusCase(unittest.TestCase):
             SOr(SAtomic(int), SNot(SMember(1, 1.0, 2, 2.0))).conversion16(),
             SOr(SAtomic(int), SNot(SMember(1, 2))))
 
+    def test_conversion17(self):
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        t0 = SOr(SAnd(SNot(odd), even), SAnd(even,odd))
+        assert t0.conversion17() == SOr(even, even)
+        assert t0.canonicalize() == even, f"canonicalize = {t0.canonicalize()}"
+
+        t1 = SAnd(SOr(SNot(odd),even), SOr(even,odd))
+        assert t1.conversion17() == SAnd(even, even)
+        assert t1.canonicalize() == even
+        a = SEql("a")
+        b = SEql("b")
+        c = SEql("c")
+        d = SEql("d")
+        assert SOr(SAnd(a,b,c),SAnd(a,SNot(b),c)).conversion17() == SOr(SAnd(a,c),SAnd(a,c))
+        assert SAnd(SOr(a,b,c),SOr(a,SNot(b),c)).conversion17() == SAnd(SOr(a,c),SOr(a,c))
+
+        assert SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, d)).conversion17() == SOr(SAnd(a, c, d), SAnd(a, c, d))
+        assert SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, d)).conversion17() == SAnd(SOr(a, c, d), SOr(a, c, d))
+
+        assert SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))).conversion17() == SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d)))
+        assert SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))).conversion17() == SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d)))
+
     def test_combo_conversionD1(self):
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
         # == > SNot(SMember(42, 43, 44))
