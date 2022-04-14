@@ -1461,6 +1461,17 @@ class GenusCase(unittest.TestCase):
         # first element is one of them
         self.assertEqual(find_first(lambda x: x + 1 == 5, li), 4)
 
+    def test_canonicalize_1464(self):
+        odd = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 1, "odd")
+        even = SSatisfies(lambda a: isinstance(a, int) and a % 2 == 0, "even")
+        t0 = SOr(SAnd(SNot(odd), even), SAnd(even,odd))
+        assert t0.conversion17() == SOr(even, even)
+        assert t0.canonicalize() == even, f"canonicalize = {t0.canonicalize()}"
+
+        t1 = SAnd(SOr(SNot(odd),even), SOr(even,odd))
+        assert t1.conversion17() == SAnd(even, even)
+        assert t1.canonicalize() == even
+
 
 if __name__ == '__main__':
     unittest.main()

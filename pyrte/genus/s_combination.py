@@ -390,6 +390,48 @@ class SCombination(SimpleTypeD):
         newargs = [f(td) for td in self.tds]
         return self.create(newargs)
 
+    def conversion17(self):
+        from genus.s_not import SNot, notp
+
+        # A !B + A B --> A
+        # (A + !B)(A + B) -> A
+        def f(td):
+
+            if not self.dual_combination(td):
+                return td
+            else:
+                # e.g., SOr(SAnd(a,b,c...),...,SAnd(a,b,!c...))
+                # -->   SOr(SAnd(a,b),...SAnd(a,b,!c))
+                others = [c for c in self.tds
+                          if c is not td
+                          if self.dual_combination(c)]
+
+                def except_for(c, tds1, tds2) -> bool:
+                    if len(tds1) != len(tds2):
+                        return False
+                    shorter = set(tds1) - {c}  # TODO can't I do with without making a set?
+                    if notp(c):
+                        return shorter == set(tds2) - {c.s}
+                    else:
+                        return len(tds1) == len(tds2) and \
+                               shorter == set(tds2) - {SNot(c)}
+
+                # is there an element, c, of the arglist of td and an x in others
+                # such that x.tds has the same elements as td.tds
+                # except that c is in td.tds and !c is in x.tds
+                # or          !c is in td.tds and c is in x.tds
+                # if so remove c or !c from td.tds
+                negated = next((c for c in td.tds
+                                if next((x for x in others
+                                         if except_for(c, td.tds, x.tds)), False)),
+                               None)
+                if negated is not None:
+                    return self.create_dual([x for x in td.tds if x != negated])
+                else:
+                    return td
+
+        return self.create([f(c) for c in self.tds])
+
     def conversionD1(self) -> SimpleTypeD:
         raise NotImplementedError
 
@@ -422,6 +464,7 @@ class SCombination(SimpleTypeD):
                        lambda: self.conversion14(),
                        lambda: self.conversion15(),
                        lambda: self.conversion16(),
+                       lambda: self.conversion17(),
                        lambda: self.conversionD1(),
                        lambda: self.conversionD3(),
                        lambda: self.conversion98(),
