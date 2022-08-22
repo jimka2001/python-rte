@@ -63,9 +63,11 @@ def mdtd(tds: Union[List[SimpleTypeD], Set[SimpleTypeD]]) -> List[Tuple[SimpleTy
                 return [(td1, factors, disjoints + [td])]
             elif nc().disjoint(td1) is True:
                 return [(td1, factors + [td], disjoints)]
-            elif a().inhabited() is False:
+            # dont check a().inhabited in the case that td.disjoint(td1) is False
+            elif td.disjoint(td1) is None and a().inhabited() is False:
                 return [(td1, factors, disjoints + [td])]
-            elif b().inhabited() is False:
+            # dont check b().inhabited in the case that nc.disjoint(td1) is False
+            elif nc().disjoint(td1) is None and b().inhabited() is False:
                 return [(td1, factors + [td], disjoints)]
             else:
                 return [(a(), factors + [td], disjoints),
