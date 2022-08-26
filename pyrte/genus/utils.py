@@ -357,7 +357,7 @@ def pip_install(package):
     # running pip install from the shell will install libraries according to the
     # unix environment, which might be different than the particular python
     # being used.   using something like pip_install('typing_extensions') from
-    # the python console seems to install the the *correct* place so it can
+    # the python console seems to install the *correct* place so it can
     # be referenced by the python being run.
     import pip
 
