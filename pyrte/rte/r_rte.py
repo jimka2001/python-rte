@@ -202,6 +202,43 @@ class Rte:
         raise TypeError(f"generateThompson not implemented for {self} of type {type(self)}")
 
 
+def Atomic(cl) -> TypeGuard['Singleton']:
+    from genus.s_atomic import SAtomic
+    from rte.r_singleton import Singleton
+    return Singleton(SAtomic(cl))
+
+
+def Satisfies(f, printable) -> TypeGuard['Singleton']:
+    from genus.s_satisfies import SSatisfies
+    from rte.r_singleton import Singleton
+    return Singleton(SSatisfies(f, printable))
+
+
+def Eql(v) -> TypeGuard['Singleton']:
+    from genus.s_eql import SEql
+    from rte.r_singleton import Singleton
+    return Singleton(SEql(v))
+
+
+def Member(*vs) -> TypeGuard['Singleton']:
+    from genus.s_member import SMember
+    from rte.r_singleton import Singleton
+    return Singleton(SMember(*vs))
+
+def Plus(r: Rte) -> TypeGuard['Cat']:
+    from rte.r_cat import Cat
+    from rte.r_star import Star
+    assert isinstance(r, Rte)
+    return Cat(r, Star(r))
+
+def plusp(rte: Rte) -> TypeGuard['Cat']:
+    from rte.r_cat import catp
+    from rte.r_star import starp
+    return catp(rte) \
+           and 2 == len(rte.operands) \
+           and ((starp(rte.operands[1]) and rte.operands[1].operand == rte.operands[0])
+                or (starp(rte.operands[0]) and rte.operands[0].operand == rte.operands[1]))
+
 def random_rte(depth):
     import random
 

@@ -88,7 +88,8 @@ class Or(Combination):
         #   --> (:or (:* Y) (:* X))
         # BUT NOT
         # (:or :epsilon (:cat X (:* X) ANYTHING))
-        from rte.r_star import plusp, starp
+        from rte.r_rte import plusp
+        from rte.r_star import starp
         from rte.r_cat import catp
         if any(op.nullable() for op in self.operands) and any(plusp(op) for op in self.operands):
             def f(op):
