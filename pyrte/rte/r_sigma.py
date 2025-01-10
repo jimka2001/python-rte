@@ -50,7 +50,7 @@ class SigmaImpl (Rte):
     def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
         from genus.s_top import STop
-        return (ini(), out(), [(ini(), STop, out())])
+        return ini(), out(), [(ini(), STop, out())]
 
 
 

@@ -121,7 +121,8 @@ class And(Combination):
         if ror is None:
             return self
         else:
-            return createOr([createAnd(search_replace(self.operands, ror, r)) for r in ror.operands])
+            return createOr([createAnd(search_replace(self.operands, ror, r))
+                             for r in ror.operands])
 
     def conversionA13(self) -> Rte:
         # if there is an explicit Sigma and also a singleton which is inhabited, then
@@ -130,7 +131,9 @@ class And(Combination):
         from rte.r_singleton import singletonp
         from genus.utils import remove_element
         if Sigma in self.operands \
-                and any(r.operand.inhabited() is True for r in self.operands if singletonp(r)):
+                and any(r.operand.inhabited() is True
+                        for r in self.operands
+                        if singletonp(r)):
             return self.create(remove_element(self.operands, Sigma))
         else:
             return self

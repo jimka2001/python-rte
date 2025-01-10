@@ -20,7 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import os
 import unittest
 
 from genus.depthgenerator import random_type_designator, test_values

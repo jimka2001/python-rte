@@ -38,7 +38,8 @@ leaf_rtes = [EmptySet,
 
 
 def random_list(length: int, f) -> list:
-    return [f() for i in range(length)]
+    return [f()
+            for _ in range(length)]
 
 
 def random_rte(depth: int) -> Rte:
