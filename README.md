@@ -32,14 +32,15 @@ The theory of how RTEs work can be found here:
 
 ## Installation
 
-Download from [LRDE](https://www.lrde.epita.fr/wiki/Home) GitLab 
+Download from [LRE](git@gitlab.lre.epita.fr:jnewton/python-rte.git) GitLab 
+or [GitHub](https://github.com/jimka2001/python-rte.git) GitHub
 
 ```
 git clone git@gitlab.lrde.epita.fr:jnewton/python-rte.git
 ```
  or
 ```
-git clone https://gitlab.lrde.epita.fr/jnewton/python-rte.git
+git clone https://gitlab.lre.epita.fr/jnewton/python-rte.git
 ```
 
 ## RTE in more depth
@@ -54,7 +55,7 @@ git clone https://gitlab.lrde.epita.fr/jnewton/python-rte.git
 ## Not yet implemented
 
 There are several outstanding issues.  
-[See them here](https://gitlab.lrde.epita.fr/jnewton/python-rte/-/issues).
+[See them here](https://gitlab.lre.epita.fr/jnewton/python-rte/-/issues).
 
 ## Package dependencies overview
 
