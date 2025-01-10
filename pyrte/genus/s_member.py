@@ -22,8 +22,7 @@
 
 from genus.simple_type_d import SimpleTypeD, TerminalType
 from genus.s_empty import SEmptyImpl
-from typing import Literal, Union
-from typing_extensions import TypeGuard
+from typing import Literal, Union, TypeGuard
 
 
 class SMemberImpl(SimpleTypeD):

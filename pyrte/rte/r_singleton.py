@@ -22,8 +22,7 @@
 
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
-from typing import Literal, Set, Optional, List, Callable, Tuple
-from typing_extensions import TypeGuard
+from typing import Literal, Set, Optional, List, Callable, Tuple, TypeGuard
 
 
 class Singleton(Rte):

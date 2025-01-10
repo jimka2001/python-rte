@@ -19,7 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.r_rte.py
 
-from typing import List, Set, Tuple, Any,  Callable, Optional
+from typing import List, Set, Tuple, Any, Callable, Optional, TypeGuard
 
 
 class CannotComputeDerivative(Exception):
