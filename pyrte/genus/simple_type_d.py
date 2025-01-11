@@ -40,7 +40,7 @@ class TerminalType(metaclass=ABCMeta):
 
 
 class SimpleTypeD:
-    """SimpleTypeD is the super class of all of the
+    """SimpleTypeD is the super class of all the
     representations of type in Genus"""
 
     def __init__(self):
@@ -57,8 +57,8 @@ class SimpleTypeD:
     def typep(self, a) -> Literal[True, False]:
         """Returns whether a given object belongs to this designated type.
         It is a set membership test.
-            @param a the object we want to check the type
-            @return a Boolean which is true is a is of this type"""
+            @param `a` the object we want to check the type
+            @return a Boolean which is true if `a` is of this type"""
 
     def disjoint(self, td) -> Literal[True, False, None]:
         assert isinstance(td, SimpleTypeD)

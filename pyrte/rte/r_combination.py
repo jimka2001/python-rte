@@ -248,7 +248,7 @@ class Combination(Rte):
         # remove And superclasses
         # remove Or subclasses
 
-        # Must be careful, e.g. if Or(A,B) with A a subset of B and B a subset of A
+        # Must be careful, e.g. if Or(A,B) with `A` a subset of `B` and `B` a subset of `A`
         #    but A != B, then don't remove both.
         from rte.r_singleton import singletonp
         from genus.utils import flat_map

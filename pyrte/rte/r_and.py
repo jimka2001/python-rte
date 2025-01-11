@@ -334,8 +334,8 @@ class And(Combination):
     #   conversionC... -- a method on Combination
     #   conversionA... -- a method on And
     #   conversionO... -- a method on Or
-    #   conversionD... -- a method declared in Combination but implemented in And and Or in a dual way
-    #                          I.e. the And and Or methods of this name implement dual operations.
+    #   conversionD... -- a method declared in Combination but implemented in `And` and `Or` in a dual way
+    #                          I.e. the `And` and `Or` methods of this name implement dual operations.
 
     def canonicalize_once(self) -> Rte:
         from genus.utils import find_simplifier

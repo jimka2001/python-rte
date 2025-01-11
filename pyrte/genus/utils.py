@@ -53,7 +53,7 @@ def fixed_point(v: T,
                 invariant: Union[None, Callable[[T], bool]] = None) -> T:
     # if invariant is given, it should be a function we can call on the
     #   input v, and also on the computed result, f(v)
-    #   if the invariant fails to return True, the an exception will be thrown
+    #   if the invariant fails to return True, an exception will be thrown
     history = []
     if invariant:
         assert invariant(v), f"invariant failed on initial value v={v}"

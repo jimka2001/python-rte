@@ -40,7 +40,7 @@ def measureSubtypeComputability(n, depth, inh):
             "subtype DNF False": 0,
             "subtype DNF Some": 0,
             "subtype DNF None": 0,
-            # how many were not computed a original but became computable after DNF
+            # how many were not computed `a` original but became computable after DNF
             "gained": 0,
             # how many lost computability after DNF
             "lost": 0

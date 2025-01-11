@@ -140,7 +140,7 @@ class Singleton(Rte):
 
     def constructThompson(self, ini: Callable[[], int], out: Callable[[], int]) \
             -> Tuple[int, int, List[Tuple[int, Optional[SimpleTypeD], int]]]:
-        return (ini(), out(), [(ini(), self.operand, out())])
+        return ini(), out(), [(ini(), self.operand, out())]
 
 
 def singletonp(op: Rte) -> TypeGuard[Singleton]:
