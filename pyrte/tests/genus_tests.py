@@ -933,14 +933,21 @@ class GenusCase(unittest.TestCase):
         b = SEql("b")
         c = SEql("c")
         d = SEql("d")
-        assert SOr(SAnd(a,b,c),SAnd(a,SNot(b),c)).conversion17() == SOr(SAnd(a,c),SAnd(a,c))
-        assert SAnd(SOr(a,b,c),SOr(a,SNot(b),c)).conversion17() == SAnd(SOr(a,c),SOr(a,c))
+        self.assertEqual( SOr(SAnd(a,b,c),
+                             SAnd(a,SNot(b),c)).conversion17(),
+                          SOr(SAnd(a,c),SAnd(a,c)))
+        self.assertEqual( SAnd(SOr(a,b,c),SOr(a,SNot(b),c)).conversion17(),
+                          SAnd(SOr(a,c),SOr(a,c)))
 
-        assert SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, d)).conversion17() == SOr(SAnd(a, c, d), SAnd(a, c, d))
-        assert SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, d)).conversion17() == SAnd(SOr(a, c, d), SOr(a, c, d))
+        self.assertEqual( SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, d)).conversion17(),
+                          SOr(SAnd(a, c, d), SAnd(a, c, d)))
+        self.assertEqual( SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, d)).conversion17(),
+                          SAnd(SOr(a, c, d), SOr(a, c, d)))
 
-        assert SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))).conversion17() == SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d)))
-        assert SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))).conversion17() == SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d)))
+        self.assertEqual( SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))).conversion17(),
+                          SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))))
+        self.assertEqual( SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))).conversion17(),
+                          SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))))
 
     def test_combo_conversionD1(self):
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
@@ -1492,8 +1499,8 @@ class GenusCase(unittest.TestCase):
         assert t0.canonicalize() == even, f"canonicalize = {t0.canonicalize()}"
 
         t1 = SAnd(SOr(SNot(odd),even), SOr(even,odd))
-        assert t1.conversion17() == SAnd(even, even)
-        assert t1.canonicalize() == even
+        self.assertEqual( t1.conversion17(), SAnd(even, even))
+        self.assertEqual( t1.canonicalize(), even)
 
 
 if __name__ == '__main__':
