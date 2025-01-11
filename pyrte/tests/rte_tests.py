@@ -24,7 +24,7 @@ from rte.r_sigma import Sigma, SigmaImpl
 from rte.r_epsilon import Epsilon, EpsilonImpl
 from rte.r_emptyset import EmptySet, EmptySetImpl
 from rte.r_star import Star
-from rte.r_rte import plusp, Plus, Satisfies, Atomic
+from rte.syntax_sugar import Plus, Member, Eql, Satisfies, Atomic, plusp
 from rte.r_and import And, createAnd
 from rte.r_or import Or, createOr
 from rte.r_singleton import Singleton
@@ -67,7 +67,6 @@ class RteCase(unittest.TestCase):
         self.assertIs(Star(EmptySet), Star(EmptySet))
 
     def test_plus(self):
-        from rte.r_rte import Eql
         self.assertEqual(42, Plus(Eql(1)).simulate(42, [1]))
         self.assertEqual(42, Plus(Eql(1)).simulate(42, [1,1]))
         self.assertEqual(42, Plus(Eql(1)).simulate(42, [1,1,1]))
@@ -103,7 +102,6 @@ class RteCase(unittest.TestCase):
         self.assertIsNone(Eql(1).simulate(42, ["hello"]))
 
     def test_member(self):
-        from rte.r_rte import Member
         self.assertEqual(42, Member(1,2,3).simulate(42, [1]))
         self.assertEqual(42, Member(1, 2, 3).simulate(42, [2]))
         self.assertEqual(42, Member(1, 2, 3).simulate(42, [3]))
