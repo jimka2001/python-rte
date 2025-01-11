@@ -22,23 +22,23 @@
 
 import unittest
 
-from genus.depthgenerator import random_type_designator, test_values
-from genus.genus_types import NormalForm
-from genus.mdtd import mdtd
-from genus.s_and import SAnd, createSAnd, andp
+#from genus.depthgenerator import random_type_designator, test_values
+#from genus.genus_types import NormalForm
+#from genus.mdtd import mdtd
+#from genus.s_and import SAnd, createSAnd, andp
 from genus.s_atomic import SAtomic
-from genus.s_satisfies import SSatisfies
-from genus.s_empty import SEmptyImpl, SEmpty
+#from genus.s_satisfies import SSatisfies
+#from genus.s_empty import SEmptyImpl, SEmpty
 from genus.s_eql import SEql
 from genus.s_member import SMember
-from genus.s_not import SNot, notp
+#from genus.s_not import SNot, notp
 from genus.s_or import SOr, createSOr, orp
-from genus.s_top import STopImpl, STop
-from genus.simple_type_d import TerminalType
-from genus.utils import compare_sequence, cmp_objects
-from genus.utils import find_simplifier, find_first
-from genus.utils import generate_lazy_val, fixed_point
-from genus.utils import uniquify, trace_graph, remove_element, search_replace, search_replace_splice
+#from genus.s_top import STopImpl, STop
+#from genus.simple_type_d import TerminalType
+#from genus.utils import compare_sequence, cmp_objects
+#from genus.utils import find_simplifier, find_first
+#from genus.utils import generate_lazy_val, fixed_point
+#from genus.utils import uniquify, trace_graph, remove_element, search_replace, search_replace_splice
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
