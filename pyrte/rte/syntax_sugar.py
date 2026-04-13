@@ -10,6 +10,17 @@ def Plus(r: Rte) -> 'Cat':
     return Cat(r, Star(r))
 
 
+def Optional(r:Rte) -> 'Or':
+    from rte.r_or import Or
+    from rte.r_epsilon import Epsilon
+    assert isinstance(r, Rte)
+    return Or(r, Epsilon)
+
+def Contains(r:Rte)-> 'Cat':
+    from rte.r_cat import Cat
+    from rte.r_constants import sigmaStar
+    return Cat(sigmaStar, r, sigmaStar)
+
 def Member(*vs) -> 'Singleton':
     from genus.s_member import SMember
     from rte.r_singleton import Singleton
