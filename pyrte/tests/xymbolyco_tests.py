@@ -49,11 +49,12 @@ class XymbolycoCase(unittest.TestCase):
         for depth in range(4):
             for r in range(num_random_tests):
                 rt = random_rte(depth)
-                pattern, transitions, accepting, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
+                pattern, transitions, accepting, default_exit_value, exit_map, combine_labels = rt.to_dfa(depth * 10).serialize()
                 self.assertTrue(createDfa(pattern=pattern,
                                           ini=0,
                                           transition_triples=transitions,
                                           accepting_states=accepting,
+                                          default_exit_value=default_exit_value,
                                           exit_map=exit_map,
                                           combine_labels=combine_labels))
 
@@ -68,6 +69,7 @@ class XymbolycoCase(unittest.TestCase):
                                             (1, STop, 3),
                                             ],
                         accepting_states=[1, 2],
+                        default_exit_value=3,
                         exit_map={1: 1, 2: 2})
         self.assertTrue(dfa)
 
@@ -85,6 +87,7 @@ class XymbolycoCase(unittest.TestCase):
                                           (2, STop, 3),
                                           (3, STop, 3)],
                       accepting_states=[3],
+                      default_exit_value=True,
                       exit_map={3: True})
         except AssertionError:
             pass
@@ -100,6 +103,7 @@ class XymbolycoCase(unittest.TestCase):
                                           (2, STop, 3),
                                           (3, STop, 3)],
                       accepting_states=[3],
+                      default_exit_value=True,
                       exit_map={3: True})
         except AssertionError:
             self.fail('Expected no exception because of non-disjoint transitions')

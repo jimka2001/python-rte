@@ -388,6 +388,7 @@ def constructThompsonDfa(pattern: Rte, ret: Any = True) -> 'Dfa':
                      ini=ini,
                      transition_triples=determinized,
                      accepting_states=outs,
+                     default_exit_value=ret,
                      exit_map=fmap,
                      )
 
@@ -441,7 +442,7 @@ def profile(pattern: Rte, depth: int, r: int, view: bool = True, verbose: bool =
             print(f"brz states = {len(min_brzozowski.states)}  thompson states = {len(min_thompson.states)}")
             print(f"brz {min_brzozowski.serialize()}")
             print(f"tho {min_thompson.serialize()}")
-        serialized = dict(zip(["pattern", "transitions", "accepting", "exit_map", "combine_labels"],
+        serialized = dict(zip(["pattern", "transitions", "accepting", "default_exit_value", "exit_map", "combine_labels"],
                               dfa_thompson.serialize()))
 
         if verbose:

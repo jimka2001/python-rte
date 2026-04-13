@@ -21,6 +21,8 @@
 
 
 from functools import reduce
+
+
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
@@ -87,6 +89,7 @@ class Dfa:
     def __init__(self,
                  pattern: Optional[Rte] = None,
                  states: Optional[List[State]] = None,
+                 default_exit_value = True,
                  exit_map: Optional[Dict[int, Any]] = None,
                  combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = default_combine_labels):
         if exit_map is None:
@@ -102,13 +105,18 @@ class Dfa:
             assert isinstance(i, int)
             assert i >= 0
         assert callable(combine_labels)
-        for q in states:
-            if q.accepting:
-                assert q.index in exit_map, f"accepting state {q.index} missing from exit_map {exit_map}"
         self.pattern = pattern  # Rte
         self.states = states  # vector of State objects
+        self.default_exit_value = default_exit_value
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
+
+    def exitValue(self, state:Union[State,int]):
+        if isinstance(state, int):
+            return self.exit_map.get(state, self.default_exit_value)
+        assert isinstance(state, State), f"expecting an int or State, got {state=}"
+        return self.exitValue(state.index)
+
 
     # output the state machine as a graphical image.
     # if view=True, then display the image using the dod_view function.
@@ -167,7 +175,7 @@ class Dfa:
             else:
                 if q.accepting:
                     text.write(f"   q{q.index} [shape=doublecircle] ;\n")
-                    text.write(f"   X{q.index} [label=\"{self.exit_map[q.index]}\", shape=rarrow]\n")
+                    text.write(f"   X{q.index} [label=\"{self.exitValue(q)}\", shape=rarrow]\n")
                     text.write(f"   q{q.index} -> X{q.index} ;\n")
                 if q.initial:
                     text.write(f"   H{q.index} [label=\"\", style=invis, width=0]\n")
@@ -216,7 +224,7 @@ class Dfa:
                 return None
 
         if self.states[state_id].accepting:
-            return self.exit_map[state_id]
+            return self.exitValue(state_id)
         else:
             return None
 
@@ -229,11 +237,12 @@ class Dfa:
         def accepting():
             return [state.index for state in self.states if state.accepting]
 
-        def exit_map():
-            # return [(id, self.exit_map[id]) for id in self.exit_map]
-            return self.exit_map
-
-        return [self.pattern, transitions(), accepting(), exit_map(), self.combine_labels]
+        return [self.pattern,
+                transitions(),
+                accepting(),
+                self.default_exit_value,
+                self.exit_map,
+                self.combine_labels]
 
     def find_sink_states(self) -> List[int]:  # returns a list of integers representing sink states
         from genus.s_top import STop
@@ -251,7 +260,7 @@ class Dfa:
         from rte.r_not import Not
         from rte.r_or import createOr
         from genus.s_top import STop
-        pattern, transitions, accepting, exit_map, combine_labels = self.serialize()
+        pattern, transitions, accepting, default_exit_value, exit_map, combine_labels = self.serialize()
         sink_states = self.find_sink_states()
         if sink_states:
             sink_id = sink_states[0]
@@ -279,6 +288,7 @@ class Dfa:
                              ini=0,
                              transition_triples=transitions + extra_transitions + [[sink_id, STop, sink_id]],
                              accepting_states=accepting,
+                             default_exit_value=default_exit_value,
                              exit_map=exit_map,
                              combine_labels=combine_labels)
 
@@ -288,7 +298,7 @@ class Dfa:
     # exit values for states which are now accepting, but were not previously.
     def complement(self, exit_map: Dict[int, Any]) -> 'Dfa':
         from rte.r_not import createNot
-        pattern_old, transitions, accepting, _, combine_labels = self.complete().serialize()
+        pattern_old, transitions, accepting, default_exit_value, _, combine_labels = self.complete().serialize()
         if pattern_old is None:
             pattern = None
         else:
@@ -297,6 +307,7 @@ class Dfa:
                          ini=0,
                          transition_triples=transitions,
                          accepting_states=[i for i in range(len(self.states)) if i not in accepting],
+                         default_exit_value=default_exit_value,
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
@@ -320,7 +331,7 @@ class Dfa:
                     return seen
             return seen
 
-        _, transitions, accepting_ids, _, _ = self.serialize()
+        _, transitions, accepting_ids, _, _, _ = self.serialize()
         accessibles = expand_reachable([0], transitions)
         # now reverse src and dst and recompute reachable, these are coaccessible.
         coaccessibles = expand_reachable(accepting_ids, [(dst, label, src) for src, label, dst in transitions])
@@ -328,7 +339,7 @@ class Dfa:
 
     # remove states which are not accessible and not co-accessible.
     def trim(self, compact: bool = True) -> 'Dfa':
-        pattern, transitions, accepting_ids, exit_map, combine_labels = self.serialize()
+        pattern, transitions, accepting_ids, default_exit_value, exit_map, combine_labels = self.serialize()
         accessibles, coaccessibles = self.find_accessibles()
         useful_states = set(accessibles).intersection(set(coaccessibles))
         useful_transitions = [(src, label, dst) for src, label, dst in transitions
@@ -363,7 +374,7 @@ class Dfa:
                                                                            accepting_ids,
                                                                            exit_map)
 
-        return createDfa(pattern, 0, useful_transitions, accepting_ids, exit_map, combine_labels)
+        return createDfa(pattern, 0, useful_transitions, accepting_ids, default_exit_value, exit_map, combine_labels)
 
     def combine_parallel_triples(self,
                                  triples: List[Triple],
@@ -416,13 +427,13 @@ class Dfa:
         self = None
 
         # step 2
-        _, old_transition_triples, accepting, _, _ = dfa.serialize()
+        _, old_transition_triples, accepting, _, _, _ = dfa.serialize()
         old_transitions: List[Triple] = [(src, Singleton(td), dst)
                                          for src, td, dst in old_transition_triples]
         # step 3  # adding state whose index is NOT integer
         new_initial_transitions: List[Triple] = [("I", Epsilon, 0)]
         # step 4  # adding state whose index is NOT integer
-        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exit_map[qid]))
+        new_final_transitions: List[Triple] = [(qid, Epsilon, ("F", dfa.exitValue(qid)))
                                                for qid in accepting]
 
         def combine_parallel_labels(rtes: List[Rte]) -> Rte:
@@ -472,7 +483,7 @@ class Dfa:
                                         #  id "I".  These will remain.
                                         range(len(dfa.states)),
                                         new_initial_transitions + old_transitions + new_final_transitions)
-        exit_values = list(set([dfa.exit_map[qid] for qid in accepting]))
+        exit_values = list(set([dfa.exitValue(qid) for qid in accepting] + [dfa.default_exit_value]))
         for triple in new_transition_triples:
             assert isinstance(triple, tuple)
             assert 3 == len(triple)
@@ -600,7 +611,7 @@ class Dfa:
         from genus.s_empty import SEmpty
         finals = tuple([q for q in self.states if q.accepting])
         non_finals = tuple([q for q in self.states if not q.accepting])
-        pi_0 = split_eqv_class(finals, lambda q: self.exit_map[q.index]) + [non_finals]
+        pi_0 = split_eqv_class(finals, lambda q: self.exitValue(q)) + [non_finals]
 
         def refine(partition: List[EqvClass]) -> List[EqvClass]:
             def phi(source_state: State, label: SimpleTypeD) -> Optional[EqvClass]:
@@ -657,7 +668,9 @@ class Dfa:
 
         new_fids: List[int] = [idx for idx, eqv_class in zip(ids, pi_minimized)
                                if any(q.accepting for q in eqv_class)]
-        new_exit_map = dict([(new_id(f), self.exit_map[f]) for f in self.exit_map])
+        new_exit_map = dict([(new_id(f), self.exitValue(f))
+                             for f in self.exit_map
+                             if self.exitValue(f) != self.default_exit_value])
         new_transitions = [(src, label, dst) for eqv_class in pi_minimized
                            for q in [eqv_class[0]]
                            for src in [new_id(q)]
@@ -668,6 +681,7 @@ class Dfa:
                          0,
                          merge_parallel(new_transitions),
                          new_fids,
+                         self.default_exit_value,
                          new_exit_map,
                          self.combine_labels)
 
@@ -727,27 +741,20 @@ class Dfa:
                             for q2 in [next(q for q in dfa2.states if id2 == q.index)]
                             if f_arbitrate_accepting(q1.accepting, q2.accepting)]
 
-        def compute_exit_value(q1, q2):
-            if q1.accepting and q2.accepting:
-                return f_arbitrate_exit_value(q1, q2)
-            elif q1.accepting and not q2.accepting:
-                return dfa1.exit_map[q1.index]
-            elif q2.accepting and not q1.accepting:
-                return dfa2.exit_map[q2.index]
-            else:
-                return f_arbitrate_exit_value(q1, q2)
-
-        exit_map = [(cross_state_to_new_id[(id1, id2)], compute_exit_value(q1, q2))
-                    for id1, id2 in cross_state_to_new_id
-                    if cross_state_to_new_id[(id1, id2)] in accepting_states
-                    for q1 in [next(q for q in dfa1.states if id1 == q.index)]
-                    for q2 in [next(q for q in dfa2.states if id2 == q.index)]
-                    ]
+        exit_map = dict((cross_state_to_new_id[(id1, id2)], ev)
+                        for id1, id2 in cross_state_to_new_id
+                        if cross_state_to_new_id[(id1, id2)] in accepting_states
+                        for q1 in [next(q for q in dfa1.states if id1 == q.index)]
+                        for q2 in [next(q for q in dfa2.states if id2 == q.index)]
+                        for ev in [f_arbitrate_exit_value(dfa1, q1, dfa2, q2)]
+                        if ev != self.default_exit_value
+                        )
         return createDfa(pattern=None,
                          ini=0,
                          transition_triples=transition_triples,
                          accepting_states=accepting_states,
-                         exit_map=dict(exit_map),
+                         default_exit_value=self.default_exit_value,
+                         exit_map=exit_map,
                          combine_labels=dfa1.combine_labels)
 
     # returns True, False, or None
@@ -809,7 +816,8 @@ def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
                      ini=0,
                      transition_triples=transition_triples,
                      accepting_states=accepting_states,
-                     exit_map=dict([(i, exit_value) for i in accepting_states]))
+                     default_exit_value=exit_value,
+                     exit_map=dict())
 
 
 # default value for the combine_labels parameter of combine_labels
@@ -863,6 +871,7 @@ def createDfa(pattern: Optional[Rte],
               ini: int,
               transition_triples: List[Tuple[int, SimpleTypeD, int]],
               accepting_states: List[int],
+              default_exit_value: Any,
               exit_map: Dict[int, Any],
               combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = createDfa_combine_labels
               ) -> 'Dfa':
@@ -904,6 +913,7 @@ def createDfa(pattern: Optional[Rte],
                                             + [(dst, STop, sink_id) for dst in set(needs_dst)]
                                             + [(sink_id, STop, sink_id)],
                          accepting_states=accepting_states,
+                         default_exit_value=default_exit_value,
                          exit_map=exit_map,
                          combine_labels=combine_labels)
 
@@ -934,5 +944,6 @@ def createDfa(pattern: Optional[Rte],
     states = [make_state(i) for i in range(1 + max_index)]
     return Dfa(pattern=pattern,
                states=states,
+               default_exit_value=default_exit_value,
                exit_map=exit_map,
                combine_labels=combine_labels)
