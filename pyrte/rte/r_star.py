@@ -25,9 +25,7 @@ from rte.r_emptyset import EmptySet
 from rte.r_epsilon import Epsilon
 from rte.r_rte import Rte
 from rte.r_sigma import Sigma
-from typing import Literal, Set, Optional, List, Callable, Tuple
-from typing_extensions import TypeGuard
-
+from typing import Literal, Set, Optional, List, Callable, Tuple, TypeGuard
 
 class Star(Rte):
     __instances = {}
@@ -163,17 +161,3 @@ class Star(Rte):
 
 def starp(rte: Rte) -> TypeGuard[Star]:
     return isinstance(rte, Star)
-
-
-def Plus(r: Rte) -> TypeGuard['Cat']:
-    from rte.r_cat import Cat
-    assert isinstance(r, Rte)
-    return Cat(r, Star(r))
-
-
-def plusp(rte: Rte) -> TypeGuard['Cat']:
-    from rte.r_cat import catp
-    return catp(rte) \
-           and 2 == len(rte.operands) \
-           and ((starp(rte.operands[1]) and rte.operands[1].operand == rte.operands[0])
-                or (starp(rte.operands[0]) and rte.operands[0].operand == rte.operands[1]))

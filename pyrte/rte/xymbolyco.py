@@ -593,7 +593,7 @@ class Dfa:
 
     # Return a list of equivalence classes, where each equivalence class
     # is a tuple of States.   Why Tuple rather than List?  Because the
-    # Python Map/Set etc types cannot handle mutable objects.  A tuple, once
+    # Python Map/Set etc. types cannot handle mutable objects.  A tuple, once
     # created, is immutable.
     def find_hopcroft_partition(self) -> List[EqvClass]:
         from genus.utils import split_eqv_class, flat_map, fixed_point, find_eqv_class, group_by
@@ -638,7 +638,7 @@ class Dfa:
 
         def min_state(eqv_class) -> int:
             # using min_int with reduce, rather than int, because otherwise
-            # mypy cannot figure out that min_state returns int.
+            # mypy cannot figure out that min_state returns an int.
             return reduce(min_int, [q.index for q in eqv_class])
 
         pi_minimized = self.find_hopcroft_partition()
@@ -794,7 +794,7 @@ def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
         return [connecting_label(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
 
-# Construct a deterministic symbolic finite automaton, given an Rte and exit value.
+# Construct a deterministic symbolic finite automaton, given an Rte and an exit value.
 # The Brzozowski derivative method is used in this construction.
 def rte_to_dfa(rte: Rte, exit_value: Any = True) -> Dfa:
     rtes, transitions = rte.derivatives()

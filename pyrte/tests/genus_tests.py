@@ -116,14 +116,14 @@ class GenusCase(unittest.TestCase):
         for x in test_values:
             self.assertTrue((STop.typep(x)))
 
-        # obviously, a is inhabited as it contains everything by definition
+        # obviously, `a` is inhabited as it contains everything by definition
         self.assertTrue((STop.inhabited() is True))
 
-        # a is never disjoint with anything but the empty subtype
+        # `a` is never disjoint with anything but the empty subtype
         self.assertTrue(STop.disjoint(SAtomic(object)) is False)
         self.assertTrue(STop.disjoint(SEmpty) is True)
 
-        # on the contrary, a is never a subtype of any type
+        # on the contrary, `a` is never a subtype of any type
         # since types are sets and top is the set that contains all sets
         self.assertTrue((STop.subtypep(SAtomic(object)) is True))
         self.assertTrue(STop.subtypep(STop) is True)
@@ -281,18 +281,18 @@ class GenusCase(unittest.TestCase):
         # str(a) has to be "Top"
         self.assertTrue(str(STop) == "STop")
 
-        # a.subtypep(t) indicates whether t is a subtype of a, which is always the case by definition
+        # a.subtypep(t) indicates whether t is a subtype of `a`, which is always the case by definition
         self.assertTrue(STop.subtypep(SAtomic(object)) is True)
         self.assertTrue(STop.subtypep(STop) is True)
 
-        # obviously, a is inhabited as it contains everything by definition
+        # obviously, `a` is inhabited as it contains everything by definition
         self.assertTrue(STop.inhabited() is True)
 
-        # a is never disjoint with anything but the empty subtype
+        # `a` is never disjoint with anything but the empty subtype
         self.assertTrue(STop.disjoint(SAtomic(object)) is False)
         self.assertTrue(STop.disjoint(SEmpty) is True)
 
-        # on the contrary, a is never a subtype of any type
+        # on the contrary, `a` is never a subtype of any type
         # since types are sets and top is the set that contains all sets
         self.assertTrue(STop.subtypep(SAtomic(object)) is not False)
         self.assertTrue(STop.subtypep(STop) is True)
@@ -306,19 +306,19 @@ class GenusCase(unittest.TestCase):
         # str(a) has to be "Empty"
         self.assertTrue(str(SEmpty) == "SEmpty")
 
-        # a.typep(t) indicates whether t is a subtype of a, which is never the case
+        # a.typep(t) indicates whether t is a subtype of `a`, which is never the case
         self.assertTrue(SEmpty.typep(3) is False)
         self.assertTrue(SEmpty.subtypep(SEmpty) is True)
         for x in test_values:
             self.assertTrue(SEmpty.typep(x) is False)
 
-        # obviously, a is not inhabited as it is by definition empty
+        # obviously, `a` is not inhabited as it is by definition empty
         self.assertTrue(SEmpty.inhabited() is False)
 
-        # a is disjoint with anything as it is empty
+        # `a` is disjoint with anything as it is empty
         self.assertTrue(SEmpty.disjoint(SAtomic(object)) is True)
 
-        # on the contrary, a is always a subtype of any type
+        # on the contrary, `a` is always a subtype of any type
         # since types are sets and the empty set is a subset of all sets
         self.assertTrue(SEmpty.subtypep(SAtomic(object)) is True)
         self.assertTrue(SEmpty.subtypep(SEmpty) is True)
@@ -435,7 +435,6 @@ class GenusCase(unittest.TestCase):
                              SOr(SAtomic(Test1), even))),
                    SNot(SAtomic(int))).canonicalize(NormalForm.CNF)
         self.assertIs(SAnd(td1, td2).canonicalize(NormalForm.DNF), SEmpty)
-        print("-----------------------")
         self.assertIsNot(td1.disjoint(td2), False,
                          f"\n td1={td1}\n td2={td2}\n td1.disjoint(td2) = {td1.disjoint(td2)}")
 
@@ -933,14 +932,21 @@ class GenusCase(unittest.TestCase):
         b = SEql("b")
         c = SEql("c")
         d = SEql("d")
-        assert SOr(SAnd(a,b,c),SAnd(a,SNot(b),c)).conversion17() == SOr(SAnd(a,c),SAnd(a,c))
-        assert SAnd(SOr(a,b,c),SOr(a,SNot(b),c)).conversion17() == SAnd(SOr(a,c),SOr(a,c))
+        self.assertEqual( SOr(SAnd(a,b,c),
+                             SAnd(a,SNot(b),c)).conversion17(),
+                          SOr(SAnd(a,c),SAnd(a,c)))
+        self.assertEqual( SAnd(SOr(a,b,c),SOr(a,SNot(b),c)).conversion17(),
+                          SAnd(SOr(a,c),SOr(a,c)))
 
-        assert SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, d)).conversion17() == SOr(SAnd(a, c, d), SAnd(a, c, d))
-        assert SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, d)).conversion17() == SAnd(SOr(a, c, d), SOr(a, c, d))
+        self.assertEqual( SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, d)).conversion17(),
+                          SOr(SAnd(a, c, d), SAnd(a, c, d)))
+        self.assertEqual( SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, d)).conversion17(),
+                          SAnd(SOr(a, c, d), SOr(a, c, d)))
 
-        assert SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))).conversion17() == SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d)))
-        assert SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))).conversion17() == SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d)))
+        self.assertEqual( SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))).conversion17(),
+                          SOr(SAnd(a, b, c, d), SAnd(a, SNot(b), c, SNot(d))))
+        self.assertEqual( SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))).conversion17(),
+                          SAnd(SOr(a, b, c, d), SOr(a, SNot(b), c, SNot(d))))
 
     def test_combo_conversionD1(self):
         # SOr(SNot(SMember(42, 43, 44, "a","b")), String)
@@ -1412,7 +1418,7 @@ class GenusCase(unittest.TestCase):
         self.assertEqual(li[2], SMember(3, 1, 2))
         self.assertTrue(len(li) == 3)
 
-        # Searching every elements and replacing it with Replace elements
+        # Searching every element and replacing them with Replace elements
         li = search_replace(li, SMember(1, 2, 3), replace[0])
         li = search_replace(li, SMember(2, 1, 3), replace[1])
         li = search_replace(li, SMember(3, 1, 2), replace[2])
@@ -1471,8 +1477,8 @@ class GenusCase(unittest.TestCase):
 
     def test_find_first(self):
         # Empty list testing the default argument also
-        self.assertEqual(find_first(lambda: True, []), None)
-        self.assertEqual(find_first(lambda: True, [], "Test"), "Test")
+        self.assertEqual(find_first(lambda _: True, []), None)
+        self.assertEqual(find_first(lambda _ : True, [], "Test"), "Test")
 
         # No elements makes the predicate true
         li = [1, 2, 3, 4, 5, 6, 7]
@@ -1492,8 +1498,8 @@ class GenusCase(unittest.TestCase):
         assert t0.canonicalize() == even, f"canonicalize = {t0.canonicalize()}"
 
         t1 = SAnd(SOr(SNot(odd),even), SOr(even,odd))
-        assert t1.conversion17() == SAnd(even, even)
-        assert t1.canonicalize() == even
+        self.assertEqual( t1.conversion17(), SAnd(even, even))
+        self.assertEqual( t1.canonicalize(), even)
 
 
 if __name__ == '__main__':

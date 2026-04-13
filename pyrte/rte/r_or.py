@@ -21,8 +21,7 @@
 
 
 from rte.r_combination import Combination
-from typing import List, Any, Optional, Tuple, Callable
-from typing_extensions import TypeGuard
+from typing import List, Any, Optional, Tuple, Callable, TypeGuard
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 
@@ -89,7 +88,8 @@ class Or(Combination):
         #   --> (:or (:* Y) (:* X))
         # BUT NOT
         # (:or :epsilon (:cat X (:* X) ANYTHING))
-        from rte.r_star import plusp, starp
+        from rte.syntax_sugar import plusp
+        from rte.r_star import starp
         from rte.r_cat import catp
         if any(op.nullable() for op in self.operands) and any(plusp(op) for op in self.operands):
             def f(op):
@@ -185,8 +185,8 @@ class Or(Combination):
     #   conversionC... -- a method on Combination
     #   conversionA... -- a method on And
     #   conversionO... -- a method on Or
-    #   conversionD... -- a method declared in Combination but implemented in And and Or in a dual way
-    #                          I.e. the And and Or methods of this name implement dual operations.
+    #   conversionD... -- a method declared in Combination but implemented in `And` and `Or` in a dual way
+    #                          I.e. the `And` and `Or` methods of this name implement dual operations.
 
     def canonicalize_once(self) -> Rte:
         from genus.utils import find_simplifier

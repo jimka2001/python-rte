@@ -23,7 +23,7 @@ import unittest
 from rte.r_sigma import Sigma, SigmaImpl
 from rte.r_epsilon import Epsilon, EpsilonImpl
 from rte.r_emptyset import EmptySet, EmptySetImpl
-from rte.r_star import Star, plusp, Plus
+from rte.r_star import Star
 from rte.r_and import And, createAnd
 from rte.r_or import Or, createOr
 from rte.r_singleton import Singleton
@@ -64,6 +64,51 @@ class RteCase(unittest.TestCase):
         self.assertIs(Star(Sigma), Star(Sigma))
         self.assertIs(Star(Epsilon), Star(Epsilon))
         self.assertIs(Star(EmptySet), Star(EmptySet))
+
+    def test_plus(self):
+        from rte.syntax_sugar import Plus, Eql
+        self.assertEqual(42, Plus(Eql(1)).simulate(42, [1]))
+        self.assertEqual(42, Plus(Eql(1)).simulate(42, [1,1]))
+        self.assertEqual(42, Plus(Eql(1)).simulate(42, [1,1,1]))
+        self.assertIsNone(Plus(Eql(1)).simulate(42, []))
+
+    def test_satisfies(self):
+        from rte.syntax_sugar import Satisfies
+        def oddp(n):
+            if not isinstance(n, int):
+                return False
+            else:
+                return n % 2 != 0
+
+        self.assertEqual(42, Satisfies(oddp, "odd").simulate(42, [1]))
+        self.assertIsNone(Satisfies(oddp, "odd").simulate(42, [2]))
+        self.assertIsNone(Satisfies(oddp, "odd").simulate(42, ["hello"]))
+        self.assertIsNone(Satisfies(oddp, "odd").simulate(42, [1,1]))
+        self.assertIsNone(Satisfies(oddp, "odd").simulate(42, [1,1,1]))
+        self.assertIsNone(Satisfies(oddp, "odd").simulate(42, []))
+
+    def test_atomic(self):
+        from rte.syntax_sugar import Atomic
+        self.assertEqual(42, Atomic(int).simulate(42, [1]))
+        self.assertIsNone(Atomic(int).simulate(42, [1, 1]))
+        self.assertIsNone(Atomic(int).simulate(42, []))
+        self.assertIsNone(Atomic(int).simulate(42, ["hello"]))
+
+    def test_eql(self):
+        from rte.syntax_sugar import Eql
+        self.assertEqual(42, Eql(1).simulate(42, [1]))
+        self.assertIsNone(Eql(1).simulate(42, [1, 1]))
+        self.assertIsNone(Eql(1).simulate(42, []))
+        self.assertIsNone(Eql(1).simulate(42, ["hello"]))
+
+    def test_member(self):
+        from rte.syntax_sugar import Member
+        self.assertEqual(42, Member(1,2,3).simulate(42, [1]))
+        self.assertEqual(42, Member(1, 2, 3).simulate(42, [2]))
+        self.assertEqual(42, Member(1, 2, 3).simulate(42, [3]))
+        self.assertIsNone(Member(1,2,3).simulate(42, [1, 3]))
+        self.assertIsNone(Member(1,2,3).simulate(42, []))
+        self.assertIsNone(Member(1,2,3).simulate(42, ["hello"]))
 
     def test_or(self):
         self.assertEqual(Or(Sigma, Sigma, Sigma).operands, [Sigma, Sigma, Sigma])
@@ -540,6 +585,7 @@ class RteCase(unittest.TestCase):
         self.assertIs(And(ab, Not(Singleton(SAtomic(str)))).conversionA19(), EmptySet)
 
     def test_starp(self):
+        from rte.syntax_sugar import plusp, Plus
         a = Singleton(SEql("a"))
         b = Singleton(SEql("b"))
         self.assertTrue(plusp(Cat(a, Star(a))))
@@ -561,6 +607,7 @@ class RteCase(unittest.TestCase):
         self.assertFalse(catxyp(Cat(x, y, z, Star(Cat(x, x, y, z)))))
 
     def test_or_conversionO8(self):
+        from rte.syntax_sugar import Plus
         a = Singleton(SEql("a"))
         b = Singleton(SEql("b"))
         c = Singleton(SEql("c"))

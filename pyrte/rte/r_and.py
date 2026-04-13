@@ -21,8 +21,7 @@
 
 
 from rte.r_combination import Combination
-from typing import Literal, List, Any, Optional, Callable, Tuple
-from typing_extensions import TypeGuard
+from typing import Literal, List, Any, Optional, Callable, Tuple, TypeGuard
 
 verbose = False
 
@@ -122,7 +121,8 @@ class And(Combination):
         if ror is None:
             return self
         else:
-            return createOr([createAnd(search_replace(self.operands, ror, r)) for r in ror.operands])
+            return createOr([createAnd(search_replace(self.operands, ror, r))
+                             for r in ror.operands])
 
     def conversionA13(self) -> Rte:
         # if there is an explicit Sigma and also a singleton which is inhabited, then
@@ -131,7 +131,9 @@ class And(Combination):
         from rte.r_singleton import singletonp
         from genus.utils import remove_element
         if Sigma in self.operands \
-                and any(r.operand.inhabited() is True for r in self.operands if singletonp(r)):
+                and any(r.operand.inhabited() is True
+                        for r in self.operands
+                        if singletonp(r)):
             return self.create(remove_element(self.operands, Sigma))
         else:
             return self
@@ -332,8 +334,8 @@ class And(Combination):
     #   conversionC... -- a method on Combination
     #   conversionA... -- a method on And
     #   conversionO... -- a method on Or
-    #   conversionD... -- a method declared in Combination but implemented in And and Or in a dual way
-    #                          I.e. the And and Or methods of this name implement dual operations.
+    #   conversionD... -- a method declared in Combination but implemented in `And` and `Or` in a dual way
+    #                          I.e. the `And` and `Or` methods of this name implement dual operations.
 
     def canonicalize_once(self) -> Rte:
         from genus.utils import find_simplifier
