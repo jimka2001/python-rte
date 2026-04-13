@@ -22,7 +22,6 @@
 
 from functools import reduce
 
-
 from rte.r_rte import Rte
 from genus.simple_type_d import SimpleTypeD
 from genus.ite import eval_ite, transitions_to_ite
@@ -89,7 +88,7 @@ class Dfa:
     def __init__(self,
                  pattern: Optional[Rte] = None,
                  states: Optional[List[State]] = None,
-                 default_exit_value = True,
+                 default_exit_value=True,
                  exit_map: Optional[Dict[int, Any]] = None,
                  combine_labels: Callable[[SimpleTypeD, SimpleTypeD], SimpleTypeD] = default_combine_labels):
         if exit_map is None:
@@ -111,12 +110,12 @@ class Dfa:
         self.exit_map = exit_map  # map index -> return_value
         self.combine_labels = combine_labels  # function (SimpleTypeD,SimpleTypeD)->SimpleTypeD
 
-    def exitValue(self, state:Union[State,int]):
+    def exitValue(self, state: Union[State, int]):
         if isinstance(state, int):
             return self.exit_map.get(state, self.default_exit_value)
         assert isinstance(state, State), f"expecting an int or State, got {state=}"
+        assert state in self.states
         return self.exitValue(state.index)
-
 
     # output the state machine as a graphical image.
     # if view=True, then display the image using the dod_view function.
@@ -257,17 +256,18 @@ class Dfa:
     # The result is guaranteed to be complete, but might have
     # vacuous transitions which we cannot prove or inhabited or not inhabited.
     def complete(self) -> 'Dfa':
-        from rte.r_not import Not
-        from rte.r_or import createOr
+        from genus.s_not import SNot
+        from genus.s_or import createSOr
         from genus.s_top import STop
         pattern, transitions, accepting, default_exit_value, exit_map, combine_labels = self.serialize()
         sink_states = self.find_sink_states()
         if sink_states:
             sink_id = sink_states[0]
         else:
-            sink_id = len(self.states)
-        # look at the group of transitions of each state
-        #   if we find one for which the complement of the union of the
+            # get new id not already corresponding to a state
+            sink_id = 1 + max(q.index for q in self.states)
+        # Look at the group of transitions of each state.
+        #   If we find one for which the complement of the union of the
         #   SimpleTypeD's labeling the transitions is found to not be
         #   inhabited, then create a transition to encompass the type
         #   of all possible object not covered by the transitions.
@@ -276,17 +276,21 @@ class Dfa:
         #   case we are unfortunately creating a useless transition.
         extra_transitions = [(q.index, td, sink_id)
                              for q in self.states
-                             for tds in [[td for td, _ in q.transitions]]
-                             for td in [Not(createOr(tds)).canonicalize()]
+                             for tds in [[td for td in q.transitions]]
+                             for td in [SNot(createSOr(tds)).canonicalize()]
                              if td.inhabited() is not False
                              ]
 
         if not extra_transitions:
             return self
         else:
+            new_transitions = transitions + extra_transitions
+            sink_transition = (sink_id, STop, sink_id)
+            if sink_transition not in new_transitions:
+                new_transitions = new_transitions + [sink_transition]
             return createDfa(pattern=pattern,
                              ini=0,
-                             transition_triples=transitions + extra_transitions + [[sink_id, STop, sink_id]],
+                             transition_triples=new_transitions,
                              accepting_states=accepting,
                              default_exit_value=default_exit_value,
                              exit_map=exit_map,
@@ -694,7 +698,8 @@ class Dfa:
     def sxp(self, dfa2, f_arbitrate_accepting, f_arbitrate_exit_value) -> 'Dfa':
         from genus.s_and import SAnd
         from genus.genus_types import NormalForm
-        dfa1 = self  # IDE warns if I name the parameter dfa1 rather than self. :-(
+        dfa1 = self.complete()
+        dfa2 = dfa2.complete()
 
         CrossTransition = Tuple[Tuple[State, State], SimpleTypeD, Tuple[State, State]]
 
@@ -768,21 +773,74 @@ class Dfa:
 
     # compute a Dfa recognizing the union of the languages of the given Dfas
     def union(self, dfa2) -> 'Dfa':
+        def arbitrate(dfa_a, qa, dfa_b, qb):
+            assert qa.accepting or qb.accepting
+            if qa.accepting:
+                return dfa_a.exitValue(qa)
+            else:
+                return dfa_b.exitValue(qb)
+
         return self.sxp(dfa2,
                         lambda a, b: a or b,
-                        lambda q1, _: self.exit_map[q1.index])
+                        arbitrate)
 
     # compute a Dfa recognizing the union of the languages of the given Dfas
     def intersection(self, dfa2) -> 'Dfa':
+        def arbitrate(dfa_a, qa, dfa_b, qb):
+            assert qa.accepting and qb.accepting
+            return dfa_a.exitValue(qa)
+
         return self.sxp(dfa2,
                         lambda a, b: a and b,
-                        lambda q1, _: self.exit_map[q1.index])
+                        arbitrate)
+
+    def nor(self, dfa2) -> 'Dfa':
+        def arbitrate(dfa_a, qa, dfa_b, qb):
+            assert not (qa.accepting or qb.accepting)  # neither a nor b
+            return dfa_a.default_exit_value
+
+        return self.sxp(dfa2,
+                        lambda a, b: not (a or b),
+                        arbitrate
+                        )
+
+    def nand(self, dfa2) -> 'Dfa':
+        def arbitrate(dfa_a, qa, dfa_b, qb):
+            assert not (qa.accepting and qb.accepting)
+            assert qa in dfa_a.states
+            assert qb in dfa_b.states
+            if qa.accepting:
+                return dfa_a.exitValue(qa)
+            elif qb.accepting:
+                return dfa_b.exitValue(qb)
+            else:
+                return dfa_a.default_exit_value
+
+        return self.sxp(dfa2,
+                        lambda a, b: not (a and b),
+                        arbitrate)
+
+    def and_not(self, dfa2) -> 'Dfa':
+        def arbitrate(dfa_a, qa, dfa_b, qb):
+            assert qa.accepting and not qb.accepting
+            return dfa_a.exitValue(qa)
+
+        return self.sxp(dfa2,
+                        lambda a, b: a and not b,
+                        arbitrate)
 
     # compute a Dfa recognizing the XOR of the languages of the given Dfas
     def xor(self, dfa2) -> 'Dfa':
+        def arbitrate(dfa_a, qa, dfa_b, qb):
+            assert (qa.accepting and not qb.accepting) or (qb.accepting and not qa.accepting)
+            if qa.accepting:
+                return dfa_a.exitValue(qa)
+            else:
+                return dfa_b.exitValue(qb)
+
         return self.sxp(dfa2,
                         lambda a, b: (a and not b) or (b and not a),
-                        lambda q1, _: self.exit_map[q1.index])
+                        arbitrate)
 
 
 def reconstructLabels(path: List[State]) -> Optional[List[SimpleTypeD]]:
@@ -878,6 +936,8 @@ def createDfa(pattern: Optional[Rte],
     from functools import reduce
     assert ini == 0, f"expecting ini=0, got {ini}"
     assert isinstance(accepting_states, list)
+    for tt in transition_triples:
+        assert isinstance(tt, tuple)
     for i in accepting_states:
         assert isinstance(i, int)
         assert i >= 0

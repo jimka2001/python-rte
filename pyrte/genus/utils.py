@@ -260,7 +260,7 @@ def stringify(vec: List[T],
 
 def dot_view(dot_string: str,
              verbose: bool = False,
-             title: str = "no-name"):
+             title: Optional[str] = "no-name"):
     import platform
     import subprocess
     import tempfile

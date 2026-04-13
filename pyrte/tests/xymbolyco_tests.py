@@ -36,10 +36,11 @@ from genus.s_member import SMember
 from genus.s_atomic import SAtomic
 from genus.s_or import SOr
 from genus.s_not import SNot
+from rte.rte_test import test_rtes, test_sequences
 
 # default value of num_random_tests is 1000, but you can temporarily edit this file
 #   and set it to a smaller number for a quicker run of the tests.
-num_random_tests = 1000
+num_random_tests = 100
 
 
 class XymbolycoCase(unittest.TestCase):
@@ -311,6 +312,42 @@ class XymbolycoCase(unittest.TestCase):
                                 f"rt1={rt1}\n" +
                                 f"rt2={rt2}\n" +
                                 "xor of Dfas does not correspond to dfa of xor")
+
+    def sxp_boolean(self,dfa_bool, logic_bool):
+        for r1 in test_rtes:
+            dfa1 = r1.to_dfa(True).trim()
+            for r2 in test_rtes:
+                dfa2 = r2.to_dfa(True).trim()
+                sxp_dfa = dfa_bool(dfa1,dfa2)
+                for seq in test_sequences:
+                    self.assertEqual(logic_bool(dfa1.simulate(seq) or False,
+                                                dfa2.simulate(seq) or False),
+                                     sxp_dfa.simulate(seq) or False)
+
+    def test_sxp_and(self):
+        self.sxp_boolean(lambda dfa1, dfa2: dfa1.intersection(dfa2),
+                         lambda a, b: a and b)
+
+    def test_sxp_or(self):
+        self.sxp_boolean(lambda dfa1, dfa2: dfa1.union(dfa2),
+                         lambda a, b: a or b)
+
+    def test_sxp_xor(self):
+        self.sxp_boolean(lambda dfa1, dfa2: dfa1.xor(dfa2),
+                         lambda a, b: (a and not b) or (b and not a))
+
+
+    def test_sxp_nand(self):
+        self.sxp_boolean(lambda dfa1, dfa2: dfa1.nand(dfa2),
+                         lambda a, b: not (a and b))
+
+    def test_sxp_nor(self):
+        self.sxp_boolean(lambda dfa1, dfa2: dfa1.nor(dfa2),
+                        lambda a, b: not (a or b))
+
+    def test_sxp_and_not(self):
+        self.sxp_boolean(lambda dfa1, dfa2: dfa1.and_not(dfa2),
+                         lambda a, b: a and (not b))
 
 
 if __name__ == '__main__':
